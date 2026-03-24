@@ -254,7 +254,7 @@ export const Dashboard: React.FC = () => {
     <div className="space-y-8">
       {/* Hero Metric */}
       <section className="pt-4">
-        <div className="flex items-start justify-between">
+        <div className="flex items-start gap-8">
           <div className="flex flex-col items-start">
             <div className="text-[4.5rem] leading-none tracking-[-3px] text-white" style={{ fontFamily: '"SF Pro Display", "Helvetica Neue", Arial, sans-serif', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
               33.5
@@ -263,16 +263,12 @@ export const Dashboard: React.FC = () => {
               KM
             </div>
           </div>
-          <div className="flex flex-col items-start pt-2">
-            <div className="text-[10px] font-bold uppercase tracking-[1.5px] mb-3" style={{ color: 'rgba(255,255,255,0.4)' }}>
-              Tracker
-            </div>
-            <div className="space-y-2">
-              <div className="text-[13px] font-medium text-white/80">Run <span className="text-white/50">4.3km</span></div>
-              <div className="text-[13px] font-medium text-white/80">Row <span className="text-white/50">2.0km</span></div>
-              <div className="text-[13px] font-medium text-white/80">Cycle <span className="text-white/50">15.2km</span></div>
-              <div className="text-[13px] font-medium text-white/80">Walk <span className="text-white/50">12.0km</span></div>
-            </div>
+          <div className="flex flex-col items-start pt-2 space-y-1.5">
+            <div className="text-[13px] font-medium text-white/80">Tracker <span className="text-white/50">0.0km</span></div>
+            <div className="text-[13px] font-medium text-white/80">Run <span className="text-white/50">4.3km</span></div>
+            <div className="text-[13px] font-medium text-white/80">Row <span className="text-white/50">2.0km</span></div>
+            <div className="text-[13px] font-medium text-white/80">Cycle <span className="text-white/50">15.2km</span></div>
+            <div className="text-[13px] font-medium text-white/80">Walk <span className="text-white/50">12.0km</span></div>
           </div>
         </div>
         <div className="mt-8 text-[20px] font-light text-white leading-relaxed max-w-xs">
