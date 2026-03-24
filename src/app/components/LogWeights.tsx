@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Dumbbell, ChevronRight, Minus, Plus, Clock } from 'lucide-react';
-import { Page } from '../types';
+import { Page } from '../../types';
 
 interface LogWeightsProps {
   onNavigate: (page: Page) => void;
@@ -84,7 +84,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
               border: selectedMuscle === 'shoulders' ? '1px solid rgba(255,255,255,0.2)' : '1px solid transparent',
             }}
           >
-            <span className="font-bold uppercase tracking-widest text-xs text-white">Shoulders &amp; Arms</span>
+            <span className="font-bold uppercase tracking-widest text-xs text-white">Shoulders & Arms</span>
             <ChevronRight size={16} style={{ color: '#c6c6c6' }} />
           </div>
         </div>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Page } from '../types';
+import { Page } from '../../types';
 
 interface LogCaloriesProps {
   onNavigate: (page: Page) => void;
