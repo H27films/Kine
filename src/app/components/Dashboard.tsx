@@ -265,7 +265,7 @@ export const Dashboard: React.FC = () => {
       <section className="pt-4">
         <div className="flex items-start">
           {/* Left: Big number with rounded dot */}
-          <div className="text-[4.5rem] leading-none tracking-[-3px] text-white" style={{ fontFamily: '"SF Pro Display", "Helvetica Neue", Arial, sans-serif', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
+          <div className="text-[5rem] font-black leading-none tracking-tighter text-white">
             33.5
           </div>
           {/* Right of number: MOVEMENT (KM) + yesterday */}
