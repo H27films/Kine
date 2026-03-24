@@ -37,80 +37,74 @@ const BarChart: React.FC<{ data: number[]; maxVal: number; label: string; unit: 
 
 const ScatterChart: React.FC<{ data: number[]; maxVal: number; label: string }> = ({ data, maxVal, label }) => {
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const chartH = 140;
-  const padTop = 22;
-  const padBot = 5;
-  const usableH = chartH - padTop - padBot;
-
-  // Match the same even spacing as the bar chart flex layout
-  // 7 items evenly spaced: center of each slot
-  const points = data.map((val, i) => {
-    const slotWidth = 100 / 7;
-    const x = slotWidth * i + slotWidth / 2;
-    const y = padTop + usableH - (val / maxVal) * usableH;
-    return { x, y, val };
-  });
-
-  // Build smooth curve using cubic bezier
-  let pathD = `M ${points[0].x} ${points[0].y}`;
-  for (let i = 0; i < points.length - 1; i++) {
-    const p0 = points[Math.max(i - 1, 0)];
-    const p1 = points[i];
-    const p2 = points[i + 1];
-    const p3 = points[Math.min(i + 2, points.length - 1)];
-    const cp1x = p1.x + (p2.x - p0.x) / 6;
-    const cp1y = p1.y + (p2.y - p0.y) / 6;
-    const cp2x = p2.x - (p3.x - p1.x) / 6;
-    const cp2y = p2.y - (p3.y - p1.y) / 6;
-    pathD += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`;
-  }
+  const chartHeight = 128; // matches h-32
 
   return (
     <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', border: '1px solid rgba(255,255,255,0.1)' }}>
       <div className="text-[10px] font-bold uppercase tracking-[1.5px] mb-4" style={{ color: 'rgba(255,255,255,0.4)' }}>
         {label}
       </div>
-      <svg viewBox={`0 0 100 ${chartH}`} className="w-full" preserveAspectRatio="none" style={{ height: '140px', overflow: 'visible' }}>
-        {/* Curved connecting line */}
-        <path d={pathD} fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="0.4" vectorEffect="non-scaling-stroke" />
+      <div className="flex items-end justify-between relative" style={{ gap: '12px', height: `${chartHeight}px` }}>
+        {/* SVG overlay for connecting line - positioned absolutely */}
+        <svg
+          className="absolute inset-0 pointer-events-none"
+          style={{ width: '100%', height: '100%', overflow: 'visible' }}
+          preserveAspectRatio="none"
+        >
+          {/* We'll draw connecting lines between dots using percentage positions */}
+          {data.map((val, i) => {
+            if (i >= data.length - 1) return null;
+            const nextVal = data[i + 1];
+            const pct1 = val / maxVal;
+            const pct2 = nextVal / maxVal;
+            // Each column center: (i + 0.5) / 7 * 100%
+            const x1 = ((i + 0.5) / 7) * 100;
+            const y1 = (1 - pct1) * 100;
+            const x2 = ((i + 1.5) / 7) * 100;
+            const y2 = (1 - pct2) * 100;
+            return (
+              <line
+                key={`line-${i}`}
+                x1={`${x1}%`} y1={`${y1}%`}
+                x2={`${x2}%`} y2={`${y2}%`}
+                stroke="rgba(255,255,255,0.3)"
+                strokeWidth="1"
+              />
+            );
+          })}
+        </svg>
 
-        {/* Drop lines and dots */}
-        {points.map((p, i) => (
-          <g key={i}>
-            {/* Vertical drop line */}
-            <line
-              x1={p.x} y1={p.y}
-              x2={p.x} y2={chartH - padBot}
-              stroke="rgba(255,255,255,0.15)"
-              strokeWidth="0.3"
-              strokeDasharray="1 1"
-              vectorEffect="non-scaling-stroke"
-            />
-            {/* Value label above dot */}
-            <text
-              x={p.x}
-              y={p.y - 5}
-              textAnchor="middle"
-              fill="rgba(255,255,255,0.6)"
-              fontSize="3.5"
-              fontWeight="700"
-              fontFamily="Inter, system-ui, sans-serif"
-            >
-              {p.val}
-            </text>
-            {/* White dot */}
-            <circle cx={p.x} cy={p.y} r="1.5" fill="white" />
-          </g>
-        ))}
-      </svg>
-      {/* Day labels - same flex layout as bar chart */}
-      <div className="flex items-end justify-between mt-2" style={{ gap: '12px' }}>
-        {days.map((d, i) => (
-          <div key={i} className="text-[9px] font-bold uppercase text-center" style={{ color: 'rgba(255,255,255,0.3)', flex: '1', maxWidth: '28px' }}>
-            {d}
-          </div>
-        ))}
+        {data.map((val, i) => {
+          const pct = maxVal > 0 ? val / maxVal : 0;
+          const bottomPx = pct * chartHeight;
+          return (
+            <div key={i} className="flex flex-col items-center h-full justify-end relative" style={{ flex: '1', maxWidth: '28px' }}>
+              {/* Dot column container */}
+              <div className="absolute left-0 right-0 flex flex-col items-center" style={{ bottom: `${bottomPx}px` }}>
+                {/* Value */}
+                <div className="text-[8px] font-bold text-white/60 mb-1 whitespace-nowrap">{val}</div>
+                {/* Dot */}
+                <div className="w-[7px] h-[7px] rounded-full bg-white" />
+              </div>
+              {/* Dashed drop line */}
+              <div
+                className="absolute left-1/2 -translate-x-1/2 bottom-0"
+                style={{
+                  height: `${bottomPx}px`,
+                  width: '1px',
+                  backgroundImage: 'repeating-linear-gradient(to bottom, rgba(255,255,255,0.15) 0px, rgba(255,255,255,0.15) 3px, transparent 3px, transparent 6px)',
+                }}
+              />
+              {/* Day label */}
+              <div className="absolute -bottom-6 text-[9px] font-bold uppercase" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                {days[i]}
+              </div>
+            </div>
+          );
+        })}
       </div>
+      {/* Spacer for day labels */}
+      <div style={{ height: '20px' }} />
     </div>
   );
 };
