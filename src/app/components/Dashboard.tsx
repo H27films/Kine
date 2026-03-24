@@ -265,7 +265,7 @@ export const Dashboard: React.FC = () => {
       <section className="pt-4">
         <div className="flex items-start">
           {/* Left: Big number with rounded dot */}
-          <div className="text-[5rem] font-black leading-none tracking-tighter text-white">
+          <div className="text-[4rem] font-black leading-none tracking-tighter text-white">
             33.5
           </div>
           {/* Right of number: MOVEMENT (KM) + yesterday */}
