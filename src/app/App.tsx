@@ -8,6 +8,7 @@ import { LogCardio } from './components/LogCardio';
 import { LogCalories } from './components/LogCalories';
 import { Analytics } from './components/Analytics';
 import { Profile } from './components/Profile';
+import { Summary } from './components/Summary';
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>('dashboard');
@@ -21,6 +22,7 @@ const App: React.FC = () => {
         return 'Log';
       case 'analytics': return 'Data+';
       case 'profile': return 'Profile';
+      case 'summary': return 'Summary';
     }
   };
 
@@ -38,12 +40,20 @@ const App: React.FC = () => {
         return <Analytics />;
       case 'profile':
         return <Profile onNavigate={setCurrentPage} />;
+      case 'summary':
+        return <Summary />;
     }
   };
 
+  const showBackButton = currentPage === 'profile' || currentPage === 'summary';
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#000000', color: '#e2e2e2', fontFamily: "'Inter Variable', 'Inter', system-ui, sans-serif" }}>
-      <Header title={getHeaderTitle()} onBack={currentPage === 'profile' ? () => setCurrentPage('dashboard') : undefined} />
+      <Header
+        title={getHeaderTitle()}
+        onBack={showBackButton ? () => setCurrentPage('dashboard') : undefined}
+        onNavigate={setCurrentPage}
+      />
       <main className="pt-20 pb-32 px-4 max-w-lg mx-auto">
         {renderPage()}
       </main>
