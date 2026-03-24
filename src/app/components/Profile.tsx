@@ -20,54 +20,39 @@ const settings = [
   'Connected Devices',
 ];
 
-export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
+export const Profile: React.FC<ProfileProps> = ({ onNavigate: _onNavigate }) => {
   return (
-    <div>
+    <div className="space-y-6">
       {/* Profile Header */}
-      <div className="flex flex-col items-center mb-12 pt-4">
-        <div
-          className="rounded-full w-[120px] h-[120px] flex items-center justify-center mb-6"
-          style={{ backgroundColor: '#121212', border: '1px solid rgba(255,255,255,0.1)' }}
-        >
-          <User size={64} style={{ color: 'rgba(255,255,255,0.4)' }} />
+      <div className="flex flex-col items-center py-8">
+        <div className="w-24 h-24 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: '#1a1a1a' }}>
+          <User size={40} color="#666" />
         </div>
-        <h2 className="text-[32px] font-black tracking-[-1.6px] mb-2 text-white">ATHLETE</h2>
-        <p className="text-sm tracking-[1.4px] uppercase" style={{ color: 'rgba(255,255,255,0.6)' }}>
-          Member since 2024
-        </p>
+        <h2 className="text-2xl font-black tracking-tight">ATHLETE</h2>
+        <p className="text-sm" style={{ color: '#666' }}>Member since 2024</p>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-4 mb-8">
+      <div className="grid grid-cols-2 gap-3">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <div
-              key={stat.label}
-              className="rounded-lg p-6"
-              style={{ backgroundColor: '#121212', border: '1px solid rgba(255,255,255,0.1)' }}
-            >
-              <Icon size={24} className="text-white mb-4" />
-              <div className="text-[32px] font-black leading-none mb-2 text-white">{stat.value}</div>
-              <div className="text-[10px] font-bold uppercase tracking-[1px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                {stat.label}
-              </div>
+            <div key={stat.label} className="rounded-2xl p-4" style={{ backgroundColor: '#121212' }}>
+              <Icon size={18} color="#666" />
+              <p className="text-2xl font-black mt-2">{stat.value}</p>
+              <p className="text-xs" style={{ color: '#666' }}>{stat.label}</p>
             </div>
           );
         })}
       </div>
 
       {/* Settings */}
-      <div className="space-y-4">
-        <h3 className="text-[18px] font-black tracking-[-0.9px] uppercase mb-4 text-white">Settings</h3>
+      <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: '#121212' }}>
+        <h3 className="text-sm font-bold px-4 pt-4 pb-2" style={{ color: '#666' }}>Settings</h3>
         {settings.map((item) => (
-          <div
-            key={item}
-            className="flex items-center justify-between p-5 rounded cursor-pointer active:scale-[0.98] transition-all"
-            style={{ backgroundColor: '#121212', border: '1px solid rgba(255,255,255,0.05)' }}
-          >
-            <div className="font-bold text-sm text-white">{item}</div>
-            <ChevronRight size={16} style={{ color: 'rgba(255,255,255,0.4)' }} />
+          <div key={item} className="flex items-center justify-between px-4 py-3 cursor-pointer" style={{ borderBottom: '1px solid #1a1a1a' }}>
+            <span className="text-sm">{item}</span>
+            <ChevronRight size={16} color="#444" />
           </div>
         ))}
       </div>
