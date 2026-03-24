@@ -1,5 +1,5 @@
-import React from 'react';
-import { Dumbbell } from 'lucide-react';
+import React, { useState } from 'react';
+import { Dumbbell, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const BarChart: React.FC<{ data: number[]; maxVal: number; label: string; unit: string }> = ({ data, maxVal, label, unit }) => {
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -40,7 +40,6 @@ const ScatterChart: React.FC<{ data: number[]; minVal: number; maxVal: number; l
   const chartHeight = 128;
   const range = maxVal - minVal;
 
-  // Calculate positions for curved line
   const getPosition = (val: number, index: number) => {
     const pct = range > 0 ? (val - minVal) / range : 0;
     const clampedPct = Math.max(0, Math.min(1, pct));
@@ -51,7 +50,6 @@ const ScatterChart: React.FC<{ data: number[]; minVal: number; maxVal: number; l
     };
   };
 
-  // Build smooth cubic bezier path
   const buildCurvedPath = () => {
     const points = data.map((val, i) => getPosition(val, i));
     if (points.length < 2) return '';
@@ -75,12 +73,10 @@ const ScatterChart: React.FC<{ data: number[]; minVal: number; maxVal: number; l
       <div className="text-[10px] font-bold uppercase tracking-[1.5px] mb-4" style={{ color: 'rgba(255,255,255,0.4)' }}>
         {label}
       </div>
-      {/* Axis labels */}
       <div className="flex justify-between mb-1">
         <span className="text-[8px] font-bold" style={{ color: 'rgba(255,255,255,0.2)' }}>{maxVal}</span>
       </div>
       <div className="flex items-end justify-between relative" style={{ gap: '12px', height: `${chartHeight}px` }}>
-        {/* SVG overlay for curved connecting line */}
         <svg
           className="absolute inset-0 pointer-events-none"
           viewBox="0 0 100 100"
@@ -100,12 +96,10 @@ const ScatterChart: React.FC<{ data: number[]; minVal: number; maxVal: number; l
           const { bottomPx } = getPosition(val, i);
           return (
             <div key={i} className="flex flex-col items-center h-full justify-end relative" style={{ flex: '1', maxWidth: '28px' }}>
-              {/* Dot + value */}
               <div className="absolute left-0 right-0 flex flex-col items-center" style={{ bottom: `${bottomPx}px` }}>
                 <div className="text-[8px] font-bold text-white/60 mb-1 whitespace-nowrap">{val}</div>
                 <div className="w-[7px] h-[7px] rounded-full bg-white" />
               </div>
-              {/* Dashed drop line */}
               <div
                 className="absolute left-1/2 -translate-x-1/2 bottom-0"
                 style={{
@@ -114,7 +108,6 @@ const ScatterChart: React.FC<{ data: number[]; minVal: number; maxVal: number; l
                   backgroundImage: 'repeating-linear-gradient(to bottom, rgba(255,255,255,0.15) 0px, rgba(255,255,255,0.15) 3px, transparent 3px, transparent 6px)',
                 }}
               />
-              {/* Day label */}
               <div className="absolute -bottom-6 text-[9px] font-bold uppercase" style={{ color: 'rgba(255,255,255,0.3)' }}>
                 {days[i]}
               </div>
@@ -125,20 +118,59 @@ const ScatterChart: React.FC<{ data: number[]; minVal: number; maxVal: number; l
       <div className="flex justify-between mt-1">
         <span className="text-[8px] font-bold" style={{ color: 'rgba(255,255,255,0.2)' }}>{minVal}</span>
       </div>
-      {/* Spacer for day labels */}
       <div style={{ height: '14px' }} />
     </div>
   );
 };
 
-export const Dashboard: React.FC = () => {
-  const weightExercises = [
+// Mock data per day (0 = today, -1 = yesterday, etc.)
+const weightsByDay: Record<number, { name: string; weight: number }[]> = {
+  0: [
     { name: 'Bench Press', weight: 120 },
     { name: 'Squats', weight: 180 },
     { name: 'Deadlift', weight: 160 },
     { name: 'OHP', weight: 60 },
-  ];
-  const totalWeight = weightExercises.reduce((sum, e) => sum + e.weight, 0);
+  ],
+  [-1]: [
+    { name: 'Bench Press', weight: 100 },
+    { name: 'Pull Ups', weight: 80 },
+    { name: 'Rows', weight: 140 },
+  ],
+  [-2]: [
+    { name: 'Squats', weight: 200 },
+    { name: 'Leg Press', weight: 300 },
+    { name: 'Lunges', weight: 60 },
+  ],
+  [-3]: [
+    { name: 'Bench Press', weight: 110 },
+    { name: 'Incline Press', weight: 80 },
+    { name: 'Flyes', weight: 40 },
+  ],
+  [-4]: [],
+  [-5]: [
+    { name: 'Deadlift', weight: 180 },
+    { name: 'Rows', weight: 120 },
+  ],
+  [-6]: [
+    { name: 'Squats', weight: 190 },
+    { name: 'OHP', weight: 55 },
+    { name: 'Lateral Raises', weight: 20 },
+  ],
+};
+
+const getDayLabel = (offset: number): string => {
+  if (offset === 0) return 'Today';
+  if (offset === -1) return 'Yesterday';
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+};
+
+export const Dashboard: React.FC = () => {
+  const [dayOffset, setDayOffset] = useState(0);
+
+  const exercises = weightsByDay[dayOffset] || [];
+  const totalWeight = exercises.reduce((sum, e) => sum + e.weight, 0);
 
   const cardioData = [5.2, 0, 8.1, 3.4, 6.7, 10.2, 0];
   const weightsData = [320, 0, 520, 280, 0, 460, 0];
@@ -157,33 +189,58 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
         <div className="mt-8 text-[20px] font-light text-white leading-relaxed max-w-xs">
-          <span>You burned </span>
-          <span className="font-bold">385 calories</span>
-          <span> and moved for </span>
-          <span className="font-bold">1 h 17 minutes</span>
+          You burned <span className="font-bold">385 Calories</span>
         </div>
       </section>
 
-      {/* Total Weights Box */}
+      {/* Weights Box */}
       <section>
         <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', border: '1px solid rgba(255,255,255,0.1)' }}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Dumbbell size={18} color="white" />
-              <span className="text-[10px] font-bold uppercase tracking-[1.5px]" style={{ color: 'rgba(255,255,255,0.4)' }}>Total Weights Today</span>
+              <Dumbbell size={16} color="white" />
+              <span className="text-[10px] font-bold uppercase tracking-[1.5px]" style={{ color: 'rgba(255,255,255,0.4)' }}>Weights</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setDayOffset((prev) => Math.max(prev - 1, -6))}
+                disabled={dayOffset <= -6}
+                className="transition-opacity"
+                style={{ opacity: dayOffset <= -6 ? 0.2 : 0.6 }}
+              >
+                <ChevronLeft size={18} color="white" />
+              </button>
+              <span className="text-[10px] font-bold uppercase tracking-[1px] text-white/50 min-w-[80px] text-center">
+                {getDayLabel(dayOffset)}
+              </span>
+              <button
+                onClick={() => setDayOffset((prev) => Math.min(prev + 1, 0))}
+                disabled={dayOffset >= 0}
+                className="transition-opacity"
+                style={{ opacity: dayOffset >= 0 ? 0.2 : 0.6 }}
+              >
+                <ChevronRight size={18} color="white" />
+              </button>
             </div>
           </div>
-          <div className="text-4xl font-black text-white tracking-tight">
-            {totalWeight} <span className="text-lg font-bold" style={{ color: 'rgba(255,255,255,0.4)' }}>KG</span>
-          </div>
-          <div className="mt-4 space-y-2">
-            {weightExercises.map((ex, i) => (
-              <div key={i} className="flex items-center justify-between">
-                <span className="text-[11px] font-medium text-white/60">{ex.name}</span>
-                <span className="text-[12px] font-bold text-white">{ex.weight} kg</span>
+
+          {exercises.length > 0 ? (
+            <>
+              <div className="text-4xl font-black text-white tracking-tight">
+                {totalWeight} <span className="text-lg font-bold" style={{ color: 'rgba(255,255,255,0.4)' }}>KG</span>
               </div>
-            ))}
-          </div>
+              <div className="mt-4 space-y-2">
+                {exercises.map((ex, i) => (
+                  <div key={i} className="flex items-center justify-between">
+                    <span className="text-[11px] font-medium text-white/60">{ex.name}</span>
+                    <span className="text-[12px] font-bold text-white">{ex.weight} kg</span>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="text-[13px] text-white/30 font-medium py-4">No weights logged</div>
+          )}
         </div>
       </section>
 
