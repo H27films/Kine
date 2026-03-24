@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Page } from '../../types';
+import { Page } from '../types';
 
 interface LogCaloriesProps {
   onNavigate: (page: Page) => void;
@@ -33,19 +33,13 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
   return (
     <div>
       {/* Tab Navigation */}
-      <nav className="flex items-end justify-start gap-8 mb-12 overflow-x-auto hide-scrollbar" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+      <nav className="flex gap-8 mb-12 items-end">
         {tabs.map((tab) => (
-          <button
-            key={tab.page}
-            onClick={() => onNavigate(tab.page)}
-            className="pb-4 text-[10px] uppercase tracking-[0.2em] transition-colors"
-            style={{
-              color: tab.page === 'calories' ? '#ffffff' : 'rgba(161,161,170,1)',
-              fontWeight: 700,
-              borderBottom: tab.page === 'calories' ? '2px solid #ffffff' : '2px solid transparent',
-            }}
-          >
-            {tab.label}
+          <button key={tab.page} onClick={() => onNavigate(tab.page)} className="flex flex-col items-center">
+            <span className="uppercase tracking-widest text-[10px] transition-colors" style={{ color: tab.page === 'calories' ? '#ffffff' : 'rgba(226,226,226,0.5)', fontWeight: tab.page === 'calories' ? 700 : 400 }}>
+              {tab.label}
+            </span>
+            {tab.page === 'calories' && <div className="h-1 w-1 rounded-full mt-1" style={{ backgroundColor: '#ffffff' }} />}
           </button>
         ))}
       </nav>

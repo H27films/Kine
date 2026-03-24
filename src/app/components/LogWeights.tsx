@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Dumbbell, ChevronRight, Minus, Plus, Clock } from 'lucide-react';
-import { Page } from '../../types';
+import { Page } from '../types';
 
 interface LogWeightsProps {
   onNavigate: (page: Page) => void;
@@ -31,19 +31,13 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
   return (
     <div>
       {/* Tab Navigation */}
-      <nav className="flex justify-between items-center mb-10 gap-2">
+      <nav className="flex gap-8 mb-12 items-end">
         {tabs.map((tab) => (
-          <button
-            key={tab.page}
-            onClick={() => onNavigate(tab.page)}
-            className="flex-1 py-3 text-center transition-all"
-            style={{
-              borderBottom: tab.page === 'weights' ? '2px solid #ffffff' : '2px solid transparent',
-              color: tab.page === 'weights' ? '#ffffff' : 'rgba(198,198,198,0.4)',
-              fontWeight: tab.page === 'weights' ? 700 : 400,
-            }}
-          >
-            {tab.label}
+          <button key={tab.page} onClick={() => onNavigate(tab.page)} className="flex flex-col items-center">
+            <span className="uppercase tracking-widest text-[10px] transition-colors" style={{ color: tab.page === 'weights' ? '#ffffff' : 'rgba(226,226,226,0.5)', fontWeight: tab.page === 'weights' ? 700 : 400 }}>
+              {tab.label}
+            </span>
+            {tab.page === 'weights' && <div className="h-1 w-1 rounded-full mt-1" style={{ backgroundColor: '#ffffff' }} />}
           </button>
         ))}
       </nav>
