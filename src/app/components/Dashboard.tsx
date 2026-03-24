@@ -298,41 +298,16 @@ export const Dashboard: React.FC = () => {
           ))}
         </div>
 
-        {/* Inline activity chart - appears when an activity is selected */}
+        {/* Inline lollipop chart - appears when an activity is selected */}
         {selectedActivity && activityWeeklyData[selectedActivity] && (() => {
           const data = activityWeeklyData[selectedActivity];
-          const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+          const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
           const maxVal = Math.max(...data);
-          const minVal = Math.min(...data.filter(v => v > 0), 0);
-          const range = maxVal - minVal || 1;
-          const chartH = 80;
-          const getY = (val: number) => {
-            const pct = (val - minVal) / range;
-            return (1 - pct) * 100;
-          };
-          const getBottom = (val: number) => {
-            const pct = (val - minVal) / range;
-            return pct * chartH;
-          };
-          // Build bezier path
-          const points = data.map((val, i) => ({ x: ((i + 0.5) / 7) * 100, y: getY(val) }));
-          let pathD = `M ${points[0].x} ${points[0].y}`;
-          for (let i = 0; i < points.length - 1; i++) {
-            const p0 = points[i]; const p1 = points[i + 1];
-            const dx = p1.x - p0.x;
-            pathD += ` C ${p0.x + dx * 0.3} ${p0.y}, ${p1.x - dx * 0.3} ${p1.y}, ${p1.x} ${p1.y}`;
-          }
+          const chartH = 90;
+          const getBottom = (val: number) => maxVal > 0 ? (val / maxVal) * chartH : 0;
           return (
-            <div className="mt-4 relative" style={{ height: `${chartH + 30}px` }}>
+            <div className="mt-8 relative" style={{ height: `${chartH + 30}px` }}>
               <div className="flex items-end justify-between relative" style={{ height: `${chartH}px` }}>
-                <svg
-                  className="absolute inset-0 pointer-events-none"
-                  viewBox="0 0 100 100"
-                  preserveAspectRatio="none"
-                  style={{ width: '100%', height: '100%', overflow: 'visible' }}
-                >
-                  <path d={pathD} fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="0.8" vectorEffect="non-scaling-stroke" />
-                </svg>
                 {data.map((val, i) => {
                   const bottom = getBottom(val);
                   return (
@@ -341,14 +316,14 @@ export const Dashboard: React.FC = () => {
                         <>
                           <div className="absolute left-0 right-0 flex flex-col items-center" style={{ bottom: `${bottom}px` }}>
                             <div className="text-[9px] font-bold text-white/70 mb-1 whitespace-nowrap">{val}</div>
-                            <div className="w-[6px] h-[6px] rounded-full bg-white" />
+                            <div className="w-[7px] h-[7px] rounded-full bg-white" />
                           </div>
                           <div
                             className="absolute left-1/2 -translate-x-1/2 bottom-0"
                             style={{
                               height: `${bottom}px`,
                               width: '1px',
-                              backgroundImage: 'repeating-linear-gradient(to bottom, rgba(255,255,255,0.15) 0px, rgba(255,255,255,0.15) 3px, transparent 3px, transparent 6px)',
+                              backgroundColor: 'rgba(255,255,255,0.25)',
                             }}
                           />
                         </>
