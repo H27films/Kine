@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
 import { Dumbbell, ChevronLeft, ChevronRight, Bike, Footprints, Waves } from 'lucide-react';
 
+// Weekly data per activity type (index 0 = this week)
+const activityWeeklyData: Record<string, number[]> = {
+  Run:   [4.3, 0, 5.1, 3.2, 6.0, 0, 3.8],
+  Row:   [2.0, 1.5, 0, 2.8, 0, 3.1, 1.2],
+  Cycle: [15.2, 0, 12.0, 18.5, 0, 10.3, 14.1],
+  Walk:  [12.0, 8.5, 10.2, 0, 9.4, 11.0, 7.6],
+};
+
 // Weekly mock data (index 0 = current week, up to 6 = 7 weeks ago)
 const cardioWeeks: number[][] = [
   [5.2, 0, 8.1, 3.4, 6.7, 10.2, 0],
@@ -246,6 +254,7 @@ export const Dashboard: React.FC = () => {
   const [cardioWeek, setCardioWeek] = useState(0);
   const [weightsWeek, setWeightsWeek] = useState(0);
   const [calorieWeek, setCalorieWeek] = useState(0);
+  const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
 
   const exercises = weightsByDay[dayOffset] || [];
   const totalWeight = exercises.reduce((sum, e) => sum + e.weight, 0);
@@ -255,9 +264,9 @@ export const Dashboard: React.FC = () => {
       {/* Hero Metric */}
       <section className="pt-4">
         <div className="flex items-start">
-          {/* Left: Big number */}
+          {/* Left: Big number with rounded dot */}
           <div className="text-[4.5rem] leading-none tracking-[-3px] text-white" style={{ fontFamily: '"SF Pro Display", "Helvetica Neue", Arial, sans-serif', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
-            33.5
+            33<span style={{ display: 'inline-block', width: '0.22em', textAlign: 'center', fontSize: '0.6em', verticalAlign: 'baseline', lineHeight: 1 }}>●</span>5
           </div>
           {/* Right of number: MOVEMENT (KM) + yesterday */}
           <div className="flex flex-col justify-center ml-4 pt-3">
@@ -269,7 +278,7 @@ export const Dashboard: React.FC = () => {
             </div>
           </div>
         </div>
-        {/* Activity icons row */}
+        {/* Activity icons row - clickable */}
         <div className="flex items-center gap-5 mt-5">
           {[
             { icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="17" cy="4" r="2"/><path d="M15.6 7.6L13 10l-3-3-4 4"/><path d="M3 17l3-3 3 3 4-4 2 2 3.5-3.5"/><path d="M10 10l-2 8h3l1 4"/></svg>, label: 'Run', km: 4.3 },
@@ -277,12 +286,86 @@ export const Dashboard: React.FC = () => {
             { icon: <Bike size={18} />, label: 'Cycle', km: 15.2 },
             { icon: <Footprints size={18} />, label: 'Walk', km: 12.0 },
           ].filter(a => a.km > 0).map((activity, i) => (
-            <div key={i} className="flex items-center gap-2">
+            <div
+              key={i}
+              className="flex items-center gap-2 cursor-pointer transition-opacity"
+              style={{ opacity: selectedActivity && selectedActivity !== activity.label ? 0.4 : 1 }}
+              onClick={() => setSelectedActivity(selectedActivity === activity.label ? null : activity.label)}
+            >
               <div className="text-white/60">{activity.icon}</div>
               <div className="text-[12px] font-bold text-white/80">{activity.label} {activity.km}km</div>
             </div>
           ))}
         </div>
+
+        {/* Inline activity chart - appears when an activity is selected */}
+        {selectedActivity && activityWeeklyData[selectedActivity] && (() => {
+          const data = activityWeeklyData[selectedActivity];
+          const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+          const maxVal = Math.max(...data);
+          const minVal = Math.min(...data.filter(v => v > 0), 0);
+          const range = maxVal - minVal || 1;
+          const chartH = 80;
+          const getY = (val: number) => {
+            const pct = (val - minVal) / range;
+            return (1 - pct) * 100;
+          };
+          const getBottom = (val: number) => {
+            const pct = (val - minVal) / range;
+            return pct * chartH;
+          };
+          // Build bezier path
+          const points = data.map((val, i) => ({ x: ((i + 0.5) / 7) * 100, y: getY(val) }));
+          let pathD = `M ${points[0].x} ${points[0].y}`;
+          for (let i = 0; i < points.length - 1; i++) {
+            const p0 = points[i]; const p1 = points[i + 1];
+            const dx = p1.x - p0.x;
+            pathD += ` C ${p0.x + dx * 0.3} ${p0.y}, ${p1.x - dx * 0.3} ${p1.y}, ${p1.x} ${p1.y}`;
+          }
+          return (
+            <div className="mt-4 relative" style={{ height: `${chartH + 30}px` }}>
+              <div className="flex items-end justify-between relative" style={{ height: `${chartH}px` }}>
+                <svg
+                  className="absolute inset-0 pointer-events-none"
+                  viewBox="0 0 100 100"
+                  preserveAspectRatio="none"
+                  style={{ width: '100%', height: '100%', overflow: 'visible' }}
+                >
+                  <path d={pathD} fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="0.8" vectorEffect="non-scaling-stroke" />
+                </svg>
+                {data.map((val, i) => {
+                  const bottom = getBottom(val);
+                  return (
+                    <div key={i} className="flex flex-col items-center h-full justify-end relative" style={{ flex: '1' }}>
+                      {val > 0 && (
+                        <>
+                          <div className="absolute left-0 right-0 flex flex-col items-center" style={{ bottom: `${bottom}px` }}>
+                            <div className="text-[9px] font-bold text-white/70 mb-1 whitespace-nowrap">{val}</div>
+                            <div className="w-[6px] h-[6px] rounded-full bg-white" />
+                          </div>
+                          <div
+                            className="absolute left-1/2 -translate-x-1/2 bottom-0"
+                            style={{
+                              height: `${bottom}px`,
+                              width: '1px',
+                              backgroundImage: 'repeating-linear-gradient(to bottom, rgba(255,255,255,0.15) 0px, rgba(255,255,255,0.15) 3px, transparent 3px, transparent 6px)',
+                            }}
+                          />
+                        </>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="flex justify-between mt-2">
+                {days.map((d, i) => (
+                  <div key={i} className="text-[9px] font-bold uppercase text-center" style={{ flex: '1', color: 'rgba(255,255,255,0.3)' }}>{d}</div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
+
         <div className="mt-6 text-[20px] font-light text-white leading-relaxed max-w-xs">
           You burned <span className="font-bold">385 Calories</span>
         </div>
