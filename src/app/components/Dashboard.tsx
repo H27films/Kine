@@ -1,27 +1,100 @@
 import React from 'react';
 import { Dumbbell } from 'lucide-react';
 
-const WeeklyChart: React.FC<{ data: number[]; maxVal: number; color: string; label: string; unit: string }> = ({ data, maxVal, color, label, unit }) => {
+const BarChart: React.FC<{ data: number[]; maxVal: number; label: string; unit: string }> = ({ data, maxVal, label, unit }) => {
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   return (
     <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', border: '1px solid rgba(255,255,255,0.1)' }}>
       <div className="text-[10px] font-bold uppercase tracking-[1.5px] mb-4" style={{ color: 'rgba(255,255,255,0.4)' }}>
         {label}
       </div>
-      <div className="flex items-end justify-between gap-2 h-28">
-        {data.map((val, i) => (
-          <div key={i} className="flex flex-col items-center flex-1 h-full justify-end">
-            <div className="text-[9px] font-bold text-white mb-1">{val > 0 ? `${val}${unit}` : ''}</div>
-            <div
-              className="w-full rounded-sm min-h-[4px] transition-all"
-              style={{
-                height: `${Math.max((val / maxVal) * 100, 4)}%`,
-                backgroundColor: val > 0 ? color : 'rgba(255,255,255,0.05)',
-              }}
-            />
-            <div className="text-[9px] font-bold uppercase mt-2" style={{ color: 'rgba(255,255,255,0.3)' }}>
-              {days[i]}
+      <div className="flex items-end justify-between gap-2 h-32">
+        {data.map((val, i) => {
+          const pct = maxVal > 0 ? val / maxVal : 0;
+          // Higher values = brighter white, lower = darker grey
+          const brightness = Math.round(80 + pct * 175); // range ~80 to 255
+          const barColor = val > 0 ? `rgb(${brightness},${brightness},${brightness})` : 'rgba(255,255,255,0.05)';
+          return (
+            <div key={i} className="flex flex-col items-center flex-1 h-full justify-end">
+              <div className="text-[9px] font-bold text-white/60 mb-1">{val > 0 ? `${val}${unit}` : ''}</div>
+              <div
+                className="w-full min-h-[4px] transition-all"
+                style={{
+                  height: `${Math.max(pct * 100, 4)}%`,
+                  backgroundColor: barColor,
+                  borderRadius: '4px',
+                }}
+              />
+              <div className="text-[9px] font-bold uppercase mt-2" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                {days[i]}
+              </div>
             </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+const ScatterChart: React.FC<{ data: number[]; maxVal: number; label: string }> = ({ data, maxVal, label }) => {
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const chartH = 120;
+  const padX = 20;
+  const padTop = 10;
+  const padBot = 25;
+  const usableH = chartH - padTop - padBot;
+  const totalW = 100; // percentage-based
+
+  const points = data.map((val, i) => {
+    const x = padX + (i / (data.length - 1)) * (totalW - padX * 2);
+    const y = padTop + usableH - (val / maxVal) * usableH;
+    return { x, y, val };
+  });
+
+  // Build smooth curve using cubic bezier
+  let pathD = `M ${points[0].x} ${points[0].y}`;
+  for (let i = 0; i < points.length - 1; i++) {
+    const p0 = points[Math.max(i - 1, 0)];
+    const p1 = points[i];
+    const p2 = points[i + 1];
+    const p3 = points[Math.min(i + 2, points.length - 1)];
+    const cp1x = p1.x + (p2.x - p0.x) / 6;
+    const cp1y = p1.y + (p2.y - p0.y) / 6;
+    const cp2x = p2.x - (p3.x - p1.x) / 6;
+    const cp2y = p2.y - (p3.y - p1.y) / 6;
+    pathD += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`;
+  }
+
+  return (
+    <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', border: '1px solid rgba(255,255,255,0.1)' }}>
+      <div className="text-[10px] font-bold uppercase tracking-[1.5px] mb-4" style={{ color: 'rgba(255,255,255,0.4)' }}>
+        {label}
+      </div>
+      <svg viewBox={`0 0 ${totalW} ${chartH}`} className="w-full" style={{ height: `${chartH}px` }} preserveAspectRatio="none">
+        {/* Curved connecting line */}
+        <path d={pathD} fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="0.5" />
+
+        {/* Drop lines and dots */}
+        {points.map((p, i) => (
+          <g key={i}>
+            {/* Vertical drop line */}
+            <line
+              x1={p.x} y1={p.y}
+              x2={p.x} y2={chartH - padBot}
+              stroke="rgba(255,255,255,0.15)"
+              strokeWidth="0.3"
+              strokeDasharray="1 1"
+            />
+            {/* White dot */}
+            <circle cx={p.x} cy={p.y} r="1.8" fill="white" />
+          </g>
+        ))}
+      </svg>
+      {/* Day labels */}
+      <div className="flex justify-between" style={{ padding: `0 ${padX}%` }}>
+        {days.map((d, i) => (
+          <div key={i} className="text-[9px] font-bold uppercase" style={{ color: 'rgba(255,255,255,0.3)' }}>
+            {d}
           </div>
         ))}
       </div>
@@ -30,7 +103,6 @@ const WeeklyChart: React.FC<{ data: number[]; maxVal: number; color: string; lab
 };
 
 export const Dashboard: React.FC = () => {
-  // Sample data
   const weightExercises = [
     { name: 'Bench Press', weight: 120 },
     { name: 'Squats', weight: 180 },
@@ -88,35 +160,17 @@ export const Dashboard: React.FC = () => {
 
       {/* Tracker Weekly - Cardio */}
       <section>
-        <WeeklyChart
-          data={cardioData}
-          maxVal={12}
-          color="#4ade80"
-          label="Tracker Weekly — Cardio"
-          unit="km"
-        />
+        <BarChart data={cardioData} maxVal={12} label="Tracker Weekly — Cardio" unit="km" />
       </section>
 
       {/* Tracker Weekly - Weights */}
       <section>
-        <WeeklyChart
-          data={weightsData}
-          maxVal={600}
-          color="#60a5fa"
-          label="Tracker Weekly — Weights"
-          unit="kg"
-        />
+        <BarChart data={weightsData} maxVal={600} label="Tracker Weekly — Weights" unit="kg" />
       </section>
 
       {/* Tracker Weekly - Calories */}
       <section>
-        <WeeklyChart
-          data={calorieData}
-          maxVal={3000}
-          color="#f97316"
-          label="Tracker Weekly — Calories"
-          unit=""
-        />
+        <ScatterChart data={calorieData} maxVal={3000} label="Tracker Weekly — Calories" />
       </section>
     </div>
   );
