@@ -38,7 +38,7 @@ const BarChart: React.FC<{ data: number[]; maxVal: number; label: string; unit: 
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   const weekLabel = `${TOTAL_WEEKS - weekIndex}`;
   return (
-    <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', border: '1px solid rgba(255,255,255,0.1)' }}>
+    <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff' }}>
       <div className="flex items-center justify-between mb-4">
         <div className="text-[10px] font-bold uppercase tracking-[1.5px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
           {label}
@@ -127,7 +127,7 @@ const ScatterChart: React.FC<{ data: number[]; minVal: number; maxVal: number; l
   };
 
   return (
-    <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', border: '1px solid rgba(255,255,255,0.1)' }}>
+    <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff' }}>
       <div className="flex items-center justify-between mb-4">
         <div className="text-[10px] font-bold uppercase tracking-[1.5px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
           {label}
@@ -316,7 +316,7 @@ export const Dashboard: React.FC = () => {
 
       {/* Weights Box */}
       <section>
-        <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', border: '1px solid rgba(255,255,255,0.1)' }}>
+        <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff' }}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Dumbbell size={16} color="white" />
