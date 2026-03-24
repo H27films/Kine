@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dumbbell, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Dumbbell, ChevronLeft, ChevronRight, Bike, Footprints, Waves } from 'lucide-react';
 
 // Weekly mock data (index 0 = current week, up to 6 = 7 weeks ago)
 const cardioWeeks: number[][] = [
@@ -38,7 +38,7 @@ const BarChart: React.FC<{ data: number[]; maxVal: number; label: string; unit: 
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   const weekLabel = `${TOTAL_WEEKS - weekIndex}`;
   return (
-    <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', border: '1px solid rgba(255,255,255,0.1)' }}>
+    <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff' }}>
       <div className="flex items-center justify-between mb-4">
         <div className="text-[10px] font-bold uppercase tracking-[1.5px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
           {label}
@@ -127,7 +127,7 @@ const ScatterChart: React.FC<{ data: number[]; minVal: number; maxVal: number; l
   };
 
   return (
-    <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', border: '1px solid rgba(255,255,255,0.1)' }}>
+    <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff' }}>
       <div className="flex items-center justify-between mb-4">
         <div className="text-[10px] font-bold uppercase tracking-[1.5px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
           {label}
@@ -254,7 +254,8 @@ export const Dashboard: React.FC = () => {
     <div className="space-y-8">
       {/* Hero Metric */}
       <section className="pt-4">
-        <div className="flex items-start gap-8">
+        <div className="flex items-start justify-between">
+          {/* Left: Big number + activity icons below */}
           <div className="flex flex-col items-start">
             <div className="text-[4.5rem] leading-none tracking-[-3px] text-white" style={{ fontFamily: '"SF Pro Display", "Helvetica Neue", Arial, sans-serif', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
               33.5
@@ -262,23 +263,60 @@ export const Dashboard: React.FC = () => {
             <div className="text-[24px] font-bold tracking-[2.4px] uppercase" style={{ color: 'rgba(255,255,255,0.4)' }}>
               KM
             </div>
+            {/* Activity icons row */}
+            <div className="flex items-center gap-4 mt-4">
+              {[
+                { icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="17" cy="4" r="2"/><path d="M15.6 7.6L13 10l-3-3-4 4"/><path d="M3 17l3-3 3 3 4-4 2 2 3.5-3.5"/><path d="M10 10l-2 8h3l1 4"/></svg>, label: 'Run', km: 4.3 },
+                { icon: <Waves size={14} />, label: 'Row', km: 2.0 },
+                { icon: <Bike size={14} />, label: 'Cycle', km: 15.2 },
+                { icon: <Footprints size={14} />, label: 'Walk', km: 12.0 },
+              ].filter(a => a.km > 0).map((activity, i) => (
+                <div key={i} className="flex flex-col items-center gap-1">
+                  <div className="text-white/60">{activity.icon}</div>
+                  <div className="text-[10px] font-bold text-white/80">{activity.km}km</div>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="flex flex-col items-start pt-2 space-y-1.5">
-            <div className="text-[13px] font-medium text-white/80">Tracker <span className="text-white/50">0.0km</span></div>
-            <div className="text-[13px] font-medium text-white/80">Run <span className="text-white/50">4.3km</span></div>
-            <div className="text-[13px] font-medium text-white/80">Row <span className="text-white/50">2.0km</span></div>
-            <div className="text-[13px] font-medium text-white/80">Cycle <span className="text-white/50">15.2km</span></div>
-            <div className="text-[13px] font-medium text-white/80">Walk <span className="text-white/50">12.0km</span></div>
+
+          {/* Right: Mini weekly running bar chart */}
+          <div className="flex flex-col items-end pt-1" style={{ width: '120px' }}>
+            <div className="text-[9px] font-bold uppercase tracking-[1px] text-white/40 mb-2">This Week</div>
+            <div className="flex items-end gap-[3px] w-full" style={{ height: '48px' }}>
+              {[4.3, 0, 6.1, 3.2, 5.8, 7.4, 0].map((val, i) => {
+                const maxVal = 8;
+                const pct = maxVal > 0 ? val / maxVal : 0;
+                const brightness = Math.round(80 + pct * 175);
+                const barColor = val > 0 ? `rgb(${brightness},${brightness},${brightness})` : 'rgba(255,255,255,0.05)';
+                return (
+                  <div key={i} className="flex flex-col items-center flex-1" style={{ height: '100%', justifyContent: 'flex-end' }}>
+                    <div
+                      className="w-full min-h-[3px]"
+                      style={{
+                        height: `${Math.max(pct * 100, 6)}%`,
+                        backgroundColor: barColor,
+                        borderRadius: '3px',
+                      }}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex w-full mt-1">
+              {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => (
+                <div key={i} className="flex-1 text-center text-[7px] font-bold text-white/25">{d}</div>
+              ))}
+            </div>
           </div>
         </div>
-        <div className="mt-8 text-[20px] font-light text-white leading-relaxed max-w-xs">
+        <div className="mt-6 text-[20px] font-light text-white leading-relaxed max-w-xs">
           You burned <span className="font-bold">385 Calories</span>
         </div>
       </section>
 
       {/* Weights Box */}
       <section>
-        <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', border: '1px solid rgba(255,255,255,0.1)' }}>
+        <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff' }}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Dumbbell size={16} color="white" />
