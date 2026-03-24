@@ -35,55 +35,74 @@ const BarChart: React.FC<{ data: number[]; maxVal: number; label: string; unit: 
   );
 };
 
-const ScatterChart: React.FC<{ data: number[]; maxVal: number; label: string }> = ({ data, maxVal, label }) => {
+const ScatterChart: React.FC<{ data: number[]; minVal: number; maxVal: number; label: string }> = ({ data, minVal, maxVal, label }) => {
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const chartHeight = 128; // matches h-32
+  const chartHeight = 128;
+  const range = maxVal - minVal;
+
+  // Calculate positions for curved line
+  const getPosition = (val: number, index: number) => {
+    const pct = range > 0 ? (val - minVal) / range : 0;
+    const clampedPct = Math.max(0, Math.min(1, pct));
+    return {
+      x: ((index + 0.5) / 7) * 100,
+      y: (1 - clampedPct) * 100,
+      bottomPx: clampedPct * chartHeight,
+    };
+  };
+
+  // Build smooth cubic bezier path
+  const buildCurvedPath = () => {
+    const points = data.map((val, i) => getPosition(val, i));
+    if (points.length < 2) return '';
+    let d = `M ${points[0].x} ${points[0].y}`;
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[i];
+      const p1 = points[i + 1];
+      const tension = 0.3;
+      const dx = p1.x - p0.x;
+      const cp1x = p0.x + dx * tension;
+      const cp1y = p0.y;
+      const cp2x = p1.x - dx * tension;
+      const cp2y = p1.y;
+      d += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p1.x} ${p1.y}`;
+    }
+    return d;
+  };
 
   return (
     <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', border: '1px solid rgba(255,255,255,0.1)' }}>
       <div className="text-[10px] font-bold uppercase tracking-[1.5px] mb-4" style={{ color: 'rgba(255,255,255,0.4)' }}>
         {label}
       </div>
+      {/* Axis labels */}
+      <div className="flex justify-between mb-1">
+        <span className="text-[8px] font-bold" style={{ color: 'rgba(255,255,255,0.2)' }}>{maxVal}</span>
+      </div>
       <div className="flex items-end justify-between relative" style={{ gap: '12px', height: `${chartHeight}px` }}>
-        {/* SVG overlay for connecting line - positioned absolutely */}
+        {/* SVG overlay for curved connecting line */}
         <svg
           className="absolute inset-0 pointer-events-none"
-          style={{ width: '100%', height: '100%', overflow: 'visible' }}
+          viewBox="0 0 100 100"
           preserveAspectRatio="none"
+          style={{ width: '100%', height: '100%', overflow: 'visible' }}
         >
-          {/* We'll draw connecting lines between dots using percentage positions */}
-          {data.map((val, i) => {
-            if (i >= data.length - 1) return null;
-            const nextVal = data[i + 1];
-            const pct1 = val / maxVal;
-            const pct2 = nextVal / maxVal;
-            // Each column center: (i + 0.5) / 7 * 100%
-            const x1 = ((i + 0.5) / 7) * 100;
-            const y1 = (1 - pct1) * 100;
-            const x2 = ((i + 1.5) / 7) * 100;
-            const y2 = (1 - pct2) * 100;
-            return (
-              <line
-                key={`line-${i}`}
-                x1={`${x1}%`} y1={`${y1}%`}
-                x2={`${x2}%`} y2={`${y2}%`}
-                stroke="rgba(255,255,255,0.3)"
-                strokeWidth="1"
-              />
-            );
-          })}
+          <path
+            d={buildCurvedPath()}
+            fill="none"
+            stroke="rgba(255,255,255,0.3)"
+            strokeWidth="0.8"
+            vectorEffect="non-scaling-stroke"
+          />
         </svg>
 
         {data.map((val, i) => {
-          const pct = maxVal > 0 ? val / maxVal : 0;
-          const bottomPx = pct * chartHeight;
+          const { bottomPx } = getPosition(val, i);
           return (
             <div key={i} className="flex flex-col items-center h-full justify-end relative" style={{ flex: '1', maxWidth: '28px' }}>
-              {/* Dot column container */}
+              {/* Dot + value */}
               <div className="absolute left-0 right-0 flex flex-col items-center" style={{ bottom: `${bottomPx}px` }}>
-                {/* Value */}
                 <div className="text-[8px] font-bold text-white/60 mb-1 whitespace-nowrap">{val}</div>
-                {/* Dot */}
                 <div className="w-[7px] h-[7px] rounded-full bg-white" />
               </div>
               {/* Dashed drop line */}
@@ -103,8 +122,11 @@ const ScatterChart: React.FC<{ data: number[]; maxVal: number; label: string }> 
           );
         })}
       </div>
+      <div className="flex justify-between mt-1">
+        <span className="text-[8px] font-bold" style={{ color: 'rgba(255,255,255,0.2)' }}>{minVal}</span>
+      </div>
       {/* Spacer for day labels */}
-      <div style={{ height: '20px' }} />
+      <div style={{ height: '14px' }} />
     </div>
   );
 };
@@ -127,8 +149,8 @@ export const Dashboard: React.FC = () => {
       {/* Hero Metric */}
       <section className="pt-4">
         <div className="flex flex-col items-start">
-          <div className="text-[4.5rem] font-extrabold leading-none tracking-[-3px] text-white" style={{ fontFamily: 'Inter, system-ui, sans-serif', fontWeight: 800 }}>
-            33,5
+          <div className="text-[4.5rem] leading-none tracking-[-3px] text-white" style={{ fontFamily: '"SF Pro Display", "Helvetica Neue", Arial, sans-serif', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
+            33.5
           </div>
           <div className="text-[24px] font-bold tracking-[2.4px] uppercase" style={{ color: 'rgba(255,255,255,0.4)' }}>
             KM
@@ -177,7 +199,7 @@ export const Dashboard: React.FC = () => {
 
       {/* Tracker Weekly - Calories */}
       <section>
-        <ScatterChart data={calorieData} maxVal={3000} label="Tracker Weekly — Calories" />
+        <ScatterChart data={calorieData} minVal={500} maxVal={2500} label="Tracker Weekly — Calories" />
       </section>
     </div>
   );
