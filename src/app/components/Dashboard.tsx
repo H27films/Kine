@@ -8,15 +8,14 @@ const BarChart: React.FC<{ data: number[]; maxVal: number; label: string; unit: 
       <div className="text-[10px] font-bold uppercase tracking-[1.5px] mb-4" style={{ color: 'rgba(255,255,255,0.4)' }}>
         {label}
       </div>
-      <div className="flex items-end justify-between gap-2 h-32">
+      <div className="flex items-end justify-between h-32" style={{ gap: '12px' }}>
         {data.map((val, i) => {
           const pct = maxVal > 0 ? val / maxVal : 0;
-          // Higher values = brighter white, lower = darker grey
-          const brightness = Math.round(80 + pct * 175); // range ~80 to 255
+          const brightness = Math.round(80 + pct * 175);
           const barColor = val > 0 ? `rgb(${brightness},${brightness},${brightness})` : 'rgba(255,255,255,0.05)';
           return (
-            <div key={i} className="flex flex-col items-center flex-1 h-full justify-end">
-              <div className="text-[9px] font-bold text-white/60 mb-1">{val > 0 ? `${val}${unit}` : ''}</div>
+            <div key={i} className="flex flex-col items-center h-full justify-end" style={{ flex: '1', maxWidth: '28px' }}>
+              <div className="text-[8px] font-bold text-white/60 mb-1">{val > 0 ? `${val}${unit}` : ''}</div>
               <div
                 className="w-full min-h-[4px] transition-all"
                 style={{
@@ -38,15 +37,17 @@ const BarChart: React.FC<{ data: number[]; maxVal: number; label: string; unit: 
 
 const ScatterChart: React.FC<{ data: number[]; maxVal: number; label: string }> = ({ data, maxVal, label }) => {
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const chartH = 120;
-  const padX = 20;
-  const padTop = 10;
-  const padBot = 25;
+  const chartH = 140;
+  const padTop = 22;
+  const padBot = 5;
   const usableH = chartH - padTop - padBot;
-  const totalW = 100; // percentage-based
+
+  // Use same horizontal distribution as bars
+  const totalPoints = data.length;
+  const pointSpacing = 100 / (totalPoints + 1);
 
   const points = data.map((val, i) => {
-    const x = padX + (i / (data.length - 1)) * (totalW - padX * 2);
+    const x = pointSpacing * (i + 1);
     const y = padTop + usableH - (val / maxVal) * usableH;
     return { x, y, val };
   });
@@ -70,9 +71,9 @@ const ScatterChart: React.FC<{ data: number[]; maxVal: number; label: string }> 
       <div className="text-[10px] font-bold uppercase tracking-[1.5px] mb-4" style={{ color: 'rgba(255,255,255,0.4)' }}>
         {label}
       </div>
-      <svg viewBox={`0 0 ${totalW} ${chartH}`} className="w-full" style={{ height: `${chartH}px` }} preserveAspectRatio="none">
+      <svg viewBox={`0 0 100 ${chartH}`} className="w-full overflow-visible" style={{ height: '140px' }}>
         {/* Curved connecting line */}
-        <path d={pathD} fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="0.5" />
+        <path d={pathD} fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="0.4" vectorEffect="non-scaling-stroke" />
 
         {/* Drop lines and dots */}
         {points.map((p, i) => (
@@ -85,15 +86,27 @@ const ScatterChart: React.FC<{ data: number[]; maxVal: number; label: string }> 
               strokeWidth="0.3"
               strokeDasharray="1 1"
             />
+            {/* Value label above dot */}
+            <text
+              x={p.x}
+              y={p.y - 5}
+              textAnchor="middle"
+              fill="rgba(255,255,255,0.6)"
+              fontSize="3.5"
+              fontWeight="700"
+              fontFamily="Inter, system-ui, sans-serif"
+            >
+              {p.val}
+            </text>
             {/* White dot */}
-            <circle cx={p.x} cy={p.y} r="1.8" fill="white" />
+            <circle cx={p.x} cy={p.y} r="1.5" fill="white" />
           </g>
         ))}
       </svg>
-      {/* Day labels */}
-      <div className="flex justify-between" style={{ padding: `0 ${padX}%` }}>
+      {/* Day labels - same spacing as bar charts */}
+      <div className="flex justify-between mt-2" style={{ gap: '12px' }}>
         {days.map((d, i) => (
-          <div key={i} className="text-[9px] font-bold uppercase" style={{ color: 'rgba(255,255,255,0.3)' }}>
+          <div key={i} className="text-[9px] font-bold uppercase text-center" style={{ color: 'rgba(255,255,255,0.3)', flex: '1', maxWidth: '28px' }}>
             {d}
           </div>
         ))}
