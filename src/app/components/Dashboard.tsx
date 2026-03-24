@@ -42,12 +42,11 @@ const ScatterChart: React.FC<{ data: number[]; maxVal: number; label: string }> 
   const padBot = 5;
   const usableH = chartH - padTop - padBot;
 
-  // Use same horizontal distribution as bars
-  const totalPoints = data.length;
-  const pointSpacing = 100 / (totalPoints + 1);
-
+  // Match the same even spacing as the bar chart flex layout
+  // 7 items evenly spaced: center of each slot
   const points = data.map((val, i) => {
-    const x = pointSpacing * (i + 1);
+    const slotWidth = 100 / 7;
+    const x = slotWidth * i + slotWidth / 2;
     const y = padTop + usableH - (val / maxVal) * usableH;
     return { x, y, val };
   });
@@ -71,7 +70,7 @@ const ScatterChart: React.FC<{ data: number[]; maxVal: number; label: string }> 
       <div className="text-[10px] font-bold uppercase tracking-[1.5px] mb-4" style={{ color: 'rgba(255,255,255,0.4)' }}>
         {label}
       </div>
-      <svg viewBox={`0 0 100 ${chartH}`} className="w-full overflow-visible" style={{ height: '140px' }}>
+      <svg viewBox={`0 0 100 ${chartH}`} className="w-full" preserveAspectRatio="none" style={{ height: '140px', overflow: 'visible' }}>
         {/* Curved connecting line */}
         <path d={pathD} fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="0.4" vectorEffect="non-scaling-stroke" />
 
@@ -85,6 +84,7 @@ const ScatterChart: React.FC<{ data: number[]; maxVal: number; label: string }> 
               stroke="rgba(255,255,255,0.15)"
               strokeWidth="0.3"
               strokeDasharray="1 1"
+              vectorEffect="non-scaling-stroke"
             />
             {/* Value label above dot */}
             <text
@@ -103,8 +103,8 @@ const ScatterChart: React.FC<{ data: number[]; maxVal: number; label: string }> 
           </g>
         ))}
       </svg>
-      {/* Day labels - same spacing as bar charts */}
-      <div className="flex justify-between mt-2" style={{ gap: '12px' }}>
+      {/* Day labels - same flex layout as bar chart */}
+      <div className="flex items-end justify-between mt-2" style={{ gap: '12px' }}>
         {days.map((d, i) => (
           <div key={i} className="text-[9px] font-bold uppercase text-center" style={{ color: 'rgba(255,255,255,0.3)', flex: '1', maxWidth: '28px' }}>
             {d}
