@@ -5,19 +5,13 @@ interface LogCaloriesProps {
   onNavigate: (page: Page) => void;
 }
 
-const tabs: { label: string; page: Page }[] = [
-  { label: 'Weights', page: 'weights' },
-  { label: 'Cardio', page: 'cardio' },
-  { label: 'Calories', page: 'calories' },
-];
-
 const weeklyBars = [60, 45, 80, 95, 70, 55, 75];
 const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const monthlyBars = [30, 40, 35, 60, 55, 45, 70, 65, 50, 40, 80, 75, 60, 50, 45];
 
 type FoodRating = 'bad' | 'ok' | 'good';
 
-export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
+export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate: _onNavigate }) => {
   const [calories, setCalories] = useState('1420');
   const [foodRating, setFoodRating] = useState<FoodRating>('ok');
   const [bodyWeight, setBodyWeight] = useState('78.5');
@@ -32,27 +26,6 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
 
   return (
     <div>
-      <nav className="flex gap-8 mb-12 items-end">
-        {tabs.map((tab) => {
-          const isActive = tab.page === 'calories';
-          return (
-            <button key={tab.page} onClick={() => onNavigate(tab.page)} className="flex flex-col items-center" style={{ filter: isActive ? 'none' : 'blur(0.4px)' }}>
-              <span
-                className="uppercase tracking-widest transition-all"
-                style={{
-                  color: isActive ? '#ffffff' : 'rgba(226,226,226,0.65)',
-                  fontWeight: isActive ? 900 : 400,
-                  fontSize: isActive ? '0.875rem' : '0.65rem',
-                  letterSpacing: '0.15em',
-                }}
-              >
-                {tab.label}
-              </span>
-              {isActive && <div className="h-1 w-1 rounded-full mt-1" style={{ backgroundColor: '#ffffff' }} />}
-            </button>
-          );
-        })}
-      </nav>
       <section className="mb-16 space-y-12">
         <div>
           <label className="block text-[10px] uppercase tracking-[0.2em] font-bold mb-4" style={{ color: 'rgba(161,161,170,1)' }}>Total Calories</label>

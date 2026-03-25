@@ -6,12 +6,6 @@ interface LogWeightsProps {
   onNavigate: (page: Page) => void;
 }
 
-const tabs: { label: string; page: Page }[] = [
-  { label: 'Weights', page: 'weights' },
-  { label: 'Cardio', page: 'cardio' },
-  { label: 'Calories', page: 'calories' },
-];
-
 const exercisesByGroup: Record<string, string[]> = {
   Chest: ['Bench Press', 'Incline Press', 'Dumbbell Flyes', 'Cable Crossover', 'Chest Dips', 'Push-ups'],
   Back: ['Deadlift', 'Pull-ups', 'Bent-over Row', 'Lat Pulldown', 'Seated Row', 'Face Pull'],
@@ -142,8 +136,10 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     );
   };
 
-  const calcTotalWeight = (sets: SetRow[]): number =>
+  const calcExerciseTotal = (sets: SetRow[]): number =>
     sets.reduce((acc, s) => acc + (parseFloat(s.weight) || 0) * s.reps, 0);
+
+  const grandTotal = addedExercises.reduce((acc, ex) => acc + calcExerciseTotal(ex.sets), 0);
 
   const dropdownBoxStyle: React.CSSProperties = {
     backgroundColor: '#1b1b1b',
@@ -173,31 +169,8 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
 
   return (
     <div>
-      {/* Tabs */}
-      <nav className="flex gap-8 mb-12 items-end">
-        {tabs.map((tab) => {
-          const isActive = tab.page === 'weights';
-          return (
-            <button key={tab.page} onClick={() => onNavigate(tab.page)} className="flex flex-col items-center" style={{ filter: isActive ? 'none' : 'blur(0.4px)' }}>
-              <span
-                className="uppercase tracking-widest transition-all"
-                style={{
-                  color: isActive ? '#ffffff' : 'rgba(226,226,226,0.65)',
-                  fontWeight: isActive ? 900 : 400,
-                  fontSize: isActive ? '0.875rem' : '0.65rem',
-                  letterSpacing: '0.15em',
-                }}
-              >
-                {tab.label}
-              </span>
-              {isActive && <div className="h-1 w-1 rounded-full mt-1" style={{ backgroundColor: '#ffffff' }} />}
-            </button>
-          );
-        })}
-      </nav>
-
       {/* Muscle Group + Exercise Selection */}
-      <section className="mb-8">
+      <section className="mb-4">
         {/* Muscle Group Dropdown */}
         <div className="mb-4">
           <p className="text-xs font-semibold mb-2" style={{ color: 'rgba(255,255,255,0.85)', letterSpacing: '0.05em' }}>Select Muscle Group</p>
@@ -287,6 +260,34 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
         )}
       </section>
 
+      {/* Grand Total — shown once exercises are added */}
+      {addedExercises.length > 0 && (
+        <div className="flex items-baseline gap-2 mb-6 mt-2">
+          <span
+            style={{
+              fontSize: '3.5rem',
+              fontWeight: 900,
+              lineHeight: 1,
+              color: grandTotal > 0 ? '#ffffff' : 'rgba(255,255,255,0.2)',
+              letterSpacing: '-0.02em',
+            }}
+          >
+            {grandTotal > 0 ? grandTotal.toLocaleString() : '—'}
+          </span>
+          <span
+            style={{
+              fontSize: '0.7rem',
+              fontWeight: 700,
+              color: 'rgba(255,255,255,0.35)',
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+            }}
+          >
+            kg total
+          </span>
+        </div>
+      )}
+
       {/* Exercise List */}
       {addedExercises.length > 0 && (
         <section className="mb-10">
@@ -299,9 +300,8 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                   : `Last time: ${last.reps} reps`
                 : 'No previous data';
 
-              // Tick shows as soon as any weight is entered
               const hasData = ex.sets.some(s => s.weight !== '');
-              const totalWeight = calcTotalWeight(ex.sets);
+              const exTotal = calcExerciseTotal(ex.sets);
 
               return (
                 <div key={ex.name}>
@@ -310,7 +310,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                     className="flex items-center gap-4 py-4"
                     style={{ borderBottom: ex.expanded ? 'none' : '1px solid rgba(255,255,255,0.06)' }}
                   >
-                    {/* Tick circle — fills as soon as data entered */}
+                    {/* Tick circle */}
                     <div
                       style={{
                         width: 32,
@@ -339,9 +339,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                       onClick={() => toggleExpanded(ex.name)}
                       style={{ color: 'rgba(255,255,255,0.4)', flexShrink: 0 }}
                     >
-                      {ex.expanded
-                        ? <ChevronUp size={20} />
-                        : <ChevronRight size={20} />}
+                      {ex.expanded ? <ChevronUp size={20} /> : <ChevronRight size={20} />}
                     </button>
                   </div>
 
@@ -351,25 +349,25 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                       className="pb-5"
                       style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
                     >
-                      {/* TOP ROW: Total Weight (left) + Copy icon (right) */}
+                      {/* TOP ROW: exercise total (left) + Copy icon (right) */}
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-baseline gap-1">
                           <span
                             className="font-black"
                             style={{
                               fontSize: '1.5rem',
-                              color: totalWeight > 0 ? '#ffffff' : 'rgba(255,255,255,0.2)',
+                              color: exTotal > 0 ? '#ffffff' : 'rgba(255,255,255,0.2)',
                               lineHeight: 1,
                             }}
                           >
-                            {totalWeight > 0 ? totalWeight.toLocaleString() : '—'}
+                            {exTotal > 0 ? exTotal.toLocaleString() : '—'}
                           </span>
-                          {totalWeight > 0 && (
+                          {exTotal > 0 && (
                             <span className="text-xs font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.4)' }}>kg</span>
                           )}
                         </div>
 
-                        {/* Copy from last — just a + circle icon */}
+                        {/* Copy from last */}
                         <button
                           onClick={() => copyFromLast(ex.name)}
                           title="Copy from last session"
@@ -411,21 +409,10 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                             className="grid items-center mb-2"
                             style={{ gridTemplateColumns: '1.8rem 1fr 1fr 1fr', gap: '0.5rem' }}
                           >
-                            {/* Set number — larger, bright white when data entered */}
-                            <p
-                              className="font-black"
-                              style={{
-                                fontSize: '1rem',
-                                color: numColor,
-                                lineHeight: 1,
-                                textAlign: 'center',
-                                transition: 'color 0.2s',
-                              }}
-                            >
+                            <p className="font-black" style={{ fontSize: '1rem', color: numColor, lineHeight: 1, textAlign: 'center', transition: 'color 0.2s' }}>
                               {idx + 1}
                             </p>
 
-                            {/* Weight input */}
                             <input
                               type="number"
                               value={set.weight}
@@ -443,50 +430,23 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                               }}
                             />
 
-                            {/* Reps stepper */}
                             <div
                               className="flex items-center justify-between rounded-lg py-2 px-2"
-                              style={{
-                                backgroundColor: '#1b1b1b',
-                                border: '1px solid rgba(255,255,255,0.07)',
-                              }}
+                              style={{ backgroundColor: '#1b1b1b', border: '1px solid rgba(255,255,255,0.07)' }}
                             >
-                              <button
-                                onClick={() => updateSet(ex.name, idx, 'reps', Math.max(1, set.reps - 1))}
-                                style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}
-                              >−</button>
-                              <span
-                                className="font-bold"
-                                style={{
-                                  fontSize: '0.875rem',
-                                  color: rowHasData ? '#ffffff' : 'rgba(255,255,255,0.3)',
-                                  transition: 'color 0.2s',
-                                }}
-                              >
-                                {set.reps}
-                              </span>
-                              <button
-                                onClick={() => updateSet(ex.name, idx, 'reps', set.reps + 1)}
-                                style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}
-                              >+</button>
+                              <button onClick={() => updateSet(ex.name, idx, 'reps', Math.max(1, set.reps - 1))} style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}>−</button>
+                              <span className="font-bold" style={{ fontSize: '0.875rem', color: rowHasData ? '#ffffff' : 'rgba(255,255,255,0.3)', transition: 'color 0.2s' }}>{set.reps}</span>
+                              <button onClick={() => updateSet(ex.name, idx, 'reps', set.reps + 1)} style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}>+</button>
                             </div>
 
-                            {/* Row total */}
-                            <p
-                              className="text-center font-bold"
-                              style={{
-                                fontSize: '0.875rem',
-                                color: rowTotal > 0 ? '#ffffff' : 'rgba(255,255,255,0.2)',
-                                transition: 'color 0.2s',
-                              }}
-                            >
+                            <p className="text-center font-bold" style={{ fontSize: '0.875rem', color: rowTotal > 0 ? '#ffffff' : 'rgba(255,255,255,0.2)', transition: 'color 0.2s' }}>
                               {rowTotal > 0 ? `${rowTotal}` : '—'}
                             </p>
                           </div>
                         );
                       })}
 
-                      {/* BOTTOM: + Set (left-aligned) */}
+                      {/* BOTTOM: + Set */}
                       <div className="flex items-center mt-4">
                         {ex.sets.length < 6 && (
                           <button
@@ -510,11 +470,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
           <button
             onClick={handleLogAll}
             className="w-full mt-8 py-4 rounded-full font-black uppercase tracking-widest text-sm active:scale-95 duration-150"
-            style={{
-              backgroundColor: '#ffffff',
-              color: '#1a1c1c',
-              boxShadow: '0 12px 32px rgba(0,0,0,0.4)',
-            }}
+            style={{ backgroundColor: '#ffffff', color: '#1a1c1c', boxShadow: '0 12px 32px rgba(0,0,0,0.4)' }}
           >
             Log Exercises
           </button>

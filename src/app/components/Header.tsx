@@ -4,11 +4,18 @@ import { Page } from '../../types';
 
 interface HeaderProps {
   title: string;
+  currentPage?: Page;
   onBack?: () => void;
   onNavigate?: (page: Page) => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ title, onBack, onNavigate }) => {
+const logTabs: { label: string; short: string; page: Page }[] = [
+  { label: 'WEIGHTS', short: 'Weights', page: 'weights' },
+  { label: 'CARDIO',  short: 'Cardio',  page: 'cardio'  },
+  { label: 'CAL',     short: 'Cal',     page: 'calories' },
+];
+
+export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNavigate }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -23,18 +30,24 @@ export const Header: React.FC<HeaderProps> = ({ title, onBack, onNavigate }) => 
   }, [menuOpen]);
 
   const menuItems = [
-    { label: 'Log', icon: Dumbbell, page: 'weights' as Page },
-    { label: 'Summary', icon: FileText, page: 'summary' as Page },
-    { label: 'Data+', icon: BarChart3, page: 'analytics' as Page },
+    { label: 'Log',     icon: Dumbbell,  page: 'weights'   as Page },
+    { label: 'Summary', icon: FileText,  page: 'summary'   as Page },
+    { label: 'Data+',   icon: BarChart3, page: 'analytics' as Page },
   ];
 
-  const isDashboard = !title;
+  const isDashboard = !title && currentPage === 'dashboard';
+  const isLogPage = currentPage === 'weights' || currentPage === 'cardio' || currentPage === 'calories';
+
+  // Build the 3-tab array: active tab always in the middle slot
+  const activeTab = logTabs.find(t => t.page === currentPage);
+  const inactiveTabs = logTabs.filter(t => t.page !== currentPage);
 
   return (
     <header
       className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-5 h-16"
       style={{ backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)' }}
     >
+      {/* Left — menu or back */}
       <div className="relative flex items-center w-12" ref={menuRef}>
         {onBack ? (
           <button onClick={onBack} className="hover:opacity-80 transition-opacity">
@@ -79,8 +92,63 @@ export const Header: React.FC<HeaderProps> = ({ title, onBack, onNavigate }) => 
         )}
       </div>
 
+      {/* Center */}
       {isDashboard ? (
         <span className="absolute left-1/2 -translate-x-1/2 text-xl font-black tracking-tighter text-white uppercase">Kiné</span>
+      ) : isLogPage && activeTab ? (
+        /* Log page: 3-tab header row */
+        <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-5">
+          {/* Left inactive tab */}
+          <button
+            onClick={() => onNavigate?.(inactiveTabs[0].page)}
+            style={{
+              fontSize: '0.6rem',
+              fontWeight: 400,
+              color: 'rgba(226,226,226,0.6)',
+              letterSpacing: '0.15em',
+              textTransform: 'uppercase',
+              filter: 'blur(0.4px)',
+              cursor: 'pointer',
+              background: 'none',
+              border: 'none',
+              padding: 0,
+            }}
+          >
+            {inactiveTabs[0].short}
+          </button>
+
+          {/* Active tab — center, large */}
+          <span
+            style={{
+              fontSize: '0.875rem',
+              fontWeight: 900,
+              color: '#ffffff',
+              letterSpacing: '0.18em',
+              textTransform: 'uppercase',
+            }}
+          >
+            {activeTab.label}
+          </span>
+
+          {/* Right inactive tab */}
+          <button
+            onClick={() => onNavigate?.(inactiveTabs[1].page)}
+            style={{
+              fontSize: '0.6rem',
+              fontWeight: 400,
+              color: 'rgba(226,226,226,0.6)',
+              letterSpacing: '0.15em',
+              textTransform: 'uppercase',
+              filter: 'blur(0.4px)',
+              cursor: 'pointer',
+              background: 'none',
+              border: 'none',
+              padding: 0,
+            }}
+          >
+            {inactiveTabs[1].short}
+          </button>
+        </div>
       ) : (
         <>
           <div className="absolute left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-[0.2em] text-white">

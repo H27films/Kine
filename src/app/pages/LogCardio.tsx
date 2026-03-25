@@ -5,42 +5,15 @@ interface LogCardioProps {
   onNavigate: (page: Page) => void;
 }
 
-const tabs: { label: string; page: Page }[] = [
-  { label: 'Weights', page: 'weights' },
-  { label: 'Cardio', page: 'cardio' },
-  { label: 'Calories', page: 'calories' },
-];
-
 const heartRateBars = [40, 55, 70, 85, 95, 90, 80, 65, 50, 45, 40, 35, 60, 85, 100];
 
-export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
+export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate: _onNavigate }) => {
   const [distance, setDistance] = useState('12.45');
   const [minutes, setMinutes] = useState('58');
   const [seconds, setSeconds] = useState('12');
 
   return (
     <div>
-      <nav className="flex gap-8 mb-12 items-end">
-        {tabs.map((tab) => {
-          const isActive = tab.page === 'cardio';
-          return (
-            <button key={tab.page} onClick={() => onNavigate(tab.page)} className="flex flex-col items-center" style={{ filter: isActive ? 'none' : 'blur(0.4px)' }}>
-              <span
-                className="uppercase tracking-widest transition-all"
-                style={{
-                  color: isActive ? '#ffffff' : 'rgba(226,226,226,0.65)',
-                  fontWeight: isActive ? 900 : 400,
-                  fontSize: isActive ? '0.875rem' : '0.65rem',
-                  letterSpacing: '0.15em',
-                }}
-              >
-                {tab.label}
-              </span>
-              {isActive && <div className="h-1 w-1 rounded-full mt-1" style={{ backgroundColor: '#ffffff' }} />}
-            </button>
-          );
-        })}
-      </nav>
       <header className="mb-16">
         <h1 className="text-[2rem] font-black tracking-tighter leading-none mb-2 text-white">LOG PERFORMANCE</h1>
         <p className="text-[0.75rem] uppercase tracking-[0.2em] font-medium" style={{ color: '#c6c6c6' }}>Cardio • Session 042</p>
