@@ -47,10 +47,12 @@ const recentLogs = [
 ];
 
 const weeklyData = [
-  { group: 'Chest', total: 4200 },
-  { group: 'Back',  total: 6800 },
-  { group: 'Legs',  total: 8100 },
+  { group: 'Chest', total: 4200,  lastWeek: 3800 },
+  { group: 'Back',  total: 6800,  lastWeek: 7100 },
+  { group: 'Legs',  total: 8100,  lastWeek: 6200 },
 ];
+
+const WEEKLY_MAX = 30000;
 
 interface SetRow {
   weight: string;
@@ -152,8 +154,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     sets.reduce((acc, s) => acc + (parseFloat(s.weight) || 0) * s.reps, 0);
 
   const grandTotal = addedExercises.reduce((acc, ex) => acc + calcExerciseTotal(ex.sets), 0);
-
-  const weeklyMax = Math.max(...weeklyData.map(d => d.total));
 
   const dropdownListStyle: React.CSSProperties = {
     position: 'absolute',
@@ -546,15 +546,20 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
           Weekly
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {weeklyData.map(({ group, total }) => {
-            const pct = (total / weeklyMax) * 100;
+          {weeklyData.map(({ group, total, lastWeek }) => {
+            const pct = Math.min((total / WEEKLY_MAX) * 100, 100);
             return (
               <div key={group}>
                 {/* Label row */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '0.6rem', paddingLeft: '2px', paddingRight: '2px' }}>
-                  <span style={{ color: '#ffffff', fontWeight: 700, fontSize: '1rem', letterSpacing: '-0.01em' }}>
-                    {group}
-                  </span>
+                  <div>
+                    <span style={{ color: '#ffffff', fontWeight: 700, fontSize: '1rem', letterSpacing: '-0.01em', display: 'block' }}>
+                      {group}
+                    </span>
+                    <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.7rem', fontWeight: 400, marginTop: '1px', display: 'block' }}>
+                      Last week: {lastWeek.toLocaleString()}kg
+                    </span>
+                  </div>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
                     <span style={{ color: '#ffffff', fontWeight: 900, fontSize: '1.4rem', letterSpacing: '-0.02em', lineHeight: 1 }}>
                       {total.toLocaleString()}
