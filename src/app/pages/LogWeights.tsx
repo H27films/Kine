@@ -6,6 +6,12 @@ interface LogWeightsProps {
   onNavigate: (page: Page) => void;
 }
 
+const tabs: { label: string; page: Page }[] = [
+  { label: 'Weights', page: 'weights' },
+  { label: 'Cardio', page: 'cardio' },
+  { label: 'Calories', page: 'calories' },
+];
+
 const exercisesByGroup: Record<string, string[]> = {
   Chest: ['Bench Press', 'Incline Press', 'Dumbbell Flyes', 'Cable Crossover', 'Chest Dips', 'Push-ups'],
   Back: ['Deadlift', 'Pull-ups', 'Bent-over Row', 'Lat Pulldown', 'Seated Row', 'Face Pull'],
@@ -169,6 +175,29 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
 
   return (
     <div>
+      {/* Tab Nav */}
+      <nav className="flex gap-8 mb-12 items-end">
+        {tabs.map((tab) => {
+          const isActive = tab.page === 'weights';
+          return (
+            <button key={tab.page} onClick={() => onNavigate(tab.page)} className="flex flex-col items-center" style={{ filter: isActive ? 'none' : 'blur(0.4px)' }}>
+              <span
+                className="uppercase tracking-widest transition-all"
+                style={{
+                  color: isActive ? '#ffffff' : 'rgba(226,226,226,0.65)',
+                  fontWeight: isActive ? 900 : 400,
+                  fontSize: isActive ? '0.875rem' : '0.65rem',
+                  letterSpacing: '0.15em',
+                }}
+              >
+                {tab.label}
+              </span>
+              {isActive && <div className="h-1 w-1 rounded-full mt-1" style={{ backgroundColor: '#ffffff' }} />}
+            </button>
+          );
+        })}
+      </nav>
+
       {/* Muscle Group + Exercise Selection */}
       <section className="mb-4">
         {/* Muscle Group Dropdown */}
