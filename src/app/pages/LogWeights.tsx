@@ -136,7 +136,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     if (!ex) return;
 
     if (ex.copied) {
-      // − pressed: clear all entries, reset copied flag
       setAddedExercises(prev =>
         prev.map(e =>
           e.name !== exName ? e : {
@@ -147,7 +146,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
         )
       );
     } else {
-      // + pressed: populate from last session, set copied flag
       const last = lastTimeData[exName];
       if (!last) return;
       setAddedExercises(prev =>
@@ -196,20 +194,20 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
   };
 
   const sectionLabelStyle: React.CSSProperties = {
-    fontSize: '0.72rem',
-    fontWeight: 600,
-    letterSpacing: '0.15em',
+    fontSize: '1rem',
+    fontWeight: 700,
+    letterSpacing: '0.04em',
     textTransform: 'uppercase',
-    color: 'rgba(255,255,255,0.5)',
+    color: '#ffffff',
     marginBottom: '1.25rem',
   };
 
   const weeklyLabelStyle: React.CSSProperties = {
-    fontSize: '0.62rem',
-    fontWeight: 500,
-    letterSpacing: '0.15em',
+    fontSize: '0.875rem',
+    fontWeight: 700,
+    letterSpacing: '0.04em',
     textTransform: 'uppercase',
-    color: 'rgba(255,255,255,0.5)',
+    color: '#ffffff',
     marginBottom: '1.25rem',
   };
 
@@ -526,7 +524,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
       <section>
         <div className="flex justify-between items-center mb-6">
           <p style={sectionLabelStyle}>Recent Logs</p>
-          <Clock size={13} style={{ color: 'rgba(255,255,255,0.35)', marginBottom: '1.25rem' }} />
+          <Clock size={15} style={{ color: 'rgba(255,255,255,0.5)', marginBottom: '1.25rem' }} />
         </div>
         <div className="space-y-4">
           {recentLogs.map((log, i) => (
