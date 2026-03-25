@@ -176,6 +176,15 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     userSelect: 'none',
   };
 
+  const sectionLabelStyle: React.CSSProperties = {
+    fontSize: '0.75rem',
+    fontWeight: 700,
+    letterSpacing: '0.15em',
+    textTransform: 'uppercase',
+    color: 'rgba(255,255,255,0.5)',
+    marginBottom: '1.25rem',
+  };
+
   return (
     <div>
       {/* Tab Nav */}
@@ -533,16 +542,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
 
       {/* WEEKLY Section */}
       <section className="mb-10">
-        <p
-          style={{
-            fontSize: '0.65rem',
-            fontWeight: 700,
-            letterSpacing: '0.18em',
-            textTransform: 'uppercase',
-            color: 'rgba(255,255,255,0.35)',
-            marginBottom: '1.25rem',
-          }}
-        >
+        <p style={{ ...sectionLabelStyle, fontSize: '0.65rem' }}>
           Weekly
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -595,8 +595,8 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
       {/* Recent Logs */}
       <section>
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-black tracking-tight uppercase text-white">Recent Logs</h2>
-          <Clock size={18} style={{ color: '#c6c6c6' }} />
+          <p style={sectionLabelStyle}>Recent Logs</p>
+          <Clock size={14} style={{ color: 'rgba(255,255,255,0.35)', marginBottom: '1.25rem' }} />
         </div>
         <div className="space-y-4">
           {recentLogs.map((log, i) => (
