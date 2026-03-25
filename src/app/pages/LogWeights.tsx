@@ -176,9 +176,20 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     userSelect: 'none',
   };
 
+  // RECENT LOGS label: slightly smaller and less bold than original
   const sectionLabelStyle: React.CSSProperties = {
-    fontSize: '0.75rem',
-    fontWeight: 700,
+    fontSize: '0.72rem',
+    fontWeight: 600,
+    letterSpacing: '0.15em',
+    textTransform: 'uppercase',
+    color: 'rgba(255,255,255,0.5)',
+    marginBottom: '1.25rem',
+  };
+
+  // WEEKLY label: same feel as RECENT LOGS but slightly smaller, not bold
+  const weeklyLabelStyle: React.CSSProperties = {
+    fontSize: '0.62rem',
+    fontWeight: 500,
     letterSpacing: '0.15em',
     textTransform: 'uppercase',
     color: 'rgba(255,255,255,0.5)',
@@ -542,9 +553,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
 
       {/* WEEKLY Section */}
       <section className="mb-10">
-        <p style={{ ...sectionLabelStyle, fontSize: '0.65rem' }}>
-          Weekly
-        </p>
+        <p style={weeklyLabelStyle}>Weekly</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           {weeklyData.map(({ group, total, lastWeek }) => {
             const pct = Math.min((total / WEEKLY_MAX) * 100, 100);
@@ -601,7 +610,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
       <section>
         <div className="flex justify-between items-center mb-6">
           <p style={sectionLabelStyle}>Recent Logs</p>
-          <Clock size={14} style={{ color: 'rgba(255,255,255,0.35)', marginBottom: '1.25rem' }} />
+          <Clock size={13} style={{ color: 'rgba(255,255,255,0.35)', marginBottom: '1.25rem' }} />
         </div>
         <div className="space-y-4">
           {recentLogs.map((log, i) => (
