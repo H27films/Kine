@@ -23,7 +23,6 @@ const settings = [
 export const Profile: React.FC<ProfileProps> = ({ onNavigate: _onNavigate }) => {
   return (
     <div className="space-y-6">
-      {/* Profile Header */}
       <div className="flex flex-col items-center py-8">
         <div className="w-24 h-24 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: '#1a1a1a' }}>
           <User size={40} color="#666" />
@@ -31,8 +30,6 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate: _onNavigate }) => 
         <h2 className="text-2xl font-black tracking-tight">ATHLETE</h2>
         <p className="text-sm" style={{ color: '#666' }}>Member since 2024</p>
       </div>
-
-      {/* Stats Grid */}
       <div className="grid grid-cols-2 gap-3">
         {stats.map((stat) => {
           const Icon = stat.icon;
@@ -45,8 +42,6 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate: _onNavigate }) => 
           );
         })}
       </div>
-
-      {/* Settings */}
       <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: '#121212' }}>
         <h3 className="text-sm font-bold px-4 pt-4 pb-2" style={{ color: '#666' }}>Settings</h3>
         {settings.map((item) => (

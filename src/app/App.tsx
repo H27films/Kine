@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import { Page } from '../types';
 import { Header } from './components/Header';
 import { BottomNav } from './components/BottomNav';
-import { Dashboard } from './components/Dashboard';
-import { LogWeights } from './components/LogWeights';
-import { LogCardio } from './components/LogCardio';
-import { LogCalories } from './components/LogCalories';
-import { Analytics } from './components/Analytics';
-import { Profile } from './components/Profile';
-import { Summary } from './components/Summary';
+import { Dashboard } from './pages/Dashboard';
+import { LogWeights } from './pages/LogWeights';
+import { LogCardio } from './pages/LogCardio';
+import { LogCalories } from './pages/LogCalories';
+import { Analytics } from './pages/Analytics';
+import { Profile } from './pages/Profile';
+import { Summary } from './pages/Summary';
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>('dashboard');

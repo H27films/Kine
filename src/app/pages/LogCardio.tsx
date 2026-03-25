@@ -20,24 +20,18 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
 
   return (
     <div>
-      {/* Tab Navigation */}
       <nav className="flex gap-8 mb-12 items-end">
         {tabs.map((tab) => (
           <button key={tab.page} onClick={() => onNavigate(tab.page)} className="flex flex-col items-center">
-            <span className="uppercase tracking-widest text-[10px] transition-colors" style={{ color: tab.page === 'cardio' ? '#ffffff' : 'rgba(226,226,226,0.5)', fontWeight: tab.page === 'cardio' ? 700 : 400 }}>
-              {tab.label}
-            </span>
+            <span className="uppercase tracking-widest text-[10px] transition-colors" style={{ color: tab.page === 'cardio' ? '#ffffff' : 'rgba(226,226,226,0.5)', fontWeight: tab.page === 'cardio' ? 700 : 400 }}>{tab.label}</span>
             {tab.page === 'cardio' && <div className="h-1 w-1 rounded-full mt-1" style={{ backgroundColor: '#ffffff' }} />}
           </button>
         ))}
       </nav>
-
       <header className="mb-16">
         <h1 className="text-[2rem] font-black tracking-tighter leading-none mb-2 text-white">LOG PERFORMANCE</h1>
         <p className="text-[0.75rem] uppercase tracking-[0.2em] font-medium" style={{ color: '#c6c6c6' }}>Cardio • Session 042</p>
       </header>
-
-      {/* Distance Input */}
       <section className="mb-16">
         <label className="text-[0.75rem] uppercase tracking-[0.3em] font-bold block mb-2" style={{ color: '#c6c6c6' }}>Distance</label>
         <div className="flex items-baseline gap-4">
@@ -46,8 +40,6 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
         </div>
         <div className="h-px w-full" style={{ backgroundColor: 'rgba(71,71,71,0.2)' }} />
       </section>
-
-      {/* Duration Input */}
       <section className="mb-16">
         <label className="text-[0.75rem] uppercase tracking-[0.3em] font-bold block mb-2" style={{ color: '#c6c6c6' }}>Duration</label>
         <div className="flex items-baseline gap-4">
@@ -62,8 +54,6 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
         </div>
         <div className="h-px w-full" style={{ backgroundColor: 'rgba(71,71,71,0.2)' }} />
       </section>
-
-      {/* Secondary Metrics */}
       <div className="grid grid-cols-2 gap-px rounded-xl overflow-hidden mb-16" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
         <div className="p-6" style={{ backgroundColor: '#121212' }}>
           <label className="text-[10px] uppercase tracking-widest font-bold block mb-4" style={{ color: '#c6c6c6' }}>Avg Pace</label>
@@ -77,8 +67,6 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
           <span className="text-2xl font-black text-white">ZONE 4</span>
         </div>
       </div>
-
-      {/* Heart Rate Telemetry */}
       <section className="mb-20">
         <div className="p-8 rounded-xl relative overflow-hidden" style={{ backgroundColor: '#121212', border: '1px solid rgba(255,255,255,0.1)' }}>
           <div className="relative z-10">
@@ -95,10 +83,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
           <div className="absolute inset-0 pointer-events-none" style={{ opacity: 0.05, background: 'radial-gradient(circle at top right, white, transparent, transparent)' }} />
         </div>
       </section>
-
-      <button className="w-full rounded-full py-5 text-[0.75rem] uppercase tracking-[0.4em] font-black active:scale-95 transition-all" style={{ backgroundColor: '#ffffff', color: '#000000', boxShadow: '0 12px 32px rgba(0,0,0,0.4)' }}>
-        Commit Session
-      </button>
+      <button className="w-full rounded-full py-5 text-[0.75rem] uppercase tracking-[0.4em] font-black active:scale-95 transition-all" style={{ backgroundColor: '#ffffff', color: '#000000', boxShadow: '0 12px 32px rgba(0,0,0,0.4)' }}>Commit Session</button>
     </div>
   );
 };
