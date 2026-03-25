@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Dumbbell, ChevronDown, ChevronRight, Minus, Plus, Clock, Check } from 'lucide-react';
+import { Dumbbell, ChevronDown, ChevronRight, ChevronUp, Plus, Clock, Check, Copy } from 'lucide-react';
 import { Page } from '../../types';
 
 interface LogWeightsProps {
@@ -19,40 +19,47 @@ const exercisesByGroup: Record<string, string[]> = {
 };
 
 const lastTimeData: Record<string, { weight: number; reps: number }> = {
-  'Bench Press':     { weight: 80,   reps: 10 },
-  'Incline Press':   { weight: 70,   reps: 10 },
-  'Dumbbell Flyes':  { weight: 24.5, reps: 12 },
-  'Cable Crossover': { weight: 15,   reps: 15 },
-  'Chest Dips':      { weight: 0,    reps: 12 },
-  'Push-ups':        { weight: 0,    reps: 20 },
-  'Deadlift':        { weight: 120,  reps: 5  },
-  'Pull-ups':        { weight: 0,    reps: 8  },
-  'Bent-over Row':   { weight: 70,   reps: 8  },
-  'Lat Pulldown':    { weight: 60,   reps: 12 },
-  'Seated Row':      { weight: 55,   reps: 12 },
-  'Face Pull':       { weight: 20,   reps: 15 },
-  'Squat':           { weight: 100,  reps: 8  },
-  'Leg Press':       { weight: 140,  reps: 10 },
-  'Romanian Deadlift': { weight: 80, reps: 8  },
-  'Lunges':          { weight: 30,   reps: 12 },
-  'Leg Curl':        { weight: 45,   reps: 12 },
-  'Leg Extension':   { weight: 50,   reps: 12 },
-  'Calf Raises':     { weight: 60,   reps: 20 },
+  'Bench Press':       { weight: 80,   reps: 10 },
+  'Incline Press':     { weight: 70,   reps: 10 },
+  'Dumbbell Flyes':    { weight: 24.5, reps: 12 },
+  'Cable Crossover':   { weight: 15,   reps: 15 },
+  'Chest Dips':        { weight: 0,    reps: 12 },
+  'Push-ups':          { weight: 0,    reps: 20 },
+  'Deadlift':          { weight: 120,  reps: 5  },
+  'Pull-ups':          { weight: 0,    reps: 8  },
+  'Bent-over Row':     { weight: 70,   reps: 8  },
+  'Lat Pulldown':      { weight: 60,   reps: 12 },
+  'Seated Row':        { weight: 55,   reps: 12 },
+  'Face Pull':         { weight: 20,   reps: 15 },
+  'Squat':             { weight: 100,  reps: 8  },
+  'Leg Press':         { weight: 140,  reps: 10 },
+  'Romanian Deadlift': { weight: 80,   reps: 8  },
+  'Lunges':            { weight: 30,   reps: 12 },
+  'Leg Curl':          { weight: 45,   reps: 12 },
+  'Leg Extension':     { weight: 50,   reps: 12 },
+  'Calf Raises':       { weight: 60,   reps: 20 },
 };
 
 const recentLogs = [
-  { name: 'Dumbbell Flyes', sets: 3, reps: 12, weight: 24.5 },
-  { name: 'Incline Press',  sets: 4, reps: 10, weight: 80.0 },
-  { name: 'Cable Crossover',sets: 3, reps: 15, weight: 15.0 },
+  { name: 'Dumbbell Flyes',  sets: 3, reps: 12, weight: 24.5 },
+  { name: 'Incline Press',   sets: 4, reps: 10, weight: 80.0 },
+  { name: 'Cable Crossover', sets: 3, reps: 15, weight: 15.0 },
 ];
+
+interface SetRow {
+  weight: string;
+  reps: number;
+}
 
 interface AddedExercise {
   name: string;
-  weight: string;
-  reps: number;
+  sets: SetRow[];
   expanded: boolean;
   logged: boolean;
 }
+
+const makeDefaultSets = (): SetRow[] =>
+  Array.from({ length: 4 }, () => ({ weight: '', reps: 10 }));
 
 export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
   const [selectedGroup, setSelectedGroup] = useState('');
@@ -80,20 +87,59 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
 
   const handleAddExercise = (name: string) => {
     if (!addedExercises.find(e => e.name === name)) {
-      setAddedExercises(prev => [...prev, { name, weight: '', reps: 12, expanded: false, logged: false }]);
+      setAddedExercises(prev => [...prev, {
+        name,
+        sets: makeDefaultSets(),
+        expanded: false,
+        logged: false,
+      }]);
     }
   };
 
   const toggleExpanded = (name: string) => {
-    setAddedExercises(prev => prev.map(e => e.name === name ? { ...e, expanded: !e.expanded } : e));
+    setAddedExercises(prev =>
+      prev.map(e => e.name === name ? { ...e, expanded: !e.expanded } : e)
+    );
   };
 
-  const updateExercise = (name: string, field: 'weight' | 'reps', value: string | number) => {
-    setAddedExercises(prev => prev.map(e => e.name === name ? { ...e, [field]: value } : e));
+  const updateSet = (exName: string, setIdx: number, field: 'weight' | 'reps', value: string | number) => {
+    setAddedExercises(prev =>
+      prev.map(e => {
+        if (e.name !== exName) return e;
+        const sets = e.sets.map((s, i) => i === setIdx ? { ...s, [field]: value } : s);
+        return { ...e, sets };
+      })
+    );
   };
 
-  const handleLogSet = (name: string) => {
-    setAddedExercises(prev => prev.map(e => e.name === name ? { ...e, logged: true, expanded: false } : e));
+  const addSet = (exName: string) => {
+    setAddedExercises(prev =>
+      prev.map(e => {
+        if (e.name !== exName || e.sets.length >= 6) return e;
+        return { ...e, sets: [...e.sets, { weight: '', reps: 10 }] };
+      })
+    );
+  };
+
+  const copyFromLast = (exName: string) => {
+    const last = lastTimeData[exName];
+    if (!last) return;
+    setAddedExercises(prev =>
+      prev.map(e => {
+        if (e.name !== exName) return e;
+        const sets = e.sets.map(s => ({
+          weight: last.weight > 0 ? String(last.weight) : '',
+          reps: last.reps,
+        }));
+        return { ...e, sets };
+      })
+    );
+  };
+
+  const handleLogAll = () => {
+    setAddedExercises(prev =>
+      prev.map(e => ({ ...e, logged: true, expanded: false }))
+    );
   };
 
   const dropdownBoxStyle: React.CSSProperties = {
@@ -242,7 +288,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
       {addedExercises.length > 0 && (
         <section className="mb-10">
           <div className="space-y-0">
-            {addedExercises.map((ex, i) => {
+            {addedExercises.map((ex) => {
               const last = lastTimeData[ex.name];
               const lastText = last
                 ? last.weight > 0
@@ -250,23 +296,23 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                   : `Last time: ${last.reps} reps`
                 : 'No previous data';
 
+              const hasData = ex.sets.some(s => s.weight !== '' || s.reps !== 10);
+
               return (
                 <div key={ex.name}>
                   {/* Row */}
                   <div
                     className="flex items-center gap-4 py-4"
-                    style={{
-                      borderBottom: '1px solid rgba(255,255,255,0.06)',
-                    }}
+                    style={{ borderBottom: ex.expanded ? 'none' : '1px solid rgba(255,255,255,0.06)' }}
                   >
                     {/* Tick circle */}
                     <div
                       style={{
-                        width: 36,
-                        height: 36,
+                        width: 32,
+                        height: 32,
                         borderRadius: '50%',
                         border: ex.logged ? 'none' : '2px solid rgba(255,255,255,0.2)',
-                        backgroundColor: ex.logged ? '#ffffff' : 'transparent',
+                        backgroundColor: ex.logged ? '#ffffff' : hasData ? 'rgba(255,255,255,0.08)' : 'transparent',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -274,7 +320,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                         transition: 'all 0.25s',
                       }}
                     >
-                      {ex.logged && <Check size={16} color="#1a1a1a" strokeWidth={3} />}
+                      {ex.logged && <Check size={14} color="#1a1a1a" strokeWidth={3} />}
                     </div>
 
                     {/* Name + last time */}
@@ -288,61 +334,114 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                       onClick={() => toggleExpanded(ex.name)}
                       style={{ color: 'rgba(255,255,255,0.4)', flexShrink: 0 }}
                     >
-                      <ChevronRight
-                        size={20}
-                        style={{
-                          transform: ex.expanded ? 'rotate(90deg)' : 'none',
-                          transition: 'transform 0.2s',
-                        }}
-                      />
+                      {ex.expanded
+                        ? <ChevronUp size={20} />
+                        : <ChevronRight size={20} />}
                     </button>
                   </div>
 
-                  {/* Expanded entry panel */}
+                  {/* Expanded set rows */}
                   {ex.expanded && (
                     <div
-                      className="py-6 px-2"
-                      style={{
-                        borderBottom: '1px solid rgba(255,255,255,0.06)',
-                      }}
+                      className="pb-5"
+                      style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
                     >
-                      {/* Weight */}
-                      <div className="flex items-baseline gap-2 mb-6">
-                        <input
-                          type="number"
-                          value={ex.weight}
-                          onChange={(e) => updateExercise(ex.name, 'weight', e.target.value)}
-                          placeholder="00"
-                          className="text-6xl font-black tracking-tighter text-white"
-                          style={{ backgroundColor: 'transparent', border: 'none', outline: 'none', width: '7rem', color: '#ffffff' }}
-                        />
-                        <span className="text-xl font-bold uppercase tracking-widest" style={{ color: '#c6c6c6' }}>KG</span>
-                      </div>
-
-                      {/* Reps + Log Set */}
-                      <div className="flex items-center justify-between gap-6">
-                        <div className="flex-1">
-                          <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#888' }}>Repetitions</label>
-                          <div className="flex items-center justify-between rounded-full px-4 py-3" style={{ backgroundColor: '#1b1b1b' }}>
-                            <button onClick={() => updateExercise(ex.name, 'reps', Math.max(1, ex.reps - 1))} style={{ color: '#c6c6c6' }}><Minus size={18} /></button>
-                            <span className="text-xl font-black text-white">{ex.reps}</span>
-                            <button onClick={() => updateExercise(ex.name, 'reps', ex.reps + 1)} style={{ color: '#c6c6c6' }}><Plus size={18} /></button>
-                          </div>
-                        </div>
+                      {/* Copy from last row */}
+                      <div className="flex justify-end mb-3">
                         <button
-                          onClick={() => handleLogSet(ex.name)}
-                          className="font-black uppercase tracking-widest text-xs px-6 py-4 rounded-full mt-6 active:scale-90 duration-150"
-                          style={{ backgroundColor: '#ffffff', color: '#1a1c1c', boxShadow: '0 12px 32px rgba(0,0,0,0.4)', whiteSpace: 'nowrap' }}
+                          onClick={() => copyFromLast(ex.name)}
+                          className="flex items-center gap-1.5 text-xs"
+                          style={{ color: 'rgba(255,255,255,0.4)' }}
                         >
-                          Log Set
+                          <Copy size={12} />
+                          <span>Copy last session</span>
                         </button>
                       </div>
+
+                      {/* Column headers */}
+                      <div className="grid mb-2" style={{ gridTemplateColumns: '2rem 1fr 1fr 1fr', gap: '0.5rem' }}>
+                        <div />
+                        <p className="text-center text-[10px] font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.3)' }}>kg</p>
+                        <p className="text-center text-[10px] font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.3)' }}>reps</p>
+                        <p className="text-center text-[10px] font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.3)' }}>total</p>
+                      </div>
+
+                      {/* Set rows */}
+                      {ex.sets.map((set, idx) => {
+                        const w = parseFloat(set.weight) || 0;
+                        const total = w * set.reps;
+                        return (
+                          <div
+                            key={idx}
+                            className="grid items-center mb-2"
+                            style={{ gridTemplateColumns: '2rem 1fr 1fr 1fr', gap: '0.5rem' }}
+                          >
+                            {/* Set label */}
+                            <p className="text-[10px] font-bold" style={{ color: 'rgba(255,255,255,0.3)' }}>{idx + 1}</p>
+
+                            {/* Weight */}
+                            <input
+                              type="number"
+                              value={set.weight}
+                              onChange={e => updateSet(ex.name, idx, 'weight', e.target.value)}
+                              placeholder="—"
+                              className="text-center text-sm font-bold text-white rounded-lg py-2"
+                              style={{
+                                backgroundColor: '#1b1b1b',
+                                border: '1px solid rgba(255,255,255,0.07)',
+                                outline: 'none',
+                                width: '100%',
+                              }}
+                            />
+
+                            {/* Reps */}
+                            <div
+                              className="flex items-center justify-between rounded-lg py-2 px-2"
+                              style={{ backgroundColor: '#1b1b1b', border: '1px solid rgba(255,255,255,0.07)' }}
+                            >
+                              <button onClick={() => updateSet(ex.name, idx, 'reps', Math.max(1, set.reps - 1))} style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}>−</button>
+                              <span className="text-sm font-bold text-white">{set.reps}</span>
+                              <button onClick={() => updateSet(ex.name, idx, 'reps', set.reps + 1)} style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}>+</button>
+                            </div>
+
+                            {/* Total */}
+                            <p className="text-center text-sm font-bold" style={{ color: total > 0 ? '#ffffff' : 'rgba(255,255,255,0.2)' }}>
+                              {total > 0 ? `${total}` : '—'}
+                            </p>
+                          </div>
+                        );
+                      })}
+
+                      {/* Add set */}
+                      {ex.sets.length < 6 && (
+                        <button
+                          onClick={() => addSet(ex.name)}
+                          className="flex items-center gap-2 mt-3 text-xs font-bold uppercase tracking-widest"
+                          style={{ color: 'rgba(255,255,255,0.35)' }}
+                        >
+                          <Plus size={14} />
+                          Add Set
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
               );
             })}
           </div>
+
+          {/* Log Exercises button */}
+          <button
+            onClick={handleLogAll}
+            className="w-full mt-8 py-4 rounded-full font-black uppercase tracking-widest text-sm active:scale-95 duration-150"
+            style={{
+              backgroundColor: '#ffffff',
+              color: '#1a1c1c',
+              boxShadow: '0 12px 32px rgba(0,0,0,0.4)',
+            }}
+          >
+            Log Exercises
+          </button>
         </section>
       )}
 
