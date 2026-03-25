@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Dumbbell, ChevronDown, ChevronRight, ChevronUp, Plus, Minus, Clock, Check, X } from 'lucide-react';
+import { Dumbbell, ChevronDown, ChevronRight, ChevronUp, Plus, Minus, Clock, Check, X, Calendar } from 'lucide-react';
 import { Page } from '../../types';
 
 interface LogWeightsProps {
@@ -203,17 +203,9 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     userSelect: 'none',
   };
 
+  // Shared label style — used for both RECENT LOGS and WEEKLY
   const sectionLabelStyle: React.CSSProperties = {
     fontSize: '1.15rem',
-    fontWeight: 800,
-    letterSpacing: '-0.03em',
-    textTransform: 'uppercase',
-    color: '#ffffff',
-    marginBottom: '1.25rem',
-  };
-
-  const weeklyLabelStyle: React.CSSProperties = {
-    fontSize: '1rem',
     fontWeight: 800,
     letterSpacing: '-0.03em',
     textTransform: 'uppercase',
@@ -254,15 +246,16 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
             <div onClick={() => setGroupOpen(o => !o)} style={textTriggerStyle}>
               <span
                 style={{
-                  color: selectedGroup ? '#ffffff' : 'rgba(255,255,255,0.75)',
-                  fontSize: selectorActive ? '0.875rem' : '1.6rem',
-                  fontWeight: selectedGroup ? 700 : selectorActive ? 500 : 700,
-                  letterSpacing: selectorActive ? '0.03em' : '-0.03em',
+                  color: '#ffffff',
+                  fontSize: selectorActive ? '0.875rem' : '2rem',
+                  fontWeight: selectorActive ? 700 : 900,
+                  letterSpacing: selectorActive ? '0.03em' : '-0.05em',
                   transition: 'font-size 0.2s ease, letter-spacing 0.2s ease',
                   lineHeight: 1.1,
+                  textTransform: 'uppercase',
                 }}
               >
-                {selectedGroup || 'Select Muscle Group'}
+                {selectedGroup || (selectorActive ? 'Select Muscle Group' : 'Select')}
               </span>
               <ChevronDown
                 size={selectorActive ? 14 : 20}
@@ -556,7 +549,10 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
 
       {/* WEEKLY Section */}
       <section className="mb-10">
-        <p style={weeklyLabelStyle}>Weekly</p>
+        <div className="flex items-center justify-between mb-5">
+          <p style={{ ...sectionLabelStyle, marginBottom: 0 }}>Weekly</p>
+          <Calendar size={15} style={{ color: 'rgba(255,255,255,0.4)' }} />
+        </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           {weeklyData.map(({ group, total, lastWeek }) => {
             const pct = Math.min((total / WEEKLY_MAX) * 100, 100);
