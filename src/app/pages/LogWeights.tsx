@@ -147,19 +147,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
 
   const grandTotal = addedExercises.reduce((acc, ex) => acc + calcExerciseTotal(ex.sets), 0);
 
-  const dropdownBoxStyle: React.CSSProperties = {
-    backgroundColor: '#1b1b1b',
-    border: '1px solid rgba(255,255,255,0.08)',
-    borderRadius: '14px',
-    padding: '14px 18px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    cursor: 'pointer',
-    color: '#ffffff',
-    userSelect: 'none',
-  };
-
   const dropdownListStyle: React.CSSProperties = {
     position: 'absolute',
     top: 'calc(100% + 6px)',
@@ -171,6 +158,19 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     overflow: 'hidden',
     zIndex: 50,
     boxShadow: '0 16px 40px rgba(0,0,0,0.6)',
+  };
+
+  const exerciseDropdownBoxStyle: React.CSSProperties = {
+    backgroundColor: '#1b1b1b',
+    border: '1px solid rgba(255,255,255,0.08)',
+    borderRadius: '14px',
+    padding: '14px 18px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    cursor: 'pointer',
+    color: '#ffffff',
+    userSelect: 'none',
   };
 
   return (
@@ -200,46 +200,59 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
 
       {/* Muscle Group + Exercise Selection */}
       <section className="mb-4">
-        {/* Muscle Group Dropdown */}
-        <div className="mb-4">
-          <p className="text-xs font-semibold mb-2" style={{ color: 'rgba(255,255,255,0.85)', letterSpacing: '0.05em' }}>Select Muscle Group</p>
-          <div ref={groupRef} className="relative">
-            <div style={dropdownBoxStyle} onClick={() => setGroupOpen(o => !o)}>
-              <span className="text-sm font-bold" style={{ color: selectedGroup ? '#ffffff' : '#555555' }}>
-                {selectedGroup || 'Choose group...'}
-              </span>
-              <ChevronDown size={16} style={{ color: '#888', transform: groupOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
-            </div>
-            {groupOpen && (
-              <div style={dropdownListStyle}>
-                {Object.keys(exercisesByGroup).map((group, i, arr) => (
-                  <div
-                    key={group}
-                    onClick={() => handleSelectGroup(group)}
-                    style={{
-                      padding: '14px 18px',
-                      cursor: 'pointer',
-                      color: selectedGroup === group ? '#ffffff' : '#aaaaaa',
-                      fontWeight: selectedGroup === group ? 700 : 400,
-                      fontSize: '0.875rem',
-                      borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
-                      backgroundColor: selectedGroup === group ? 'rgba(255,255,255,0.06)' : 'transparent',
-                    }}
-                  >
-                    {group}
-                  </div>
-                ))}
-              </div>
-            )}
+        {/* Muscle Group — borderless text trigger */}
+        <div ref={groupRef} className="relative mb-4">
+          <div
+            onClick={() => setGroupOpen(o => !o)}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', cursor: 'pointer', userSelect: 'none' }}
+          >
+            <span
+              style={{
+                color: selectedGroup ? '#ffffff' : 'rgba(255,255,255,0.75)',
+                fontSize: '0.875rem',
+                fontWeight: selectedGroup ? 700 : 500,
+                letterSpacing: '0.03em',
+              }}
+            >
+              {selectedGroup || 'Select Muscle Group'}
+            </span>
+            <ChevronDown
+              size={14}
+              style={{
+                color: 'rgba(255,255,255,0.45)',
+                transform: groupOpen ? 'rotate(180deg)' : 'none',
+                transition: 'transform 0.2s',
+              }}
+            />
           </div>
+          {groupOpen && (
+            <div style={dropdownListStyle}>
+              {Object.keys(exercisesByGroup).map((group, i, arr) => (
+                <div
+                  key={group}
+                  onClick={() => handleSelectGroup(group)}
+                  style={{
+                    padding: '14px 18px',
+                    cursor: 'pointer',
+                    color: selectedGroup === group ? '#ffffff' : '#aaaaaa',
+                    fontWeight: selectedGroup === group ? 700 : 400,
+                    fontSize: '0.875rem',
+                    borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
+                    backgroundColor: selectedGroup === group ? 'rgba(255,255,255,0.06)' : 'transparent',
+                  }}
+                >
+                  {group}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Exercise Dropdown */}
         {selectedGroup && (
           <div>
-            <p className="text-xs font-semibold mb-2" style={{ color: 'rgba(255,255,255,0.85)', letterSpacing: '0.05em' }}>Select Exercise</p>
             <div ref={exerciseRef} className="relative">
-              <div style={dropdownBoxStyle} onClick={() => setExerciseOpen(o => !o)}>
+              <div style={exerciseDropdownBoxStyle} onClick={() => setExerciseOpen(o => !o)}>
                 <span className="text-sm" style={{ color: '#555555' }}>Choose exercise...</span>
                 <ChevronDown size={16} style={{ color: '#888', transform: exerciseOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
               </div>
@@ -294,7 +307,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
         <div className="flex items-baseline gap-2 mb-6 mt-2">
           <span
             style={{
-              fontSize: '3.5rem',
+              fontSize: '2.6rem',
               fontWeight: 900,
               lineHeight: 1,
               color: grandTotal > 0 ? '#ffffff' : 'rgba(255,255,255,0.2)',
@@ -305,14 +318,14 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
           </span>
           <span
             style={{
-              fontSize: '0.7rem',
+              fontSize: '0.75rem',
               fontWeight: 700,
-              color: 'rgba(255,255,255,0.35)',
+              color: '#ffffff',
               letterSpacing: '0.12em',
               textTransform: 'uppercase',
             }}
           >
-            kg total
+            KG
           </span>
         </div>
       )}
@@ -391,9 +404,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                           >
                             {exTotal > 0 ? exTotal.toLocaleString() : '—'}
                           </span>
-                          {exTotal > 0 && (
-                            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.4)' }}>kg</span>
-                          )}
+                          <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#ffffff' }}>KG</span>
                         </div>
 
                         {/* Copy from last */}

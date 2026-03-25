@@ -51,6 +51,7 @@ const App: React.FC = () => {
     <div className="min-h-screen" style={{ backgroundColor: '#000000', color: '#e2e2e2', fontFamily: "'Inter Variable', 'Inter', system-ui, sans-serif" }}>
       <Header
         title={getHeaderTitle()}
+        currentPage={currentPage}
         onBack={showBackButton ? () => setCurrentPage('dashboard') : undefined}
         onNavigate={setCurrentPage}
       />

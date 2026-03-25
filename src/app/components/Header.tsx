@@ -1,14 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, ArrowLeft, Dumbbell, BarChart3, FileText } from 'lucide-react';
+import { Menu, ArrowLeft, Dumbbell, BarChart3, FileText, Activity, Flame } from 'lucide-react';
 import { Page } from '../../types';
 
 interface HeaderProps {
   title: string;
+  currentPage?: Page;
   onBack?: () => void;
   onNavigate?: (page: Page) => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ title, onBack, onNavigate }) => {
+export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNavigate }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -29,6 +30,17 @@ export const Header: React.FC<HeaderProps> = ({ title, onBack, onNavigate }) => 
   ];
 
   const isDashboard = !title;
+
+  // Determine center content for log pages
+  const getLogIcon = () => {
+    if (currentPage === 'weights') return <Dumbbell size={20} color="white" />;
+    if (currentPage === 'cardio') return <Activity size={20} color="white" />;
+    if (currentPage === 'calories') return <Flame size={20} color="white" />;
+    return null;
+  };
+
+  const isLogPage = currentPage === 'weights' || currentPage === 'cardio' || currentPage === 'calories';
+  const logIcon = getLogIcon();
 
   return (
     <header
@@ -83,8 +95,12 @@ export const Header: React.FC<HeaderProps> = ({ title, onBack, onNavigate }) => 
         <span className="absolute left-1/2 -translate-x-1/2 text-xl font-black tracking-tighter text-white uppercase">Kiné</span>
       ) : (
         <>
-          <div className="absolute left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-[0.2em] text-white">
-            {title}
+          <div className="absolute left-1/2 -translate-x-1/2">
+            {isLogPage && logIcon ? (
+              logIcon
+            ) : (
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white">{title}</span>
+            )}
           </div>
           <div className="flex items-center justify-end w-12">
             <span className="text-xl font-black tracking-tighter text-white uppercase">Kiné</span>
