@@ -34,13 +34,13 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
         {tabs.map((tab) => {
           const isActive = tab.page === 'weights';
           return (
-            <button key={tab.page} onClick={() => onNavigate(tab.page)} className="flex flex-col items-center" style={{ filter: isActive ? 'none' : 'blur(0.7px)' }}>
+            <button key={tab.page} onClick={() => onNavigate(tab.page)} className="flex flex-col items-center" style={{ filter: isActive ? 'none' : 'blur(0.4px)' }}>
               <span
                 className="uppercase tracking-widest transition-all"
                 style={{
-                  color: isActive ? '#ffffff' : 'rgba(226,226,226,0.45)',
+                  color: isActive ? '#ffffff' : 'rgba(226,226,226,0.65)',
                   fontWeight: isActive ? 900 : 400,
-                  fontSize: isActive ? '1rem' : '0.65rem',
+                  fontSize: isActive ? '0.875rem' : '0.65rem',
                   letterSpacing: '0.15em',
                 }}
               >
