@@ -33,12 +33,25 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
   return (
     <div>
       <nav className="flex gap-8 mb-12 items-end">
-        {tabs.map((tab) => (
-          <button key={tab.page} onClick={() => onNavigate(tab.page)} className="flex flex-col items-center">
-            <span className="uppercase tracking-widest text-[10px] transition-colors" style={{ color: tab.page === 'calories' ? '#ffffff' : 'rgba(226,226,226,0.5)', fontWeight: tab.page === 'calories' ? 700 : 400 }}>{tab.label}</span>
-            {tab.page === 'calories' && <div className="h-1 w-1 rounded-full mt-1" style={{ backgroundColor: '#ffffff' }} />}
-          </button>
-        ))}
+        {tabs.map((tab) => {
+          const isActive = tab.page === 'calories';
+          return (
+            <button key={tab.page} onClick={() => onNavigate(tab.page)} className="flex flex-col items-center" style={{ filter: isActive ? 'none' : 'blur(0.7px)' }}>
+              <span
+                className="uppercase tracking-widest transition-all"
+                style={{
+                  color: isActive ? '#ffffff' : 'rgba(226,226,226,0.45)',
+                  fontWeight: isActive ? 900 : 400,
+                  fontSize: isActive ? '1rem' : '0.65rem',
+                  letterSpacing: '0.15em',
+                }}
+              >
+                {tab.label}
+              </span>
+              {isActive && <div className="h-1 w-1 rounded-full mt-1" style={{ backgroundColor: '#ffffff' }} />}
+            </button>
+          );
+        })}
       </nav>
       <section className="mb-16 space-y-12">
         <div>
