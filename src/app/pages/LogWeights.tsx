@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Dumbbell, ChevronDown, ChevronRight, ChevronUp, Plus, Clock, Check } from 'lucide-react';
+import { Dumbbell, ChevronDown, ChevronRight, ChevronUp, Plus, Minus, Clock, Check } from 'lucide-react';
 import { Page } from '../../types';
 
 interface LogWeightsProps {
@@ -64,6 +64,7 @@ interface AddedExercise {
   sets: SetRow[];
   expanded: boolean;
   logged: boolean;
+  copied: boolean;
 }
 
 const makeDefaultSets = (): SetRow[] =>
@@ -100,6 +101,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
         sets: makeDefaultSets(),
         expanded: false,
         logged: false,
+        copied: false,
       }]);
     }
   };
@@ -129,19 +131,36 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     );
   };
 
-  const copyFromLast = (exName: string) => {
-    const last = lastTimeData[exName];
-    if (!last) return;
-    setAddedExercises(prev =>
-      prev.map(e => {
-        if (e.name !== exName) return e;
-        const sets = e.sets.map(() => ({
-          weight: last.weight > 0 ? String(last.weight) : '',
-          reps: last.reps,
-        }));
-        return { ...e, sets };
-      })
-    );
+  const toggleCopyFromLast = (exName: string) => {
+    const ex = addedExercises.find(e => e.name === exName);
+    if (!ex) return;
+
+    if (ex.copied) {
+      // − pressed: clear all entries, reset copied flag
+      setAddedExercises(prev =>
+        prev.map(e =>
+          e.name !== exName ? e : {
+            ...e,
+            copied: false,
+            sets: makeDefaultSets(),
+          }
+        )
+      );
+    } else {
+      // + pressed: populate from last session, set copied flag
+      const last = lastTimeData[exName];
+      if (!last) return;
+      setAddedExercises(prev =>
+        prev.map(e => {
+          if (e.name !== exName) return e;
+          const sets = e.sets.map(() => ({
+            weight: last.weight > 0 ? String(last.weight) : '',
+            reps: last.reps,
+          }));
+          return { ...e, sets, copied: true };
+        })
+      );
+    }
   };
 
   const handleLogAll = () => {
@@ -176,7 +195,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     userSelect: 'none',
   };
 
-  // RECENT LOGS label: slightly smaller and less bold than original
   const sectionLabelStyle: React.CSSProperties = {
     fontSize: '0.72rem',
     fontWeight: 600,
@@ -186,7 +204,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     marginBottom: '1.25rem',
   };
 
-  // WEEKLY label: same feel as RECENT LOGS but slightly smaller, not bold
   const weeklyLabelStyle: React.CSSProperties = {
     fontSize: '0.62rem',
     fontWeight: 500,
@@ -223,27 +240,13 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
 
       {/* Muscle Group + Exercise Selection */}
       <section className="mb-4">
-        {/* Muscle Group — borderless text trigger */}
+        {/* Muscle Group */}
         <div ref={groupRef} className="relative mb-4">
           <div onClick={() => setGroupOpen(o => !o)} style={textTriggerStyle}>
-            <span
-              style={{
-                color: selectedGroup ? '#ffffff' : 'rgba(255,255,255,0.75)',
-                fontSize: '0.875rem',
-                fontWeight: selectedGroup ? 700 : 500,
-                letterSpacing: '0.03em',
-              }}
-            >
+            <span style={{ color: selectedGroup ? '#ffffff' : 'rgba(255,255,255,0.75)', fontSize: '0.875rem', fontWeight: selectedGroup ? 700 : 500, letterSpacing: '0.03em' }}>
               {selectedGroup || 'Select Muscle Group'}
             </span>
-            <ChevronDown
-              size={14}
-              style={{
-                color: 'rgba(255,255,255,0.45)',
-                transform: groupOpen ? 'rotate(180deg)' : 'none',
-                transition: 'transform 0.2s',
-              }}
-            />
+            <ChevronDown size={14} style={{ color: 'rgba(255,255,255,0.45)', transform: groupOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
           </div>
           {groupOpen && (
             <div style={dropdownListStyle}>
@@ -268,28 +271,14 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
           )}
         </div>
 
-        {/* Exercise Dropdown — borderless text trigger */}
+        {/* Exercise Dropdown */}
         {selectedGroup && (
           <div ref={exerciseRef} className="relative">
             <div onClick={() => setExerciseOpen(o => !o)} style={textTriggerStyle}>
-              <span
-                style={{
-                  color: 'rgba(255,255,255,0.55)',
-                  fontSize: '0.875rem',
-                  fontWeight: 500,
-                  letterSpacing: '0.03em',
-                }}
-              >
+              <span style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.875rem', fontWeight: 500, letterSpacing: '0.03em' }}>
                 Choose exercise...
               </span>
-              <ChevronDown
-                size={14}
-                style={{
-                  color: 'rgba(255,255,255,0.3)',
-                  transform: exerciseOpen ? 'rotate(180deg)' : 'none',
-                  transition: 'transform 0.2s',
-                }}
-              />
+              <ChevronDown size={14} style={{ color: 'rgba(255,255,255,0.3)', transform: exerciseOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
             </div>
             {exerciseOpen && (
               <div style={dropdownListStyle}>
@@ -311,14 +300,10 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                       <button
                         onClick={(e) => { e.stopPropagation(); handleAddExercise(ex); }}
                         style={{
-                          width: 28,
-                          height: 28,
-                          borderRadius: '50%',
+                          width: 28, height: 28, borderRadius: '50%',
                           backgroundColor: alreadyAdded ? '#2a2a2a' : '#ffffff',
                           color: alreadyAdded ? '#444' : '#1a1a1a',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
                           flexShrink: 0,
                           cursor: alreadyAdded ? 'default' : 'pointer',
                           border: 'none',
@@ -336,29 +321,13 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
         )}
       </section>
 
-      {/* Grand Total — only shown when there's actual weight entered */}
+      {/* Grand Total */}
       {addedExercises.length > 0 && grandTotal > 0 && (
         <div className="flex items-baseline gap-2 mb-6 mt-2">
-          <span
-            style={{
-              fontSize: '2.6rem',
-              fontWeight: 900,
-              lineHeight: 1,
-              color: '#ffffff',
-              letterSpacing: '-0.02em',
-            }}
-          >
+          <span style={{ fontSize: '2.6rem', fontWeight: 900, lineHeight: 1, color: '#ffffff', letterSpacing: '-0.02em' }}>
             {grandTotal.toLocaleString()}
           </span>
-          <span
-            style={{
-              fontSize: '0.75rem',
-              fontWeight: 700,
-              color: '#ffffff',
-              letterSpacing: '0.12em',
-              textTransform: 'uppercase',
-            }}
-          >
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#ffffff', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
             KG
           </span>
         </div>
@@ -371,11 +340,8 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
             {addedExercises.map((ex) => {
               const last = lastTimeData[ex.name];
               const lastText = last
-                ? last.weight > 0
-                  ? `Last time: ${last.weight}kg × ${last.reps} reps`
-                  : `Last time: ${last.reps} reps`
+                ? last.weight > 0 ? `Last time: ${last.weight}kg × ${last.reps} reps` : `Last time: ${last.reps} reps`
                 : 'No previous data';
-
               const hasData = ex.sets.some(s => s.weight !== '');
               const exTotal = calcExerciseTotal(ex.sets);
 
@@ -389,16 +355,11 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                     {/* Tick circle */}
                     <div
                       style={{
-                        width: 32,
-                        height: 32,
-                        borderRadius: '50%',
+                        width: 32, height: 32, borderRadius: '50%',
                         border: hasData || ex.logged ? 'none' : '2px solid rgba(255,255,255,0.2)',
                         backgroundColor: hasData || ex.logged ? '#ffffff' : 'transparent',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                        transition: 'all 0.25s',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        flexShrink: 0, transition: 'all 0.25s',
                       }}
                     >
                       {(hasData || ex.logged) && <Check size={14} color="#1a1a1a" strokeWidth={3} />}
@@ -411,29 +372,20 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                     </div>
 
                     {/* Chevron */}
-                    <button
-                      onClick={() => toggleExpanded(ex.name)}
-                      style={{ color: 'rgba(255,255,255,0.4)', flexShrink: 0 }}
-                    >
+                    <button onClick={() => toggleExpanded(ex.name)} style={{ color: 'rgba(255,255,255,0.4)', flexShrink: 0 }}>
                       {ex.expanded ? <ChevronUp size={20} /> : <ChevronRight size={20} />}
                     </button>
                   </div>
 
                   {/* Expanded set panel */}
                   {ex.expanded && (
-                    <div
-                      className="pb-5"
-                      style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
-                    >
-                      {/* TOP ROW: exercise total (left) + Copy icon (right) */}
+                    <div className="pb-5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                      {/* TOP ROW: total (left) + copy toggle (right) */}
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-baseline gap-1">
                           {exTotal > 0 && (
                             <>
-                              <span
-                                className="font-black"
-                                style={{ fontSize: '1.5rem', color: '#ffffff', lineHeight: 1 }}
-                              >
+                              <span className="font-black" style={{ fontSize: '1.5rem', color: '#ffffff', lineHeight: 1 }}>
                                 {exTotal.toLocaleString()}
                               </span>
                               <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#ffffff' }}>KG</span>
@@ -441,25 +393,24 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                           )}
                         </div>
 
-                        {/* Copy from last */}
+                        {/* + / − toggle button */}
                         <button
-                          onClick={() => copyFromLast(ex.name)}
-                          title="Copy from last session"
+                          onClick={() => toggleCopyFromLast(ex.name)}
+                          title={ex.copied ? 'Clear entries' : 'Copy from last session'}
                           style={{
-                            width: 30,
-                            height: 30,
-                            borderRadius: '50%',
-                            backgroundColor: 'rgba(255,255,255,0.08)',
-                            border: '1px solid rgba(255,255,255,0.12)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: 'rgba(255,255,255,0.55)',
-                            cursor: 'pointer',
-                            flexShrink: 0,
+                            width: 30, height: 30, borderRadius: '50%',
+                            backgroundColor: ex.copied ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.08)',
+                            border: ex.copied ? '1px solid rgba(255,255,255,0.3)' : '1px solid rgba(255,255,255,0.12)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            color: ex.copied ? '#ffffff' : 'rgba(255,255,255,0.55)',
+                            cursor: 'pointer', flexShrink: 0,
+                            transition: 'all 0.2s',
                           }}
                         >
-                          <Plus size={14} strokeWidth={2.5} />
+                          {ex.copied
+                            ? <Minus size={14} strokeWidth={2.5} />
+                            : <Plus size={14} strokeWidth={2.5} />
+                          }
                         </button>
                       </div>
 
@@ -478,15 +429,10 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                         const rowHasData = set.weight !== '';
                         const numColor = rowHasData ? '#ffffff' : 'rgba(255,255,255,0.25)';
                         return (
-                          <div
-                            key={idx}
-                            className="grid items-center mb-2"
-                            style={{ gridTemplateColumns: '1.8rem 1fr 1fr 1fr', gap: '0.5rem' }}
-                          >
+                          <div key={idx} className="grid items-center mb-2" style={{ gridTemplateColumns: '1.8rem 1fr 1fr 1fr', gap: '0.5rem' }}>
                             <p className="font-black" style={{ fontSize: '1rem', color: numColor, lineHeight: 1, textAlign: 'center', transition: 'color 0.2s' }}>
                               {idx + 1}
                             </p>
-
                             <input
                               type="number"
                               value={set.weight}
@@ -494,16 +440,11 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                               placeholder="—"
                               className="text-center font-bold rounded-lg py-2"
                               style={{
-                                backgroundColor: '#1b1b1b',
-                                border: '1px solid rgba(255,255,255,0.07)',
-                                outline: 'none',
-                                width: '100%',
-                                fontSize: '0.875rem',
-                                color: rowHasData ? '#ffffff' : 'rgba(255,255,255,0.3)',
-                                transition: 'color 0.2s',
+                                backgroundColor: '#1b1b1b', border: '1px solid rgba(255,255,255,0.07)',
+                                outline: 'none', width: '100%', fontSize: '0.875rem',
+                                color: rowHasData ? '#ffffff' : 'rgba(255,255,255,0.3)', transition: 'color 0.2s',
                               }}
                             />
-
                             <div
                               className="flex items-center justify-between rounded-lg py-2 px-2"
                               style={{ backgroundColor: '#1b1b1b', border: '1px solid rgba(255,255,255,0.07)' }}
@@ -512,7 +453,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                               <span className="font-bold" style={{ fontSize: '0.875rem', color: rowHasData ? '#ffffff' : 'rgba(255,255,255,0.3)', transition: 'color 0.2s' }}>{set.reps}</span>
                               <button onClick={() => updateSet(ex.name, idx, 'reps', set.reps + 1)} style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}>+</button>
                             </div>
-
                             <p className="text-center font-bold" style={{ fontSize: '0.875rem', color: '#ffffff', transition: 'color 0.2s' }}>
                               {rowTotal > 0 ? rowTotal : ''}
                             </p>
@@ -520,7 +460,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                         );
                       })}
 
-                      {/* BOTTOM: + Set */}
+                      {/* + Set */}
                       <div className="flex items-center mt-4">
                         {ex.sets.length < 6 && (
                           <button
@@ -559,12 +499,9 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
             const pct = Math.min((total / WEEKLY_MAX) * 100, 100);
             return (
               <div key={group}>
-                {/* Label row */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '0.6rem', paddingLeft: '2px', paddingRight: '2px' }}>
                   <div>
-                    <span style={{ color: '#ffffff', fontWeight: 700, fontSize: '1rem', letterSpacing: '-0.01em', display: 'block' }}>
-                      {group}
-                    </span>
+                    <span style={{ color: '#ffffff', fontWeight: 700, fontSize: '1rem', letterSpacing: '-0.01em', display: 'block' }}>{group}</span>
                     <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.7rem', fontWeight: 400, marginTop: '1px', display: 'block' }}>
                       Last week: {lastWeek.toLocaleString()}kg
                     </span>
@@ -573,32 +510,11 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                     <span style={{ color: '#ffffff', fontWeight: 900, fontSize: '1.4rem', letterSpacing: '-0.02em', lineHeight: 1 }}>
                       {total.toLocaleString()}
                     </span>
-                    <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                      kg
-                    </span>
+                    <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>kg</span>
                   </div>
                 </div>
-                {/* Progress bar */}
-                <div
-                  style={{
-                    height: '44px',
-                    width: '100%',
-                    backgroundColor: '#1f1f1f',
-                    borderRadius: '999px',
-                    overflow: 'hidden',
-                    padding: '5px',
-                  }}
-                >
-                  <div
-                    style={{
-                      height: '100%',
-                      width: `${pct}%`,
-                      background: 'linear-gradient(90deg, #c6c6c7 0%, #ffffff 100%)',
-                      borderRadius: '999px',
-                      boxShadow: '0 0 14px rgba(255,255,255,0.25)',
-                      transition: 'width 0.6s cubic-bezier(0.4,0,0.2,1)',
-                    }}
-                  />
+                <div style={{ height: '44px', width: '100%', backgroundColor: '#1f1f1f', borderRadius: '999px', overflow: 'hidden', padding: '5px' }}>
+                  <div style={{ height: '100%', width: `${pct}%`, background: 'linear-gradient(90deg, #c6c6c7 0%, #ffffff 100%)', borderRadius: '999px', boxShadow: '0 0 14px rgba(255,255,255,0.25)', transition: 'width 0.6s cubic-bezier(0.4,0,0.2,1)' }} />
                 </div>
               </div>
             );
