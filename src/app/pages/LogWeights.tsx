@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Dumbbell, ChevronDown, ChevronRight, ChevronUp, Plus, Clock, Check, Copy } from 'lucide-react';
+import { Dumbbell, ChevronDown, ChevronRight, ChevronUp, Plus, Clock, Check } from 'lucide-react';
 import { Page } from '../../types';
 
 interface LogWeightsProps {
@@ -127,7 +127,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     setAddedExercises(prev =>
       prev.map(e => {
         if (e.name !== exName) return e;
-        const sets = e.sets.map(s => ({
+        const sets = e.sets.map(() => ({
           weight: last.weight > 0 ? String(last.weight) : '',
           reps: last.reps,
         }));
@@ -141,6 +141,9 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
       prev.map(e => ({ ...e, logged: true, expanded: false }))
     );
   };
+
+  const calcTotalWeight = (sets: SetRow[]): number =>
+    sets.reduce((acc, s) => acc + (parseFloat(s.weight) || 0) * s.reps, 0);
 
   const dropdownBoxStyle: React.CSSProperties = {
     backgroundColor: '#1b1b1b',
@@ -297,6 +300,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                 : 'No previous data';
 
               const hasData = ex.sets.some(s => s.weight !== '' || s.reps !== 10);
+              const totalWeight = calcTotalWeight(ex.sets);
 
               return (
                 <div key={ex.name}>
@@ -346,18 +350,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                       className="pb-5"
                       style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
                     >
-                      {/* Copy from last row */}
-                      <div className="flex justify-end mb-3">
-                        <button
-                          onClick={() => copyFromLast(ex.name)}
-                          className="flex items-center gap-1.5 text-xs"
-                          style={{ color: 'rgba(255,255,255,0.4)' }}
-                        >
-                          <Copy size={12} />
-                          <span>Copy last session</span>
-                        </button>
-                      </div>
-
                       {/* Column headers */}
                       <div className="grid mb-2" style={{ gridTemplateColumns: '2rem 1fr 1fr 1fr', gap: '0.5rem' }}>
                         <div />
@@ -404,7 +396,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                               <button onClick={() => updateSet(ex.name, idx, 'reps', set.reps + 1)} style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}>+</button>
                             </div>
 
-                            {/* Total */}
+                            {/* Set total */}
                             <p className="text-center text-sm font-bold" style={{ color: total > 0 ? '#ffffff' : 'rgba(255,255,255,0.2)' }}>
                               {total > 0 ? `${total}` : '—'}
                             </p>
@@ -412,17 +404,59 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                         );
                       })}
 
-                      {/* Add set */}
-                      {ex.sets.length < 6 && (
-                        <button
-                          onClick={() => addSet(ex.name)}
-                          className="flex items-center gap-2 mt-3 text-xs font-bold uppercase tracking-widest"
-                          style={{ color: 'rgba(255,255,255,0.35)' }}
-                        >
-                          <Plus size={14} />
-                          Add Set
-                        </button>
-                      )}
+                      {/* Total weight + copy icon + add set row */}
+                      <div className="flex items-center justify-between mt-4">
+                        {/* Total weight */}
+                        <div>
+                          <span
+                            className="font-black"
+                            style={{
+                              fontSize: '1.4rem',
+                              color: totalWeight > 0 ? '#ffffff' : 'rgba(255,255,255,0.2)',
+                              lineHeight: 1,
+                            }}
+                          >
+                            {totalWeight > 0 ? totalWeight.toLocaleString() : '—'}
+                          </span>
+                          {totalWeight > 0 && (
+                            <span className="ml-1 text-xs font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.4)' }}>kg</span>
+                          )}
+                        </div>
+
+                        {/* Right side: add set (if < 6) + copy icon */}
+                        <div className="flex items-center gap-3">
+                          {ex.sets.length < 6 && (
+                            <button
+                              onClick={() => addSet(ex.name)}
+                              className="flex items-center gap-1 text-xs font-bold uppercase tracking-widest"
+                              style={{ color: 'rgba(255,255,255,0.35)' }}
+                            >
+                              <Plus size={13} />
+                              <span>Set</span>
+                            </button>
+                          )}
+                          {/* Copy from last — just the + icon in a circle */}
+                          <button
+                            onClick={() => copyFromLast(ex.name)}
+                            title="Copy from last session"
+                            style={{
+                              width: 30,
+                              height: 30,
+                              borderRadius: '50%',
+                              backgroundColor: 'rgba(255,255,255,0.08)',
+                              border: '1px solid rgba(255,255,255,0.12)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: 'rgba(255,255,255,0.55)',
+                              cursor: 'pointer',
+                              flexShrink: 0,
+                            }}
+                          >
+                            <Plus size={14} strokeWidth={2.5} />
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
