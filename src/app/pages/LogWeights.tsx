@@ -46,6 +46,12 @@ const recentLogs = [
   { name: 'Cable Crossover', sets: 3, reps: 15, weight: 15.0 },
 ];
 
+const weeklyData = [
+  { group: 'Chest', total: 4200 },
+  { group: 'Back',  total: 6800 },
+  { group: 'Legs',  total: 8100 },
+];
+
 interface SetRow {
   weight: string;
   reps: number;
@@ -147,6 +153,8 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
 
   const grandTotal = addedExercises.reduce((acc, ex) => acc + calcExerciseTotal(ex.sets), 0);
 
+  const weeklyMax = Math.max(...weeklyData.map(d => d.total));
+
   const dropdownListStyle: React.CSSProperties = {
     position: 'absolute',
     top: 'calc(100% + 6px)',
@@ -160,16 +168,11 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     boxShadow: '0 16px 40px rgba(0,0,0,0.6)',
   };
 
-  const exerciseDropdownBoxStyle: React.CSSProperties = {
-    backgroundColor: '#1b1b1b',
-    border: '1px solid rgba(255,255,255,0.08)',
-    borderRadius: '14px',
-    padding: '14px 18px',
-    display: 'flex',
+  const textTriggerStyle: React.CSSProperties = {
+    display: 'inline-flex',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: '6px',
     cursor: 'pointer',
-    color: '#ffffff',
     userSelect: 'none',
   };
 
@@ -202,10 +205,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
       <section className="mb-4">
         {/* Muscle Group — borderless text trigger */}
         <div ref={groupRef} className="relative mb-4">
-          <div
-            onClick={() => setGroupOpen(o => !o)}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', cursor: 'pointer', userSelect: 'none' }}
-          >
+          <div onClick={() => setGroupOpen(o => !o)} style={textTriggerStyle}>
             <span
               style={{
                 color: selectedGroup ? '#ffffff' : 'rgba(255,255,255,0.75)',
@@ -248,56 +248,70 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
           )}
         </div>
 
-        {/* Exercise Dropdown */}
+        {/* Exercise Dropdown — borderless text trigger */}
         {selectedGroup && (
-          <div>
-            <div ref={exerciseRef} className="relative">
-              <div style={exerciseDropdownBoxStyle} onClick={() => setExerciseOpen(o => !o)}>
-                <span className="text-sm" style={{ color: '#555555' }}>Choose exercise...</span>
-                <ChevronDown size={16} style={{ color: '#888', transform: exerciseOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
-              </div>
-              {exerciseOpen && (
-                <div style={dropdownListStyle}>
-                  {exercisesByGroup[selectedGroup].map((ex, i, arr) => {
-                    const alreadyAdded = !!addedExercises.find(e => e.name === ex);
-                    return (
-                      <div
-                        key={ex}
+          <div ref={exerciseRef} className="relative">
+            <div onClick={() => setExerciseOpen(o => !o)} style={textTriggerStyle}>
+              <span
+                style={{
+                  color: 'rgba(255,255,255,0.55)',
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                  letterSpacing: '0.03em',
+                }}
+              >
+                Choose exercise...
+              </span>
+              <ChevronDown
+                size={14}
+                style={{
+                  color: 'rgba(255,255,255,0.3)',
+                  transform: exerciseOpen ? 'rotate(180deg)' : 'none',
+                  transition: 'transform 0.2s',
+                }}
+              />
+            </div>
+            {exerciseOpen && (
+              <div style={dropdownListStyle}>
+                {exercisesByGroup[selectedGroup].map((ex, i, arr) => {
+                  const alreadyAdded = !!addedExercises.find(e => e.name === ex);
+                  return (
+                    <div
+                      key={ex}
+                      style={{
+                        padding: '12px 18px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
+                        backgroundColor: alreadyAdded ? 'rgba(255,255,255,0.04)' : 'transparent',
+                      }}
+                    >
+                      <span style={{ color: alreadyAdded ? '#666' : '#cccccc', fontSize: '0.875rem' }}>{ex}</span>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleAddExercise(ex); }}
                         style={{
-                          padding: '12px 18px',
+                          width: 28,
+                          height: 28,
+                          borderRadius: '50%',
+                          backgroundColor: alreadyAdded ? '#2a2a2a' : '#ffffff',
+                          color: alreadyAdded ? '#444' : '#1a1a1a',
                           display: 'flex',
                           alignItems: 'center',
-                          justifyContent: 'space-between',
-                          borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
-                          backgroundColor: alreadyAdded ? 'rgba(255,255,255,0.04)' : 'transparent',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                          cursor: alreadyAdded ? 'default' : 'pointer',
+                          border: 'none',
                         }}
+                        disabled={alreadyAdded}
                       >
-                        <span style={{ color: alreadyAdded ? '#666' : '#cccccc', fontSize: '0.875rem' }}>{ex}</span>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleAddExercise(ex); }}
-                          style={{
-                            width: 28,
-                            height: 28,
-                            borderRadius: '50%',
-                            backgroundColor: alreadyAdded ? '#2a2a2a' : '#ffffff',
-                            color: alreadyAdded ? '#444' : '#1a1a1a',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flexShrink: 0,
-                            cursor: alreadyAdded ? 'default' : 'pointer',
-                            border: 'none',
-                          }}
-                          disabled={alreadyAdded}
-                        >
-                          <Plus size={14} strokeWidth={3} />
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+                        <Plus size={14} strokeWidth={3} />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
       </section>
@@ -398,11 +412,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                             <>
                               <span
                                 className="font-black"
-                                style={{
-                                  fontSize: '1.5rem',
-                                  color: '#ffffff',
-                                  lineHeight: 1,
-                                }}
+                                style={{ fontSize: '1.5rem', color: '#ffffff', lineHeight: 1 }}
                               >
                                 {exTotal.toLocaleString()}
                               </span>
@@ -520,6 +530,67 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
           </button>
         </section>
       )}
+
+      {/* WEEKLY Section */}
+      <section className="mb-10">
+        <p
+          style={{
+            fontSize: '0.65rem',
+            fontWeight: 700,
+            letterSpacing: '0.18em',
+            textTransform: 'uppercase',
+            color: 'rgba(255,255,255,0.35)',
+            marginBottom: '1.25rem',
+          }}
+        >
+          Weekly
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          {weeklyData.map(({ group, total }) => {
+            const pct = (total / weeklyMax) * 100;
+            return (
+              <div key={group}>
+                {/* Label row */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '0.6rem', paddingLeft: '2px', paddingRight: '2px' }}>
+                  <span style={{ color: '#ffffff', fontWeight: 700, fontSize: '1rem', letterSpacing: '-0.01em' }}>
+                    {group}
+                  </span>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
+                    <span style={{ color: '#ffffff', fontWeight: 900, fontSize: '1.4rem', letterSpacing: '-0.02em', lineHeight: 1 }}>
+                      {total.toLocaleString()}
+                    </span>
+                    <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                      kg
+                    </span>
+                  </div>
+                </div>
+                {/* Progress bar */}
+                <div
+                  style={{
+                    height: '44px',
+                    width: '100%',
+                    backgroundColor: '#1f1f1f',
+                    borderRadius: '999px',
+                    overflow: 'hidden',
+                    padding: '5px',
+                  }}
+                >
+                  <div
+                    style={{
+                      height: '100%',
+                      width: `${pct}%`,
+                      background: 'linear-gradient(90deg, #c6c6c7 0%, #ffffff 100%)',
+                      borderRadius: '999px',
+                      boxShadow: '0 0 14px rgba(255,255,255,0.25)',
+                      transition: 'width 0.6s cubic-bezier(0.4,0,0.2,1)',
+                    }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
 
       {/* Recent Logs */}
       <section>
