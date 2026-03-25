@@ -299,24 +299,25 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                   : `Last time: ${last.reps} reps`
                 : 'No previous data';
 
-              const hasData = ex.sets.some(s => s.weight !== '' || s.reps !== 10);
+              // Tick shows as soon as any weight is entered
+              const hasData = ex.sets.some(s => s.weight !== '');
               const totalWeight = calcTotalWeight(ex.sets);
 
               return (
                 <div key={ex.name}>
-                  {/* Row */}
+                  {/* Exercise Row */}
                   <div
                     className="flex items-center gap-4 py-4"
                     style={{ borderBottom: ex.expanded ? 'none' : '1px solid rgba(255,255,255,0.06)' }}
                   >
-                    {/* Tick circle */}
+                    {/* Tick circle — fills as soon as data entered */}
                     <div
                       style={{
                         width: 32,
                         height: 32,
                         borderRadius: '50%',
-                        border: ex.logged ? 'none' : '2px solid rgba(255,255,255,0.2)',
-                        backgroundColor: ex.logged ? '#ffffff' : hasData ? 'rgba(255,255,255,0.08)' : 'transparent',
+                        border: hasData || ex.logged ? 'none' : '2px solid rgba(255,255,255,0.2)',
+                        backgroundColor: hasData || ex.logged ? '#ffffff' : 'transparent',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -324,7 +325,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                         transition: 'all 0.25s',
                       }}
                     >
-                      {ex.logged && <Check size={14} color="#1a1a1a" strokeWidth={3} />}
+                      {(hasData || ex.logged) && <Check size={14} color="#1a1a1a" strokeWidth={3} />}
                     </div>
 
                     {/* Name + last time */}
@@ -344,14 +345,54 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                     </button>
                   </div>
 
-                  {/* Expanded set rows */}
+                  {/* Expanded set panel */}
                   {ex.expanded && (
                     <div
                       className="pb-5"
                       style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
                     >
+                      {/* TOP ROW: Total Weight (left) + Copy icon (right) */}
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-baseline gap-1">
+                          <span
+                            className="font-black"
+                            style={{
+                              fontSize: '1.5rem',
+                              color: totalWeight > 0 ? '#ffffff' : 'rgba(255,255,255,0.2)',
+                              lineHeight: 1,
+                            }}
+                          >
+                            {totalWeight > 0 ? totalWeight.toLocaleString() : '—'}
+                          </span>
+                          {totalWeight > 0 && (
+                            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.4)' }}>kg</span>
+                          )}
+                        </div>
+
+                        {/* Copy from last — just a + circle icon */}
+                        <button
+                          onClick={() => copyFromLast(ex.name)}
+                          title="Copy from last session"
+                          style={{
+                            width: 30,
+                            height: 30,
+                            borderRadius: '50%',
+                            backgroundColor: 'rgba(255,255,255,0.08)',
+                            border: '1px solid rgba(255,255,255,0.12)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'rgba(255,255,255,0.55)',
+                            cursor: 'pointer',
+                            flexShrink: 0,
+                          }}
+                        >
+                          <Plus size={14} strokeWidth={2.5} />
+                        </button>
+                      </div>
+
                       {/* Column headers */}
-                      <div className="grid mb-2" style={{ gridTemplateColumns: '2rem 1fr 1fr 1fr', gap: '0.5rem' }}>
+                      <div className="grid mb-2" style={{ gridTemplateColumns: '1.8rem 1fr 1fr 1fr', gap: '0.5rem' }}>
                         <div />
                         <p className="text-center text-[10px] font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.3)' }}>kg</p>
                         <p className="text-center text-[10px] font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.3)' }}>reps</p>
@@ -361,101 +402,102 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                       {/* Set rows */}
                       {ex.sets.map((set, idx) => {
                         const w = parseFloat(set.weight) || 0;
-                        const total = w * set.reps;
+                        const rowTotal = w * set.reps;
+                        const rowHasData = set.weight !== '';
+                        const numColor = rowHasData ? '#ffffff' : 'rgba(255,255,255,0.25)';
                         return (
                           <div
                             key={idx}
                             className="grid items-center mb-2"
-                            style={{ gridTemplateColumns: '2rem 1fr 1fr 1fr', gap: '0.5rem' }}
+                            style={{ gridTemplateColumns: '1.8rem 1fr 1fr 1fr', gap: '0.5rem' }}
                           >
-                            {/* Set label */}
-                            <p className="text-[10px] font-bold" style={{ color: 'rgba(255,255,255,0.3)' }}>{idx + 1}</p>
+                            {/* Set number — larger, bright white when data entered */}
+                            <p
+                              className="font-black"
+                              style={{
+                                fontSize: '1rem',
+                                color: numColor,
+                                lineHeight: 1,
+                                textAlign: 'center',
+                                transition: 'color 0.2s',
+                              }}
+                            >
+                              {idx + 1}
+                            </p>
 
-                            {/* Weight */}
+                            {/* Weight input */}
                             <input
                               type="number"
                               value={set.weight}
                               onChange={e => updateSet(ex.name, idx, 'weight', e.target.value)}
                               placeholder="—"
-                              className="text-center text-sm font-bold text-white rounded-lg py-2"
+                              className="text-center font-bold rounded-lg py-2"
                               style={{
                                 backgroundColor: '#1b1b1b',
                                 border: '1px solid rgba(255,255,255,0.07)',
                                 outline: 'none',
                                 width: '100%',
+                                fontSize: '0.875rem',
+                                color: rowHasData ? '#ffffff' : 'rgba(255,255,255,0.3)',
+                                transition: 'color 0.2s',
                               }}
                             />
 
-                            {/* Reps */}
+                            {/* Reps stepper */}
                             <div
                               className="flex items-center justify-between rounded-lg py-2 px-2"
-                              style={{ backgroundColor: '#1b1b1b', border: '1px solid rgba(255,255,255,0.07)' }}
+                              style={{
+                                backgroundColor: '#1b1b1b',
+                                border: '1px solid rgba(255,255,255,0.07)',
+                              }}
                             >
-                              <button onClick={() => updateSet(ex.name, idx, 'reps', Math.max(1, set.reps - 1))} style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}>−</button>
-                              <span className="text-sm font-bold text-white">{set.reps}</span>
-                              <button onClick={() => updateSet(ex.name, idx, 'reps', set.reps + 1)} style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}>+</button>
+                              <button
+                                onClick={() => updateSet(ex.name, idx, 'reps', Math.max(1, set.reps - 1))}
+                                style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}
+                              >−</button>
+                              <span
+                                className="font-bold"
+                                style={{
+                                  fontSize: '0.875rem',
+                                  color: rowHasData ? '#ffffff' : 'rgba(255,255,255,0.3)',
+                                  transition: 'color 0.2s',
+                                }}
+                              >
+                                {set.reps}
+                              </span>
+                              <button
+                                onClick={() => updateSet(ex.name, idx, 'reps', set.reps + 1)}
+                                style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}
+                              >+</button>
                             </div>
 
-                            {/* Set total */}
-                            <p className="text-center text-sm font-bold" style={{ color: total > 0 ? '#ffffff' : 'rgba(255,255,255,0.2)' }}>
-                              {total > 0 ? `${total}` : '—'}
+                            {/* Row total */}
+                            <p
+                              className="text-center font-bold"
+                              style={{
+                                fontSize: '0.875rem',
+                                color: rowTotal > 0 ? '#ffffff' : 'rgba(255,255,255,0.2)',
+                                transition: 'color 0.2s',
+                              }}
+                            >
+                              {rowTotal > 0 ? `${rowTotal}` : '—'}
                             </p>
                           </div>
                         );
                       })}
 
-                      {/* Total weight + copy icon + add set row */}
-                      <div className="flex items-center justify-between mt-4">
-                        {/* Total weight */}
-                        <div>
-                          <span
-                            className="font-black"
-                            style={{
-                              fontSize: '1.4rem',
-                              color: totalWeight > 0 ? '#ffffff' : 'rgba(255,255,255,0.2)',
-                              lineHeight: 1,
-                            }}
-                          >
-                            {totalWeight > 0 ? totalWeight.toLocaleString() : '—'}
-                          </span>
-                          {totalWeight > 0 && (
-                            <span className="ml-1 text-xs font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.4)' }}>kg</span>
-                          )}
-                        </div>
-
-                        {/* Right side: add set (if < 6) + copy icon */}
-                        <div className="flex items-center gap-3">
-                          {ex.sets.length < 6 && (
-                            <button
-                              onClick={() => addSet(ex.name)}
-                              className="flex items-center gap-1 text-xs font-bold uppercase tracking-widest"
-                              style={{ color: 'rgba(255,255,255,0.35)' }}
-                            >
-                              <Plus size={13} />
-                              <span>Set</span>
-                            </button>
-                          )}
-                          {/* Copy from last — just the + icon in a circle */}
+                      {/* BOTTOM: + Set (left-aligned) */}
+                      <div className="flex items-center mt-4">
+                        {ex.sets.length < 6 && (
                           <button
-                            onClick={() => copyFromLast(ex.name)}
-                            title="Copy from last session"
-                            style={{
-                              width: 30,
-                              height: 30,
-                              borderRadius: '50%',
-                              backgroundColor: 'rgba(255,255,255,0.08)',
-                              border: '1px solid rgba(255,255,255,0.12)',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              color: 'rgba(255,255,255,0.55)',
-                              cursor: 'pointer',
-                              flexShrink: 0,
-                            }}
+                            onClick={() => addSet(ex.name)}
+                            className="flex items-center gap-1 text-xs font-bold uppercase tracking-widest"
+                            style={{ color: 'rgba(255,255,255,0.35)' }}
                           >
-                            <Plus size={14} strokeWidth={2.5} />
+                            <Plus size={13} />
+                            <span>Set</span>
                           </button>
-                        </div>
+                        )}
                       </div>
                     </div>
                   )}
