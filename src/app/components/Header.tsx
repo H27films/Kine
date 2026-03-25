@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, ArrowLeft, Dumbbell, BarChart3, FileText, Activity, Flame } from 'lucide-react';
+import { Menu, ArrowLeft, Dumbbell, BarChart3, FileText, Flame } from 'lucide-react';
 import { Page } from '../../types';
 
 interface HeaderProps {
@@ -8,6 +8,12 @@ interface HeaderProps {
   onBack?: () => void;
   onNavigate?: (page: Page) => void;
 }
+
+const RunningManIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+    <path d="M13.49 5.48c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-3.6 13.9l1-4.4 2.1 2v6h2v-7.5l-2.1-2 .6-3c1.3 1.5 3.3 2.5 5.5 2.5v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1l-5.2 2.2v4.7h2v-3.4l1.8-.7-1.6 8.1-4.9-1-.4 2 7 1.4z"/>
+  </svg>
+);
 
 export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNavigate }) => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -31,10 +37,9 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
 
   const isDashboard = !title;
 
-  // Determine center content for log pages
   const getLogIcon = () => {
     if (currentPage === 'weights') return <Dumbbell size={20} color="white" />;
-    if (currentPage === 'cardio') return <Activity size={20} color="white" />;
+    if (currentPage === 'cardio') return <RunningManIcon />;
     if (currentPage === 'calories') return <Flame size={20} color="white" />;
     return null;
   };
@@ -61,7 +66,6 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
           </button>
         )}
 
-        {/* Dropdown Menu */}
         {menuOpen && (
           <div
             className="absolute top-12 left-0 w-48 rounded-xl overflow-hidden shadow-2xl"

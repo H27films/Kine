@@ -302,19 +302,19 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
         )}
       </section>
 
-      {/* Grand Total — shown once exercises are added */}
-      {addedExercises.length > 0 && (
+      {/* Grand Total — only shown when there's actual weight entered */}
+      {addedExercises.length > 0 && grandTotal > 0 && (
         <div className="flex items-baseline gap-2 mb-6 mt-2">
           <span
             style={{
               fontSize: '2.6rem',
               fontWeight: 900,
               lineHeight: 1,
-              color: grandTotal > 0 ? '#ffffff' : 'rgba(255,255,255,0.2)',
+              color: '#ffffff',
               letterSpacing: '-0.02em',
             }}
           >
-            {grandTotal > 0 ? grandTotal.toLocaleString() : '—'}
+            {grandTotal.toLocaleString()}
           </span>
           <span
             style={{
@@ -394,17 +394,21 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                       {/* TOP ROW: exercise total (left) + Copy icon (right) */}
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-baseline gap-1">
-                          <span
-                            className="font-black"
-                            style={{
-                              fontSize: '1.5rem',
-                              color: exTotal > 0 ? '#ffffff' : 'rgba(255,255,255,0.2)',
-                              lineHeight: 1,
-                            }}
-                          >
-                            {exTotal > 0 ? exTotal.toLocaleString() : '—'}
-                          </span>
-                          <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#ffffff' }}>KG</span>
+                          {exTotal > 0 && (
+                            <>
+                              <span
+                                className="font-black"
+                                style={{
+                                  fontSize: '1.5rem',
+                                  color: '#ffffff',
+                                  lineHeight: 1,
+                                }}
+                              >
+                                {exTotal.toLocaleString()}
+                              </span>
+                              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#ffffff' }}>KG</span>
+                            </>
+                          )}
                         </div>
 
                         {/* Copy from last */}
@@ -479,8 +483,8 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                               <button onClick={() => updateSet(ex.name, idx, 'reps', set.reps + 1)} style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}>+</button>
                             </div>
 
-                            <p className="text-center font-bold" style={{ fontSize: '0.875rem', color: rowTotal > 0 ? '#ffffff' : 'rgba(255,255,255,0.2)', transition: 'color 0.2s' }}>
-                              {rowTotal > 0 ? `${rowTotal}` : '—'}
+                            <p className="text-center font-bold" style={{ fontSize: '0.875rem', color: '#ffffff', transition: 'color 0.2s' }}>
+                              {rowTotal > 0 ? rowTotal : ''}
                             </p>
                           </div>
                         );
