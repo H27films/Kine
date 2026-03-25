@@ -42,21 +42,64 @@ const calorieWeeks: number[][] = [
 
 const TOTAL_WEEKS = 7;
 
-const BarChart: React.FC<{ data: number[]; maxVal: number; label: string; unit: string; weekIndex: number; onPrev: () => void; onNext: () => void }> = ({ data, maxVal, label, unit, weekIndex, onPrev, onNext }) => {
+type WeeklyTab = 'Cardio' | 'Weights' | 'Calories';
+
+const WeeklyChart: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<WeeklyTab>('Cardio');
+  const [cardioWeek, setCardioWeek] = useState(0);
+  const [weightsWeek, setWeightsWeek] = useState(0);
+  const [calorieWeek, setCalorieWeek] = useState(0);
+
+  const tabs: WeeklyTab[] = ['Cardio', 'Weights', 'Calories'];
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const weekLabel = `${TOTAL_WEEKS - weekIndex}`;
+
+  const config = (() => {
+    switch (activeTab) {
+      case 'Cardio':
+        return {
+          data: cardioWeeks[cardioWeek],
+          maxVal: 12,
+          unit: 'km',
+          weekIndex: cardioWeek,
+          onPrev: () => setCardioWeek(p => Math.min(p + 1, TOTAL_WEEKS - 1)),
+          onNext: () => setCardioWeek(p => Math.max(p - 1, 0)),
+        };
+      case 'Weights':
+        return {
+          data: weightsWeeks[weightsWeek],
+          maxVal: 600,
+          unit: 'kg',
+          weekIndex: weightsWeek,
+          onPrev: () => setWeightsWeek(p => Math.min(p + 1, TOTAL_WEEKS - 1)),
+          onNext: () => setWeightsWeek(p => Math.max(p - 1, 0)),
+        };
+      case 'Calories':
+        return {
+          data: calorieWeeks[calorieWeek],
+          maxVal: 2800,
+          unit: 'kcal',
+          weekIndex: calorieWeek,
+          onPrev: () => setCalorieWeek(p => Math.min(p + 1, TOTAL_WEEKS - 1)),
+          onNext: () => setCalorieWeek(p => Math.max(p - 1, 0)),
+        };
+    }
+  })();
+
+  const weekLabel = `${TOTAL_WEEKS - config.weekIndex}`;
+
   return (
     <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff' }}>
+      {/* Header: label left, week nav right */}
       <div className="flex items-center justify-between mb-4">
         <div className="text-[10px] font-bold uppercase tracking-[1.5px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
-          {label}
+          WEEKLY
         </div>
         <div className="flex items-center gap-3">
           <button
-            onClick={onPrev}
-            disabled={weekIndex >= TOTAL_WEEKS - 1}
+            onClick={config.onPrev}
+            disabled={config.weekIndex >= TOTAL_WEEKS - 1}
             className="transition-opacity"
-            style={{ opacity: weekIndex >= TOTAL_WEEKS - 1 ? 0.2 : 0.6 }}
+            style={{ opacity: config.weekIndex >= TOTAL_WEEKS - 1 ? 0.2 : 0.6 }}
           >
             <ChevronLeft size={16} color="white" />
           </button>
@@ -64,23 +107,44 @@ const BarChart: React.FC<{ data: number[]; maxVal: number; label: string; unit: 
             {weekLabel}
           </span>
           <button
-            onClick={onNext}
-            disabled={weekIndex <= 0}
+            onClick={config.onNext}
+            disabled={config.weekIndex <= 0}
             className="transition-opacity"
-            style={{ opacity: weekIndex <= 0 ? 0.2 : 0.6 }}
+            style={{ opacity: config.weekIndex <= 0 ? 0.2 : 0.6 }}
           >
             <ChevronRight size={16} color="white" />
           </button>
         </div>
       </div>
+
+      {/* Tabs */}
+      <div className="flex gap-2 mb-5">
+        {tabs.map(tab => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className="text-[10px] font-bold uppercase tracking-[1px] px-3 py-1 rounded transition-all"
+            style={{
+              backgroundColor: activeTab === tab ? 'rgba(255,255,255,0.12)' : 'transparent',
+              color: activeTab === tab ? 'white' : 'rgba(255,255,255,0.35)',
+              border: '1px solid',
+              borderColor: activeTab === tab ? 'rgba(255,255,255,0.25)' : 'transparent',
+            }}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
+
+      {/* Bar Chart */}
       <div className="flex items-end justify-between h-32" style={{ gap: '12px' }}>
-        {data.map((val, i) => {
-          const pct = maxVal > 0 ? val / maxVal : 0;
+        {config.data.map((val, i) => {
+          const pct = config.maxVal > 0 ? val / config.maxVal : 0;
           const brightness = Math.round(80 + pct * 175);
           const barColor = val > 0 ? `rgb(${brightness},${brightness},${brightness})` : 'rgba(255,255,255,0.05)';
           return (
             <div key={i} className="flex flex-col items-center h-full justify-end" style={{ flex: '1', maxWidth: '28px' }}>
-              <div className="text-[8px] font-bold text-white/60 mb-1">{val > 0 ? `${val}${unit}` : ''}</div>
+              <div className="text-[8px] font-bold text-white/60 mb-1">{val > 0 ? `${val}${config.unit}` : ''}</div>
               <div
                 className="w-full min-h-[4px] transition-all"
                 style={{
@@ -96,112 +160,6 @@ const BarChart: React.FC<{ data: number[]; maxVal: number; label: string; unit: 
           );
         })}
       </div>
-    </div>
-  );
-};
-
-const ScatterChart: React.FC<{ data: number[]; minVal: number; maxVal: number; label: string; weekIndex: number; onPrev: () => void; onNext: () => void }> = ({ data, minVal, maxVal, label, weekIndex, onPrev, onNext }) => {
-  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const chartHeight = 128;
-  const range = maxVal - minVal;
-  const weekLabel = `${TOTAL_WEEKS - weekIndex}`;
-
-  const getPosition = (val: number, index: number) => {
-    const pct = range > 0 ? (val - minVal) / range : 0;
-    const clampedPct = Math.max(0, Math.min(1, pct));
-    return {
-      x: ((index + 0.5) / 7) * 100,
-      y: (1 - clampedPct) * 100,
-      bottomPx: clampedPct * chartHeight,
-    };
-  };
-
-  const buildCurvedPath = () => {
-    const points = data.map((val, i) => getPosition(val, i));
-    if (points.length < 2) return '';
-    let d = `M ${points[0].x} ${points[0].y}`;
-    for (let i = 0; i < points.length - 1; i++) {
-      const p0 = points[i];
-      const p1 = points[i + 1];
-      const tension = 0.3;
-      const dx = p1.x - p0.x;
-      const cp1x = p0.x + dx * tension;
-      const cp1y = p0.y;
-      const cp2x = p1.x - dx * tension;
-      const cp2y = p1.y;
-      d += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p1.x} ${p1.y}`;
-    }
-    return d;
-  };
-
-  return (
-    <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff' }}>
-      <div className="flex items-center justify-between mb-4">
-        <div className="text-[10px] font-bold uppercase tracking-[1.5px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
-          {label}
-        </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={onPrev}
-            disabled={weekIndex >= TOTAL_WEEKS - 1}
-            className="transition-opacity"
-            style={{ opacity: weekIndex >= TOTAL_WEEKS - 1 ? 0.2 : 0.6 }}
-          >
-            <ChevronLeft size={16} color="white" />
-          </button>
-          <span className="text-[10px] font-bold uppercase tracking-[1px] text-white/50 min-w-[50px] text-center">
-            {weekLabel}
-          </span>
-          <button
-            onClick={onNext}
-            disabled={weekIndex <= 0}
-            className="transition-opacity"
-            style={{ opacity: weekIndex <= 0 ? 0.2 : 0.6 }}
-          >
-            <ChevronRight size={16} color="white" />
-          </button>
-        </div>
-      </div>
-      <div className="flex items-end justify-between relative" style={{ gap: '12px', height: `${chartHeight}px` }}>
-        <svg
-          className="absolute inset-0 pointer-events-none"
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
-          style={{ width: '100%', height: '100%', overflow: 'visible' }}
-        >
-          <path
-            d={buildCurvedPath()}
-            fill="none"
-            stroke="rgba(255,255,255,0.3)"
-            strokeWidth="0.8"
-            vectorEffect="non-scaling-stroke"
-          />
-        </svg>
-
-        {data.map((val, i) => {
-          const { bottomPx } = getPosition(val, i);
-          return (
-            <div key={i} className="flex flex-col items-center h-full justify-end relative" style={{ flex: '1', maxWidth: '28px' }}>
-              <div className="absolute left-0 right-0 flex flex-col items-center" style={{ bottom: `${bottomPx}px` }}>
-                <div className="text-[8px] font-bold text-white/60 mb-1 whitespace-nowrap">{val}</div>
-                <div className="w-[7px] h-[7px] rounded-full bg-white" />
-              </div>
-              <div
-                className="absolute left-1/2 -translate-x-1/2 bottom-0"
-                style={{
-                  height: `${bottomPx}px`,
-                  width: '1px',
-                  backgroundImage: 'repeating-linear-gradient(to bottom, rgba(255,255,255,0.15) 0px, rgba(255,255,255,0.15) 3px, transparent 3px, transparent 6px)',
-                }}
-              />
-              <div className="absolute -bottom-6 text-[9px] font-bold uppercase" style={{ color: 'rgba(255,255,255,0.3)' }}>
-                {days[i]}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-      <div style={{ height: '14px' }} />
     </div>
   );
 };
@@ -251,9 +209,6 @@ const getDayLabel = (offset: number): string => {
 
 export const Dashboard: React.FC = () => {
   const [dayOffset, setDayOffset] = useState(0);
-  const [cardioWeek, setCardioWeek] = useState(0);
-  const [weightsWeek, setWeightsWeek] = useState(0);
-  const [calorieWeek, setCalorieWeek] = useState(0);
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
 
   const exercises = weightsByDay[dayOffset] || [];
@@ -264,11 +219,9 @@ export const Dashboard: React.FC = () => {
       {/* Hero Metric */}
       <section className="pt-4">
         <div className="flex items-start">
-          {/* Left: Big number with rounded dot */}
           <div className="text-[4rem] font-black leading-none tracking-tighter text-white">
             33.5
           </div>
-          {/* Right of number: MOVEMENT (KM) + yesterday */}
           <div className="flex flex-col justify-center ml-4 pt-3">
             <div className="text-[13px] font-black uppercase tracking-[2px] text-white">
               MOVEMENT (KM)
@@ -298,7 +251,7 @@ export const Dashboard: React.FC = () => {
           ))}
         </div>
 
-        {/* Inline lollipop chart - appears when an activity is selected */}
+        {/* Inline lollipop chart */}
         {selectedActivity && activityWeeklyData[selectedActivity] && (() => {
           const data = activityWeeklyData[selectedActivity];
           const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
@@ -397,43 +350,9 @@ export const Dashboard: React.FC = () => {
         </div>
       </section>
 
-      {/* Tracker Weekly - Cardio */}
+      {/* Combined Weekly Chart */}
       <section>
-        <BarChart
-          data={cardioWeeks[cardioWeek]}
-          maxVal={12}
-          label="Tracker Weekly — Cardio"
-          unit="km"
-          weekIndex={cardioWeek}
-          onPrev={() => setCardioWeek((prev) => Math.min(prev + 1, TOTAL_WEEKS - 1))}
-          onNext={() => setCardioWeek((prev) => Math.max(prev - 1, 0))}
-        />
-      </section>
-
-      {/* Tracker Weekly - Weights */}
-      <section>
-        <BarChart
-          data={weightsWeeks[weightsWeek]}
-          maxVal={600}
-          label="Tracker Weekly — Weights"
-          unit="kg"
-          weekIndex={weightsWeek}
-          onPrev={() => setWeightsWeek((prev) => Math.min(prev + 1, TOTAL_WEEKS - 1))}
-          onNext={() => setWeightsWeek((prev) => Math.max(prev - 1, 0))}
-        />
-      </section>
-
-      {/* Tracker Weekly - Calories */}
-      <section>
-        <ScatterChart
-          data={calorieWeeks[calorieWeek]}
-          minVal={500}
-          maxVal={2500}
-          label="Tracker Weekly — Calories"
-          weekIndex={calorieWeek}
-          onPrev={() => setCalorieWeek((prev) => Math.min(prev + 1, TOTAL_WEEKS - 1))}
-          onNext={() => setCalorieWeek((prev) => Math.max(prev - 1, 0))}
-        />
+        <WeeklyChart />
       </section>
     </div>
   );
