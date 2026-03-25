@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Dumbbell, ChevronDown, ChevronRight, ChevronUp, Plus, Minus, Clock, Check } from 'lucide-react';
+import { Dumbbell, ChevronDown, ChevronRight, ChevronUp, Plus, Minus, Clock, Check, X } from 'lucide-react';
 import { Page } from '../../types';
 
 interface LogWeightsProps {
@@ -94,6 +94,13 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     setExerciseOpen(false);
   };
 
+  const cancelSelection = () => {
+    setSelectedGroup('');
+    setGroupOpen(false);
+    setExerciseOpen(false);
+    // addedExercises intentionally kept
+  };
+
   const handleAddExercise = (name: string) => {
     if (!addedExercises.find(e => e.name === name)) {
       setAddedExercises(prev => [...prev, {
@@ -172,6 +179,9 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
 
   const grandTotal = addedExercises.reduce((acc, ex) => acc + calcExerciseTotal(ex.sets), 0);
 
+  // Whether the muscle group selector is in its "active" (small) state
+  const selectorActive = groupOpen || !!selectedGroup;
+
   const dropdownListStyle: React.CSSProperties = {
     position: 'absolute',
     top: 'calc(100% + 6px)',
@@ -194,18 +204,18 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
   };
 
   const sectionLabelStyle: React.CSSProperties = {
-    fontSize: '1rem',
-    fontWeight: 700,
-    letterSpacing: '0.04em',
+    fontSize: '1.15rem',
+    fontWeight: 800,
+    letterSpacing: '-0.03em',
     textTransform: 'uppercase',
     color: '#ffffff',
     marginBottom: '1.25rem',
   };
 
   const weeklyLabelStyle: React.CSSProperties = {
-    fontSize: '0.875rem',
-    fontWeight: 700,
-    letterSpacing: '0.04em',
+    fontSize: '1rem',
+    fontWeight: 800,
+    letterSpacing: '-0.03em',
     textTransform: 'uppercase',
     color: '#ffffff',
     marginBottom: '1.25rem',
@@ -237,15 +247,51 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
       </nav>
 
       {/* Muscle Group + Exercise Selection */}
-      <section className="mb-4">
+      <section className="mb-12">
         {/* Muscle Group */}
         <div ref={groupRef} className="relative mb-4">
-          <div onClick={() => setGroupOpen(o => !o)} style={textTriggerStyle}>
-            <span style={{ color: selectedGroup ? '#ffffff' : 'rgba(255,255,255,0.75)', fontSize: '0.875rem', fontWeight: selectedGroup ? 700 : 500, letterSpacing: '0.03em' }}>
-              {selectedGroup || 'Select Muscle Group'}
-            </span>
-            <ChevronDown size={14} style={{ color: 'rgba(255,255,255,0.45)', transform: groupOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div onClick={() => setGroupOpen(o => !o)} style={textTriggerStyle}>
+              <span
+                style={{
+                  color: selectedGroup ? '#ffffff' : 'rgba(255,255,255,0.75)',
+                  fontSize: selectorActive ? '0.875rem' : '1.6rem',
+                  fontWeight: selectedGroup ? 700 : selectorActive ? 500 : 700,
+                  letterSpacing: selectorActive ? '0.03em' : '-0.03em',
+                  transition: 'font-size 0.2s ease, letter-spacing 0.2s ease',
+                  lineHeight: 1.1,
+                }}
+              >
+                {selectedGroup || 'Select Muscle Group'}
+              </span>
+              <ChevronDown
+                size={selectorActive ? 14 : 20}
+                style={{
+                  color: 'rgba(255,255,255,0.45)',
+                  transform: groupOpen ? 'rotate(180deg)' : 'none',
+                  transition: 'transform 0.2s',
+                  flexShrink: 0,
+                }}
+              />
+            </div>
+
+            {/* X cancel — only when group is selected */}
+            {selectedGroup && (
+              <button
+                onClick={cancelSelection}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: 'rgba(255,255,255,0.35)',
+                  padding: '4px',
+                  flexShrink: 0,
+                  marginLeft: '8px',
+                }}
+              >
+                <X size={16} strokeWidth={2} />
+              </button>
+            )}
           </div>
+
           {groupOpen && (
             <div style={dropdownListStyle}>
               {Object.keys(exercisesByGroup).map((group, i, arr) => (
@@ -272,12 +318,31 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
         {/* Exercise Dropdown */}
         {selectedGroup && (
           <div ref={exerciseRef} className="relative">
-            <div onClick={() => setExerciseOpen(o => !o)} style={textTriggerStyle}>
-              <span style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.875rem', fontWeight: 500, letterSpacing: '0.03em' }}>
-                Choose exercise...
-              </span>
-              <ChevronDown size={14} style={{ color: 'rgba(255,255,255,0.3)', transform: exerciseOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div onClick={() => setExerciseOpen(o => !o)} style={textTriggerStyle}>
+                <span style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.875rem', fontWeight: 500, letterSpacing: '0.03em' }}>
+                  Choose exercise...
+                </span>
+                <ChevronDown size={14} style={{ color: 'rgba(255,255,255,0.3)', transform: exerciseOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+              </div>
+
+              {/* X on exercise row — closes exercise picker only */}
+              {exerciseOpen && (
+                <button
+                  onClick={() => setExerciseOpen(false)}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: 'rgba(255,255,255,0.35)',
+                    padding: '4px',
+                    flexShrink: 0,
+                    marginLeft: '8px',
+                  }}
+                >
+                  <X size={16} strokeWidth={2} />
+                </button>
+              )}
             </div>
+
             {exerciseOpen && (
               <div style={dropdownListStyle}>
                 {exercisesByGroup[selectedGroup].map((ex, i, arr) => {
