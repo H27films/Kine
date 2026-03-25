@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Dumbbell, ChevronDown, Minus, Plus, Clock, X } from 'lucide-react';
+import { Dumbbell, ChevronDown, ChevronRight, Minus, Plus, Clock, Check } from 'lucide-react';
 import { Page } from '../../types';
 
 interface LogWeightsProps {
@@ -18,16 +18,40 @@ const exercisesByGroup: Record<string, string[]> = {
   Legs: ['Squat', 'Leg Press', 'Romanian Deadlift', 'Lunges', 'Leg Curl', 'Leg Extension', 'Calf Raises'],
 };
 
+const lastTimeData: Record<string, { weight: number; reps: number }> = {
+  'Bench Press':     { weight: 80,   reps: 10 },
+  'Incline Press':   { weight: 70,   reps: 10 },
+  'Dumbbell Flyes':  { weight: 24.5, reps: 12 },
+  'Cable Crossover': { weight: 15,   reps: 15 },
+  'Chest Dips':      { weight: 0,    reps: 12 },
+  'Push-ups':        { weight: 0,    reps: 20 },
+  'Deadlift':        { weight: 120,  reps: 5  },
+  'Pull-ups':        { weight: 0,    reps: 8  },
+  'Bent-over Row':   { weight: 70,   reps: 8  },
+  'Lat Pulldown':    { weight: 60,   reps: 12 },
+  'Seated Row':      { weight: 55,   reps: 12 },
+  'Face Pull':       { weight: 20,   reps: 15 },
+  'Squat':           { weight: 100,  reps: 8  },
+  'Leg Press':       { weight: 140,  reps: 10 },
+  'Romanian Deadlift': { weight: 80, reps: 8  },
+  'Lunges':          { weight: 30,   reps: 12 },
+  'Leg Curl':        { weight: 45,   reps: 12 },
+  'Leg Extension':   { weight: 50,   reps: 12 },
+  'Calf Raises':     { weight: 60,   reps: 20 },
+};
+
 const recentLogs = [
   { name: 'Dumbbell Flyes', sets: 3, reps: 12, weight: 24.5 },
-  { name: 'Incline Press', sets: 4, reps: 10, weight: 80.0 },
-  { name: 'Cable Crossover', sets: 3, reps: 15, weight: 15.0 },
+  { name: 'Incline Press',  sets: 4, reps: 10, weight: 80.0 },
+  { name: 'Cable Crossover',sets: 3, reps: 15, weight: 15.0 },
 ];
 
 interface AddedExercise {
   name: string;
   weight: string;
   reps: number;
+  expanded: boolean;
+  logged: boolean;
 }
 
 export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
@@ -39,7 +63,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
   const groupRef = useRef<HTMLDivElement>(null);
   const exerciseRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdowns on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (groupRef.current && !groupRef.current.contains(e.target as Node)) setGroupOpen(false);
@@ -57,16 +80,20 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
 
   const handleAddExercise = (name: string) => {
     if (!addedExercises.find(e => e.name === name)) {
-      setAddedExercises(prev => [...prev, { name, weight: '', reps: 12 }]);
+      setAddedExercises(prev => [...prev, { name, weight: '', reps: 12, expanded: false, logged: false }]);
     }
   };
 
-  const handleRemoveExercise = (name: string) => {
-    setAddedExercises(prev => prev.filter(e => e.name !== name));
+  const toggleExpanded = (name: string) => {
+    setAddedExercises(prev => prev.map(e => e.name === name ? { ...e, expanded: !e.expanded } : e));
   };
 
   const updateExercise = (name: string, field: 'weight' | 'reps', value: string | number) => {
     setAddedExercises(prev => prev.map(e => e.name === name ? { ...e, [field]: value } : e));
+  };
+
+  const handleLogSet = (name: string) => {
+    setAddedExercises(prev => prev.map(e => e.name === name ? { ...e, logged: true, expanded: false } : e));
   };
 
   const dropdownBoxStyle: React.CSSProperties = {
@@ -121,8 +148,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
       </nav>
 
       {/* Muscle Group + Exercise Selection */}
-      <section className="mb-10">
-
+      <section className="mb-8">
         {/* Muscle Group Dropdown */}
         <div className="mb-4">
           <p className="text-xs font-semibold mb-2" style={{ color: 'rgba(255,255,255,0.85)', letterSpacing: '0.05em' }}>Select Muscle Group</p>
@@ -157,7 +183,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
           </div>
         </div>
 
-        {/* Exercise Dropdown — shown once group selected */}
+        {/* Exercise Dropdown */}
         {selectedGroup && (
           <div>
             <p className="text-xs font-semibold mb-2" style={{ color: 'rgba(255,255,255,0.85)', letterSpacing: '0.05em' }}>Select Exercise</p>
@@ -212,48 +238,111 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
         )}
       </section>
 
-      {/* Entry Area — one card per added exercise */}
-      {addedExercises.length === 0 ? (
-        <section className="mb-12 p-8 rounded-xl" style={{ backgroundColor: '#0e0e0e', border: '1px solid rgba(71,71,71,0.1)' }}>
-          <p className="text-sm" style={{ color: '#444444' }}>Select a muscle group and add exercises above</p>
-        </section>
-      ) : (
-        <section className="mb-12 space-y-4">
-          {addedExercises.map((ex) => (
-            <div key={ex.name} className="p-6 rounded-xl" style={{ backgroundColor: '#0e0e0e', border: '1px solid rgba(71,71,71,0.12)', boxShadow: '0 25px 50px rgba(0,0,0,0.4)' }}>
-              {/* Exercise header */}
-              <div className="flex items-center justify-between mb-5">
-                <h3 className="text-xs font-bold uppercase tracking-[0.25em]" style={{ color: '#c6c6c6' }}>{ex.name}</h3>
-                <button onClick={() => handleRemoveExercise(ex.name)} style={{ color: '#555' }}>
-                  <X size={16} />
-                </button>
-              </div>
-              {/* Weight input */}
-              <div className="flex items-baseline gap-2 mb-5">
-                <input
-                  type="number"
-                  value={ex.weight}
-                  onChange={(e) => updateExercise(ex.name, 'weight', e.target.value)}
-                  placeholder="00"
-                  className="text-6xl font-black tracking-tighter text-white w-32 p-0"
-                  style={{ backgroundColor: 'transparent', border: 'none', outline: 'none', color: '#ffffff' }}
-                />
-                <span className="text-xl font-bold uppercase tracking-widest" style={{ color: '#c6c6c6' }}>KG</span>
-              </div>
-              {/* Reps + Log Set */}
-              <div className="flex items-center justify-between gap-6">
-                <div className="flex-1">
-                  <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#c6c6c6' }}>Repetitions</label>
-                  <div className="flex items-center justify-between rounded-full px-4 py-2" style={{ backgroundColor: '#1b1b1b' }}>
-                    <button onClick={() => updateExercise(ex.name, 'reps', Math.max(1, ex.reps - 1))} style={{ color: '#c6c6c6' }}><Minus size={18} /></button>
-                    <span className="text-xl font-black text-white">{ex.reps}</span>
-                    <button onClick={() => updateExercise(ex.name, 'reps', ex.reps + 1)} style={{ color: '#c6c6c6' }}><Plus size={18} /></button>
+      {/* Exercise List */}
+      {addedExercises.length > 0 && (
+        <section className="mb-10">
+          <div className="space-y-0">
+            {addedExercises.map((ex, i) => {
+              const last = lastTimeData[ex.name];
+              const lastText = last
+                ? last.weight > 0
+                  ? `Last time: ${last.weight}kg × ${last.reps} reps`
+                  : `Last time: ${last.reps} reps`
+                : 'No previous data';
+
+              return (
+                <div key={ex.name}>
+                  {/* Row */}
+                  <div
+                    className="flex items-center gap-4 py-4"
+                    style={{
+                      borderBottom: '1px solid rgba(255,255,255,0.06)',
+                    }}
+                  >
+                    {/* Tick circle */}
+                    <div
+                      style={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: '50%',
+                        border: ex.logged ? 'none' : '2px solid rgba(255,255,255,0.2)',
+                        backgroundColor: ex.logged ? '#ffffff' : 'transparent',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                        transition: 'all 0.25s',
+                      }}
+                    >
+                      {ex.logged && <Check size={16} color="#1a1a1a" strokeWidth={3} />}
+                    </div>
+
+                    {/* Name + last time */}
+                    <div className="flex-grow">
+                      <p className="font-bold text-sm text-white">{ex.name}</p>
+                      <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>{lastText}</p>
+                    </div>
+
+                    {/* Chevron */}
+                    <button
+                      onClick={() => toggleExpanded(ex.name)}
+                      style={{ color: 'rgba(255,255,255,0.4)', flexShrink: 0 }}
+                    >
+                      <ChevronRight
+                        size={20}
+                        style={{
+                          transform: ex.expanded ? 'rotate(90deg)' : 'none',
+                          transition: 'transform 0.2s',
+                        }}
+                      />
+                    </button>
                   </div>
+
+                  {/* Expanded entry panel */}
+                  {ex.expanded && (
+                    <div
+                      className="py-6 px-2"
+                      style={{
+                        borderBottom: '1px solid rgba(255,255,255,0.06)',
+                      }}
+                    >
+                      {/* Weight */}
+                      <div className="flex items-baseline gap-2 mb-6">
+                        <input
+                          type="number"
+                          value={ex.weight}
+                          onChange={(e) => updateExercise(ex.name, 'weight', e.target.value)}
+                          placeholder="00"
+                          className="text-6xl font-black tracking-tighter text-white"
+                          style={{ backgroundColor: 'transparent', border: 'none', outline: 'none', width: '7rem', color: '#ffffff' }}
+                        />
+                        <span className="text-xl font-bold uppercase tracking-widest" style={{ color: '#c6c6c6' }}>KG</span>
+                      </div>
+
+                      {/* Reps + Log Set */}
+                      <div className="flex items-center justify-between gap-6">
+                        <div className="flex-1">
+                          <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#888' }}>Repetitions</label>
+                          <div className="flex items-center justify-between rounded-full px-4 py-3" style={{ backgroundColor: '#1b1b1b' }}>
+                            <button onClick={() => updateExercise(ex.name, 'reps', Math.max(1, ex.reps - 1))} style={{ color: '#c6c6c6' }}><Minus size={18} /></button>
+                            <span className="text-xl font-black text-white">{ex.reps}</span>
+                            <button onClick={() => updateExercise(ex.name, 'reps', ex.reps + 1)} style={{ color: '#c6c6c6' }}><Plus size={18} /></button>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => handleLogSet(ex.name)}
+                          className="font-black uppercase tracking-widest text-xs px-6 py-4 rounded-full mt-6 active:scale-90 duration-150"
+                          style={{ backgroundColor: '#ffffff', color: '#1a1c1c', boxShadow: '0 12px 32px rgba(0,0,0,0.4)', whiteSpace: 'nowrap' }}
+                        >
+                          Log Set
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <button className="font-black uppercase tracking-widest text-xs px-8 py-4 rounded-full mt-6 active:scale-90 duration-150" style={{ backgroundColor: '#ffffff', color: '#1a1c1c', boxShadow: '0 12px 32px rgba(0,0,0,0.4)' }}>Log Set</button>
-              </div>
-            </div>
-          ))}
+              );
+            })}
+          </div>
         </section>
       )}
 
