@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Dumbbell, ChevronLeft, ChevronRight, Bike, Footprints, Waves } from 'lucide-react';
+import { DailyActivityCards } from '../components/DailyActivityCards';
 
 // Weekly data per activity type (index 0 = this week)
 const activityWeeklyData: Record<string, number[]> = {
@@ -254,6 +255,9 @@ export const Dashboard: React.FC = () => {
         </div>
       </section>
       <section><WeeklyChart /></section>
+
+      {/* ── Daily activity cards ── */}
+      <DailyActivityCards />
     </div>
   );
 };
