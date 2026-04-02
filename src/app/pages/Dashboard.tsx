@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Dumbbell, ChevronLeft, ChevronRight, Bike, Footprints, Waves } from 'lucide-react';
 import { DailyActivityCards } from '../components/DailyActivityCards';
-import { supabase, dateOffsetStr, mapToWeeklyChart, weeksAgoMonday } from '../../lib/supabase';
+import { supabase, dateOffsetStr, weeksAgoMonday } from '../../lib/supabase';
 
-const TOTAL_WEEKS = 7;
 type ChartTab = 'Cardio' | 'Weights' | 'Calories';
 
 // Only these 3 exercise IDs count toward Total Cardio (TrackerDaily)
 const TOTAL_CARDIO_IDS = [82, 83, 87]; // TRACKER, ROW, CYCLE
+const DAY_ORDER = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
 // Map exercise names to short display labels + icons
 const CARDIO_DISPLAY: Record<string, { label: string; icon: React.ReactNode }> = {
@@ -31,6 +31,11 @@ interface DayWeight {
   weight: number;
 }
 
+interface WeekData {
+  weekNumber: number;
+  days: number[]; // 7 values Mon-Sun
+}
+
 const getDayLabel = (offset: number): string => {
   if (offset === 0) return 'Today';
   if (offset === -1) return 'Yesterday';
@@ -39,17 +44,30 @@ const getDayLabel = (offset: number): string => {
   return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 };
 
+/** Group raw rows (with week, day, value) into WeekData[] sorted most-recent first */
+function groupByWeek(rows: { week: number; day: string; value: number }[]): WeekData[] {
+  const map: Record<number, number[]> = {};
+  for (const r of rows) {
+    if (!map[r.week]) map[r.week] = Array(7).fill(0);
+    const idx = DAY_ORDER.indexOf(r.day);
+    if (idx >= 0) map[r.week][idx] = +(map[r.week][idx] + r.value).toFixed(2);
+  }
+  return Object.entries(map)
+    .map(([w, days]) => ({ weekNumber: Number(w), days }))
+    .sort((a, b) => b.weekNumber - a.weekNumber);
+}
+
 const WeeklyChart: React.FC<{
-  cardioWeeks: number[][];
-  weightsWeeks: number[][];
-  calorieWeeks: number[][];
+  cardioWeeks: WeekData[];
+  weightsWeeks: WeekData[];
+  calorieWeeks: WeekData[];
 }> = ({ cardioWeeks, weightsWeeks, calorieWeeks }) => {
   const [activeTab, setActiveTab] = useState<ChartTab>('Cardio');
   const [weekIndices, setWeekIndices] = useState<Record<ChartTab, number>>({
     Cardio: 0, Weights: 0, Calories: 0,
   });
 
-  const chartConfig: Record<ChartTab, { weeks: number[][]; unit: string }> = {
+  const chartConfig: Record<ChartTab, { weeks: WeekData[]; unit: string }> = {
     Cardio:   { weeks: cardioWeeks,  unit: 'km' },
     Weights:  { weeks: weightsWeeks, unit: 'kg' },
     Calories: { weeks: calorieWeeks, unit: '' },
@@ -57,12 +75,14 @@ const WeeklyChart: React.FC<{
 
   const weekIndex = weekIndices[activeTab];
   const { weeks, unit } = chartConfig[activeTab];
-  const data = weeks[weekIndex] || Array(7).fill(0);
+  const current = weeks[weekIndex];
+  const data = current?.days || Array(7).fill(0);
   const maxVal = Math.max(...data, 1);
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const weekLabel = `${TOTAL_WEEKS - weekIndex}`;
+  const weekLabel = current ? `Week ${current.weekNumber}` : '—';
+  const totalWeeks = weeks.length;
 
-  const onPrev = () => setWeekIndices(prev => ({ ...prev, [activeTab]: Math.min(prev[activeTab] + 1, TOTAL_WEEKS - 1) }));
+  const onPrev = () => setWeekIndices(prev => ({ ...prev, [activeTab]: Math.min(prev[activeTab] + 1, totalWeeks - 1) }));
   const onNext = () => setWeekIndices(prev => ({ ...prev, [activeTab]: Math.max(prev[activeTab] - 1, 0) }));
 
   return (
@@ -70,8 +90,8 @@ const WeeklyChart: React.FC<{
       <div className="flex items-center justify-between mb-4">
         <div className="text-[10px] font-bold uppercase tracking-[1.5px]" style={{ color: 'rgba(255,255,255,0.4)' }}>WEEKLY</div>
         <div className="flex items-center gap-3">
-          <button onClick={onPrev} disabled={weekIndex >= TOTAL_WEEKS - 1} className="transition-opacity" style={{ opacity: weekIndex >= TOTAL_WEEKS - 1 ? 0.2 : 0.6 }}><ChevronLeft size={16} color="white" /></button>
-          <span className="text-[10px] font-bold uppercase tracking-[1px] text-white/50 min-w-[50px] text-center">{weekLabel}</span>
+          <button onClick={onPrev} disabled={weekIndex >= totalWeeks - 1} className="transition-opacity" style={{ opacity: weekIndex >= totalWeeks - 1 ? 0.2 : 0.6 }}><ChevronLeft size={16} color="white" /></button>
+          <span className="text-[10px] font-bold uppercase tracking-[1px] text-white/50 min-w-[60px] text-center">{weekLabel}</span>
           <button onClick={onNext} disabled={weekIndex <= 0} className="transition-opacity" style={{ opacity: weekIndex <= 0 ? 0.2 : 0.6 }}><ChevronRight size={16} color="white" /></button>
         </div>
       </div>
@@ -115,23 +135,20 @@ export const Dashboard: React.FC = () => {
   const [dayWeights, setDayWeights] = useState<DayWeight[]>([]);
   const [dayWeightsTotal, setDayWeightsTotal] = useState<number>(0);
 
-  // Weekly chart data
-  const [cardioWeeks, setCardioWeeks] = useState<number[][]>(Array.from({ length: 7 }, () => Array(7).fill(0)));
-  const [weightsWeeks, setWeightsWeeks] = useState<number[][]>(Array.from({ length: 7 }, () => Array(7).fill(0)));
-  const [calorieWeeks, setCalorieWeeks] = useState<number[][]>(Array.from({ length: 7 }, () => Array(7).fill(0)));
+  // Weekly chart data (grouped by actual week number from DB)
+  const [cardioWeeks, setCardioWeeks] = useState<WeekData[]>([]);
+  const [weightsWeeks, setWeightsWeeks] = useState<WeekData[]>([]);
+  const [calorieWeeks, setCalorieWeeks] = useState<WeekData[]>([]);
 
   // Per-activity sparkline data (last 7 days Mon-Sun of current week)
   const [activityWeeklyData, setActivityWeeklyData] = useState<Record<string, number[]>>({});
 
   // Load today's cardio + yesterday's
-  // Total movement = ONLY Tracker + Row + Cycle (exercise IDs 82, 83, 87)
-  // Other cardio (Running, Walking etc.) shown in breakdown but NOT added to total
   useEffect(() => {
     const loadCardio = async () => {
       const todayDate = dateOffsetStr(0);
       const yesterdayDate = dateOffsetStr(-1);
 
-      // Fetch ALL cardio for display breakdown
       const { data } = await supabase
         .from('workouts')
         .select('date, km, total_cardio, exercise_id, exercises:exercise_id(exercise_name)')
@@ -161,7 +178,6 @@ export const Dashboard: React.FC = () => {
         .reduce((s, a) => s + a.total_cardio, 0);
       setTotalMovement(+totalCardio.toFixed(1));
 
-      // Yesterday total: same 3 exercises only
       const yestTotal = yesterdayRows
         .filter((r: any) => TOTAL_CARDIO_IDS.includes(r.exercise_id))
         .reduce((s: number, r: any) => s + Number(r.total_cardio || 0), 0);
@@ -170,7 +186,7 @@ export const Dashboard: React.FC = () => {
     loadCardio();
   }, []);
 
-  // Load per-activity weekly sparklines
+  // Load per-activity sparklines (current week, by date)
   useEffect(() => {
     const loadActivityWeekly = async () => {
       const monday = weeksAgoMonday(0);
@@ -216,54 +232,63 @@ export const Dashboard: React.FC = () => {
     loadWeights();
   }, [dayOffset]);
 
-  // Load weekly chart data (last 7 weeks)
-  // Cardio chart: ONLY Tracker (82) + Row (83) + Cycle (87)
+  // Load weekly chart data grouped by actual week + day columns from DB
   useEffect(() => {
     const loadWeeklyCharts = async () => {
-      const cutoff = weeksAgoMonday(6);
-
-      // Cardio chart: filter to TOTAL_CARDIO_IDS only
+      // Fetch last 10 weeks of data using week column
+      // Cardio: TRACKER + ROW + CYCLE only
       const { data: cardioData } = await supabase
         .from('workouts')
-        .select('date, total_cardio, exercise_id')
+        .select('week, day, total_cardio, exercise_id')
         .eq('type', 'CARDIO')
         .in('exercise_id', TOTAL_CARDIO_IDS)
-        .gte('date', cutoff);
+        .not('week', 'is', null)
+        .not('day', 'is', null)
+        .order('week', { ascending: false })
+        .limit(100);
+
       if (cardioData) {
-        setCardioWeeks(mapToWeeklyChart(
-          (cardioData as any[]).map(r => ({ date: r.date, value: Number(r.total_cardio || 0) }))
+        setCardioWeeks(groupByWeek(
+          (cardioData as any[]).map(r => ({ week: Number(r.week), day: r.day, value: Number(r.total_cardio || 0) }))
         ));
       }
 
       // Weights
       const { data: weightsData } = await supabase
         .from('workouts')
-        .select('date, total_weight')
+        .select('week, day, total_weight')
         .in('type', ['CHEST', 'BACK', 'LEGS'])
-        .gte('date', cutoff);
+        .not('week', 'is', null)
+        .not('day', 'is', null)
+        .order('week', { ascending: false })
+        .limit(100);
+
       if (weightsData) {
-        setWeightsWeeks(mapToWeeklyChart(
-          (weightsData as any[]).map(r => ({ date: r.date, value: Number(r.total_weight || 0) }))
+        setWeightsWeeks(groupByWeek(
+          (weightsData as any[]).map(r => ({ week: Number(r.week), day: r.day, value: Number(r.total_weight || 0) }))
         ));
       }
 
       // Calories
       const { data: calData } = await supabase
         .from('workouts')
-        .select('date, calories')
+        .select('week, day, calories')
         .eq('type', 'MEASUREMENT')
         .not('calories', 'is', null)
-        .gte('date', cutoff);
+        .not('week', 'is', null)
+        .not('day', 'is', null)
+        .order('week', { ascending: false })
+        .limit(100);
+
       if (calData) {
-        setCalorieWeeks(mapToWeeklyChart(
-          (calData as any[]).map(r => ({ date: r.date, value: Number(r.calories || 0) }))
+        setCalorieWeeks(groupByWeek(
+          (calData as any[]).map(r => ({ week: Number(r.week), day: r.day, value: Number(r.calories || 0) }))
         ));
       }
     };
     loadWeeklyCharts();
   }, []);
 
-  // All cardio activities shown in breakdown (TRACKER now shown too)
   const displayActivities = todayActivities.filter(a => a.km > 0);
 
   return (
