@@ -52,18 +52,22 @@ export function dateOffsetStr(offset: number): string {
   return d.toISOString().split('T')[0];
 }
 
-/** ISO week number for today */
+/**
+ * Custom sequential week number based on app start date (2025-01-06).
+ * Week 1 = 2025-01-06, Week 2 = 2025-01-13, etc.
+ */
 export function getISOWeek(): number {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  d.setDate(d.getDate() + 3 - ((d.getDay() + 6) % 7));
-  const week1 = new Date(d.getFullYear(), 0, 4);
-  return 1 + Math.round(((d.getTime() - week1.getTime()) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
+  const APP_START = new Date('2025-01-06T00:00:00Z');
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  const diffDays = Math.floor((today.getTime() - APP_START.getTime()) / (1000 * 60 * 60 * 24));
+  return Math.max(1, Math.floor(diffDays / 7) + 1);
 }
 
-/** Day name e.g. "Monday" */
+/** Day abbreviation matching DB format e.g. "MON", "TUE", "WED" */
 export function getDayName(): string {
-  return new Date().toLocaleDateString('en-US', { weekday: 'long' });
+  const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+  return days[new Date().getDay()];
 }
 
 /**
