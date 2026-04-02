@@ -300,14 +300,14 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
       </nav>
 
       <section className="mb-12">
-        {/* Muscle group selector — always big font, no shrink */}
+        {/* Muscle group selector */}
         <div ref={groupRef} className="relative mb-4">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div onClick={() => setGroupOpen(o => !o)} style={textTriggerStyle}>
-              <span style={{ color: '#ffffff', fontSize: '2rem', fontWeight: 900, letterSpacing: '-0.05em', lineHeight: 1.1, textTransform: 'uppercase' }}>
+              <span style={{ color: '#ffffff', fontSize: '1.15rem', fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1.1, textTransform: 'uppercase' }}>
                 {selectedGroup || 'Select Muscle Group'}
               </span>
-              <ChevronDown size={20} style={{ color: 'rgba(255,255,255,0.45)', transform: groupOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', flexShrink: 0 }} />
+              <ChevronDown size={16} style={{ color: 'rgba(255,255,255,0.45)', transform: groupOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', flexShrink: 0 }} />
             </div>
             {selectedGroup && (
               <button onClick={cancelSelection} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.35)', padding: '4px', flexShrink: 0, marginLeft: '8px' }}>
@@ -315,12 +315,12 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
               </button>
             )}
           </div>
-          {/* Dropdown — no box, no background, just clean text */}
+          {/* Dropdown with box */}
           {groupOpen && (
-            <div style={{ position: 'absolute', top: 'calc(100% + 8px)', left: 0, zIndex: 50 }}>
-              {orderedGroups.map(group => (
+            <div style={{ position: 'absolute', top: 'calc(100% + 8px)', left: 0, zIndex: 50, backgroundColor: '#222222', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '14px', overflow: 'hidden', minWidth: '180px', boxShadow: '0 16px 40px rgba(0,0,0,0.6)' }}>
+              {orderedGroups.map((group, i, arr) => (
                 <div key={group} onClick={() => handleSelectGroup(group)}
-                  style={{ padding: '8px 0', cursor: 'pointer', color: selectedGroup === group ? '#ffffff' : 'rgba(255,255,255,0.45)', fontWeight: selectedGroup === group ? 900 : 600, fontSize: '1.4rem', letterSpacing: '-0.04em', textTransform: 'uppercase', lineHeight: 1.2 }}>
+                  style={{ padding: '12px 18px', cursor: 'pointer', color: selectedGroup === group ? '#ffffff' : 'rgba(255,255,255,0.6)', fontWeight: selectedGroup === group ? 800 : 600, fontSize: '0.875rem', letterSpacing: '0.05em', textTransform: 'uppercase', lineHeight: 1.2, borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none', backgroundColor: selectedGroup === group ? 'rgba(255,255,255,0.06)' : 'transparent' }}>
                   {group}
                 </div>
               ))}
