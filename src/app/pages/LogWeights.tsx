@@ -14,6 +14,8 @@ const tabs: { label: string; page: Page }[] = [
 ];
 
 const WEIGHT_TYPES = ['CHEST', 'BACK', 'LEGS'];
+// Fixed display order
+const GROUP_ORDER = ['Chest', 'Back', 'Legs'];
 
 interface SetRow {
   weight: string;
@@ -74,7 +76,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
       if (data) {
         const grouped: Record<string, Exercise[]> = {};
         for (const ex of data as Exercise[]) {
-          // Capitalise type for display key: CHEST -> Chest
           const key = ex.type.charAt(0) + ex.type.slice(1).toLowerCase();
           if (!grouped[key]) grouped[key] = [];
           grouped[key].push(ex);
@@ -154,7 +155,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
   const handleAddExercise = async (exercise: Exercise) => {
     if (addedExercises.find(e => e.exercise.id === exercise.id)) return;
 
-    // Fetch last session for this exercise
     const { data } = await supabase
       .from('workouts')
       .select('w1, r1')
@@ -262,13 +262,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     sets.reduce((acc, s) => acc + (parseFloat(s.weight) || 0) * s.reps, 0);
 
   const grandTotal = addedExercises.reduce((acc, ex) => acc + calcExerciseTotal(ex.sets), 0);
-  const selectorActive = groupOpen || !!selectedGroup;
-
-  const dropdownListStyle: React.CSSProperties = {
-    position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0,
-    backgroundColor: '#222222', border: '1px solid rgba(255,255,255,0.1)',
-    borderRadius: '14px', overflow: 'hidden', zIndex: 50, boxShadow: '0 16px 40px rgba(0,0,0,0.6)',
-  };
 
   const textTriggerStyle: React.CSSProperties = {
     display: 'inline-flex', alignItems: 'center', gap: '6px', cursor: 'pointer', userSelect: 'none',
@@ -279,7 +272,8 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     textTransform: 'uppercase', color: '#ffffff', marginBottom: '1.25rem',
   };
 
-  const groupKeys = Object.keys(exercisesByGroup);
+  // Always display in Chest → Back → Legs order
+  const orderedGroups = GROUP_ORDER.filter(g => exercisesByGroup[g]);
 
   return (
     <div>
@@ -298,13 +292,14 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
       </nav>
 
       <section className="mb-12">
+        {/* Muscle group selector — always big font, no shrink */}
         <div ref={groupRef} className="relative mb-4">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div onClick={() => setGroupOpen(o => !o)} style={textTriggerStyle}>
-              <span style={{ color: '#ffffff', fontSize: selectorActive ? '0.875rem' : '2rem', fontWeight: selectorActive ? 700 : 900, letterSpacing: selectorActive ? '0.03em' : '-0.05em', transition: 'font-size 0.2s ease', lineHeight: 1.1, textTransform: 'uppercase' }}>
-                {selectedGroup || (selectorActive ? 'Select Muscle Group' : 'Select')}
+              <span style={{ color: '#ffffff', fontSize: '2rem', fontWeight: 900, letterSpacing: '-0.05em', lineHeight: 1.1, textTransform: 'uppercase' }}>
+                {selectedGroup || 'Select Muscle Group'}
               </span>
-              <ChevronDown size={selectorActive ? 14 : 20} style={{ color: 'rgba(255,255,255,0.45)', transform: groupOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', flexShrink: 0 }} />
+              <ChevronDown size={20} style={{ color: 'rgba(255,255,255,0.45)', transform: groupOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', flexShrink: 0 }} />
             </div>
             {selectedGroup && (
               <button onClick={cancelSelection} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.35)', padding: '4px', flexShrink: 0, marginLeft: '8px' }}>
@@ -312,11 +307,12 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
               </button>
             )}
           </div>
+          {/* Dropdown — no box, no background, just clean text */}
           {groupOpen && (
-            <div style={dropdownListStyle}>
-              {groupKeys.map((group, i, arr) => (
+            <div style={{ position: 'absolute', top: 'calc(100% + 8px)', left: 0, zIndex: 50 }}>
+              {orderedGroups.map(group => (
                 <div key={group} onClick={() => handleSelectGroup(group)}
-                  style={{ padding: '14px 18px', cursor: 'pointer', color: selectedGroup === group ? '#ffffff' : '#aaaaaa', fontWeight: selectedGroup === group ? 700 : 400, fontSize: '0.875rem', borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none', backgroundColor: selectedGroup === group ? 'rgba(255,255,255,0.06)' : 'transparent' }}>
+                  style={{ padding: '8px 0', cursor: 'pointer', color: selectedGroup === group ? '#ffffff' : 'rgba(255,255,255,0.45)', fontWeight: selectedGroup === group ? 900 : 600, fontSize: '1.4rem', letterSpacing: '-0.04em', textTransform: 'uppercase', lineHeight: 1.2 }}>
                   {group}
                 </div>
               ))}
@@ -338,7 +334,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
               )}
             </div>
             {exerciseOpen && (
-              <div style={dropdownListStyle}>
+              <div style={{ position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, backgroundColor: '#222222', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '14px', overflow: 'hidden', zIndex: 50, boxShadow: '0 16px 40px rgba(0,0,0,0.6)' }}>
                 {(exercisesByGroup[selectedGroup] || []).map((ex, i, arr) => {
                   const alreadyAdded = !!addedExercises.find(e => e.exercise.id === ex.id);
                   return (
