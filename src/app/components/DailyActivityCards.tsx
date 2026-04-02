@@ -47,8 +47,9 @@ function formatDisplayDate(dateStr: string): string {
   return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 }
 
+// Always show 1 decimal place for km chips
 function fmt(n: number): string {
-  return n % 1 === 0 ? `${n}` : n.toFixed(1);
+  return n.toFixed(1);
 }
 
 // Full kg with commas, no rounding (e.g. 12,300)
@@ -131,12 +132,12 @@ const DayCard: React.FC<{ day: DayData }> = ({ day }) => {
         )}
       </div>
 
-      {/* Cardio KM big number */}
+      {/* Cardio KM big number — always 1 decimal place e.g. 18.4 */}
       {hasCardio ? (
         <div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
             <span style={{ fontSize: '2.8rem', fontWeight: 900, letterSpacing: '-0.04em', color: '#ffffff', lineHeight: 1 }}>
-              {fmt(totalKm)}
+              {totalKm.toFixed(1)}
             </span>
             <span style={{ fontSize: '13px', fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.06em' }}>
               KM
