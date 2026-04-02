@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Page } from '../../types';
+import { supabase, todayStr, getISOWeek, getDayName, weeksAgoMonday } from '../../lib/supabase';
 
 interface LogCaloriesProps {
   onNavigate: (page: Page) => void;
@@ -11,18 +12,122 @@ const tabs: { label: string; page: Page }[] = [
   { label: 'Calories', page: 'calories' },
 ];
 
-const weeklyBars = [60, 45, 80, 95, 70, 55, 75];
 const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const monthlyBars = [30, 40, 35, 60, 55, 45, 70, 65, 50, 40, 80, 75, 60, 50, 45];
 
 type FoodRating = 'bad' | 'ok' | 'good';
 
+// MEASUREMENT exercise IDs (from the exercises table)
+const CALORIES_EXERCISE_ID = 90;
+
 export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
-  const [calories, setCalories] = useState('1420');
+  const [calories, setCalories] = useState('');
   const [foodRating, setFoodRating] = useState<FoodRating>('ok');
-  const [bodyWeight, setBodyWeight] = useState('78.5');
-  const [bodyFat, setBodyFat] = useState('14.2');
-  const [muscleMass, setMuscleMass] = useState('64.1');
+  const [bodyWeight, setBodyWeight] = useState('');
+  const [bodyFat, setBodyFat] = useState('');
+  const [muscleMass, setMuscleMass] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [saveError, setSaveError] = useState('');
+
+  // Weekly calories chart data (7 days Mon-Sun current week)
+  const [weeklyBars, setWeeklyBars] = useState<number[]>(Array(7).fill(0));
+  // Monthly (last 28 days)
+  const [monthlyBars, setMonthlyBars] = useState<number[]>(Array(28).fill(0));
+
+  // Load recent calories for charts + pre-fill last known body measurements
+  useEffect(() => {
+    const loadData = async () => {
+      const cutoff = weeksAgoMonday(3); // ~4 weeks back
+
+      const { data } = await supabase
+        .from('workouts')
+        .select('date, calories, bodyweight, body_fat_percent, muscle_mass')
+        .eq('type', 'MEASUREMENT')
+        .gte('date', cutoff)
+        .order('date', { ascending: false });
+
+      if (!data) return;
+
+      // Pre-fill body measurements from most recent entry
+      const latest = (data as any[]).find(r => r.bodyweight);
+      if (latest) {
+        if (latest.bodyweight) setBodyWeight(String(latest.bodyweight));
+        if (latest.body_fat_percent) setBodyFat(String(latest.body_fat_percent));
+        if (latest.muscle_mass) setMuscleMass(String(latest.muscle_mass));
+      }
+
+      // Build weekly bars (current week Mon-Sun)
+      const today = new Date();
+      const dow = today.getDay();
+      const monday = new Date(today);
+      monday.setDate(today.getDate() - (dow === 0 ? 6 : dow - 1));
+      monday.setHours(0, 0, 0, 0);
+
+      const weekly = Array(7).fill(0);
+      for (const row of data as any[]) {
+        if (!row.calories) continue;
+        const d = new Date(row.date + 'T12:00:00');
+        const diffMs = d.getTime() - monday.getTime();
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        if (diffDays >= 0 && diffDays < 7) {
+          const dayIdx = d.getDay() === 0 ? 6 : d.getDay() - 1;
+          weekly[dayIdx] += Number(row.calories);
+        }
+      }
+      setWeeklyBars(weekly);
+
+      // Build monthly bars (last 28 days)
+      const monthly = Array(28).fill(0);
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      for (const row of data as any[]) {
+        if (!row.calories) continue;
+        const d = new Date(row.date + 'T12:00:00');
+        const diffMs = todayStart.getTime() - d.getTime();
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        if (diffDays >= 0 && diffDays < 28) {
+          monthly[27 - diffDays] += Number(row.calories);
+        }
+      }
+      setMonthlyBars(monthly);
+    };
+    loadData();
+  }, []);
+
+  const handleSave = async () => {
+    setSaving(true);
+    setSaveError('');
+    try {
+      const today = todayStr();
+      const week = getISOWeek();
+      const day = getDayName();
+
+      // Insert calories + food rating row
+      if (calories) {
+        await supabase.from('workouts').insert({
+          date: today,
+          week,
+          day,
+          type: 'MEASUREMENT',
+          exercise_id: CALORIES_EXERCISE_ID,
+          calories: parseInt(calories) || null,
+          food_rating: foodRating,
+          bodyweight: bodyWeight ? parseFloat(bodyWeight) : null,
+          body_fat_percent: bodyFat ? parseFloat(bodyFat) : null,
+          muscle_mass: muscleMass ? parseFloat(muscleMass) : null,
+          new_entry: 'New',
+          source: 'app',
+        });
+      }
+
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (e: any) {
+      setSaveError(e.message || 'Failed to save');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const ratingButtons: { label: string; value: FoodRating }[] = [
     { label: 'Bad', value: 'bad' },
@@ -30,22 +135,18 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
     { label: 'Good', value: 'good' },
   ];
 
+  const weeklyMax = Math.max(...weeklyBars, 1);
+  const monthlyMax = Math.max(...monthlyBars, 1);
+
   return (
     <div>
       <nav className="flex gap-8 mb-12 items-end">
-        {tabs.map((tab) => {
+        {tabs.map(tab => {
           const isActive = tab.page === 'calories';
           return (
             <button key={tab.page} onClick={() => onNavigate(tab.page)} className="flex flex-col items-center" style={{ filter: isActive ? 'none' : 'blur(0.4px)' }}>
-              <span
-                className="uppercase tracking-widest transition-all"
-                style={{
-                  color: isActive ? '#ffffff' : 'rgba(226,226,226,0.65)',
-                  fontWeight: isActive ? 900 : 400,
-                  fontSize: isActive ? '0.875rem' : '0.65rem',
-                  letterSpacing: '0.15em',
-                }}
-              >
+              <span className="uppercase tracking-widest transition-all"
+                style={{ color: isActive ? '#ffffff' : 'rgba(226,226,226,0.65)', fontWeight: isActive ? 900 : 400, fontSize: isActive ? '0.875rem' : '0.65rem', letterSpacing: '0.15em' }}>
                 {tab.label}
               </span>
               {isActive && <div className="h-1 w-1 rounded-full mt-1" style={{ backgroundColor: '#ffffff' }} />}
@@ -53,45 +154,61 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
           );
         })}
       </nav>
+
       <section className="mb-16 space-y-12">
         <div>
           <label className="block text-[10px] uppercase tracking-[0.2em] font-bold mb-4" style={{ color: 'rgba(161,161,170,1)' }}>Total Calories</label>
-          <input type="number" value={calories} onChange={(e) => setCalories(e.target.value)} placeholder="0000" className="w-full text-7xl font-black tracking-tighter text-white p-0" style={{ backgroundColor: 'transparent', border: 'none' }} />
+          <input type="number" value={calories} onChange={e => setCalories(e.target.value)} placeholder="0000"
+            className="w-full text-7xl font-black tracking-tighter text-white p-0"
+            style={{ backgroundColor: 'transparent', border: 'none' }} />
           <span className="text-[10px] font-bold uppercase tracking-[0.2em] mt-2 block" style={{ color: 'rgba(161,161,170,1)' }}>kcal today</span>
         </div>
         <div>
           <label className="block text-[10px] uppercase tracking-[0.2em] font-bold mb-4" style={{ color: 'rgba(161,161,170,1)' }}>Food Rating</label>
           <div className="flex gap-2">
-            {ratingButtons.map((btn) => (
-              <button key={btn.value} onClick={() => setFoodRating(btn.value)} className="flex-1 py-4 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95" style={{ backgroundColor: '#121212', border: foodRating === btn.value ? '1px solid rgba(255,255,255,0.4)' : '1px solid rgba(255,255,255,0.05)', color: foodRating === btn.value ? '#ffffff' : 'rgba(161,161,170,1)' }}>{btn.label}</button>
+            {ratingButtons.map(btn => (
+              <button key={btn.value} onClick={() => setFoodRating(btn.value)}
+                className="flex-1 py-4 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95"
+                style={{ backgroundColor: '#121212', border: foodRating === btn.value ? '1px solid rgba(255,255,255,0.4)' : '1px solid rgba(255,255,255,0.05)', color: foodRating === btn.value ? '#ffffff' : 'rgba(161,161,170,1)' }}>
+                {btn.label}
+              </button>
             ))}
           </div>
         </div>
       </section>
+
       <section className="mb-16">
         <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] mb-8" style={{ color: 'rgba(161,161,170,1)' }}>Performance Trends</h3>
         <div className="space-y-10">
           <div>
             <span className="text-[10px] font-bold uppercase tracking-widest mb-4 block" style={{ color: 'rgba(161,161,170,0.8)' }}>Calories: This Week</span>
             <div className="flex items-end justify-between h-32 gap-2">
-              {weeklyBars.map((h, i) => (
-                <div key={i} className="flex-1 rounded-sm" style={{ height: `${h}%`, backgroundColor: i === weeklyBars.length - 1 ? '#ffffff' : i === 3 ? '#3f3f46' : '#18181b' }} />
-              ))}
+              {weeklyBars.map((h, i) => {
+                const pct = weeklyMax > 0 ? (h / weeklyMax) * 100 : 0;
+                const isToday = i === (new Date().getDay() === 0 ? 6 : new Date().getDay() - 1);
+                return (
+                  <div key={i} className="flex-1 rounded-sm" style={{ height: `${Math.max(pct, h > 0 ? 4 : 0)}%`, backgroundColor: isToday ? '#ffffff' : h > 0 ? '#3f3f46' : '#18181b' }} />
+                );
+              })}
             </div>
             <div className="flex justify-between mt-2 text-[8px] font-bold uppercase tracking-tighter" style={{ color: 'rgba(82,82,91,1)' }}>
-              {weekDays.map((d) => <span key={d}>{d}</span>)}
+              {weekDays.map(d => <span key={d}>{d}</span>)}
             </div>
           </div>
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-widest mb-4 block" style={{ color: 'rgba(161,161,170,0.8)' }}>Calories: This Month</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest mb-4 block" style={{ color: 'rgba(161,161,170,0.8)' }}>Calories: Last 28 Days</span>
             <div className="flex items-end justify-between h-16 gap-1">
-              {monthlyBars.map((h, i) => (
-                <div key={i} className="flex-1 rounded-t-sm" style={{ height: `${h}%`, backgroundColor: i === 10 ? '#ffffff' : h >= 60 ? '#3f3f46' : 'rgba(24,24,27,0.5)' }} />
-              ))}
+              {monthlyBars.map((h, i) => {
+                const pct = monthlyMax > 0 ? (h / monthlyMax) * 100 : 0;
+                return (
+                  <div key={i} className="flex-1 rounded-t-sm" style={{ height: `${Math.max(pct, h > 0 ? 4 : 0)}%`, backgroundColor: i === monthlyBars.length - 1 ? '#ffffff' : h >= monthlyMax * 0.7 ? '#3f3f46' : 'rgba(24,24,27,0.5)' }} />
+                );
+              })}
             </div>
           </div>
         </div>
       </section>
+
       <section className="mb-8">
         <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] mb-6" style={{ color: 'rgba(161,161,170,1)' }}>Body Measurements</h3>
         <div className="grid grid-cols-1 gap-4">
@@ -99,14 +216,23 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
             { label: 'Body Weight (KG)', value: bodyWeight, onChange: setBodyWeight },
             { label: 'Body Fat (%)', value: bodyFat, onChange: setBodyFat },
             { label: 'Muscle Mass (KG)', value: muscleMass, onChange: setMuscleMass },
-          ].map((field) => (
+          ].map(field => (
             <div key={field.label} className="flex justify-between items-center p-5 rounded-lg" style={{ backgroundColor: '#121212', border: '1px solid rgba(255,255,255,0.05)' }}>
               <label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'rgba(161,161,170,0.8)' }}>{field.label}</label>
-              <input type="number" value={field.value} onChange={(e) => field.onChange(e.target.value)} step="0.1" className="text-right text-lg font-black tracking-tight text-white p-0 w-24" style={{ backgroundColor: 'transparent', border: 'none' }} />
+              <input type="number" value={field.value} onChange={e => field.onChange(e.target.value)} step="0.1"
+                className="text-right text-lg font-black tracking-tight text-white p-0 w-24"
+                style={{ backgroundColor: 'transparent', border: 'none' }} />
             </div>
           ))}
         </div>
-        <button className="w-full font-black uppercase tracking-widest text-[10px] py-5 rounded-full mt-8 active:scale-[0.98] transition-all" style={{ backgroundColor: '#ffffff', color: '#000000' }}>Update Metrics</button>
+
+        {saveError && <p className="text-red-400 text-sm mt-4 text-center">{saveError}</p>}
+
+        <button onClick={handleSave} disabled={saving}
+          className="w-full font-black uppercase tracking-widest text-[10px] py-5 rounded-full mt-8 active:scale-[0.98] transition-all"
+          style={{ backgroundColor: saveSuccess ? '#22c55e' : '#ffffff', color: '#000000', opacity: saving ? 0.7 : 1 }}>
+          {saving ? 'Saving...' : saveSuccess ? '✓ Saved!' : 'Update Metrics'}
+        </button>
       </section>
     </div>
   );
