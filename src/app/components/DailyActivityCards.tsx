@@ -21,10 +21,14 @@ const TYPE_LABEL: Record<string, string> = {
 interface DayData {
   date: string;
   calories: number;
-  tracker: number;
-  row: number;
-  cycle: number;
-  running: number;
+  // total_cardio values (km × multiplier) — used for the big KM number
+  trackerTotal: number;
+  rowTotal: number;
+  cycleTotal: number;
+  // raw km — used for chips
+  rowKm: number;
+  cycleKm: number;
+  runningKm: number;
   muscleGroups: string[];
   totalWeightKg: number;
 }
@@ -65,7 +69,8 @@ function getLast7Dates(): string[] {
 }
 
 const DayCard: React.FC<{ day: DayData }> = ({ day }) => {
-  const totalKm = day.tracker + day.row + day.cycle;
+  // Big KM number = sum of total_cardio (km × multiplier) for Tracker + Row + Cycle
+  const totalKm = day.trackerTotal + day.rowTotal + day.cycleTotal;
   const hasCardio = totalKm > 0;
   const hasWeights = day.muscleGroups.length > 0;
   const hasCalories = day.calories > 0;
@@ -119,7 +124,7 @@ const DayCard: React.FC<{ day: DayData }> = ({ day }) => {
         )}
       </div>
 
-      {/* Cardio KM big number */}
+      {/* Cardio KM big number — uses total_cardio */}
       {hasCardio ? (
         <div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
@@ -130,11 +135,11 @@ const DayCard: React.FC<{ day: DayData }> = ({ day }) => {
               KM
             </span>
           </div>
-          {/* Chips: Row, Cycle, Running only (not Tracker) */}
+          {/* Chips: Row, Cycle, Running — show raw km */}
           <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap' }}>
-            {day.row > 0 && <Chip icon={<Waves size={10} />} value={fmt(day.row)} />}
-            {day.cycle > 0 && <Chip icon={<Bike size={10} />} value={fmt(day.cycle)} />}
-            {day.running > 0 && <Chip icon={<PersonStanding size={10} />} value={fmt(day.running)} />}
+            {day.rowKm > 0 && <Chip icon={<Waves size={10} />} value={fmt(day.rowKm)} />}
+            {day.cycleKm > 0 && <Chip icon={<Bike size={10} />} value={fmt(day.cycleKm)} />}
+            {day.runningKm > 0 && <Chip icon={<PersonStanding size={10} />} value={fmt(day.runningKm)} />}
           </div>
         </div>
       ) : (
@@ -193,10 +198,10 @@ export const DailyActivityCards: React.FC = () => {
       const dates = getLast7Dates();
       const oldest = dates[dates.length - 1];
 
-      // Fetch cardio (tracker, row, cycle, running)
+      // Fetch cardio — need both km (raw) and total_cardio (km × multiplier)
       const { data: cardioData } = await supabase
         .from('workouts')
-        .select('date, exercise_id, km')
+        .select('date, exercise_id, km, total_cardio')
         .eq('type', 'CARDIO')
         .in('exercise_id', ALL_CARDIO_IDS)
         .gte('date', oldest)
@@ -220,14 +225,24 @@ export const DailyActivityCards: React.FC = () => {
         .order('date', { ascending: false });
 
       // Build cardio map
-      const cardioMap: Record<string, { tracker: number; row: number; cycle: number; running: number }> = {};
+      // trackerTotal/rowTotal/cycleTotal = sum of total_cardio (for big KM number)
+      // rowKm/cycleKm/runningKm = sum of raw km (for chips)
+      const cardioMap: Record<string, {
+        trackerTotal: number; rowTotal: number; cycleTotal: number;
+        rowKm: number; cycleKm: number; runningKm: number;
+      }> = {};
+
       for (const r of (cardioData || []) as any[]) {
-        if (!cardioMap[r.date]) cardioMap[r.date] = { tracker: 0, row: 0, cycle: 0, running: 0 };
+        if (!cardioMap[r.date]) cardioMap[r.date] = {
+          trackerTotal: 0, rowTotal: 0, cycleTotal: 0,
+          rowKm: 0, cycleKm: 0, runningKm: 0,
+        };
         const km = Number(r.km || 0);
-        if (r.exercise_id === TRACKER_ID) cardioMap[r.date].tracker += km;
-        if (r.exercise_id === ROW_ID) cardioMap[r.date].row += km;
-        if (r.exercise_id === CYCLE_ID) cardioMap[r.date].cycle += km;
-        if (r.exercise_id === RUNNING_ID) cardioMap[r.date].running += km;
+        const tc = Number(r.total_cardio || 0);
+        if (r.exercise_id === TRACKER_ID) cardioMap[r.date].trackerTotal += tc;
+        if (r.exercise_id === ROW_ID) { cardioMap[r.date].rowTotal += tc; cardioMap[r.date].rowKm += km; }
+        if (r.exercise_id === CYCLE_ID) { cardioMap[r.date].cycleTotal += tc; cardioMap[r.date].cycleKm += km; }
+        if (r.exercise_id === RUNNING_ID) cardioMap[r.date].runningKm += km;
       }
 
       // Build calories map
@@ -250,10 +265,12 @@ export const DailyActivityCards: React.FC = () => {
       const result: DayData[] = dates.map(date => ({
         date,
         calories: calMap[date] || 0,
-        tracker: cardioMap[date]?.tracker || 0,
-        row: cardioMap[date]?.row || 0,
-        cycle: cardioMap[date]?.cycle || 0,
-        running: cardioMap[date]?.running || 0,
+        trackerTotal: cardioMap[date]?.trackerTotal || 0,
+        rowTotal: cardioMap[date]?.rowTotal || 0,
+        cycleTotal: cardioMap[date]?.cycleTotal || 0,
+        rowKm: cardioMap[date]?.rowKm || 0,
+        cycleKm: cardioMap[date]?.cycleKm || 0,
+        runningKm: cardioMap[date]?.runningKm || 0,
         muscleGroups: muscleMap[date] ? Array.from(muscleMap[date]) : [],
         totalWeightKg: weightTotalMap[date] || 0,
       }));
