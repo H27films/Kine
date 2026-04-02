@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Page } from '../../types';
-import { supabase, todayStr, getISOWeek, getDayName, weeksAgoMonday } from '../../lib/supabase';
+import { supabase, todayStr, getISOWeek, getDayName, weeksAgoMonday, recalculateDailyTotals } from '../../lib/supabase';
 
 interface LogCaloriesProps {
   onNavigate: (page: Page) => void;
@@ -102,7 +102,6 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
       const week = getISOWeek();
       const day = getDayName();
 
-      // Insert calories + food rating row
       if (calories) {
         await supabase.from('workouts').insert({
           date: today,
@@ -115,9 +114,14 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
           bodyweight: bodyWeight ? parseFloat(bodyWeight) : null,
           body_fat_percent: bodyFat ? parseFloat(bodyFat) : null,
           muscle_mass: muscleMass ? parseFloat(muscleMass) : null,
+          // total_score_k is null for measurement rows
+          total_score_k: null,
           new_entry: 'New',
           source: 'app',
         });
+
+        // Recalculate daily total_score and tracker_daily for all rows today
+        await recalculateDailyTotals(today);
       }
 
       setSaveSuccess(true);

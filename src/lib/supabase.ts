@@ -38,6 +38,9 @@ export interface Workout {
   muscle_mass: number | null;
   time: string | null;
   new_entry: string | null;
+  total_score_k: number | null;
+  total_score: number | null;
+  tracker_daily: number | null;
 }
 
 /** Today as YYYY-MM-DD */
@@ -68,6 +71,53 @@ export function getISOWeek(): number {
 export function getDayName(): string {
   const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
   return days[new Date().getDay()];
+}
+
+/**
+ * Exercise IDs that count toward the daily movement total (Tracker + Row + Cycle).
+ */
+const TRACKER_IDS = [82, 83, 87];
+const WEIGHT_TYPES = ['CHEST', 'BACK', 'LEGS'];
+
+/**
+ * After any insert, call this to recompute daily aggregates for every row on that date:
+ *   tracker_daily  = sum of total_cardio for exercise_ids 82, 83, 87
+ *   total_score    = ROUND((WeightsDaily/20000 + TrackerDaily/20 + CaloriesDaily/1500) / 3 * 100, 0)
+ * All rows for the date are updated with the same values (daily totals).
+ */
+export async function recalculateDailyTotals(date: string): Promise<void> {
+  const { data } = await supabase
+    .from('workouts')
+    .select('id, type, exercise_id, total_weight, total_cardio, calories')
+    .eq('date', date);
+
+  if (!data || data.length === 0) return;
+
+  const rows = data as any[];
+
+  const weightsDailyUnits = rows
+    .filter(r => WEIGHT_TYPES.includes(r.type))
+    .reduce((s, r) => s + Number(r.total_weight || 0), 0);
+
+  const trackerDailyUnits = rows
+    .filter(r => TRACKER_IDS.includes(Number(r.exercise_id)))
+    .reduce((s, r) => s + Number(r.total_cardio || 0), 0);
+
+  const caloriesDailyUnits = rows
+    .filter(r => r.type === 'MEASUREMENT')
+    .reduce((s, r) => s + Number(r.calories || 0), 0);
+
+  const totalScore = Math.round(
+    ((weightsDailyUnits / 20000) + (trackerDailyUnits / 20) + (caloriesDailyUnits / 1500)) / 3 * 100
+  );
+
+  await supabase
+    .from('workouts')
+    .update({
+      total_score: totalScore,
+      tracker_daily: trackerDailyUnits,
+    })
+    .eq('date', date);
 }
 
 /**

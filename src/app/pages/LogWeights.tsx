@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Dumbbell, ChevronDown, ChevronRight, ChevronUp, Plus, Minus, Clock, Check, X, Calendar } from 'lucide-react';
 import { Page } from '../../types';
-import { supabase, Exercise, todayStr, getISOWeek, getDayName, currentWeekMonday, weeksAgoMonday } from '../../lib/supabase';
+import { supabase, Exercise, todayStr, getISOWeek, getDayName, currentWeekMonday, weeksAgoMonday, recalculateDailyTotals } from '../../lib/supabase';
 
 interface LogWeightsProps {
   onNavigate: (page: Page) => void;
@@ -233,6 +233,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
           }
         }
 
+        // total_weight = sum of (weight × reps) across all sets
         const totalWeight = ex.sets.reduce((acc, s) => acc + (parseFloat(s.weight) || 0) * s.reps, 0);
 
         await supabase.from('workouts').insert({
@@ -243,12 +244,17 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
           exercise_id: ex.exercise.id,
           multiplier: ex.exercise.multiplier,
           total_weight: totalWeight,
+          // total_score_k is row-specific: total volume for this exercise
+          total_score_k: totalWeight,
           sets: filledSets.length,
           new_entry: 'New',
           source: 'app',
           ...setData,
         });
       }
+
+      // Recalculate daily total_score and tracker_daily for all rows today
+      await recalculateDailyTotals(today);
 
       setAddedExercises(prev => prev.map(e => ({ ...e, logged: true, expanded: false })));
       setSaveSuccess(true);

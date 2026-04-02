@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { Page } from '../../types';
-import { supabase, Exercise, todayStr, getISOWeek, getDayName } from '../../lib/supabase';
+import { supabase, Exercise, todayStr, getISOWeek, getDayName, recalculateDailyTotals } from '../../lib/supabase';
 
 interface LogCardioProps {
   onNavigate: (page: Page) => void;
@@ -49,12 +49,16 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
     setSaving(true);
     setSaveError('');
     try {
+      const today = todayStr();
       const km = parseFloat(distance) || 0;
       const totalCardio = +(km * Number(selectedExercise.multiplier)).toFixed(2);
       const timeStr = minutes || seconds ? `${(minutes || '0').padStart(2, '0')}:${(seconds || '0').padStart(2, '0')}:00` : null;
 
+      // total_score_k for cardio = total_cardio × 1000 (row-specific)
+      const totalScoreK = Math.round(totalCardio * 1000);
+
       const { error } = await supabase.from('workouts').insert({
-        date: todayStr(),
+        date: today,
         week: getISOWeek(),
         day: getDayName(),
         type: 'CARDIO',
@@ -63,11 +67,15 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
         total_cardio: totalCardio,
         multiplier: selectedExercise.multiplier,
         time: timeStr,
+        total_score_k: totalScoreK,
         new_entry: 'New',
         source: 'app',
       });
 
       if (error) throw error;
+
+      // Recalculate daily total_score and tracker_daily for all rows today
+      await recalculateDailyTotals(today);
 
       setSaveSuccess(true);
       setDistance('');
