@@ -16,7 +16,6 @@ const tabs: { label: string; page: Page }[] = [
 const WEIGHT_TYPES = ['CHEST', 'BACK', 'LEGS'];
 const GROUP_ORDER = ['Chest', 'Back', 'Legs'];
 
-// Sort order for type2: Body Weight first, then Bar, Dumbbell, Machine
 const TYPE2_ORDER: Record<string, number> = {
   'BODY WEIGHT': 0,
   'BAR': 1,
@@ -43,6 +42,7 @@ interface AddedExercise {
   logged: boolean;
   copied: boolean;
   lastSets: SetRow[] | null;
+  fail: boolean;
 }
 
 interface RecentLog {
@@ -92,7 +92,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
           if (!grouped[key]) grouped[key] = [];
           grouped[key].push(ex);
         }
-        // Sort each group by type2 order: BODY WEIGHT → BAR → DUMB BELL → MACHINE
         for (const key of Object.keys(grouped)) {
           grouped[key].sort((a, b) => {
             const aOrder = TYPE2_ORDER[a.type2 ?? ''] ?? 99;
@@ -202,6 +201,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
       logged: false,
       copied: false,
       lastSets,
+      fail: false,
     }]);
   };
 
@@ -252,6 +252,10 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     }
   };
 
+  const toggleFail = (id: number) => {
+    setAddedExercises(prev => prev.map(e => e.exercise.id === id ? { ...e, fail: !e.fail } : e));
+  };
+
   const handleLogAll = async () => {
     setSaving(true);
     const today = todayStr();
@@ -290,6 +294,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
           total_score_k: totalWeight,
           sets: filledSets.length,
           new_entry: 'New',
+          fail: ex.fail ? 'Fail' : null,
           source: 'app',
           ...setData,
         });
@@ -321,7 +326,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
 
   const orderedGroups = GROUP_ORDER.filter(g => exercisesByGroup[g]);
 
-  // Build exercise list with type2 section headers
   const renderExerciseDropdown = () => {
     const exercises = exercisesByGroup[selectedGroup] || [];
     if (exercises.length === 0) return null;
@@ -333,7 +337,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
       const t2 = ex.type2 ?? '';
       const alreadyAdded = !!addedExercises.find(e => e.exercise.id === ex.id);
 
-      // Insert section header when type2 changes
       if (t2 !== lastType2) {
         lastType2 = t2;
         const label = TYPE2_LABELS[t2] || t2;
@@ -480,7 +483,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                 : 'No previous data';
               const hasData = ex.sets.some(s => s.weight !== '');
               const exTotal = calcExerciseTotal(ex.sets, ex.exercise.multiplier ?? 1);
-              const canAddMore = ex.sets.length < 6;
 
               return (
                 <div key={ex.exercise.id}>
@@ -502,6 +504,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                     >
                       {(hasData || ex.logged) && <Check size={14} color="#1a1a1a" strokeWidth={3} />}
                     </div>
+
                     {/* Rest of row toggles expand */}
                     <div className="flex-grow flex items-center justify-between" onClick={() => toggleExpanded(ex.exercise.id)} style={{ cursor: 'pointer' }}>
                       <div>
@@ -560,18 +563,41 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                         );
                       })}
 
-                      <div className="flex items-center gap-6 mt-4">
+                      {/* Action buttons row */}
+                      <div className="flex items-center gap-5 mt-4 flex-wrap">
                         {ex.sets.length < 6 && (
-                          <button onClick={(e) => { e.stopPropagation(); addSet(ex.exercise.id); }} className="flex items-center gap-1 text-xs font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); addSet(ex.exercise.id); }}
+                            className="flex items-center gap-1 text-xs font-bold uppercase tracking-widest"
+                            style={{ color: 'rgba(255,255,255,0.35)' }}
+                          >
                             <Plus size={13} /><span>Set</span>
                           </button>
                         )}
                         <button
                           onClick={(e) => { e.stopPropagation(); removeExercise(ex.exercise.id); }}
                           className="flex items-center gap-1 text-xs font-bold uppercase tracking-widest"
-                          style={{ color: 'rgba(255,80,80,0.6)' }}
+                          style={{ color: 'rgba(255,80,80,0.55)' }}
                         >
                           <Minus size={13} /><span>Remove Ex.</span>
+                        </button>
+                        {/* Fail pill */}
+                        <button
+                          onClick={(e) => { e.stopPropagation(); toggleFail(ex.exercise.id); }}
+                          className="text-xs font-bold uppercase tracking-widest"
+                          style={{
+                            padding: '3px 12px',
+                            borderRadius: '999px',
+                            border: ex.fail
+                              ? '1px solid rgba(255,80,80,0.7)'
+                              : '1px solid rgba(255,255,255,0.12)',
+                            backgroundColor: ex.fail ? 'rgba(255,80,80,0.15)' : 'transparent',
+                            color: ex.fail ? '#ff5050' : 'rgba(255,255,255,0.28)',
+                            transition: 'all 0.2s',
+                            letterSpacing: '0.1em',
+                          }}
+                        >
+                          Fail
                         </button>
                       </div>
                     </div>
