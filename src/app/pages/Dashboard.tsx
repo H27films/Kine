@@ -206,6 +206,7 @@ const WeeklyChart: React.FC<{
 };
 
 export const Dashboard: React.FC = () => {
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [dayOffset, setDayOffset] = useState(0);
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
 
@@ -224,20 +225,22 @@ export const Dashboard: React.FC = () => {
 
   useEffect(() => {
     const loadCardio = async () => {
-      const todayDate = dateOffsetStr(0);
-      const yesterdayDate = dateOffsetStr(-1);
+      const activeDateStr = selectedDate.toISOString().split('T')[0];
+      const yesterday = new Date(selectedDate);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayDateStr = yesterday.toISOString().split('T')[0];
 
       const { data } = await supabase
         .from('workouts')
         .select('date, km, total_cardio, exercise_id, exercises:exercise_id(exercise_name)')
         .eq('type', 'CARDIO')
-        .gte('date', yesterdayDate)
-        .lte('date', todayDate);
+        .gte('date', yesterdayDateStr)
+        .lte('date', activeDateStr);
 
       if (!data) return;
 
-      const todayRows = data.filter((r: any) => r.date === todayDate);
-      const yesterdayRows = data.filter((r: any) => r.date === yesterdayDate);
+      const todayRows = data.filter((r: any) => r.date === activeDateStr);
+      const yesterdayRows = data.filter((r: any) => r.date === yesterdayDateStr);
 
       const activities: DayActivity[] = todayRows
         .filter((r: any) => r.km && r.km > 0)
@@ -261,7 +264,7 @@ export const Dashboard: React.FC = () => {
       setYesterdayMovement(+yestTotal.toFixed(1));
     };
     loadCardio();
-  }, []);
+  }, [selectedDate]);
 
   useEffect(() => {
     const loadActivityWeekly = async () => {
@@ -289,12 +292,12 @@ export const Dashboard: React.FC = () => {
 
   useEffect(() => {
     const loadWeights = async () => {
-      const dateStr = dateOffsetStr(dayOffset);
+      const activeDateStr = selectedDate.toISOString().split('T')[0];
       const { data } = await supabase
         .from('workouts')
         .select('total_weight, exercises:exercise_id(exercise_name)')
         .in('type', ['CHEST', 'BACK', 'LEGS'])
-        .eq('date', dateStr);
+        .eq('date', activeDateStr);
 
       if (!data) return;
       const exercises = (data as any[]).map(r => ({
@@ -305,7 +308,7 @@ export const Dashboard: React.FC = () => {
       setDayWeightsTotal(exercises.reduce((s, e) => s + e.weight, 0));
     };
     loadWeights();
-  }, [dayOffset]);
+  }, [selectedDate]);
 
   useEffect(() => {
     const loadWeeklyCharts = async () => {
@@ -362,8 +365,31 @@ export const Dashboard: React.FC = () => {
   const displayActivities = todayActivities.filter(a => a.km > 0);
 
   return (
-    <div className="space-y-8">
-      <section className="pt-4">
+    <div className="space-y-4">
+      {/* DATE SELECTOR */}
+      <div className="flex justify-between items-center py-2 px-2">
+        {Array.from({ length: 7 }, (_, i) => {
+          const now = new Date();
+          const d = new Date();
+          const day = d.getDay();
+          const diff = d.getDate() - day + (day === 0 ? -6 : 1) + i;
+          const date = new Date(d.setDate(diff));
+          const isSelected = date.toDateString() === selectedDate.toDateString();
+          const isToday = date.toDateString() === now.toDateString();
+          return (
+            <div key={i} onClick={() => setSelectedDate(date)} className="flex flex-col items-center cursor-pointer">
+              <span className={`text-[10px] font-bold mb-2 ${isSelected ? 'text-white' : 'text-white/30'}`}>
+                {date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()}
+              </span>
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all ${isSelected ? 'bg-white text-black' : isToday ? 'border-2 border-white/40 text-white' : 'text-white/40'}`}>
+                {date.getDate()}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <section className="pt-2">
         <div className="flex items-start">
           <div className="text-[4rem] font-black leading-none tracking-tighter text-white">
             {totalMovement > 0 ? totalMovement.toFixed(1) : ''}
@@ -439,15 +465,6 @@ export const Dashboard: React.FC = () => {
               <Dumbbell size={16} color="white" />
               <span className="text-[10px] font-bold uppercase tracking-[1.5px]" style={{ color: 'rgba(255,255,255,0.4)' }}>Weights</span>
             </div>
-            <div className="flex items-center gap-3">
-              <button onClick={() => setDayOffset(prev => Math.max(prev - 1, -6))} disabled={dayOffset <= -6} className="transition-opacity" style={{ opacity: dayOffset <= -6 ? 0.2 : 0.6 }}>
-                <ChevronLeft size={18} color="white" />
-              </button>
-              <span className="text-[10px] font-bold uppercase tracking-[1px] text-white/50 min-w-[80px] text-center">{getDayLabel(dayOffset)}</span>
-              <button onClick={() => setDayOffset(prev => Math.min(prev + 1, 0))} disabled={dayOffset >= 0} className="transition-opacity" style={{ opacity: dayOffset >= 0 ? 0.2 : 0.6 }}>
-                <ChevronRight size={18} color="white" />
-              </button>
-            </div>
           </div>
           {dayWeights.length > 0 ? (
             <>
@@ -473,7 +490,7 @@ export const Dashboard: React.FC = () => {
         <WeeklyChart cardioWeeks={cardioWeeks} weightsWeeks={weightsWeeks} calorieWeeks={calorieWeeks} />
       </section>
 
-      <DailyActivityCards />
+      <DailyActivityCards selectedDate={selectedDate.toISOString().split('T')[0]} />
     </div>
   );
 };
