@@ -286,10 +286,14 @@ export const DailyActivityCards: React.FC = () => {
   return (
     <section>
       <div style={{
-        fontSize: '10px', fontWeight: 800, letterSpacing: '1.5px',
-        textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '14px',
+        fontSize: '1.15rem',
+        fontWeight: 800,
+        letterSpacing: '-0.03em',
+        textTransform: 'uppercase',
+        color: '#ffffff',
+        marginBottom: '1.25rem',
       }}>
-        DAILY
+        Daily
       </div>
       <div
         style={{
