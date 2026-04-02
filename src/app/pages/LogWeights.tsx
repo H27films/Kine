@@ -27,7 +27,7 @@ interface AddedExercise {
   expanded: boolean;
   logged: boolean;
   copied: boolean;
-  lastTime: { weight: number; reps: number } | null;
+  lastSets: SetRow[] | null; // full last session: index 0 = w1/r1, index 1 = w2/r2, etc.
 }
 
 interface RecentLog {
@@ -150,16 +150,27 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
   const handleAddExercise = async (exercise: Exercise) => {
     if (addedExercises.find(e => e.exercise.id === exercise.id)) return;
 
+    // Fetch ALL set columns from last session
     const { data } = await supabase
       .from('workouts')
-      .select('w1, r1')
+      .select('w1,r1,w2,r2,w3,r3,w4,r4,w5,r5,w6,r6')
       .eq('exercise_id', exercise.id)
       .order('date', { ascending: false })
       .limit(1);
 
-    const lastTime = data && data.length > 0 && (data[0] as any).w1
-      ? { weight: Number((data[0] as any).w1), reps: Number((data[0] as any).r1 || 10) }
-      : null;
+    let lastSets: SetRow[] | null = null;
+    if (data && data.length > 0) {
+      const row = data[0] as any;
+      const parsed: SetRow[] = [];
+      for (let i = 1; i <= 6; i++) {
+        const w = row[`w${i}`];
+        const r = row[`r${i}`];
+        if (w != null && Number(w) > 0) {
+          parsed.push({ weight: String(Number(w)), reps: Number(r) || 10 });
+        }
+      }
+      if (parsed.length > 0) lastSets = parsed;
+    }
 
     setAddedExercises(prev => [...prev, {
       exercise,
@@ -167,7 +178,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
       expanded: false,
       logged: false,
       copied: false,
-      lastTime,
+      lastSets,
     }]);
   };
 
@@ -194,14 +205,16 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     }));
   };
 
-  // Circle button: adds a new set pre-filled with lastTime values, and expands the panel
-  const addSetFromLast = (id: number) => {
+  // Circle button: load full last session — w1/r1 for row 1, w2/r2 for row 2, etc.
+  const loadLastSession = (id: number) => {
     setAddedExercises(prev => prev.map(e => {
-      if (e.exercise.id !== id || e.sets.length >= 6) return e;
-      const newSet: SetRow = e.lastTime && e.lastTime.weight > 0
-        ? { weight: String(e.lastTime.weight), reps: e.lastTime.reps }
-        : { weight: '', reps: 10 };
-      return { ...e, sets: [...e.sets, newSet], expanded: true };
+      if (e.exercise.id !== id) return e;
+      if (!e.lastSets || e.lastSets.length === 0) {
+        // No previous data — just expand
+        return { ...e, expanded: true };
+      }
+      // Replace sets with exact last session data
+      return { ...e, sets: [...e.lastSets], expanded: true, copied: true };
     }));
   };
 
@@ -211,11 +224,10 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     if (ex.copied) {
       setAddedExercises(prev => prev.map(e => e.exercise.id !== id ? e : { ...e, copied: false, sets: makeDefaultSets() }));
     } else {
-      if (!ex.lastTime) return;
+      if (!ex.lastSets || ex.lastSets.length === 0) return;
       setAddedExercises(prev => prev.map(e => {
         if (e.exercise.id !== id) return e;
-        const sets = e.sets.map(() => ({ weight: ex.lastTime!.weight > 0 ? String(ex.lastTime!.weight) : '', reps: ex.lastTime!.reps }));
-        return { ...e, sets, copied: true };
+        return { ...e, sets: [...e.lastSets!], copied: true };
       }));
     }
   };
@@ -402,8 +414,8 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
         <section className="mb-10">
           <div className="space-y-0">
             {addedExercises.map(ex => {
-              const lastText = ex.lastTime
-                ? ex.lastTime.weight > 0 ? `Last time: ${ex.lastTime.weight}kg × ${ex.lastTime.reps} reps` : `Last time: ${ex.lastTime.reps} reps`
+              const lastSummary = ex.lastSets && ex.lastSets.length > 0
+                ? `Last: ${ex.lastSets.length} sets — ${ex.lastSets[0].weight}kg × ${ex.lastSets[0].reps}`
                 : 'No previous data';
               const hasData = ex.sets.some(s => s.weight !== '');
               const exTotal = calcExerciseTotal(ex.sets, ex.exercise.multiplier ?? 1);
@@ -411,21 +423,20 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
 
               return (
                 <div key={ex.exercise.id}>
-                  {/* Row: circle is clickable (add set from last), rest of row toggles expand */}
                   <div
                     className="flex items-center gap-4 py-4"
                     style={{ borderBottom: ex.expanded ? 'none' : '1px solid rgba(255,255,255,0.06)' }}
                   >
-                    {/* Circle: click to add a pre-filled set from last time */}
+                    {/* Circle: tap to load full last session */}
                     <div
-                      onClick={(e) => { e.stopPropagation(); if (canAddMore) addSetFromLast(ex.exercise.id); }}
+                      onClick={(e) => { e.stopPropagation(); loadLastSession(ex.exercise.id); }}
                       style={{
                         width: 32, height: 32, borderRadius: '50%',
                         border: hasData || ex.logged ? 'none' : '2px solid rgba(255,255,255,0.2)',
                         backgroundColor: hasData || ex.logged ? '#ffffff' : 'transparent',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         flexShrink: 0, transition: 'all 0.25s',
-                        cursor: canAddMore ? 'pointer' : 'default',
+                        cursor: 'pointer',
                       }}
                     >
                       {(hasData || ex.logged) && <Check size={14} color="#1a1a1a" strokeWidth={3} />}
@@ -434,7 +445,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                     <div className="flex-grow flex items-center justify-between" onClick={() => toggleExpanded(ex.exercise.id)} style={{ cursor: 'pointer' }}>
                       <div>
                         <p className="font-bold text-sm text-white">{ex.exercise.exercise_name}</p>
-                        <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>{lastText}</p>
+                        <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>{lastSummary}</p>
                       </div>
                       <div style={{ color: 'rgba(255,255,255,0.4)', flexShrink: 0 }}>
                         {ex.expanded ? <ChevronUp size={20} /> : <ChevronRight size={20} />}
