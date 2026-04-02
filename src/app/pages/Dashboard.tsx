@@ -263,6 +263,7 @@ export const Dashboard: React.FC = () => {
 
   useEffect(() => {
     const loadWeeklyCharts = async () => {
+      // Limit 1000 to ensure all rows are fetched (table has ~300 rows, growing)
       const { data: cardioData } = await supabase
         .from('workouts')
         .select('week, day, total_cardio, exercise_id')
@@ -271,7 +272,7 @@ export const Dashboard: React.FC = () => {
         .not('week', 'is', null)
         .not('day', 'is', null)
         .order('week', { ascending: false })
-        .limit(100);
+        .limit(1000);
 
       if (cardioData) {
         setCardioWeeks(groupByWeek(
@@ -286,7 +287,7 @@ export const Dashboard: React.FC = () => {
         .not('week', 'is', null)
         .not('day', 'is', null)
         .order('week', { ascending: false })
-        .limit(100);
+        .limit(1000);
 
       if (weightsData) {
         setWeightsWeeks(groupByWeek(
@@ -302,7 +303,7 @@ export const Dashboard: React.FC = () => {
         .not('week', 'is', null)
         .not('day', 'is', null)
         .order('week', { ascending: false })
-        .limit(100);
+        .limit(1000);
 
       if (calData) {
         setCalorieWeeks(groupByWeek(
