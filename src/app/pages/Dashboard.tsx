@@ -63,9 +63,8 @@ const WeeklyChart: React.FC<{
   calorieWeeks: WeekData[];
 }> = ({ cardioWeeks, weightsWeeks, calorieWeeks }) => {
   const [activeTab, setActiveTab] = useState<ChartTab>('Cardio');
-  const [weekIndices, setWeekIndices] = useState<Record<ChartTab, number>>({
-    Cardio: 0, Weights: 0, Calories: 0,
-  });
+  // Single shared week number — persists across tab switches
+  const [selectedWeekNumber, setSelectedWeekNumber] = useState<number | null>(null);
 
   const chartConfig: Record<ChartTab, { weeks: WeekData[]; unit: string }> = {
     Cardio:   { weeks: cardioWeeks,  unit: 'km' },
@@ -73,14 +72,33 @@ const WeeklyChart: React.FC<{
     Calories: { weeks: calorieWeeks, unit: '' },
   };
 
-  const weekIndex = weekIndices[activeTab];
   const { weeks, unit } = chartConfig[activeTab];
-  const current = weeks[weekIndex];
+
+  // All unique week numbers across all tabs, sorted descending
+  const allWeekNumbers = Array.from(
+    new Set([
+      ...cardioWeeks.map(w => w.weekNumber),
+      ...weightsWeeks.map(w => w.weekNumber),
+      ...calorieWeeks.map(w => w.weekNumber),
+    ])
+  ).sort((a, b) => b - a);
+
+  // Default to most recent week once data loads
+  const effectiveWeekNumber = selectedWeekNumber ?? (allWeekNumbers[0] ?? null);
+
+  // Find current week data for active tab (may be null if no data that week)
+  const current = weeks.find(w => w.weekNumber === effectiveWeekNumber) ?? null;
   const data = current?.days || Array(7).fill(0);
   const rawMax = Math.max(...data, 1);
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const weekLabel = current ? `${current.weekNumber}` : '—';
-  const totalWeeks = weeks.length;
+  const weekLabel = effectiveWeekNumber !== null ? `${effectiveWeekNumber}` : '—';
+
+  // Navigation: move through the global list of week numbers
+  const currentGlobalIdx = effectiveWeekNumber !== null ? allWeekNumbers.indexOf(effectiveWeekNumber) : 0;
+  const canPrev = currentGlobalIdx < allWeekNumbers.length - 1;
+  const canNext = currentGlobalIdx > 0;
+  const onPrev = () => { if (canPrev) setSelectedWeekNumber(allWeekNumbers[currentGlobalIdx + 1]); };
+  const onNext = () => { if (canNext) setSelectedWeekNumber(allWeekNumbers[currentGlobalIdx - 1]); };
 
   // Y-axis min/max per tab
   const yMin = activeTab === 'Cardio' ? 5 : activeTab === 'Calories' ? 500 : 0;
@@ -102,21 +120,18 @@ const WeeklyChart: React.FC<{
     }
   })();
 
-  const onPrev = () => setWeekIndices(prev => ({ ...prev, [activeTab]: Math.min(prev[activeTab] + 1, totalWeeks - 1) }));
-  const onNext = () => setWeekIndices(prev => ({ ...prev, [activeTab]: Math.max(prev[activeTab] - 1, 0) }));
-
   return (
     <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff' }}>
       {/* Top row: WEEKLY label + week toggle */}
       <div className="flex items-center justify-between mb-3">
         <div className="text-[10px] font-bold uppercase tracking-[1.5px]" style={{ color: 'rgba(255,255,255,0.4)' }}>WEEKLY</div>
         <div className="flex items-center gap-3">
-          <button onClick={onPrev} disabled={weekIndex >= totalWeeks - 1} className="transition-opacity" style={{ opacity: weekIndex >= totalWeeks - 1 ? 0.2 : 0.6 }}><ChevronLeft size={16} color="white" /></button>
+          <button onClick={onPrev} disabled={!canPrev} className="transition-opacity" style={{ opacity: !canPrev ? 0.2 : 0.6 }}><ChevronLeft size={16} color="white" /></button>
           <span className="text-[10px] font-bold uppercase tracking-[1px] text-white/50 min-w-[24px] text-center">{weekLabel}</span>
-          <button onClick={onNext} disabled={weekIndex <= 0} className="transition-opacity" style={{ opacity: weekIndex <= 0 ? 0.2 : 0.6 }}><ChevronRight size={16} color="white" /></button>
+          <button onClick={onNext} disabled={!canNext} className="transition-opacity" style={{ opacity: !canNext ? 0.2 : 0.6 }}><ChevronRight size={16} color="white" /></button>
         </div>
       </div>
-      {/* Tab row + summary stat — items-center so stat aligns with tab text, not underline */}
+      {/* Tab row + summary stat */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex gap-4">
           {(['Cardio', 'Weights', 'Calories'] as ChartTab[]).map(tab => (
@@ -128,7 +143,7 @@ const WeeklyChart: React.FC<{
         </div>
         <div className="text-[13px] font-black text-white tracking-tight">{summaryLabel}</div>
       </div>
-      {/* Chart bars — h-44 for taller box */}
+      {/* Chart bars */}
       <div className="flex items-end justify-between h-44" style={{ gap: '12px' }}>
         {data.map((val, i) => {
           const clampedVal = Math.min(Math.max(val, yMin), yMax);
@@ -263,7 +278,6 @@ export const Dashboard: React.FC = () => {
 
   useEffect(() => {
     const loadWeeklyCharts = async () => {
-      // Limit 1000 to ensure all rows are fetched (table has ~300 rows, growing)
       const { data: cardioData } = await supabase
         .from('workouts')
         .select('week, day, total_cardio, exercise_id')
