@@ -194,6 +194,17 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     }));
   };
 
+  // Circle button: adds a new set pre-filled with lastTime values, and expands the panel
+  const addSetFromLast = (id: number) => {
+    setAddedExercises(prev => prev.map(e => {
+      if (e.exercise.id !== id || e.sets.length >= 6) return e;
+      const newSet: SetRow = e.lastTime && e.lastTime.weight > 0
+        ? { weight: String(e.lastTime.weight), reps: e.lastTime.reps }
+        : { weight: '', reps: 10 };
+      return { ...e, sets: [...e.sets, newSet], expanded: true };
+    }));
+  };
+
   const toggleCopyFromLast = (id: number) => {
     const ex = addedExercises.find(e => e.exercise.id === id);
     if (!ex) return;
@@ -396,24 +407,38 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                 : 'No previous data';
               const hasData = ex.sets.some(s => s.weight !== '');
               const exTotal = calcExerciseTotal(ex.sets, ex.exercise.multiplier ?? 1);
+              const canAddMore = ex.sets.length < 6;
 
               return (
                 <div key={ex.exercise.id}>
-                  {/* Whole row is clickable to expand/collapse */}
+                  {/* Row: circle is clickable (add set from last), rest of row toggles expand */}
                   <div
                     className="flex items-center gap-4 py-4"
-                    onClick={() => toggleExpanded(ex.exercise.id)}
-                    style={{ borderBottom: ex.expanded ? 'none' : '1px solid rgba(255,255,255,0.06)', cursor: 'pointer' }}
+                    style={{ borderBottom: ex.expanded ? 'none' : '1px solid rgba(255,255,255,0.06)' }}
                   >
-                    <div style={{ width: 32, height: 32, borderRadius: '50%', border: hasData || ex.logged ? 'none' : '2px solid rgba(255,255,255,0.2)', backgroundColor: hasData || ex.logged ? '#ffffff' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all 0.25s' }}>
+                    {/* Circle: click to add a pre-filled set from last time */}
+                    <div
+                      onClick={(e) => { e.stopPropagation(); if (canAddMore) addSetFromLast(ex.exercise.id); }}
+                      style={{
+                        width: 32, height: 32, borderRadius: '50%',
+                        border: hasData || ex.logged ? 'none' : '2px solid rgba(255,255,255,0.2)',
+                        backgroundColor: hasData || ex.logged ? '#ffffff' : 'transparent',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        flexShrink: 0, transition: 'all 0.25s',
+                        cursor: canAddMore ? 'pointer' : 'default',
+                      }}
+                    >
                       {(hasData || ex.logged) && <Check size={14} color="#1a1a1a" strokeWidth={3} />}
                     </div>
-                    <div className="flex-grow">
-                      <p className="font-bold text-sm text-white">{ex.exercise.exercise_name}</p>
-                      <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>{lastText}</p>
-                    </div>
-                    <div style={{ color: 'rgba(255,255,255,0.4)', flexShrink: 0 }}>
-                      {ex.expanded ? <ChevronUp size={20} /> : <ChevronRight size={20} />}
+                    {/* Rest of row toggles expand */}
+                    <div className="flex-grow flex items-center justify-between" onClick={() => toggleExpanded(ex.exercise.id)} style={{ cursor: 'pointer' }}>
+                      <div>
+                        <p className="font-bold text-sm text-white">{ex.exercise.exercise_name}</p>
+                        <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>{lastText}</p>
+                      </div>
+                      <div style={{ color: 'rgba(255,255,255,0.4)', flexShrink: 0 }}>
+                        {ex.expanded ? <ChevronUp size={20} /> : <ChevronRight size={20} />}
+                      </div>
                     </div>
                   </div>
 
