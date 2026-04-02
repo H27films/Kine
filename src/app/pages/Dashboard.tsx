@@ -9,6 +9,10 @@ type ChartTab = 'Cardio' | 'Weights' | 'Calories';
 const TOTAL_CARDIO_IDS = [82, 83, 87]; // TRACKER, ROW, CYCLE
 const DAY_ORDER = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
+// Convert ALL CAPS DB names to Title Case for display
+const toTitleCase = (str: string) =>
+  str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+
 // Map exercise names to short display labels + icons
 const CARDIO_DISPLAY: Record<string, { label: string; icon: React.ReactNode }> = {
   RUNNING:       { label: 'Run',    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="17" cy="4" r="2"/><path d="M15.6 7.6L13 10l-3-3-4 4"/><path d="M3 17l3-3 3 3 4-4 2 2 3.5-3.5"/><path d="M10 10l-2 8h3l1 4"/></svg> },
@@ -426,7 +430,7 @@ export const Dashboard: React.FC = () => {
               <div className="mt-4 space-y-2">
                 {dayWeights.map((ex, i) => (
                   <div key={i} className="flex items-center justify-between">
-                    <span className="text-[11px] font-medium text-white/60">{ex.name}</span>
+                    <span className="text-[11px] font-medium text-white/60">{toTitleCase(ex.name)}</span>
                     <span className="text-[12px] font-bold text-white">{Math.round(ex.weight).toLocaleString()} kg</span>
                   </div>
                 ))}
