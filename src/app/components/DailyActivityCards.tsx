@@ -7,8 +7,6 @@ const TRACKER_ID = 82;
 const ROW_ID = 83;
 const RUNNING_ID = 84;
 const CYCLE_ID = 87;
-// Total KM uses Tracker + Row + Cycle only
-const TOTAL_CARDIO_IDS = [TRACKER_ID, ROW_ID, CYCLE_ID];
 // Fetch all cardio types (for chips)
 const ALL_CARDIO_IDS = [TRACKER_ID, ROW_ID, RUNNING_ID, CYCLE_ID];
 
