@@ -12,6 +12,12 @@ const formatDate = (dateStr: string): string => {
   return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
 };
 
+const formatExcelDate = (dateStr: string): string => {
+  if (!dateStr) return '';
+  const [y, m, d] = dateStr.split('-');
+  return `${d}/${m}/${y}`;
+};
+
 export const Profile: React.FC<ProfileProps> = ({ onNavigate: _onNavigate }) => {
   const [exportCount, setExportCount] = useState<number | null>(null);
   const [exportDates, setExportDates] = useState<string[]>([]);
@@ -59,7 +65,7 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate: _onNavigate }) => 
       const XLSX = await import('xlsx');
 
       const rows = (data as any[]).map(r => ({
-        DATE: r.date ?? '',
+        DATE: formatExcelDate(r.date),
         EXERCISE: r.exercises?.exercise_name ?? '',
         KM: r.km ?? '',
         CALORIES: r.calories ?? '',
@@ -81,12 +87,6 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate: _onNavigate }) => 
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'New Entries');
       XLSX.writeFile(wb, 'ImportKineData.xlsx');
-
-      const ids = (data as any[]).map(r => r.id);
-      await supabase
-        .from('workouts')
-        .update({ new_entry: 'Exported' })
-        .in('id', ids);
 
       setExportDone(true);
       setTimeout(() => setExportDone(false), 3000);
@@ -118,7 +118,6 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate: _onNavigate }) => 
         className="rounded-2xl p-5"
         style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.07)' }}
       >
-        {/* Header */}
         <p style={{
           fontSize: '1.1rem', fontWeight: 800, letterSpacing: '-0.02em',
           color: '#ffffff', textTransform: 'uppercase', marginBottom: '16px',
@@ -126,7 +125,6 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate: _onNavigate }) => 
           Export Data
         </p>
 
-        {/* Count + Export button */}
         <div className="flex items-center justify-between">
           <div className="flex items-baseline gap-1.5">
             <span style={{
@@ -168,7 +166,6 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate: _onNavigate }) => 
           </button>
         </div>
 
-        {/* Dates list */}
         {exportDates.length > 0 && (
           <div className="mt-3 flex flex-col gap-1">
             {exportDates.map(d => (
