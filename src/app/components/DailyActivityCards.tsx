@@ -21,11 +21,9 @@ const TYPE_LABEL: Record<string, string> = {
 interface DayData {
   date: string;
   calories: number;
-  // total_cardio values (km × multiplier) — used for the big KM number
   trackerTotal: number;
   rowTotal: number;
   cycleTotal: number;
-  // raw km — used for chips
   rowKm: number;
   cycleKm: number;
   runningKm: number;
@@ -53,9 +51,9 @@ function fmt(n: number): string {
   return n % 1 === 0 ? `${n}` : n.toFixed(1);
 }
 
-function fmtWeight(kg: number): string {
-  if (kg >= 1000) return `${(kg / 1000).toFixed(1)}k`;
-  return `${Math.round(kg)}`;
+// Full kg with commas, no rounding (e.g. 12,300)
+function fmtWeightFull(kg: number): string {
+  return Math.round(kg).toLocaleString('en-GB');
 }
 
 function getLast7Dates(): string[] {
@@ -69,10 +67,9 @@ function getLast7Dates(): string[] {
 }
 
 const DayCard: React.FC<{ day: DayData }> = ({ day }) => {
-  // Big KM number = sum of total_cardio (km × multiplier) for Tracker + Row + Cycle
   const totalKm = day.trackerTotal + day.rowTotal + day.cycleTotal;
   const hasCardio = totalKm > 0;
-  const hasWeights = day.muscleGroups.length > 0;
+  const hasWeights = day.muscleGroups.length > 0 || day.totalWeightKg > 0;
   const hasCalories = day.calories > 0;
   const label = dayLabel(day.date);
   const isToday = label === 'TODAY';
@@ -124,7 +121,7 @@ const DayCard: React.FC<{ day: DayData }> = ({ day }) => {
         )}
       </div>
 
-      {/* Cardio KM big number — uses total_cardio */}
+      {/* Cardio KM big number */}
       {hasCardio ? (
         <div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
@@ -148,9 +145,32 @@ const DayCard: React.FC<{ day: DayData }> = ({ day }) => {
         </div>
       )}
 
-      {/* Muscle groups + weights total */}
+      {/* Weights section: total kg ABOVE muscle group pills */}
       {hasWeights ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          {/* Weight total — big, above pills */}
+          {day.totalWeightKg > 0 && (
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+              <span style={{
+                fontSize: '1.5rem',
+                fontWeight: 900,
+                letterSpacing: '-0.03em',
+                color: 'rgba(255,255,255,0.85)',
+                lineHeight: 1,
+              }}>
+                {fmtWeightFull(day.totalWeightKg)}
+              </span>
+              <span style={{
+                fontSize: '11px',
+                fontWeight: 700,
+                color: 'rgba(255,255,255,0.35)',
+                letterSpacing: '0.06em',
+              }}>
+                KG
+              </span>
+            </div>
+          )}
+          {/* Muscle group pills */}
           <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
             {day.muscleGroups.map(g => (
               <span key={g} style={{
@@ -162,16 +182,6 @@ const DayCard: React.FC<{ day: DayData }> = ({ day }) => {
               </span>
             ))}
           </div>
-          {day.totalWeightKg > 0 && (
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
-              <span style={{ fontSize: '13px', fontWeight: 800, color: 'rgba(255,255,255,0.75)' }}>
-                {fmtWeight(day.totalWeightKg)}
-              </span>
-              <span style={{ fontSize: '9px', fontWeight: 600, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.06em' }}>
-                KG
-              </span>
-            </div>
-          )}
         </div>
       ) : (
         <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.2)', fontWeight: 500 }}>No weights</div>
@@ -198,7 +208,6 @@ export const DailyActivityCards: React.FC = () => {
       const dates = getLast7Dates();
       const oldest = dates[dates.length - 1];
 
-      // Fetch cardio — need both km (raw) and total_cardio (km × multiplier)
       const { data: cardioData } = await supabase
         .from('workouts')
         .select('date, exercise_id, km, total_cardio')
@@ -207,7 +216,6 @@ export const DailyActivityCards: React.FC = () => {
         .gte('date', oldest)
         .order('date', { ascending: false });
 
-      // Fetch calories
       const { data: calData } = await supabase
         .from('workouts')
         .select('date, calories')
@@ -216,7 +224,6 @@ export const DailyActivityCards: React.FC = () => {
         .gte('date', oldest)
         .order('date', { ascending: false });
 
-      // Fetch weights — muscle groups + total_weight per day
       const { data: weightsData } = await supabase
         .from('workouts')
         .select('date, type, total_weight')
@@ -224,9 +231,6 @@ export const DailyActivityCards: React.FC = () => {
         .gte('date', oldest)
         .order('date', { ascending: false });
 
-      // Build cardio map
-      // trackerTotal/rowTotal/cycleTotal = sum of total_cardio (for big KM number)
-      // rowKm/cycleKm/runningKm = sum of raw km (for chips)
       const cardioMap: Record<string, {
         trackerTotal: number; rowTotal: number; cycleTotal: number;
         rowKm: number; cycleKm: number; runningKm: number;
@@ -245,13 +249,11 @@ export const DailyActivityCards: React.FC = () => {
         if (r.exercise_id === RUNNING_ID) cardioMap[r.date].runningKm += km;
       }
 
-      // Build calories map
       const calMap: Record<string, number> = {};
       for (const r of (calData || []) as any[]) {
         calMap[r.date] = Number(r.calories || 0);
       }
 
-      // Build weights map (muscle groups + total weight)
       const muscleMap: Record<string, Set<string>> = {};
       const weightTotalMap: Record<string, number> = {};
       for (const r of (weightsData || []) as any[]) {
