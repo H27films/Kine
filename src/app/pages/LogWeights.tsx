@@ -233,8 +233,10 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
           }
         }
 
-        // total_weight = sum of (weight × reps) across all sets
-        const totalWeight = ex.sets.reduce((acc, s) => acc + (parseFloat(s.weight) || 0) * s.reps, 0);
+        // total_weight = sum of (weight × reps) across all sets × exercise multiplier
+        const multiplier = ex.exercise.multiplier ?? 1;
+        const rawVolume = ex.sets.reduce((acc, s) => acc + (parseFloat(s.weight) || 0) * s.reps, 0);
+        const totalWeight = rawVolume * multiplier;
 
         await supabase.from('workouts').insert({
           date: today,
@@ -242,9 +244,9 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
           day,
           type: ex.exercise.type,
           exercise_id: ex.exercise.id,
-          multiplier: ex.exercise.multiplier,
+          multiplier,
           total_weight: totalWeight,
-          // total_score_k is row-specific: total volume for this exercise
+          // total_score_k is row-specific: total volume for this exercise (post-multiplier)
           total_score_k: totalWeight,
           sets: filledSets.length,
           new_entry: 'New',
@@ -264,10 +266,10 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     }
   };
 
-  const calcExerciseTotal = (sets: SetRow[]): number =>
-    sets.reduce((acc, s) => acc + (parseFloat(s.weight) || 0) * s.reps, 0);
+  const calcExerciseTotal = (sets: SetRow[], multiplier: number = 1): number =>
+    sets.reduce((acc, s) => acc + (parseFloat(s.weight) || 0) * s.reps, 0) * multiplier;
 
-  const grandTotal = addedExercises.reduce((acc, ex) => acc + calcExerciseTotal(ex.sets), 0);
+  const grandTotal = addedExercises.reduce((acc, ex) => acc + calcExerciseTotal(ex.sets, ex.exercise.multiplier ?? 1), 0);
 
   const textTriggerStyle: React.CSSProperties = {
     display: 'inline-flex', alignItems: 'center', gap: '6px', cursor: 'pointer', userSelect: 'none',
@@ -378,7 +380,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                 ? ex.lastTime.weight > 0 ? `Last time: ${ex.lastTime.weight}kg × ${ex.lastTime.reps} reps` : `Last time: ${ex.lastTime.reps} reps`
                 : 'No previous data';
               const hasData = ex.sets.some(s => s.weight !== '');
-              const exTotal = calcExerciseTotal(ex.sets);
+              const exTotal = calcExerciseTotal(ex.sets, ex.exercise.multiplier ?? 1);
 
               return (
                 <div key={ex.exercise.id}>
