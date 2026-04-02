@@ -126,8 +126,8 @@ const WeeklyChart: React.FC<{
 
   return (
     <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff' }}>
-      {/* Top row: WEEKLY label + week toggle */}
-      <div className="flex items-center justify-between mb-3">
+      {/* Top row: WEEKLY label + week toggle — increased mb for more breathing room */}
+      <div className="flex items-center justify-between mb-6">
         <div className="text-[10px] font-bold uppercase tracking-[1.5px]" style={{ color: 'rgba(255,255,255,0.4)' }}>WEEKLY</div>
         <div className="flex items-center gap-3">
           <button onClick={onPrev} disabled={!canPrev} className="transition-opacity" style={{ opacity: !canPrev ? 0.2 : 0.6 }}><ChevronLeft size={16} color="white" /></button>
@@ -135,7 +135,7 @@ const WeeklyChart: React.FC<{
           <button onClick={onNext} disabled={!canNext} className="transition-opacity" style={{ opacity: !canNext ? 0.2 : 0.6 }}><ChevronRight size={16} color="white" /></button>
         </div>
       </div>
-      {/* Tab row + summary stat */}
+      {/* Tab row + summary stat — pb-1 on both sides keeps them baseline-aligned */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex gap-4">
           {(['Cardio', 'Weights', 'Calories'] as ChartTab[]).map(tab => (
@@ -145,7 +145,7 @@ const WeeklyChart: React.FC<{
             </button>
           ))}
         </div>
-        <div className="text-[13px] font-black text-white tracking-tight">{summaryLabel}</div>
+        <div className="text-[13px] font-black text-white tracking-tight pb-1">{summaryLabel}</div>
       </div>
       {/* Chart bars */}
       <div className="flex items-end justify-between h-44" style={{ gap: '12px' }}>
