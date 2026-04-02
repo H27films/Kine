@@ -79,7 +79,6 @@ const WeeklyChart: React.FC<{
   const data = current?.days || Array(7).fill(0);
   const rawMax = Math.max(...data, 1);
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  // Just the number e.g. "65"
   const weekLabel = current ? `${current.weekNumber}` : '—';
   const totalWeeks = weeks.length;
 
@@ -117,8 +116,8 @@ const WeeklyChart: React.FC<{
           <button onClick={onNext} disabled={weekIndex <= 0} className="transition-opacity" style={{ opacity: weekIndex <= 0 ? 0.2 : 0.6 }}><ChevronRight size={16} color="white" /></button>
         </div>
       </div>
-      {/* Tab row + summary stat on same line */}
-      <div className="flex items-end justify-between mb-5">
+      {/* Tab row + summary stat — items-center so stat aligns with tab text, not underline */}
+      <div className="flex items-center justify-between mb-5">
         <div className="flex gap-4">
           {(['Cardio', 'Weights', 'Calories'] as ChartTab[]).map(tab => (
             <button key={tab} onClick={() => setActiveTab(tab)} className="text-[11px] font-bold uppercase tracking-[1px] pb-1 transition-all"
@@ -129,16 +128,14 @@ const WeeklyChart: React.FC<{
         </div>
         <div className="text-[13px] font-black text-white tracking-tight">{summaryLabel}</div>
       </div>
-      {/* Chart bars */}
-      <div className="flex items-end justify-between h-32" style={{ gap: '12px' }}>
+      {/* Chart bars — h-44 for taller box */}
+      <div className="flex items-end justify-between h-44" style={{ gap: '12px' }}>
         {data.map((val, i) => {
-          // Scale bar relative to yMin/yMax
           const clampedVal = Math.min(Math.max(val, yMin), yMax);
           const pct = val > 0 ? Math.max((clampedVal - yMin) / (yMax - yMin), 0.04) : 0;
           const rawPct = rawMax > 0 ? val / rawMax : 0;
           const brightness = Math.round(80 + rawPct * 175);
           const barColor = val > 0 ? `rgb(${brightness},${brightness},${brightness})` : 'rgba(255,255,255,0.05)';
-          // Bar label formatting
           let barLabel = '';
           if (val > 0) {
             if (unit === 'kg') {
@@ -166,24 +163,19 @@ export const Dashboard: React.FC = () => {
   const [dayOffset, setDayOffset] = useState(0);
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
 
-  // Today's cardio
   const [todayActivities, setTodayActivities] = useState<DayActivity[]>([]);
   const [totalMovement, setTotalMovement] = useState<number>(0);
   const [yesterdayMovement, setYesterdayMovement] = useState<number>(0);
 
-  // Weights for selected day
   const [dayWeights, setDayWeights] = useState<DayWeight[]>([]);
   const [dayWeightsTotal, setDayWeightsTotal] = useState<number>(0);
 
-  // Weekly chart data (grouped by actual week number from DB)
   const [cardioWeeks, setCardioWeeks] = useState<WeekData[]>([]);
   const [weightsWeeks, setWeightsWeeks] = useState<WeekData[]>([]);
   const [calorieWeeks, setCalorieWeeks] = useState<WeekData[]>([]);
 
-  // Per-activity sparkline data (last 7 days Mon-Sun of current week)
   const [activityWeeklyData, setActivityWeeklyData] = useState<Record<string, number[]>>({});
 
-  // Load today's cardio + yesterday's
   useEffect(() => {
     const loadCardio = async () => {
       const todayDate = dateOffsetStr(0);
@@ -212,7 +204,6 @@ export const Dashboard: React.FC = () => {
 
       setTodayActivities(activities);
 
-      // Total movement: ONLY Tracker (82) + Row (83) + Cycle (87)
       const totalCardio = activities
         .filter(a => TOTAL_CARDIO_IDS.includes(a.exercise_id))
         .reduce((s, a) => s + a.total_cardio, 0);
@@ -226,7 +217,6 @@ export const Dashboard: React.FC = () => {
     loadCardio();
   }, []);
 
-  // Load per-activity sparklines (current week, by date)
   useEffect(() => {
     const loadActivityWeekly = async () => {
       const monday = weeksAgoMonday(0);
@@ -251,7 +241,6 @@ export const Dashboard: React.FC = () => {
     loadActivityWeekly();
   }, []);
 
-  // Load weights for selected day
   useEffect(() => {
     const loadWeights = async () => {
       const dateStr = dateOffsetStr(dayOffset);
@@ -272,10 +261,8 @@ export const Dashboard: React.FC = () => {
     loadWeights();
   }, [dayOffset]);
 
-  // Load weekly chart data grouped by actual week + day columns from DB
   useEffect(() => {
     const loadWeeklyCharts = async () => {
-      // Cardio: TRACKER + ROW + CYCLE only
       const { data: cardioData } = await supabase
         .from('workouts')
         .select('week, day, total_cardio, exercise_id')
@@ -292,7 +279,6 @@ export const Dashboard: React.FC = () => {
         ));
       }
 
-      // Weights
       const { data: weightsData } = await supabase
         .from('workouts')
         .select('week, day, total_weight')
@@ -308,7 +294,6 @@ export const Dashboard: React.FC = () => {
         ));
       }
 
-      // Calories
       const { data: calData } = await supabase
         .from('workouts')
         .select('week, day, calories')
