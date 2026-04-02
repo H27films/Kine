@@ -7,21 +7,36 @@ interface ProfileProps {
   onNavigate: (page: Page) => void;
 }
 
+const formatDate = (dateStr: string): string => {
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
+};
+
 export const Profile: React.FC<ProfileProps> = ({ onNavigate: _onNavigate }) => {
   const [exportCount, setExportCount] = useState<number | null>(null);
+  const [exportDates, setExportDates] = useState<string[]>([]);
   const [exporting, setExporting] = useState(false);
   const [exportDone, setExportDone] = useState(false);
   const [exportError, setExportError] = useState('');
 
-  const loadCount = async () => {
-    const { count: c } = await supabase
+  const loadData = async () => {
+    const { data } = await supabase
       .from('workouts')
-      .select('*', { count: 'exact', head: true })
-      .eq('new_entry', 'New');
-    setExportCount(c ?? 0);
+      .select('date')
+      .eq('new_entry', 'New')
+      .order('date');
+
+    if (data) {
+      setExportCount(data.length);
+      const distinct = [...new Set((data as any[]).map(r => r.date as string))].sort();
+      setExportDates(distinct);
+    } else {
+      setExportCount(0);
+      setExportDates([]);
+    }
   };
 
-  useEffect(() => { loadCount(); }, []);
+  useEffect(() => { loadData(); }, []);
 
   const handleExport = async () => {
     setExporting(true);
@@ -66,8 +81,7 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate: _onNavigate }) => 
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'New Entries');
 
-      const dateStr = new Date().toISOString().split('T')[0];
-      XLSX.writeFile(wb, `kine-export-${dateStr}.xlsx`);
+      XLSX.writeFile(wb, 'ImportKineData.xlsx');
 
       const ids = (data as any[]).map(r => r.id);
       await supabase
@@ -76,6 +90,7 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate: _onNavigate }) => 
         .in('id', ids);
 
       setExportCount(0);
+      setExportDates([]);
       setExportDone(true);
       setTimeout(() => setExportDone(false), 4000);
     } catch (e: any) {
@@ -84,6 +99,8 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate: _onNavigate }) => 
       setExporting(false);
     }
   };
+
+  const hasRows = (exportCount ?? 0) > 0;
 
   return (
     <div className="space-y-6">
@@ -104,30 +121,30 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate: _onNavigate }) => 
         className="rounded-2xl p-5"
         style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.07)' }}
       >
+        {/* Header row */}
         <div className="flex items-center justify-between mb-4">
-          <div>
-            <p style={{
-              fontSize: '1.1rem', fontWeight: 800, letterSpacing: '-0.02em',
-              color: '#ffffff', textTransform: 'uppercase',
-            }}>
-              Export Data
-            </p>
-            <p style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', marginTop: '3px', lineHeight: 1.5 }}>
-              DATE · EXERCISE · KM · CALORIES · FOOD<br />
-              W1–R6 · FAIL · WEIGHT · BF% · MUSCLE · TIME
-            </p>
-          </div>
-          <button onClick={loadCount} style={{ color: 'rgba(255,255,255,0.25)', padding: '6px' }}>
+          <p style={{
+            fontSize: '1.1rem', fontWeight: 800, letterSpacing: '-0.02em',
+            color: '#ffffff', textTransform: 'uppercase',
+          }}>
+            Export Data
+          </p>
+          <button
+            onClick={loadData}
+            title="Check for new entries"
+            style={{ color: 'rgba(255,255,255,0.25)', padding: '6px' }}
+          >
             <RefreshCw size={14} />
           </button>
         </div>
 
+        {/* Count + Export button */}
         <div className="flex items-center justify-between">
           <div className="flex items-baseline gap-1.5">
             <span style={{
               fontSize: '2.5rem', fontWeight: 900, lineHeight: 1,
               letterSpacing: '-0.03em',
-              color: (exportCount ?? 0) === 0 ? 'rgba(255,255,255,0.15)' : '#ffffff',
+              color: hasRows ? '#ffffff' : 'rgba(255,255,255,0.15)',
             }}>
               {exportCount ?? '—'}
             </span>
@@ -142,16 +159,16 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate: _onNavigate }) => 
 
           <button
             onClick={handleExport}
-            disabled={exporting || (exportCount ?? 0) === 0}
+            disabled={exporting || !hasRows}
             className="flex items-center gap-2 font-black uppercase tracking-widest text-xs active:scale-95 duration-150"
             style={{
               padding: '10px 20px',
               borderRadius: '999px',
-              backgroundColor: exportDone ? '#22c55e' : ((exportCount ?? 0) === 0 ? '#1f1f1f' : '#ffffff'),
-              color: exportDone ? '#fff' : ((exportCount ?? 0) === 0 ? 'rgba(255,255,255,0.2)' : '#1a1a1a'),
-              cursor: (exportCount ?? 0) === 0 ? 'default' : 'pointer',
+              backgroundColor: exportDone ? '#22c55e' : (hasRows ? '#ffffff' : '#1f1f1f'),
+              color: exportDone ? '#fff' : (hasRows ? '#1a1a1a' : 'rgba(255,255,255,0.2)'),
+              cursor: hasRows ? 'pointer' : 'default',
               transition: 'all 0.2s',
-              boxShadow: (exportCount ?? 0) > 0 ? '0 8px 24px rgba(0,0,0,0.4)' : 'none',
+              boxShadow: hasRows ? '0 8px 24px rgba(0,0,0,0.4)' : 'none',
             }}
           >
             {exporting
@@ -163,12 +180,27 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate: _onNavigate }) => 
           </button>
         </div>
 
+        {/* Dates list */}
+        {exportDates.length > 0 && (
+          <div className="mt-3 flex flex-col gap-1">
+            {exportDates.map(d => (
+              <span key={d} style={{
+                fontSize: '0.75rem',
+                color: 'rgba(255,255,255,0.4)',
+                letterSpacing: '0.01em',
+              }}>
+                {formatDate(d)}
+              </span>
+            ))}
+          </div>
+        )}
+
         {exportError && (
           <p className="mt-3" style={{ color: '#ff5050', fontSize: '0.75rem' }}>{exportError}</p>
         )}
         {exportDone && (
           <p className="mt-3" style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.7rem' }}>
-            Rows marked as "Exported" — won't appear in future exports.
+            Rows marked as Exported — won't appear in future exports.
           </p>
         )}
       </div>
