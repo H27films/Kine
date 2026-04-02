@@ -88,10 +88,8 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate: _onNavigate }) => 
         .update({ new_entry: 'Exported' })
         .in('id', ids);
 
-      setExportCount(0);
-      setExportDates([]);
       setExportDone(true);
-      setTimeout(() => setExportDone(false), 4000);
+      setTimeout(() => setExportDone(false), 3000);
     } catch (e: any) {
       setExportError(e.message || 'Export failed');
     } finally {
@@ -187,11 +185,6 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate: _onNavigate }) => 
 
         {exportError && (
           <p className="mt-3" style={{ color: '#ff5050', fontSize: '0.75rem' }}>{exportError}</p>
-        )}
-        {exportDone && (
-          <p className="mt-3" style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.7rem' }}>
-            Rows marked as Exported — won't appear in future exports.
-          </p>
         )}
       </div>
     </div>
