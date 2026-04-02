@@ -77,10 +77,15 @@ const WeeklyChart: React.FC<{
   const { weeks, unit } = chartConfig[activeTab];
   const current = weeks[weekIndex];
   const data = current?.days || Array(7).fill(0);
-  const maxVal = Math.max(...data, 1);
+  const rawMax = Math.max(...data, 1);
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const weekLabel = current ? `Week ${current.weekNumber}` : '—';
+  // Just the number e.g. "65"
+  const weekLabel = current ? `${current.weekNumber}` : '—';
   const totalWeeks = weeks.length;
+
+  // Y-axis min/max per tab
+  const yMin = activeTab === 'Cardio' ? 5 : activeTab === 'Calories' ? 500 : 0;
+  const yMax = activeTab === 'Cardio' ? 20 : rawMax;
 
   // Summary stat: total for Cardio/Weights, average for Calories
   const summaryLabel = (() => {
@@ -92,7 +97,6 @@ const WeeklyChart: React.FC<{
       const k = total / 1000;
       return total > 0 ? `${k >= 10 ? Math.round(k) : k.toFixed(1)}K` : '0K';
     } else {
-      // Calories: average of days that have a value
       if (nonZero.length === 0) return '— Kcal';
       const avg = Math.round(total / nonZero.length);
       return `${avg.toLocaleString()} Kcal`;
@@ -104,35 +108,40 @@ const WeeklyChart: React.FC<{
 
   return (
     <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff' }}>
-      <div className="flex items-start justify-between mb-4">
-        <div className="text-[10px] font-bold uppercase tracking-[1.5px] pt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>WEEKLY</div>
-        <div className="flex flex-col items-end gap-1">
-          <div className="flex items-center gap-3">
-            <button onClick={onPrev} disabled={weekIndex >= totalWeeks - 1} className="transition-opacity" style={{ opacity: weekIndex >= totalWeeks - 1 ? 0.2 : 0.6 }}><ChevronLeft size={16} color="white" /></button>
-            <span className="text-[10px] font-bold uppercase tracking-[1px] text-white/50 min-w-[60px] text-center">{weekLabel}</span>
-            <button onClick={onNext} disabled={weekIndex <= 0} className="transition-opacity" style={{ opacity: weekIndex <= 0 ? 0.2 : 0.6 }}><ChevronRight size={16} color="white" /></button>
-          </div>
-          <div className="text-[13px] font-black text-white tracking-tight text-right">{summaryLabel}</div>
+      {/* Top row: WEEKLY label + week toggle */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="text-[10px] font-bold uppercase tracking-[1.5px]" style={{ color: 'rgba(255,255,255,0.4)' }}>WEEKLY</div>
+        <div className="flex items-center gap-3">
+          <button onClick={onPrev} disabled={weekIndex >= totalWeeks - 1} className="transition-opacity" style={{ opacity: weekIndex >= totalWeeks - 1 ? 0.2 : 0.6 }}><ChevronLeft size={16} color="white" /></button>
+          <span className="text-[10px] font-bold uppercase tracking-[1px] text-white/50 min-w-[24px] text-center">{weekLabel}</span>
+          <button onClick={onNext} disabled={weekIndex <= 0} className="transition-opacity" style={{ opacity: weekIndex <= 0 ? 0.2 : 0.6 }}><ChevronRight size={16} color="white" /></button>
         </div>
       </div>
-      <div className="flex gap-4 mb-5">
-        {(['Cardio', 'Weights', 'Calories'] as ChartTab[]).map(tab => (
-          <button key={tab} onClick={() => setActiveTab(tab)} className="text-[11px] font-bold uppercase tracking-[1px] pb-1 transition-all"
-            style={{ color: activeTab === tab ? '#ffffff' : 'rgba(255,255,255,0.3)', borderBottom: activeTab === tab ? '2px solid #ffffff' : '2px solid transparent' }}>
-            {tab}
-          </button>
-        ))}
+      {/* Tab row + summary stat on same line */}
+      <div className="flex items-end justify-between mb-5">
+        <div className="flex gap-4">
+          {(['Cardio', 'Weights', 'Calories'] as ChartTab[]).map(tab => (
+            <button key={tab} onClick={() => setActiveTab(tab)} className="text-[11px] font-bold uppercase tracking-[1px] pb-1 transition-all"
+              style={{ color: activeTab === tab ? '#ffffff' : 'rgba(255,255,255,0.3)', borderBottom: activeTab === tab ? '2px solid #ffffff' : '2px solid transparent' }}>
+              {tab}
+            </button>
+          ))}
+        </div>
+        <div className="text-[13px] font-black text-white tracking-tight">{summaryLabel}</div>
       </div>
+      {/* Chart bars */}
       <div className="flex items-end justify-between h-32" style={{ gap: '12px' }}>
         {data.map((val, i) => {
-          const pct = maxVal > 0 ? val / maxVal : 0;
-          const brightness = Math.round(80 + pct * 175);
+          // Scale bar relative to yMin/yMax
+          const clampedVal = Math.min(Math.max(val, yMin), yMax);
+          const pct = val > 0 ? Math.max((clampedVal - yMin) / (yMax - yMin), 0.04) : 0;
+          const rawPct = rawMax > 0 ? val / rawMax : 0;
+          const brightness = Math.round(80 + rawPct * 175);
           const barColor = val > 0 ? `rgb(${brightness},${brightness},${brightness})` : 'rgba(255,255,255,0.05)';
           // Bar label formatting
           let barLabel = '';
           if (val > 0) {
             if (unit === 'kg') {
-              // Weights: show in K (e.g. 21k)
               barLabel = `${Math.round(val / 1000)}k`;
             } else if (unit === 'km') {
               barLabel = `${+val.toFixed(1)}km`;
@@ -143,7 +152,7 @@ const WeeklyChart: React.FC<{
           return (
             <div key={i} className="flex flex-col items-center h-full justify-end" style={{ flex: '1', maxWidth: '28px' }}>
               <div className="text-[8px] font-bold text-white/60 mb-1">{barLabel}</div>
-              <div className="w-full min-h-[4px] transition-all" style={{ height: `${Math.max(pct * 100, 4)}%`, backgroundColor: barColor, borderRadius: '4px' }} />
+              <div className="w-full min-h-[4px] transition-all" style={{ height: `${pct * 100}%`, backgroundColor: barColor, borderRadius: '4px' }} />
               <div className="text-[9px] font-bold uppercase mt-2" style={{ color: 'rgba(255,255,255,0.3)' }}>{days[i]}</div>
             </div>
           );
@@ -266,7 +275,6 @@ export const Dashboard: React.FC = () => {
   // Load weekly chart data grouped by actual week + day columns from DB
   useEffect(() => {
     const loadWeeklyCharts = async () => {
-      // Fetch last 10 weeks of data using week column
       // Cardio: TRACKER + ROW + CYCLE only
       const { data: cardioData } = await supabase
         .from('workouts')
@@ -358,15 +366,15 @@ export const Dashboard: React.FC = () => {
         )}
 
         {selectedActivity && activityWeeklyData[selectedActivity] && (() => {
-          const data = activityWeeklyData[selectedActivity];
-          const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-          const maxVal = Math.max(...data, 0.1);
+          const sparkData = activityWeeklyData[selectedActivity];
+          const sparkDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+          const maxVal = Math.max(...sparkData, 0.1);
           const chartH = 90;
           const getBottom = (val: number) => maxVal > 0 ? (val / maxVal) * chartH : 0;
           return (
             <div className="mt-8 relative" style={{ height: `${chartH + 30}px` }}>
               <div className="flex items-end justify-between relative" style={{ height: `${chartH}px` }}>
-                {data.map((val, i) => {
+                {sparkData.map((val, i) => {
                   const bottom = getBottom(val);
                   return (
                     <div key={i} className="flex flex-col items-center h-full justify-end relative" style={{ flex: '1' }}>
@@ -384,7 +392,7 @@ export const Dashboard: React.FC = () => {
                 })}
               </div>
               <div className="flex justify-between mt-2">
-                {days.map((d, i) => (
+                {sparkDays.map((d, i) => (
                   <div key={i} className="text-[9px] font-bold uppercase text-center" style={{ flex: '1', color: 'rgba(255,255,255,0.3)' }}>{d}</div>
                 ))}
               </div>
