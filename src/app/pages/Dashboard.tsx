@@ -6,6 +6,9 @@ import { supabase, dateOffsetStr, mapToWeeklyChart, weeksAgoMonday } from '../..
 const TOTAL_WEEKS = 7;
 type ChartTab = 'Cardio' | 'Weights' | 'Calories';
 
+// Only these 3 exercise IDs count toward Total Cardio (TrackerDaily)
+const TOTAL_CARDIO_IDS = [82, 83, 87]; // TRACKER, ROW, CYCLE
+
 // Map exercise names to short display labels + icons
 const CARDIO_DISPLAY: Record<string, { label: string; icon: React.ReactNode }> = {
   RUNNING:       { label: 'Run',    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="17" cy="4" r="2"/><path d="M15.6 7.6L13 10l-3-3-4 4"/><path d="M3 17l3-3 3 3 4-4 2 2 3.5-3.5"/><path d="M10 10l-2 8h3l1 4"/></svg> },
@@ -13,10 +16,11 @@ const CARDIO_DISPLAY: Record<string, { label: string; icon: React.ReactNode }> =
   CYCLE:         { label: 'Cycle',  icon: <Bike size={18} /> },
   WALKING:       { label: 'Walk',   icon: <Footprints size={18} /> },
   'CROSS TRAINER':{ label: 'X-Train', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg> },
-  TRACKER:       { label: 'Steps',  icon: <Footprints size={18} /> },
+  TRACKER:       { label: 'Tracker', icon: <Footprints size={18} /> },
 };
 
 interface DayActivity {
+  exercise_id: number;
   exercise_name: string;
   km: number;
   total_cardio: number;
@@ -120,10 +124,14 @@ export const Dashboard: React.FC = () => {
   const [activityWeeklyData, setActivityWeeklyData] = useState<Record<string, number[]>>({});
 
   // Load today's cardio + yesterday's
+  // Total movement = ONLY Tracker + Row + Cycle (exercise IDs 82, 83, 87)
+  // Other cardio (Running, Walking etc.) shown in breakdown but NOT added to total
   useEffect(() => {
     const loadCardio = async () => {
       const todayDate = dateOffsetStr(0);
       const yesterdayDate = dateOffsetStr(-1);
+
+      // Fetch ALL cardio for display breakdown
       const { data } = await supabase
         .from('workouts')
         .select('date, km, total_cardio, exercise_id, exercises:exercise_id(exercise_name)')
@@ -139,14 +147,25 @@ export const Dashboard: React.FC = () => {
       const activities: DayActivity[] = todayRows
         .filter((r: any) => r.km && r.km > 0)
         .map((r: any) => ({
+          exercise_id: r.exercise_id,
           exercise_name: r.exercises?.exercise_name || 'Unknown',
           km: Number(r.km),
           total_cardio: Number(r.total_cardio || 0),
         }));
 
       setTodayActivities(activities);
-      setTotalMovement(+activities.reduce((s, a) => s + a.total_cardio, 0).toFixed(1));
-      setYesterdayMovement(+yesterdayRows.reduce((s: number, r: any) => s + Number(r.total_cardio || 0), 0).toFixed(1));
+
+      // Total movement: ONLY Tracker (82) + Row (83) + Cycle (87)
+      const totalCardio = activities
+        .filter(a => TOTAL_CARDIO_IDS.includes(a.exercise_id))
+        .reduce((s, a) => s + a.total_cardio, 0);
+      setTotalMovement(+totalCardio.toFixed(1));
+
+      // Yesterday total: same 3 exercises only
+      const yestTotal = yesterdayRows
+        .filter((r: any) => TOTAL_CARDIO_IDS.includes(r.exercise_id))
+        .reduce((s: number, r: any) => s + Number(r.total_cardio || 0), 0);
+      setYesterdayMovement(+yestTotal.toFixed(1));
     };
     loadCardio();
   }, []);
@@ -198,15 +217,17 @@ export const Dashboard: React.FC = () => {
   }, [dayOffset]);
 
   // Load weekly chart data (last 7 weeks)
+  // Cardio chart: ONLY Tracker (82) + Row (83) + Cycle (87)
   useEffect(() => {
     const loadWeeklyCharts = async () => {
       const cutoff = weeksAgoMonday(6);
 
-      // Cardio
+      // Cardio chart: filter to TOTAL_CARDIO_IDS only
       const { data: cardioData } = await supabase
         .from('workouts')
-        .select('date, total_cardio')
+        .select('date, total_cardio, exercise_id')
         .eq('type', 'CARDIO')
+        .in('exercise_id', TOTAL_CARDIO_IDS)
         .gte('date', cutoff);
       if (cardioData) {
         setCardioWeeks(mapToWeeklyChart(
@@ -242,8 +263,8 @@ export const Dashboard: React.FC = () => {
     loadWeeklyCharts();
   }, []);
 
-  // Build activity list for display (exclude TRACKER from breakdown, keep for total)
-  const displayActivities = todayActivities.filter(a => a.exercise_name !== 'TRACKER');
+  // All cardio activities shown in breakdown (TRACKER now shown too)
+  const displayActivities = todayActivities.filter(a => a.km > 0);
 
   return (
     <div className="space-y-8">
