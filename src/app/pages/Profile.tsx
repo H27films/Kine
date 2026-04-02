@@ -80,7 +80,6 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate: _onNavigate }) => 
       const ws = XLSX.utils.json_to_sheet(rows);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'New Entries');
-
       XLSX.writeFile(wb, 'ImportKineData.xlsx');
 
       const ids = (data as any[]).map(r => r.id);
@@ -121,22 +120,13 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate: _onNavigate }) => 
         className="rounded-2xl p-5"
         style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.07)' }}
       >
-        {/* Header row */}
-        <div className="flex items-center justify-between mb-4">
-          <p style={{
-            fontSize: '1.1rem', fontWeight: 800, letterSpacing: '-0.02em',
-            color: '#ffffff', textTransform: 'uppercase',
-          }}>
-            Export Data
-          </p>
-          <button
-            onClick={loadData}
-            title="Check for new entries"
-            style={{ color: 'rgba(255,255,255,0.25)', padding: '6px' }}
-          >
-            <RefreshCw size={14} />
-          </button>
-        </div>
+        {/* Header */}
+        <p style={{
+          fontSize: '1.1rem', fontWeight: 800, letterSpacing: '-0.02em',
+          color: '#ffffff', textTransform: 'uppercase', marginBottom: '16px',
+        }}>
+          Export Data
+        </p>
 
         {/* Count + Export button */}
         <div className="flex items-center justify-between">
