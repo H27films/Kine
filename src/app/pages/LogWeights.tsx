@@ -14,7 +14,6 @@ const tabs: { label: string; page: Page }[] = [
 ];
 
 const WEIGHT_TYPES = ['CHEST', 'BACK', 'LEGS'];
-// Fixed display order
 const GROUP_ORDER = ['Chest', 'Back', 'Legs'];
 
 interface SetRow {
@@ -57,7 +56,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  // DB state
   const [exercisesByGroup, setExercisesByGroup] = useState<Record<string, Exercise[]>>({});
   const [recentLogs, setRecentLogs] = useState<RecentLog[]>([]);
   const [weeklyData, setWeeklyData] = useState<WeeklyGroupData[]>([]);
@@ -65,7 +63,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
   const groupRef = useRef<HTMLDivElement>(null);
   const exerciseRef = useRef<HTMLDivElement>(null);
 
-  // Load exercises from DB
   useEffect(() => {
     const loadExercises = async () => {
       const { data } = await supabase
@@ -86,7 +83,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     loadExercises();
   }, []);
 
-  // Load recent weight logs
   useEffect(() => {
     const loadRecent = async () => {
       const { data } = await supabase
@@ -107,7 +103,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     loadRecent();
   }, []);
 
-  // Load weekly totals
   useEffect(() => {
     const loadWeekly = async () => {
       const thisMonday = currentWeekMonday();
@@ -233,7 +228,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
           }
         }
 
-        // total_weight = sum of (weight × reps) across all sets × exercise multiplier
         const multiplier = ex.exercise.multiplier ?? 1;
         const rawVolume = ex.sets.reduce((acc, s) => acc + (parseFloat(s.weight) || 0) * s.reps, 0);
         const totalWeight = rawVolume * multiplier;
@@ -246,7 +240,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
           exercise_id: ex.exercise.id,
           multiplier,
           total_weight: totalWeight,
-          // total_score_k is row-specific: total volume for this exercise (post-multiplier)
           total_score_k: totalWeight,
           sets: filledSets.length,
           new_entry: 'New',
@@ -255,7 +248,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
         });
       }
 
-      // Recalculate daily total_score and tracker_daily for all rows today
       await recalculateDailyTotals(today);
 
       setAddedExercises(prev => prev.map(e => ({ ...e, logged: true, expanded: false })));
@@ -280,7 +272,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     textTransform: 'uppercase', color: '#ffffff', marginBottom: '1.25rem',
   };
 
-  // Always display in Chest → Back → Legs order
   const orderedGroups = GROUP_ORDER.filter(g => exercisesByGroup[g]);
 
   return (
@@ -315,13 +306,16 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
               </button>
             )}
           </div>
-          {/* Dropdown with box */}
+          {/* Dropdown — style matches exercise dropdown */}
           {groupOpen && (
             <div style={{ position: 'absolute', top: 'calc(100% + 8px)', left: 0, zIndex: 50, backgroundColor: '#222222', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '14px', overflow: 'hidden', minWidth: '180px', boxShadow: '0 16px 40px rgba(0,0,0,0.6)' }}>
               {orderedGroups.map((group, i, arr) => (
                 <div key={group} onClick={() => handleSelectGroup(group)}
-                  style={{ padding: '12px 18px', cursor: 'pointer', color: selectedGroup === group ? '#ffffff' : 'rgba(255,255,255,0.6)', fontWeight: selectedGroup === group ? 800 : 600, fontSize: '0.875rem', letterSpacing: '0.05em', textTransform: 'uppercase', lineHeight: 1.2, borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none', backgroundColor: selectedGroup === group ? 'rgba(255,255,255,0.06)' : 'transparent' }}>
-                  {group}
+                  style={{ padding: '12px 18px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none', backgroundColor: selectedGroup === group ? 'rgba(255,255,255,0.04)' : 'transparent' }}>
+                  <span style={{ color: selectedGroup === group ? '#ffffff' : '#cccccc', fontSize: '0.875rem', fontWeight: selectedGroup === group ? 700 : 400 }}>
+                    {group}
+                  </span>
+                  {selectedGroup === group && <Check size={13} color="#ffffff" strokeWidth={2.5} />}
                 </div>
               ))}
             </div>
@@ -346,16 +340,34 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                 {(exercisesByGroup[selectedGroup] || []).map((ex, i, arr) => {
                   const alreadyAdded = !!addedExercises.find(e => e.exercise.id === ex.id);
                   return (
-                    <div key={ex.id} style={{ padding: '12px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none', backgroundColor: alreadyAdded ? 'rgba(255,255,255,0.04)' : 'transparent' }}>
+                    <div
+                      key={ex.id}
+                      onClick={() => !alreadyAdded && handleAddExercise(ex)}
+                      style={{
+                        padding: '12px 18px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
+                        backgroundColor: alreadyAdded ? 'rgba(255,255,255,0.04)' : 'transparent',
+                        cursor: alreadyAdded ? 'default' : 'pointer',
+                      }}
+                    >
                       <div>
                         <span style={{ color: alreadyAdded ? '#666' : '#cccccc', fontSize: '0.875rem' }}>{ex.exercise_name}</span>
                         {ex.info_notes && <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.7rem', display: 'block', marginTop: '2px' }}>{ex.info_notes}</span>}
                       </div>
-                      <button onClick={(e) => { e.stopPropagation(); handleAddExercise(ex); }}
-                        style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: alreadyAdded ? '#2a2a2a' : '#ffffff', color: alreadyAdded ? '#444' : '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, cursor: alreadyAdded ? 'default' : 'pointer', border: 'none' }}
-                        disabled={alreadyAdded}>
+                      <div
+                        style={{
+                          width: 28, height: 28, borderRadius: '50%',
+                          backgroundColor: alreadyAdded ? '#2a2a2a' : '#ffffff',
+                          color: alreadyAdded ? '#444' : '#1a1a1a',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          flexShrink: 0,
+                        }}
+                      >
                         <Plus size={14} strokeWidth={3} />
-                      </button>
+                      </div>
                     </div>
                   );
                 })}
