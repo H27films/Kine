@@ -306,7 +306,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
               </button>
             )}
           </div>
-          {/* Dropdown — style matches exercise dropdown */}
           {groupOpen && (
             <div style={{ position: 'absolute', top: 'calc(100% + 8px)', left: 0, zIndex: 50, backgroundColor: '#222222', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '14px', overflow: 'hidden', minWidth: '180px', boxShadow: '0 16px 40px rgba(0,0,0,0.6)' }}>
               {orderedGroups.map((group, i, arr) => (
@@ -396,7 +395,12 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
 
               return (
                 <div key={ex.exercise.id}>
-                  <div className="flex items-center gap-4 py-4" style={{ borderBottom: ex.expanded ? 'none' : '1px solid rgba(255,255,255,0.06)' }}>
+                  {/* Whole row is clickable to expand/collapse */}
+                  <div
+                    className="flex items-center gap-4 py-4"
+                    onClick={() => toggleExpanded(ex.exercise.id)}
+                    style={{ borderBottom: ex.expanded ? 'none' : '1px solid rgba(255,255,255,0.06)', cursor: 'pointer' }}
+                  >
                     <div style={{ width: 32, height: 32, borderRadius: '50%', border: hasData || ex.logged ? 'none' : '2px solid rgba(255,255,255,0.2)', backgroundColor: hasData || ex.logged ? '#ffffff' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all 0.25s' }}>
                       {(hasData || ex.logged) && <Check size={14} color="#1a1a1a" strokeWidth={3} />}
                     </div>
@@ -404,9 +408,9 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                       <p className="font-bold text-sm text-white">{ex.exercise.exercise_name}</p>
                       <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>{lastText}</p>
                     </div>
-                    <button onClick={() => toggleExpanded(ex.exercise.id)} style={{ color: 'rgba(255,255,255,0.4)', flexShrink: 0 }}>
+                    <div style={{ color: 'rgba(255,255,255,0.4)', flexShrink: 0 }}>
                       {ex.expanded ? <ChevronUp size={20} /> : <ChevronRight size={20} />}
-                    </button>
+                    </div>
                   </div>
 
                   {ex.expanded && (
@@ -420,7 +424,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                             </>
                           )}
                         </div>
-                        <button onClick={() => toggleCopyFromLast(ex.exercise.id)}
+                        <button onClick={(e) => { e.stopPropagation(); toggleCopyFromLast(ex.exercise.id); }}
                           style={{ width: 30, height: 30, borderRadius: '50%', backgroundColor: ex.copied ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.08)', border: ex.copied ? '1px solid rgba(255,255,255,0.3)' : '1px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: ex.copied ? '#ffffff' : 'rgba(255,255,255,0.55)', cursor: 'pointer', flexShrink: 0, transition: 'all 0.2s' }}>
                           {ex.copied ? <Minus size={14} strokeWidth={2.5} /> : <Plus size={14} strokeWidth={2.5} />}
                         </button>
@@ -441,8 +445,9 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                             <p className="font-black" style={{ fontSize: '1rem', color: numColor, lineHeight: 1, textAlign: 'center' }}>{idx + 1}</p>
                             <input type="number" value={set.weight} onChange={e => updateSet(ex.exercise.id, idx, 'weight', e.target.value)} placeholder="—"
                               className="text-center font-bold rounded-lg py-2"
+                              onClick={e => e.stopPropagation()}
                               style={{ backgroundColor: '#1b1b1b', border: '1px solid rgba(255,255,255,0.07)', outline: 'none', width: '100%', fontSize: '0.875rem', color: rowHasData ? '#ffffff' : 'rgba(255,255,255,0.3)' }} />
-                            <div className="flex items-center justify-between rounded-lg py-2 px-2" style={{ backgroundColor: '#1b1b1b', border: '1px solid rgba(255,255,255,0.07)' }}>
+                            <div className="flex items-center justify-between rounded-lg py-2 px-2" style={{ backgroundColor: '#1b1b1b', border: '1px solid rgba(255,255,255,0.07)' }} onClick={e => e.stopPropagation()}>
                               <button onClick={() => updateSet(ex.exercise.id, idx, 'reps', Math.max(1, set.reps - 1))} style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}>−</button>
                               <span className="font-bold" style={{ fontSize: '0.875rem', color: rowHasData ? '#ffffff' : 'rgba(255,255,255,0.3)' }}>{set.reps}</span>
                               <button onClick={() => updateSet(ex.exercise.id, idx, 'reps', set.reps + 1)} style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}>+</button>
@@ -454,7 +459,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
 
                       {ex.sets.length < 6 && (
                         <div className="flex items-center mt-4">
-                          <button onClick={() => addSet(ex.exercise.id)} className="flex items-center gap-1 text-xs font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                          <button onClick={(e) => { e.stopPropagation(); addSet(ex.exercise.id); }} className="flex items-center gap-1 text-xs font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.35)' }}>
                             <Plus size={13} /><span>Set</span>
                           </button>
                         </div>
