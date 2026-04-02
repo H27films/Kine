@@ -11,6 +11,7 @@ export interface Exercise {
   type: string;
   multiplier: number;
   info_notes: string | null;
+  type2: string | null;
 }
 
 export interface Workout {

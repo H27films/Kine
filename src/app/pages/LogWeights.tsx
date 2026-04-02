@@ -16,6 +16,21 @@ const tabs: { label: string; page: Page }[] = [
 const WEIGHT_TYPES = ['CHEST', 'BACK', 'LEGS'];
 const GROUP_ORDER = ['Chest', 'Back', 'Legs'];
 
+// Sort order for type2: Body Weight first, then Bar, Dumbbell, Machine
+const TYPE2_ORDER: Record<string, number> = {
+  'BODY WEIGHT': 0,
+  'BAR': 1,
+  'DUMB BELL': 2,
+  'MACHINE': 3,
+};
+
+const TYPE2_LABELS: Record<string, string> = {
+  'BODY WEIGHT': 'Body Weight',
+  'BAR': 'Bar',
+  'DUMB BELL': 'Dumbbell',
+  'MACHINE': 'Machine',
+};
+
 interface SetRow {
   weight: string;
   reps: number;
@@ -27,7 +42,7 @@ interface AddedExercise {
   expanded: boolean;
   logged: boolean;
   copied: boolean;
-  lastSets: SetRow[] | null; // full last session: index 0 = w1/r1, index 1 = w2/r2, etc.
+  lastSets: SetRow[] | null;
 }
 
 interface RecentLog {
@@ -76,6 +91,15 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
           const key = ex.type.charAt(0) + ex.type.slice(1).toLowerCase();
           if (!grouped[key]) grouped[key] = [];
           grouped[key].push(ex);
+        }
+        // Sort each group by type2 order: BODY WEIGHT → BAR → DUMB BELL → MACHINE
+        for (const key of Object.keys(grouped)) {
+          grouped[key].sort((a, b) => {
+            const aOrder = TYPE2_ORDER[a.type2 ?? ''] ?? 99;
+            const bOrder = TYPE2_ORDER[b.type2 ?? ''] ?? 99;
+            if (aOrder !== bOrder) return aOrder - bOrder;
+            return (a.exercise_name || '').localeCompare(b.exercise_name || '');
+          });
         }
         setExercisesByGroup(grouped);
       }
@@ -150,7 +174,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
   const handleAddExercise = async (exercise: Exercise) => {
     if (addedExercises.find(e => e.exercise.id === exercise.id)) return;
 
-    // Fetch ALL set columns from last session
     const { data } = await supabase
       .from('workouts')
       .select('w1,r1,w2,r2,w3,r3,w4,r4,w5,r5,w6,r6')
@@ -205,15 +228,12 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     }));
   };
 
-  // Circle button: load full last session — w1/r1 for row 1, w2/r2 for row 2, etc.
   const loadLastSession = (id: number) => {
     setAddedExercises(prev => prev.map(e => {
       if (e.exercise.id !== id) return e;
       if (!e.lastSets || e.lastSets.length === 0) {
-        // No previous data — just expand
         return { ...e, expanded: true };
       }
-      // Replace sets with exact last session data
       return { ...e, sets: [...e.lastSets], expanded: true, copied: true };
     }));
   };
@@ -301,6 +321,80 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
 
   const orderedGroups = GROUP_ORDER.filter(g => exercisesByGroup[g]);
 
+  // Build exercise list with type2 section headers
+  const renderExerciseDropdown = () => {
+    const exercises = exercisesByGroup[selectedGroup] || [];
+    if (exercises.length === 0) return null;
+
+    const items: React.ReactNode[] = [];
+    let lastType2: string | null = undefined as any;
+
+    exercises.forEach((ex, i) => {
+      const t2 = ex.type2 ?? '';
+      const alreadyAdded = !!addedExercises.find(e => e.exercise.id === ex.id);
+
+      // Insert section header when type2 changes
+      if (t2 !== lastType2) {
+        lastType2 = t2;
+        const label = TYPE2_LABELS[t2] || t2;
+        items.push(
+          <div key={`header-${t2}`} style={{
+            padding: '8px 18px 5px',
+            borderTop: items.length > 0 ? '1px solid rgba(255,255,255,0.07)' : 'none',
+          }}>
+            <span style={{
+              fontSize: '0.65rem',
+              fontWeight: 700,
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              color: 'rgba(255,255,255,0.3)',
+            }}>{label}</span>
+          </div>
+        );
+      }
+
+      items.push(
+        <div
+          key={ex.id}
+          onClick={() => !alreadyAdded && handleAddExercise(ex)}
+          style={{
+            padding: '10px 18px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            borderBottom: i < exercises.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
+            backgroundColor: alreadyAdded ? 'rgba(255,255,255,0.04)' : 'transparent',
+            cursor: alreadyAdded ? 'default' : 'pointer',
+          }}
+        >
+          <div>
+            <span style={{ color: alreadyAdded ? '#555' : '#cccccc', fontSize: '0.875rem' }}>
+              {ex.exercise_name.charAt(0).toUpperCase() + ex.exercise_name.slice(1).toLowerCase()}
+            </span>
+            {ex.info_notes && (
+              <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.7rem', display: 'block', marginTop: '2px' }}>
+                {ex.info_notes}
+              </span>
+            )}
+          </div>
+          <div
+            style={{
+              width: 28, height: 28, borderRadius: '50%',
+              backgroundColor: alreadyAdded ? '#2a2a2a' : '#ffffff',
+              color: alreadyAdded ? '#444' : '#1a1a1a',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0,
+            }}
+          >
+            <Plus size={14} strokeWidth={3} />
+          </div>
+        </div>
+      );
+    });
+
+    return items;
+  };
+
   return (
     <div>
       <nav className="flex gap-8 mb-12 items-end">
@@ -362,41 +456,8 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
               )}
             </div>
             {exerciseOpen && (
-              <div style={{ position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, backgroundColor: '#222222', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '14px', overflow: 'hidden', zIndex: 50, boxShadow: '0 16px 40px rgba(0,0,0,0.6)' }}>
-                {(exercisesByGroup[selectedGroup] || []).map((ex, i, arr) => {
-                  const alreadyAdded = !!addedExercises.find(e => e.exercise.id === ex.id);
-                  return (
-                    <div
-                      key={ex.id}
-                      onClick={() => !alreadyAdded && handleAddExercise(ex)}
-                      style={{
-                        padding: '12px 18px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
-                        backgroundColor: alreadyAdded ? 'rgba(255,255,255,0.04)' : 'transparent',
-                        cursor: alreadyAdded ? 'default' : 'pointer',
-                      }}
-                    >
-                      <div>
-                        <span style={{ color: alreadyAdded ? '#666' : '#cccccc', fontSize: '0.875rem' }}>{ex.exercise_name}</span>
-                        {ex.info_notes && <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.7rem', display: 'block', marginTop: '2px' }}>{ex.info_notes}</span>}
-                      </div>
-                      <div
-                        style={{
-                          width: 28, height: 28, borderRadius: '50%',
-                          backgroundColor: alreadyAdded ? '#2a2a2a' : '#ffffff',
-                          color: alreadyAdded ? '#444' : '#1a1a1a',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          flexShrink: 0,
-                        }}
-                      >
-                        <Plus size={14} strokeWidth={3} />
-                      </div>
-                    </div>
-                  );
-                })}
+              <div style={{ position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, backgroundColor: '#222222', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '14px', overflow: 'hidden', zIndex: 50, boxShadow: '0 16px 40px rgba(0,0,0,0.6)', maxHeight: '65vh', overflowY: 'auto' }}>
+                {renderExerciseDropdown()}
               </div>
             )}
           </div>
@@ -444,7 +505,9 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                     {/* Rest of row toggles expand */}
                     <div className="flex-grow flex items-center justify-between" onClick={() => toggleExpanded(ex.exercise.id)} style={{ cursor: 'pointer' }}>
                       <div>
-                        <p className="font-bold text-sm text-white">{ex.exercise.exercise_name}</p>
+                        <p className="font-bold text-sm text-white">
+                          {ex.exercise.exercise_name.charAt(0).toUpperCase() + ex.exercise.exercise_name.slice(1).toLowerCase()}
+                        </p>
                         <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>{lastSummary}</p>
                       </div>
                       <div style={{ color: 'rgba(255,255,255,0.4)', flexShrink: 0 }}>
