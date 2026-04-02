@@ -15,12 +15,39 @@ const toTitleCase = (str: string) =>
 
 // Map exercise names to short display labels + icons
 const CARDIO_DISPLAY: Record<string, { label: string; icon: React.ReactNode }> = {
-  RUNNING:       { label: 'Run',    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="17" cy="4" r="2"/><path d="M15.6 7.6L13 10l-3-3-4 4"/><path d="M3 17l3-3 3 3 4-4 2 2 3.5-3.5"/><path d="M10 10l-2 8h3l1 4"/></svg> },
-  ROW:           { label: 'Row',    icon: <Waves size={18} /> },
-  CYCLE:         { label: 'Cycle',  icon: <Bike size={18} /> },
-  WALKING:       { label: 'Walk',   icon: <Footprints size={18} /> },
-  'CROSS TRAINER':{ label: 'Cross-Trainer', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg> },
-  TRACKER:       { label: 'Tracker', icon: <Footprints size={18} /> },
+  RUNNING: { 
+    label: 'Run', 
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 512 512" fill="currentColor">
+        <path d="M393.1 144.1c11.3 7.8 26.8 5.1 34.6-6.2 7.8-11.3 5.1-26.8-6.2-34.6-21.7-15-46.7-22.1-72-20.5-24.8 1.6-48.4 11.2-66.5 27.2-4 3.5-7.7 7.4-11.1 11.5l-33.8 41.2c-5.9 7.2-15.5 10.4-24.6 8.3L153 158.2c-12.8-2.9-25.5 5.2-28.4 17.9s5.2 25.5 17.9 28.4l60.5 13.9c18.3 4.2 37.5-2.2 49.3-16.6l31.5-38.4c5.1-4.5 11-8 17.3-10.3 22.4-8 47.9-5.1 68.3 9l23.7 12zM154.5 281.3c-1.8-1.4-3.5-2.8-5.2-4.3l-55.7-49c-10.1-8.9-25.3-7.8-34.1 2.3s-7.8 25.3 2.3 34.1l55.7 49c8.2 7.2 16.9 13.6 26.2 19.1l80.5 47.8c11.9 7.1 27.1 3 34.2-8.9s3-27.1-8.9-34.2l-80.5-47.8c-4.9-2.9-9.7-6.2-14.5-8.1zM404.1 364.2l-123-146.1c-9.1-10.8-25.2-12.2-36-3.1s-12.2 25.2-3.1 36l123 146.1c5.9 7.1 13.1 13 21.2 17.4l83.6 45.4c11.7 6.3 26.4 1.9 32.7-9.8s1.9-26.4-9.8-32.7l-83.6-45.4c-1.7-.9-3.4-1.6-5-2.8z" />
+      </svg>
+    ) 
+  },
+  ROW: { 
+    label: 'Row', 
+    icon: <Waves size={18} /> 
+  },
+  CYCLE: { 
+    label: 'Cycle', 
+    icon: <Bike size={18} /> 
+  },
+  WALKING: { 
+    label: 'Walk', 
+    icon: <Footprints size={18} /> 
+  },
+  'CROSS TRAINER': { 
+    label: 'Cross-Trainer', 
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M5 12h14" />
+        <path d="M12 5l7 7-7 7" />
+      </svg>
+    ) 
+  },
+  TRACKER: { 
+    label: 'Tracker', 
+    icon: <Footprints size={18} /> 
+  },
 };
 
 interface DayActivity {
