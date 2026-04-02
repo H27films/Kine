@@ -339,16 +339,18 @@ export const Dashboard: React.FC = () => {
       <section className="pt-4">
         <div className="flex items-start">
           <div className="text-[4rem] font-black leading-none tracking-tighter text-white">
-            {totalMovement > 0 ? totalMovement.toFixed(1) : '—'}
+            {totalMovement > 0 ? totalMovement.toFixed(1) : ''}
           </div>
-          <div className="flex flex-col justify-center ml-4 pt-3">
-            <div className="text-[13px] font-black uppercase tracking-[2px] text-white">MOVEMENT (KM)</div>
-            {yesterdayMovement > 0 && (
-              <div className="text-[11px] font-medium mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                Yesterday {yesterdayMovement.toFixed(1)} km
-              </div>
-            )}
-          </div>
+          {(totalMovement > 0 || yesterdayMovement > 0) && (
+            <div className="flex flex-col justify-center ml-4 pt-3">
+              <div className="text-[13px] font-black uppercase tracking-[2px] text-white">MOVEMENT (KM)</div>
+              {yesterdayMovement > 0 && (
+                <div className="text-[11px] font-medium mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                  Yesterday {yesterdayMovement.toFixed(1)} km
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {displayActivities.length > 0 && (
