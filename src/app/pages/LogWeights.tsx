@@ -175,6 +175,10 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     setAddedExercises(prev => prev.map(e => e.exercise.id === id ? { ...e, expanded: !e.expanded } : e));
   };
 
+  const removeExercise = (id: number) => {
+    setAddedExercises(prev => prev.filter(e => e.exercise.id !== id));
+  };
+
   const updateSet = (id: number, setIdx: number, field: 'weight' | 'reps', value: string | number) => {
     setAddedExercises(prev => prev.map(e => {
       if (e.exercise.id !== id) return e;
@@ -457,13 +461,20 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                         );
                       })}
 
-                      {ex.sets.length < 6 && (
-                        <div className="flex items-center mt-4">
+                      <div className="flex items-center gap-6 mt-4">
+                        {ex.sets.length < 6 && (
                           <button onClick={(e) => { e.stopPropagation(); addSet(ex.exercise.id); }} className="flex items-center gap-1 text-xs font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.35)' }}>
                             <Plus size={13} /><span>Set</span>
                           </button>
-                        </div>
-                      )}
+                        )}
+                        <button
+                          onClick={(e) => { e.stopPropagation(); removeExercise(ex.exercise.id); }}
+                          className="flex items-center gap-1 text-xs font-bold uppercase tracking-widest"
+                          style={{ color: 'rgba(255,80,80,0.6)' }}
+                        >
+                          <Minus size={13} /><span>Remove Ex.</span>
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
