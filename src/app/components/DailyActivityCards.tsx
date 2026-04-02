@@ -66,6 +66,16 @@ function getLast7Dates(): string[] {
   return dates;
 }
 
+// Bare icon + value — no pill, no background, matches Movement section style
+const Chip: React.FC<{ icon: React.ReactNode; value: string }> = ({ icon, value }) => (
+  <div style={{
+    display: 'flex', alignItems: 'center', gap: '4px',
+  }}>
+    <span style={{ color: 'rgba(255,255,255,0.4)' }}>{icon}</span>
+    <span style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.6)' }}>{value}</span>
+  </div>
+);
+
 const DayCard: React.FC<{ day: DayData }> = ({ day }) => {
   const totalKm = day.trackerTotal + day.rowTotal + day.cycleTotal;
   const hasCardio = totalKm > 0;
@@ -132,11 +142,11 @@ const DayCard: React.FC<{ day: DayData }> = ({ day }) => {
               KM
             </span>
           </div>
-          {/* Chips: Row, Cycle, Running — show raw km */}
-          <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap' }}>
-            {day.rowKm > 0 && <Chip icon={<Waves size={10} />} value={fmt(day.rowKm)} />}
-            {day.cycleKm > 0 && <Chip icon={<Bike size={10} />} value={fmt(day.cycleKm)} />}
-            {day.runningKm > 0 && <Chip icon={<PersonStanding size={10} />} value={fmt(day.runningKm)} />}
+          {/* Bare icon + km: Row, Cycle, Running — show raw km, no pill */}
+          <div style={{ display: 'flex', gap: '10px', marginTop: '8px', flexWrap: 'wrap' }}>
+            {day.rowKm > 0 && <Chip icon={<Waves size={11} />} value={`${fmt(day.rowKm)}km`} />}
+            {day.cycleKm > 0 && <Chip icon={<Bike size={11} />} value={`${fmt(day.cycleKm)}km`} />}
+            {day.runningKm > 0 && <Chip icon={<PersonStanding size={11} />} value={`${fmt(day.runningKm)}km`} />}
           </div>
         </div>
       ) : (
@@ -189,16 +199,6 @@ const DayCard: React.FC<{ day: DayData }> = ({ day }) => {
     </div>
   );
 };
-
-const Chip: React.FC<{ icon: React.ReactNode; value: string }> = ({ icon, value }) => (
-  <div style={{
-    display: 'flex', alignItems: 'center', gap: '4px',
-    backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: '6px', padding: '3px 7px',
-  }}>
-    <span style={{ color: 'rgba(255,255,255,0.5)' }}>{icon}</span>
-    <span style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.65)' }}>{value}</span>
-  </div>
-);
 
 export const DailyActivityCards: React.FC = () => {
   const [days, setDays] = useState<DayData[]>([]);
