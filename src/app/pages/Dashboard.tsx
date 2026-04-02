@@ -82,17 +82,37 @@ const WeeklyChart: React.FC<{
   const weekLabel = current ? `Week ${current.weekNumber}` : '—';
   const totalWeeks = weeks.length;
 
+  // Summary stat: total for Cardio/Weights, average for Calories
+  const summaryLabel = (() => {
+    const nonZero = data.filter(v => v > 0);
+    const total = data.reduce((s, v) => s + v, 0);
+    if (activeTab === 'Cardio') {
+      return total > 0 ? `${total.toFixed(1)} KM` : '0.0 KM';
+    } else if (activeTab === 'Weights') {
+      const k = total / 1000;
+      return total > 0 ? `${k >= 10 ? Math.round(k) : k.toFixed(1)}K` : '0K';
+    } else {
+      // Calories: average of days that have a value
+      if (nonZero.length === 0) return '— Kcal';
+      const avg = Math.round(total / nonZero.length);
+      return `${avg.toLocaleString()} Kcal`;
+    }
+  })();
+
   const onPrev = () => setWeekIndices(prev => ({ ...prev, [activeTab]: Math.min(prev[activeTab] + 1, totalWeeks - 1) }));
   const onNext = () => setWeekIndices(prev => ({ ...prev, [activeTab]: Math.max(prev[activeTab] - 1, 0) }));
 
   return (
     <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff' }}>
-      <div className="flex items-center justify-between mb-4">
-        <div className="text-[10px] font-bold uppercase tracking-[1.5px]" style={{ color: 'rgba(255,255,255,0.4)' }}>WEEKLY</div>
-        <div className="flex items-center gap-3">
-          <button onClick={onPrev} disabled={weekIndex >= totalWeeks - 1} className="transition-opacity" style={{ opacity: weekIndex >= totalWeeks - 1 ? 0.2 : 0.6 }}><ChevronLeft size={16} color="white" /></button>
-          <span className="text-[10px] font-bold uppercase tracking-[1px] text-white/50 min-w-[60px] text-center">{weekLabel}</span>
-          <button onClick={onNext} disabled={weekIndex <= 0} className="transition-opacity" style={{ opacity: weekIndex <= 0 ? 0.2 : 0.6 }}><ChevronRight size={16} color="white" /></button>
+      <div className="flex items-start justify-between mb-4">
+        <div className="text-[10px] font-bold uppercase tracking-[1.5px] pt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>WEEKLY</div>
+        <div className="flex flex-col items-end gap-1">
+          <div className="flex items-center gap-3">
+            <button onClick={onPrev} disabled={weekIndex >= totalWeeks - 1} className="transition-opacity" style={{ opacity: weekIndex >= totalWeeks - 1 ? 0.2 : 0.6 }}><ChevronLeft size={16} color="white" /></button>
+            <span className="text-[10px] font-bold uppercase tracking-[1px] text-white/50 min-w-[60px] text-center">{weekLabel}</span>
+            <button onClick={onNext} disabled={weekIndex <= 0} className="transition-opacity" style={{ opacity: weekIndex <= 0 ? 0.2 : 0.6 }}><ChevronRight size={16} color="white" /></button>
+          </div>
+          <div className="text-[13px] font-black text-white tracking-tight text-right">{summaryLabel}</div>
         </div>
       </div>
       <div className="flex gap-4 mb-5">
@@ -108,10 +128,21 @@ const WeeklyChart: React.FC<{
           const pct = maxVal > 0 ? val / maxVal : 0;
           const brightness = Math.round(80 + pct * 175);
           const barColor = val > 0 ? `rgb(${brightness},${brightness},${brightness})` : 'rgba(255,255,255,0.05)';
-          const displayVal = unit === 'kg' ? Math.round(val) : unit === 'km' ? +val.toFixed(1) : Math.round(val);
+          // Bar label formatting
+          let barLabel = '';
+          if (val > 0) {
+            if (unit === 'kg') {
+              // Weights: show in K (e.g. 21k)
+              barLabel = `${Math.round(val / 1000)}k`;
+            } else if (unit === 'km') {
+              barLabel = `${+val.toFixed(1)}km`;
+            } else {
+              barLabel = `${Math.round(val)}`;
+            }
+          }
           return (
             <div key={i} className="flex flex-col items-center h-full justify-end" style={{ flex: '1', maxWidth: '28px' }}>
-              <div className="text-[8px] font-bold text-white/60 mb-1">{val > 0 ? (unit ? `${displayVal}${unit}` : `${displayVal}`) : ''}</div>
+              <div className="text-[8px] font-bold text-white/60 mb-1">{barLabel}</div>
               <div className="w-full min-h-[4px] transition-all" style={{ height: `${Math.max(pct * 100, 4)}%`, backgroundColor: barColor, borderRadius: '4px' }} />
               <div className="text-[9px] font-bold uppercase mt-2" style={{ color: 'rgba(255,255,255,0.3)' }}>{days[i]}</div>
             </div>
