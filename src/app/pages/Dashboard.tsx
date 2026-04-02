@@ -19,7 +19,7 @@ const CARDIO_DISPLAY: Record<string, { label: string; icon: React.ReactNode }> =
   ROW:           { label: 'Row',    icon: <Waves size={18} /> },
   CYCLE:         { label: 'Cycle',  icon: <Bike size={18} /> },
   WALKING:       { label: 'Walk',   icon: <Footprints size={18} /> },
-  'CROSS TRAINER':{ label: 'X-Train', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg> },
+  'CROSS TRAINER':{ label: 'Cross-Trainer', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg> },
   TRACKER:       { label: 'Tracker', icon: <Footprints size={18} /> },
 };
 
