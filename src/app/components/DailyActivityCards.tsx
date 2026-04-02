@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { Footprints, Waves, Bike } from 'lucide-react';
+import { Waves, Bike, PersonStanding } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 // Exercise IDs
 const TRACKER_ID = 82;
 const ROW_ID = 83;
+const RUNNING_ID = 84;
 const CYCLE_ID = 87;
-const CARDIO_IDS = [TRACKER_ID, ROW_ID, CYCLE_ID];
+// Total KM uses Tracker + Row + Cycle only
+const TOTAL_CARDIO_IDS = [TRACKER_ID, ROW_ID, CYCLE_ID];
+// Fetch all cardio types (for chips)
+const ALL_CARDIO_IDS = [TRACKER_ID, ROW_ID, RUNNING_ID, CYCLE_ID];
 
-// Map exercise type -> display label for muscle groups
 const TYPE_LABEL: Record<string, string> = {
   CHEST: 'Chest',
   BACK: 'Back',
@@ -16,12 +19,14 @@ const TYPE_LABEL: Record<string, string> = {
 };
 
 interface DayData {
-  date: string; // YYYY-MM-DD
+  date: string;
   calories: number;
   tracker: number;
   row: number;
   cycle: number;
+  running: number;
   muscleGroups: string[];
+  totalWeightKg: number;
 }
 
 function dayLabel(dateStr: string): string {
@@ -42,6 +47,11 @@ function formatDisplayDate(dateStr: string): string {
 
 function fmt(n: number): string {
   return n % 1 === 0 ? `${n}` : n.toFixed(1);
+}
+
+function fmtWeight(kg: number): string {
+  if (kg >= 1000) return `${(kg / 1000).toFixed(1)}k`;
+  return `${Math.round(kg)}`;
 }
 
 function getLast7Dates(): string[] {
@@ -120,10 +130,11 @@ const DayCard: React.FC<{ day: DayData }> = ({ day }) => {
               KM
             </span>
           </div>
+          {/* Chips: Row, Cycle, Running only (not Tracker) */}
           <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap' }}>
-            {day.tracker > 0 && <Chip icon={<Footprints size={10} />} value={fmt(day.tracker)} />}
             {day.row > 0 && <Chip icon={<Waves size={10} />} value={fmt(day.row)} />}
             {day.cycle > 0 && <Chip icon={<Bike size={10} />} value={fmt(day.cycle)} />}
+            {day.running > 0 && <Chip icon={<PersonStanding size={10} />} value={fmt(day.running)} />}
           </div>
         </div>
       ) : (
@@ -132,18 +143,30 @@ const DayCard: React.FC<{ day: DayData }> = ({ day }) => {
         </div>
       )}
 
-      {/* Muscle groups */}
+      {/* Muscle groups + weights total */}
       {hasWeights ? (
-        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-          {day.muscleGroups.map(g => (
-            <span key={g} style={{
-              fontSize: '10px', fontWeight: 700, letterSpacing: '0.04em',
-              color: 'rgba(255,255,255,0.7)', backgroundColor: 'rgba(255,255,255,0.08)',
-              borderRadius: '6px', padding: '3px 8px',
-            }}>
-              {g}
-            </span>
-          ))}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+            {day.muscleGroups.map(g => (
+              <span key={g} style={{
+                fontSize: '10px', fontWeight: 700, letterSpacing: '0.04em',
+                color: 'rgba(255,255,255,0.7)', backgroundColor: 'rgba(255,255,255,0.08)',
+                borderRadius: '6px', padding: '3px 8px',
+              }}>
+                {g}
+              </span>
+            ))}
+          </div>
+          {day.totalWeightKg > 0 && (
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
+              <span style={{ fontSize: '13px', fontWeight: 800, color: 'rgba(255,255,255,0.75)' }}>
+                {fmtWeight(day.totalWeightKg)}
+              </span>
+              <span style={{ fontSize: '9px', fontWeight: 600, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.06em' }}>
+                KG
+              </span>
+            </div>
+          )}
         </div>
       ) : (
         <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.2)', fontWeight: 500 }}>No weights</div>
@@ -170,12 +193,12 @@ export const DailyActivityCards: React.FC = () => {
       const dates = getLast7Dates();
       const oldest = dates[dates.length - 1];
 
-      // Fetch cardio (tracker, row, cycle)
+      // Fetch cardio (tracker, row, cycle, running)
       const { data: cardioData } = await supabase
         .from('workouts')
         .select('date, exercise_id, km')
         .eq('type', 'CARDIO')
-        .in('exercise_id', CARDIO_IDS)
+        .in('exercise_id', ALL_CARDIO_IDS)
         .gte('date', oldest)
         .order('date', { ascending: false });
 
@@ -188,35 +211,40 @@ export const DailyActivityCards: React.FC = () => {
         .gte('date', oldest)
         .order('date', { ascending: false });
 
-      // Fetch weights muscle groups (distinct types per day)
+      // Fetch weights — muscle groups + total_weight per day
       const { data: weightsData } = await supabase
         .from('workouts')
         .select('date, type, total_weight')
         .in('type', ['CHEST', 'BACK', 'LEGS'])
         .gte('date', oldest)
-        .gt('total_weight', 0)
         .order('date', { ascending: false });
 
-      // Build a map per date
-      const cardioMap: Record<string, { tracker: number; row: number; cycle: number }> = {};
+      // Build cardio map
+      const cardioMap: Record<string, { tracker: number; row: number; cycle: number; running: number }> = {};
       for (const r of (cardioData || []) as any[]) {
-        if (!cardioMap[r.date]) cardioMap[r.date] = { tracker: 0, row: 0, cycle: 0 };
+        if (!cardioMap[r.date]) cardioMap[r.date] = { tracker: 0, row: 0, cycle: 0, running: 0 };
         const km = Number(r.km || 0);
         if (r.exercise_id === TRACKER_ID) cardioMap[r.date].tracker += km;
         if (r.exercise_id === ROW_ID) cardioMap[r.date].row += km;
         if (r.exercise_id === CYCLE_ID) cardioMap[r.date].cycle += km;
+        if (r.exercise_id === RUNNING_ID) cardioMap[r.date].running += km;
       }
 
+      // Build calories map
       const calMap: Record<string, number> = {};
       for (const r of (calData || []) as any[]) {
         calMap[r.date] = Number(r.calories || 0);
       }
 
+      // Build weights map (muscle groups + total weight)
       const muscleMap: Record<string, Set<string>> = {};
+      const weightTotalMap: Record<string, number> = {};
       for (const r of (weightsData || []) as any[]) {
         if (!muscleMap[r.date]) muscleMap[r.date] = new Set();
+        if (!weightTotalMap[r.date]) weightTotalMap[r.date] = 0;
         const label = TYPE_LABEL[r.type];
         if (label) muscleMap[r.date].add(label);
+        weightTotalMap[r.date] += Number(r.total_weight || 0);
       }
 
       const result: DayData[] = dates.map(date => ({
@@ -225,7 +253,9 @@ export const DailyActivityCards: React.FC = () => {
         tracker: cardioMap[date]?.tracker || 0,
         row: cardioMap[date]?.row || 0,
         cycle: cardioMap[date]?.cycle || 0,
+        running: cardioMap[date]?.running || 0,
         muscleGroups: muscleMap[date] ? Array.from(muscleMap[date]) : [],
+        totalWeightKg: weightTotalMap[date] || 0,
       }));
 
       setDays(result);
