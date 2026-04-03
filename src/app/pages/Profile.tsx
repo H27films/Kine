@@ -12,12 +12,6 @@ const formatDate = (dateStr: string): string => {
   return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
 };
 
-const formatExcelDate = (dateStr: string): string => {
-  if (!dateStr) return '';
-  const [y, m, d] = dateStr.split('-');
-  return `${d}/${m}/${y}`;
-};
-
 export const Profile: React.FC<ProfileProps> = ({ onNavigate: _onNavigate }) => {
   const [exportCount, setExportCount] = useState<number | null>(null);
   const [exportDates, setExportDates] = useState<string[]>([]);
@@ -145,64 +139,43 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate: _onNavigate }) => 
           Export Data
         </p>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-baseline gap-1.5">
-            <span style={{
-              fontSize: '2.5rem', fontWeight: 900, lineHeight: 1,
-              letterSpacing: '-0.03em',
-              color: hasRows ? '#ffffff' : 'rgba(255,255,255,0.15)',
-            }}>
-              {exportCount ?? '—'}
-            </span>
-            <span style={{
-              fontSize: '0.65rem', fontWeight: 700,
-              color: 'rgba(255,255,255,0.3)',
-              textTransform: 'uppercase', letterSpacing: '0.1em',
-            }}>
-              new rows
-            </span>
-          </div>
+        {exportCount === null ? (
+          <p style={{ color: '#555', fontSize: '0.9rem' }}>Loading…</p>
+        ) : hasRows ? (
+          <>
+            <p style={{ color: '#aaa', fontSize: '0.85rem', marginBottom: '8px' }}>
+              {exportCount} new {exportCount === 1 ? 'entry' : 'entries'} ready to export
+            </p>
+            {exportDates.length > 0 && (
+              <p style={{ color: '#555', fontSize: '0.78rem', marginBottom: '16px' }}>
+                {formatDate(exportDates[0])}
+                {exportDates.length > 1 && ` → ${formatDate(exportDates[exportDates.length - 1])}`}
+              </p>
+            )}
+          </>
+        ) : (
+          <p style={{ color: '#555', fontSize: '0.85rem', marginBottom: '16px' }}>No new entries to export.</p>
+        )}
 
+        {exportError ? (
+          <p style={{ color: '#ff4444', fontSize: '0.85rem', marginBottom: '12px' }}>{exportError}</p>
+        ) : null}
+
+        <div className="flex gap-3">
           <button
             onClick={handleExport}
             disabled={exporting || !hasRows}
-            className="flex items-center gap-2 font-black uppercase tracking-widest text-xs active:scale-95 duration-150"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold"
             style={{
-              padding: '10px 20px',
-              borderRadius: '999px',
-              backgroundColor: exportDone ? '#22c55e' : (hasRows ? '#ffffff' : '#1f1f1f'),
-              color: exportDone ? '#fff' : (hasRows ? '#1a1a1a' : 'rgba(255,255,255,0.2)'),
-              cursor: hasRows ? 'pointer' : 'default',
-              transition: 'all 0.2s',
-              boxShadow: hasRows ? '0 8px 24px rgba(0,0,0,0.4)' : 'none',
+              backgroundColor: hasRows ? '#ffffff' : '#222',
+              color: hasRows ? '#000' : '#555',
+              opacity: exporting ? 0.6 : 1,
             }}
           >
-            {exporting
-              ? <RefreshCw size={13} style={{ animation: 'spin 1s linear infinite' }} />
-              : exportDone
-                ? <span>✓ Done</span>
-                : <><Download size={13} /><span>Export</span></>
-            }
+            {exporting ? <RefreshCw size={14} className="animate-spin" /> : <Download size={14} />}
+            {exportDone ? 'Exported!' : 'Export Excel'}
           </button>
         </div>
-
-        {exportDates.length > 0 && (
-          <div className="mt-3 flex flex-col gap-1">
-            {exportDates.map(d => (
-              <span key={d} style={{
-                fontSize: '0.75rem',
-                color: 'rgba(255,255,255,0.4)',
-                letterSpacing: '0.01em',
-              }}>
-                {formatDate(d)}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {exportError && (
-          <p className="mt-3" style={{ color: '#ff5050', fontSize: '0.75rem' }}>{exportError}</p>
-        )}
       </div>
     </div>
   );
