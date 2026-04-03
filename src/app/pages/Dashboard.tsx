@@ -85,6 +85,8 @@ function groupByWeek(rows: { week: number; day: string; value: number }[]): Week
     .sort((a, b) => b.weekNumber - a.weekNumber);
 }
 
+const RALEWAY = "'Raleway', sans-serif";
+
 const WeeklyChart: React.FC<{
   cardioWeeks: WeekData[];
   weightsWeeks: WeekData[];
@@ -114,7 +116,7 @@ const WeeklyChart: React.FC<{
   const data = current?.days || Array(7).fill(0);
   const rawMax = Math.max(...data, 1);
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const weekLabel = effectiveWeekNumber !== null ? `${effectiveWeekNumber}` : '—';
+  const weekLabel = effectiveWeekNumber !== null ? `${effectiveWeekNumber}` : '\u2014';
 
   const currentGlobalIdx = effectiveWeekNumber !== null ? allWeekNumbers.indexOf(effectiveWeekNumber) : 0;
   const canPrev = currentGlobalIdx < allWeekNumbers.length - 1;
@@ -135,7 +137,7 @@ const WeeklyChart: React.FC<{
       const k = total / 1000;
       return { value: total > 0 ? (k >= 10 ? `${Math.round(k)}K` : `${k.toFixed(1)}K`) : '0K', unit: '' };
     } else {
-      if (nonZero.length === 0) return { value: '—', unit: 'Kcal' };
+      if (nonZero.length === 0) return { value: '\u2014', unit: 'Kcal' };
       const avg = Math.round(total / nonZero.length);
       return { value: avg.toLocaleString(), unit: 'Kcal' };
     }
@@ -143,11 +145,12 @@ const WeeklyChart: React.FC<{
 
   return (
     <div>
-      {/* WEEKLY header — outside the box, same style as Daily */}
+      {/* WEEKLY header — outside the box, Raleway with wide tracking */}
       <div style={{
-        fontSize: '1.15rem',
+        fontFamily: RALEWAY,
+        fontSize: '1.1rem',
         fontWeight: 800,
-        letterSpacing: '-0.03em',
+        letterSpacing: '0.18em',
         textTransform: 'uppercase',
         color: '#ffffff',
         marginBottom: '0.85rem',
@@ -163,10 +166,20 @@ const WeeklyChart: React.FC<{
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className="text-[11px] font-bold uppercase tracking-[1px] pb-1 transition-all"
                 style={{
+                  fontFamily: RALEWAY,
+                  fontSize: '10px',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '1.5px',
+                  paddingBottom: '4px',
                   color: activeTab === tab ? '#ffffff' : 'rgba(255,255,255,0.3)',
                   borderBottom: activeTab === tab ? '2px solid #ffffff' : '2px solid transparent',
+                  background: 'none',
+                  border: 'none',
+                  borderBottom: activeTab === tab ? '2px solid #ffffff' : '2px solid transparent',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s',
                 }}
               >
                 {tab}
@@ -178,7 +191,7 @@ const WeeklyChart: React.FC<{
             <button onClick={onPrev} disabled={!canPrev} className="transition-opacity" style={{ opacity: !canPrev ? 0.2 : 0.6 }}>
               <ChevronLeft size={16} color="white" />
             </button>
-            <span className="text-[10px] font-bold uppercase tracking-[1px] text-white/50 min-w-[24px] text-center">{weekLabel}</span>
+            <span style={{ fontFamily: RALEWAY, fontSize: '10px', fontWeight: 700, letterSpacing: '1.5px', color: 'rgba(255,255,255,0.5)', minWidth: '24px', textAlign: 'center' }}>{weekLabel}</span>
             <button onClick={onNext} disabled={!canNext} className="transition-opacity" style={{ opacity: !canNext ? 0.2 : 0.6 }}>
               <ChevronRight size={16} color="white" />
             </button>
@@ -188,9 +201,10 @@ const WeeklyChart: React.FC<{
         {/* Row 2: big total below tabs */}
         <div className="flex items-baseline gap-1 mb-5">
           <span style={{
+            fontFamily: RALEWAY,
             fontSize: '1.6rem',
             fontWeight: 900,
-            letterSpacing: '-0.04em',
+            letterSpacing: '-0.02em',
             color: '#ffffff',
             lineHeight: 1,
           }}>
@@ -198,10 +212,11 @@ const WeeklyChart: React.FC<{
           </span>
           {summaryParts.unit && (
             <span style={{
-              fontSize: '11px',
+              fontFamily: RALEWAY,
+              fontSize: '10px',
               fontWeight: 700,
               color: 'rgba(255,255,255,0.4)',
-              letterSpacing: '0.06em',
+              letterSpacing: '0.12em',
             }}>
               {summaryParts.unit}
             </span>
@@ -228,9 +243,9 @@ const WeeklyChart: React.FC<{
             }
             return (
               <div key={i} className="flex flex-col items-center h-full justify-end" style={{ flex: '1', maxWidth: '28px' }}>
-                <div className="text-[8px] font-bold text-white/60 mb-1">{barLabel}</div>
+                <div style={{ fontFamily: RALEWAY, fontSize: '7.5px', fontWeight: 700, color: 'rgba(255,255,255,0.6)', marginBottom: '4px' }}>{barLabel}</div>
                 <div className="w-full min-h-[4px] transition-all" style={{ height: `${pct * 100}%`, backgroundColor: barColor, borderRadius: '9999px 9999px 0 0' }} />
-                <div className="text-[9px] font-bold uppercase mt-2" style={{ color: '#ffffff' }}>{days[i]}</div>
+                <div style={{ fontFamily: RALEWAY, fontSize: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#ffffff', marginTop: '8px' }}>{days[i]}</div>
               </div>
             );
           })}
@@ -423,7 +438,14 @@ export const Dashboard: React.FC = () => {
           const isToday = date.toDateString() === now.toDateString();
           return (
             <div key={i} onClick={() => setSelectedDate(date)} className="flex flex-col items-center cursor-pointer">
-              <span className={`text-[10px] font-bold mb-2 ${isSelected ? 'text-white' : 'text-white/30'}`}>
+              <span style={{
+                fontFamily: RALEWAY,
+                fontSize: '9px',
+                fontWeight: 700,
+                letterSpacing: '1.5px',
+                marginBottom: '8px',
+                color: isSelected ? '#ffffff' : 'rgba(255,255,255,0.3)',
+              }}>
                 {date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()}
               </span>
               <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all ${isSelected ? 'bg-white text-black' : isToday ? 'border-2 border-white/40 text-white' : 'text-white/40'}`}>
@@ -441,7 +463,14 @@ export const Dashboard: React.FC = () => {
             {totalMovement > 0 ? totalMovement.toFixed(1) : '0.0'}
           </div>
           <div className="flex flex-col justify-center ml-4 pt-3 flex-1 min-w-0">
-            <div className="text-[13px] font-black uppercase tracking-[2px] text-white">MOVEMENT (KM)</div>
+            <div style={{
+              fontFamily: RALEWAY,
+              fontSize: '12px',
+              fontWeight: 800,
+              textTransform: 'uppercase',
+              letterSpacing: '2.5px',
+              color: '#ffffff',
+            }}>MOVEMENT (KM)</div>
             {yesterdayMovement > 0 && (
               <div className="text-[11px] font-medium mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
                 Yesterday {yesterdayMovement.toFixed(1)} km
@@ -469,8 +498,14 @@ export const Dashboard: React.FC = () => {
                   {display.icon}
                 </div>
                 <div
-                  className="text-[11px] font-bold whitespace-nowrap"
-                  style={{ color: '#ffffff' }}
+                  style={{
+                    fontFamily: RALEWAY,
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    letterSpacing: '0.5px',
+                    color: '#ffffff',
+                    whiteSpace: 'nowrap',
+                  }}
                 >
                   {display.label}{hasData ? ` ${activity!.km}km` : ''}
                 </div>
@@ -566,7 +601,7 @@ export const Dashboard: React.FC = () => {
                       fill="rgba(255,255,255,0.70)"
                       fontSize="6.5"
                       fontWeight="700"
-                      fontFamily="system-ui, sans-serif"
+                      fontFamily="Raleway, sans-serif"
                     >
                       {p.val}
                     </text>
@@ -582,7 +617,7 @@ export const Dashboard: React.FC = () => {
                     fill="white"
                     fontSize="7"
                     fontWeight="700"
-                    fontFamily="system-ui, sans-serif"
+                    fontFamily="Raleway, sans-serif"
                   >
                     {sparkDays[k]}
                   </text>
@@ -598,7 +633,14 @@ export const Dashboard: React.FC = () => {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Dumbbell size={16} color="white" />
-              <span className="text-[10px] font-bold uppercase tracking-[1.5px]" style={{ color: 'rgba(255,255,255,0.4)' }}>Weights</span>
+              <span style={{
+                fontFamily: RALEWAY,
+                fontSize: '10px',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '2px',
+                color: 'rgba(255,255,255,0.4)',
+              }}>Weights</span>
             </div>
           </div>
           {dayWeights.length > 0 ? (

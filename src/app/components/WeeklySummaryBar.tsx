@@ -31,14 +31,25 @@ const StatCol: React.FC<{ icon: React.ReactNode; label: string; value: string }>
       {icon}
     </div>
     <div
-      className="font-bold uppercase tracking-widest"
-      style={{ fontSize: '11px', color: 'rgba(255,255,255,0.65)', letterSpacing: '1.2px' }}
+      style={{
+        fontFamily: "'Raleway', sans-serif",
+        fontSize: '10px',
+        fontWeight: 700,
+        textTransform: 'uppercase',
+        letterSpacing: '2px',
+        color: 'rgba(255,255,255,0.65)',
+      }}
     >
       {label}
     </div>
     <div
-      className="font-bold"
-      style={{ fontSize: '13px', color: '#ffffff' }}
+      style={{
+        fontFamily: "'Raleway', sans-serif",
+        fontSize: '13px',
+        fontWeight: 800,
+        color: '#ffffff',
+        letterSpacing: '0.5px',
+      }}
     >
       {value}
     </div>
