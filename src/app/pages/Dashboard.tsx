@@ -192,7 +192,7 @@ const WeeklyChart: React.FC<{
             <div key={i} className="flex flex-col items-center h-full justify-end" style={{ flex: '1', maxWidth: '28px' }}>
               <div className="text-[8px] font-bold text-white/60 mb-1">{barLabel}</div>
               <div className="w-full min-h-[4px] transition-all" style={{ height: `${pct * 100}%`, backgroundColor: barColor, borderRadius: '9999px 9999px 0 0' }} />
-              <div className="text-[9px] font-bold uppercase mt-2" style={{ color: 'rgba(255,255,255,0.3)' }}>{days[i]}</div>
+              <div className="text-[9px] font-bold uppercase mt-2" style={{ color: '#ffffff' }}>{days[i]}</div>
             </div>
           );
         })}
@@ -392,46 +392,45 @@ export const Dashboard: React.FC = () => {
 
       <section className="pt-2">
         <div className="flex items-start">
-          <div className="text-[4rem] font-black leading-none tracking-tighter text-white">
+          <div className="text-[4rem] font-black leading-none tracking-tighter text-white flex-shrink-0">
             {totalMovement > 0 ? totalMovement.toFixed(1) : ''}
           </div>
-          <div className="flex flex-col justify-center ml-4 pt-3">
+          <div className="flex flex-col justify-center ml-4 pt-3 flex-1 min-w-0">
             <div className="text-[13px] font-black uppercase tracking-[2px] text-white">MOVEMENT (KM)</div>
             {yesterdayMovement > 0 && (
               <div className="text-[11px] font-medium mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
                 Yesterday {yesterdayMovement.toFixed(1)} km
               </div>
             )}
+            {/* Cardio type pills — aligned with MOVEMENT text */}
+            <div className="flex items-center mt-3 overflow-hidden" style={{ gap: '14px' }}>
+              {visibleCardioKeys.map(key => {
+                const display = CARDIO_DISPLAY[key];
+                if (!display) return null;
+                const activity = todayActivities.find(a => a.exercise_name === key);
+                const hasData = !!(activity && activity.km > 0);
+                const isSelected = selectedActivity === key;
+                return (
+                  <div
+                    key={key}
+                    className="flex items-center gap-1.5 cursor-pointer transition-opacity flex-shrink-0"
+                    style={{ opacity: selectedActivity && !isSelected ? 0.3 : 1 }}
+                    onClick={() => setSelectedActivity(isSelected ? null : key)}
+                  >
+                    <div style={{ color: 'rgba(255,255,255,0.85)' }}>
+                      {display.icon}
+                    </div>
+                    <div
+                      className="text-[11px] font-bold whitespace-nowrap"
+                      style={{ color: '#ffffff' }}
+                    >
+                      {display.label}{hasData ? ` ${activity!.km}km` : ''}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
-
-        {/* Cardio type pills — core 4 always shown, Walk/Cycle only if logged */}
-        <div className="flex items-center mt-5 overflow-hidden" style={{ gap: '14px' }}>
-          {visibleCardioKeys.map(key => {
-            const display = CARDIO_DISPLAY[key];
-            if (!display) return null;
-            const activity = todayActivities.find(a => a.exercise_name === key);
-            const hasData = !!(activity && activity.km > 0);
-            const isSelected = selectedActivity === key;
-            return (
-              <div
-                key={key}
-                className="flex items-center gap-1.5 cursor-pointer transition-opacity flex-shrink-0"
-                style={{ opacity: selectedActivity && !isSelected ? 0.3 : 1 }}
-                onClick={() => setSelectedActivity(isSelected ? null : key)}
-              >
-                <div style={{ color: hasData ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.25)' }}>
-                  {display.icon}
-                </div>
-                <div
-                  className="text-[11px] font-bold whitespace-nowrap"
-                  style={{ color: hasData ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.25)' }}
-                >
-                  {display.label}{hasData ? ` ${activity!.km}km` : ''}
-                </div>
-              </div>
-            );
-          })}
         </div>
 
         {selectedActivity && activityWeeklyData[selectedActivity] && (() => {
@@ -462,7 +461,7 @@ export const Dashboard: React.FC = () => {
               </div>
               <div className="flex justify-between mt-2">
                 {sparkDays.map((d, i) => (
-                  <div key={i} className="text-[9px] font-bold uppercase text-center" style={{ flex: '1', color: 'rgba(255,255,255,0.3)' }}>{d}</div>
+                  <div key={i} className="text-[9px] font-bold uppercase text-center" style={{ flex: '1', color: '#ffffff' }}>{d}</div>
                 ))}
               </div>
             </div>
