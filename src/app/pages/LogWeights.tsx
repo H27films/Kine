@@ -50,6 +50,7 @@ interface RecentLog {
   sets: number;
   reps: number;
   weight: number;
+  lastWeight: number | null;
 }
 
 interface WeeklyGroupData {
@@ -133,17 +134,26 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     const loadRecent = async () => {
       const { data } = await supabase
         .from('workouts')
-        .select('total_weight, sets, r1, exercises:exercise_id(exercise_name)')
+        .select('total_weight, sets, r1, w1, w2, w3, w4, w5, w6, exercises:exercise_id(exercise_name)')
         .in('type', WEIGHT_TYPES)
         .order('date', { ascending: false })
         .limit(5);
       if (data) {
-        setRecentLogs((data as any[]).map(r => ({
-          name: r.exercises?.exercise_name || 'Unknown',
-          sets: r.sets || 1,
-          reps: r.r1 || 10,
-          weight: Number(r.total_weight || 0),
-        })));
+        setRecentLogs((data as any[]).map(r => {
+          // Find last non-zero weight across w1-w6
+          let lastWeight: number | null = null;
+          for (let i = 6; i >= 1; i--) {
+            const w = Number(r[`w${i}`] || 0);
+            if (w > 0) { lastWeight = w; break; }
+          }
+          return {
+            name: r.exercises?.exercise_name || 'Unknown',
+            sets: r.sets || 1,
+            reps: r.r1 || 10,
+            weight: Number(r.total_weight || 0),
+            lastWeight,
+          };
+        }));
       }
     };
     loadRecent();
@@ -728,10 +738,12 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
               </div>
               <div className="flex-grow">
                 <h4 className="font-bold text-sm uppercase tracking-tight text-white">{log.name}</h4>
-                <p className="text-[10px] uppercase tracking-widest" style={{ color: '#c6c6c6' }}>{log.sets} Sets • {log.reps} Reps</p>
+                <p className="text-[10px] uppercase tracking-widest" style={{ color: '#c6c6c6' }}>
+                  {log.sets} Sets • {log.reps} Reps{log.lastWeight ? ` • ${log.lastWeight} KG` : ''}
+                </p>
               </div>
               <div className="text-right">
-                <div className="text-lg font-black tracking-tighter text-white">{log.weight.toFixed(1)}</div>
+                <div className="text-lg font-black tracking-tighter text-white">{Math.round(log.weight).toLocaleString()}</div>
                 <div className="text-[8px] font-bold uppercase tracking-widest" style={{ color: '#c6c6c6' }}>Kilos</div>
               </div>
             </div>
