@@ -62,12 +62,28 @@ const makeDefaultSets = (): SetRow[] =>
   Array.from({ length: 4 }, () => ({ weight: '', reps: 10 }));
 
 const WEEKLY_MAX = 30000;
+const STORAGE_KEY = 'kine_logweights_v1';
 
 export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
-  const [selectedGroup, setSelectedGroup] = useState('');
+  const [selectedGroup, setSelectedGroup] = useState<string>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) return JSON.parse(saved).selectedGroup || '';
+    } catch {}
+    return '';
+  });
+
   const [groupOpen, setGroupOpen] = useState(false);
   const [exerciseOpen, setExerciseOpen] = useState(false);
-  const [addedExercises, setAddedExercises] = useState<AddedExercise[]>([]);
+
+  const [addedExercises, setAddedExercises] = useState<AddedExercise[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) return JSON.parse(saved).addedExercises || [];
+    } catch {}
+    return [];
+  });
+
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
@@ -77,6 +93,13 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
 
   const groupRef = useRef<HTMLDivElement>(null);
   const exerciseRef = useRef<HTMLDivElement>(null);
+
+  // Persist selected group and exercises to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ selectedGroup, addedExercises }));
+    } catch {}
+  }, [selectedGroup, addedExercises]);
 
   useEffect(() => {
     const loadExercises = async () => {
@@ -217,6 +240,19 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     setAddedExercises(prev => prev.map(e => {
       if (e.exercise.id !== id) return e;
       const sets = e.sets.map((s, i) => i === setIdx ? { ...s, [field]: value } : s);
+      return { ...e, sets };
+    }));
+  };
+
+  const adjustWeight = (id: number, setIdx: number, delta: number) => {
+    setAddedExercises(prev => prev.map(e => {
+      if (e.exercise.id !== id) return e;
+      const sets = e.sets.map((s, i) => {
+        if (i !== setIdx) return s;
+        const current = parseFloat(s.weight) || 0;
+        const next = Math.max(0, Math.round((current + delta) * 10) / 10);
+        return { ...s, weight: next === 0 ? '' : String(next) };
+      });
       return { ...e, sets };
     }));
   };
@@ -549,15 +585,34 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                         return (
                           <div key={idx} className="grid items-center mb-2" style={{ gridTemplateColumns: '1.8rem 1fr 1fr 1fr', gap: '0.5rem' }}>
                             <p className="font-black" style={{ fontSize: '1rem', color: numColor, lineHeight: 1, textAlign: 'center' }}>{idx + 1}</p>
-                            <input type="number" value={set.weight} onChange={e => updateSet(ex.exercise.id, idx, 'weight', e.target.value)} placeholder="—"
-                              className="text-center font-bold rounded-lg py-2"
+
+                            {/* KG column: − value + */}
+                            <div
+                              className="flex items-center justify-between rounded-lg py-2 px-2"
+                              style={{ backgroundColor: '#1b1b1b', border: '1px solid rgba(255,255,255,0.07)' }}
                               onClick={e => e.stopPropagation()}
-                              style={{ backgroundColor: '#1b1b1b', border: '1px solid rgba(255,255,255,0.07)', outline: 'none', width: '100%', fontSize: '0.875rem', color: rowHasData ? '#ffffff' : 'rgba(255,255,255,0.3)' }} />
+                            >
+                              <button
+                                onClick={() => adjustWeight(ex.exercise.id, idx, -2.5)}
+                                style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1, padding: '0 2px' }}
+                              >−</button>
+                              <span
+                                className="font-bold"
+                                style={{ fontSize: '0.875rem', color: rowHasData ? '#ffffff' : 'rgba(255,255,255,0.3)', minWidth: '2.5rem', textAlign: 'center' }}
+                              >{rowHasData ? set.weight : '—'}</span>
+                              <button
+                                onClick={() => adjustWeight(ex.exercise.id, idx, 2.5)}
+                                style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1, padding: '0 2px' }}
+                              >+</button>
+                            </div>
+
+                            {/* Reps column */}
                             <div className="flex items-center justify-between rounded-lg py-2 px-2" style={{ backgroundColor: '#1b1b1b', border: '1px solid rgba(255,255,255,0.07)' }} onClick={e => e.stopPropagation()}>
                               <button onClick={() => updateSet(ex.exercise.id, idx, 'reps', Math.max(1, set.reps - 1))} style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}>−</button>
                               <span className="font-bold" style={{ fontSize: '0.875rem', color: rowHasData ? '#ffffff' : 'rgba(255,255,255,0.3)' }}>{set.reps}</span>
                               <button onClick={() => updateSet(ex.exercise.id, idx, 'reps', set.reps + 1)} style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}>+</button>
                             </div>
+
                             <p className="text-center font-bold" style={{ fontSize: '0.875rem', color: '#ffffff' }}>{rowTotal > 0 ? rowTotal : ''}</p>
                           </div>
                         );
