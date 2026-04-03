@@ -56,27 +56,17 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
     loadExercises();
   }, []);
 
+  // Same IDs as Dashboard TOTAL_CARDIO_IDS: Tracker=82, Row=83, Cycle=87
+  const TOTAL_CARDIO_IDS = [82, 83, 87];
+
   useEffect(() => {
     const loadWeeklyTotal = async () => {
       const thisMonday = currentWeekMonday();
-      // Get IDs for Tracker, Row, Cycle exercises only
-      const { data: exData } = await supabase
-        .from('exercises')
-        .select('id, exercise_name')
-        .eq('type', 'CARDIO');
-      if (!exData) return;
-      const targetIds = (exData as any[])
-        .filter(e => {
-          const n = e.exercise_name?.toUpperCase();
-          return n === 'TRACKER' || n === 'RUNNING' || n === 'ROW' || n === 'CYCLE';
-        })
-        .map(e => e.id);
-      if (targetIds.length === 0) return;
       const { data } = await supabase
         .from('workouts')
         .select('total_cardio')
         .eq('type', 'CARDIO')
-        .in('exercise_id', targetIds)
+        .in('exercise_id', TOTAL_CARDIO_IDS)
         .gte('date', thisMonday);
       if (data) {
         const total = (data as any[]).reduce((sum, r) => sum + Number(r.total_cardio || 0), 0);
@@ -183,7 +173,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
       </nav>
 
       {/* Header: TRACKER + weekly total */}
-      <header className="mb-8">
+      <header className="mb-3">
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
           <h1 className="text-[2rem] font-black tracking-tighter leading-none text-white">TRACKER</h1>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', paddingBottom: '2px' }}>
@@ -319,7 +309,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
         disabled={saving || !hasAnyInput}
         className="w-full rounded-full py-5 text-[0.75rem] uppercase tracking-[0.4em] font-black active:scale-95 transition-all"
         style={{ backgroundColor: saveSuccess ? '#22c55e' : '#ffffff', color: '#000000', boxShadow: '0 12px 32px rgba(0,0,0,0.4)', opacity: saving || !hasAnyInput ? 0.6 : 1 }}>
-        {saving ? 'Saving...' : saveSuccess ? '✓ Session Saved!' : 'Commit Session'}
+        {saving ? 'Saving...' : saveSuccess ? '✓ Session Saved!' : 'Log Session'}
       </button>
     </div>
   );
