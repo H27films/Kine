@@ -342,7 +342,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
 
       {/* EXERCISE section */}
       <section className="mb-8" style={{ marginTop: 32 }}>
-        <label style={{ display: 'block', marginBottom: 20, fontSize: '1.2rem', fontWeight: 600, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.12em', textTransform: 'uppercase', lineHeight: 1 }}>Exercise</label>
+        <label style={{ display: 'block', marginBottom: 20, fontSize: '0.9rem', fontWeight: 700, color: '#c6c6c6', letterSpacing: '0.3em', textTransform: 'uppercase', lineHeight: 1 }}>Exercise</label>
 
         {/* Exercise type dropdown */}
         <div className="relative mb-6">
