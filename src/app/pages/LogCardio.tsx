@@ -153,7 +153,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
         const km = parseFloat(distance);
         const totalCardio = +(km * Number(selectedExercise.multiplier)).toFixed(2);
         const timeStr = minutes || seconds
-          ? `${(minutes || '0').padStart(2, '0')}:${(seconds || '0').padStart(2, '0')}:00`
+          ? `00:${(minutes || '0').padStart(2, '0')}:${(seconds || '0').padStart(2, '0')}`
           : null;
         const { error } = await supabase.from('workouts').insert({
           date: today, week, day, type: 'CARDIO',
@@ -341,8 +341,8 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
       )}
 
       {/* EXERCISE section */}
-      <section className="mb-8">
-        <label style={{ display: 'block', marginBottom: 20, fontSize: '2rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.03em', textTransform: 'uppercase', lineHeight: 1 }}>Exercise</label>
+      <section className="mb-8" style={{ marginTop: 32 }}>
+        <label style={{ display: 'block', marginBottom: 20, fontSize: '1.2rem', fontWeight: 600, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.12em', textTransform: 'uppercase', lineHeight: 1 }}>Exercise</label>
 
         {/* Exercise type dropdown */}
         <div className="relative mb-6">
@@ -412,13 +412,13 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
         <div className="flex items-baseline gap-4">
           <div className="flex items-baseline gap-2">
             <input type="text" value={minutes} onChange={e => setMinutes(e.target.value)} placeholder="00"
-              className="text-[2.5rem] font-black tracking-tighter text-white w-20 text-right p-0"
+              className="text-[2.5rem] font-black tracking-tighter text-white w-16 text-left p-0"
               style={{ backgroundColor: 'transparent', border: 'none' }} />
             <span style={{ ...labelStyle }}>MIN</span>
           </div>
           <div className="flex items-baseline gap-2">
             <input type="text" value={seconds} onChange={e => setSeconds(e.target.value)} placeholder="00"
-              className="text-[2.5rem] font-black tracking-tighter text-white w-20 text-right p-0"
+              className="text-[2.5rem] font-black tracking-tighter text-white w-16 text-left p-0"
               style={{ backgroundColor: 'transparent', border: 'none' }} />
             <span style={{ ...labelStyle }}>SEC</span>
           </div>

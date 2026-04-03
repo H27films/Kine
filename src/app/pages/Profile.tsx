@@ -64,26 +64,46 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate: _onNavigate }) => 
 
       const XLSX = await import('xlsx');
 
-      const rows = (data as any[]).map(r => ({
-        DATE: formatExcelDate(r.date),
-        EXERCISE: r.exercises?.exercise_name ?? '',
-        KM: r.km ?? '',
-        CALORIES: r.calories ?? '',
-        FOOD: r.food_rating ?? '',
-        W1: r.w1 ?? '', R1: r.r1 ?? '',
-        W2: r.w2 ?? '', R2: r.r2 ?? '',
-        W3: r.w3 ?? '', R3: r.r3 ?? '',
-        W4: r.w4 ?? '', R4: r.r4 ?? '',
-        W5: r.w5 ?? '', R5: r.r5 ?? '',
-        W6: r.w6 ?? '', R6: r.r6 ?? '',
-        FAIL: r.fail ?? '',
-        WEIGHT: r.bodyweight ?? '',
-        'BODY FAT %': r.body_fat_percent ?? '',
-        'MUSCLE MASS': r.muscle_mass ?? '',
-        TIME: r.time ?? '',
-      }));
+      const rows = (data as any[]).map(r => {
+        // Normalise time: old format was mm:ss:00, new is 00:mm:ss
+        // Always output as 00:mm:ss (hh:mm:ss) so Excel reads it correctly
+        let time = r.time ?? '';
+        if (time) {
+          const parts = time.split(':');
+          if (parts.length === 3 && parts[0] !== '00') {
+            // Old format mm:ss:00 → convert to 00:mm:ss
+            time = `00:${parts[0]}:${parts[1]}`;
+          }
+        }
+        return {
+          DATE: r.date ? new Date(r.date + 'T00:00:00') : '',
+          EXERCISE: r.exercises?.exercise_name ?? '',
+          KM: r.km ?? '',
+          CALORIES: r.calories ?? '',
+          FOOD: r.food_rating ?? '',
+          W1: r.w1 ?? '', R1: r.r1 ?? '',
+          W2: r.w2 ?? '', R2: r.r2 ?? '',
+          W3: r.w3 ?? '', R3: r.r3 ?? '',
+          W4: r.w4 ?? '', R4: r.r4 ?? '',
+          W5: r.w5 ?? '', R5: r.r5 ?? '',
+          W6: r.w6 ?? '', R6: r.r6 ?? '',
+          FAIL: r.fail ?? '',
+          WEIGHT: r.bodyweight ?? '',
+          'BODY FAT %': r.body_fat_percent ?? '',
+          'MUSCLE MASS': r.muscle_mass ?? '',
+          TIME: time,
+        };
+      });
 
-      const ws = XLSX.utils.json_to_sheet(rows);
+      const ws = XLSX.utils.json_to_sheet(rows, { cellDates: true });
+
+      // Apply dd/mm/yyyy format to DATE column (column A, index 0)
+      const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
+      for (let R = range.s.r + 1; R <= range.e.r; R++) {
+        const addr = XLSX.utils.encode_cell({ r: R, c: 0 });
+        if (ws[addr]) ws[addr].z = 'DD/MM/YYYY';
+      }
+
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'New Entries');
       XLSX.writeFile(wb, 'ImportKineData.xlsx');
