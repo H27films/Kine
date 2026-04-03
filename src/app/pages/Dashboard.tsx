@@ -391,9 +391,10 @@ export const Dashboard: React.FC = () => {
       </div>
 
       <section className="pt-2">
+        {/* Big number + MOVEMENT label side by side */}
         <div className="flex items-start">
           <div className="text-[4rem] font-black leading-none tracking-tighter text-white flex-shrink-0">
-            {totalMovement > 0 ? totalMovement.toFixed(1) : ''}
+            {totalMovement > 0 ? totalMovement.toFixed(1) : '0.0'}
           </div>
           <div className="flex flex-col justify-center ml-4 pt-3 flex-1 min-w-0">
             <div className="text-[13px] font-black uppercase tracking-[2px] text-white">MOVEMENT (KM)</div>
@@ -402,35 +403,36 @@ export const Dashboard: React.FC = () => {
                 Yesterday {yesterdayMovement.toFixed(1)} km
               </div>
             )}
-            {/* Cardio type pills — aligned with MOVEMENT text */}
-            <div className="flex items-center mt-3 overflow-hidden" style={{ gap: '14px' }}>
-              {visibleCardioKeys.map(key => {
-                const display = CARDIO_DISPLAY[key];
-                if (!display) return null;
-                const activity = todayActivities.find(a => a.exercise_name === key);
-                const hasData = !!(activity && activity.km > 0);
-                const isSelected = selectedActivity === key;
-                return (
-                  <div
-                    key={key}
-                    className="flex items-center gap-1.5 cursor-pointer transition-opacity flex-shrink-0"
-                    style={{ opacity: selectedActivity && !isSelected ? 0.3 : 1 }}
-                    onClick={() => setSelectedActivity(isSelected ? null : key)}
-                  >
-                    <div style={{ color: 'rgba(255,255,255,0.85)' }}>
-                      {display.icon}
-                    </div>
-                    <div
-                      className="text-[11px] font-bold whitespace-nowrap"
-                      style={{ color: '#ffffff' }}
-                    >
-                      {display.label}{hasData ? ` ${activity!.km}km` : ''}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
           </div>
+        </div>
+
+        {/* Cardio type pills — left-aligned with the movement number */}
+        <div className="flex items-center mt-3 overflow-hidden" style={{ gap: '14px' }}>
+          {visibleCardioKeys.map(key => {
+            const display = CARDIO_DISPLAY[key];
+            if (!display) return null;
+            const activity = todayActivities.find(a => a.exercise_name === key);
+            const hasData = !!(activity && activity.km > 0);
+            const isSelected = selectedActivity === key;
+            return (
+              <div
+                key={key}
+                className="flex items-center gap-1.5 cursor-pointer transition-opacity flex-shrink-0"
+                style={{ opacity: selectedActivity && !isSelected ? 0.3 : 1 }}
+                onClick={() => setSelectedActivity(isSelected ? null : key)}
+              >
+                <div style={{ color: 'rgba(255,255,255,0.85)' }}>
+                  {display.icon}
+                </div>
+                <div
+                  className="text-[11px] font-bold whitespace-nowrap"
+                  style={{ color: '#ffffff' }}
+                >
+                  {display.label}{hasData ? ` ${activity!.km}km` : ''}
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         {selectedActivity && activityWeeklyData[selectedActivity] && (() => {
