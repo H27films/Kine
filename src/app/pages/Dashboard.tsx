@@ -444,7 +444,7 @@ export const Dashboard: React.FC = () => {
         {selectedActivity && activityWeeklyData[selectedActivity] && (() => {
           const sparkData = activityWeeklyData[selectedActivity];
           const sparkDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-          const maxVal = Math.max(...sparkData, 0.1);
+          const BASE_KM = 1;
           const VW = 280;
           const VH = 110;
           const padTop = 20;
@@ -454,24 +454,40 @@ export const Dashboard: React.FC = () => {
           const chartW = VW - padLeft - padRight;
           const chartH = VH - padTop - padBottom;
 
-          const pts = sparkData.map((val, i) => ({
-            x: padLeft + (i / 6) * chartW,
-            y: val > 0 ? padTop + (1 - val / maxVal) * chartH : null,
-            val,
-            i,
-          }));
+          // Scale includes 1km baseline so anchors always visible
+          const maxVal = Math.max(...sparkData.filter(v => v > 0), BASE_KM, 0.1);
+          const getY = (val: number) => padTop + (1 - val / maxVal) * chartH;
 
-          const activePts = pts.filter(p => p.y !== null) as { x: number; y: number; val: number; i: number }[];
+          // Build line points: Mon anchor (1km if no data) + real data days + Sun anchor (1km if no data)
+          const lineVals: (number | null)[] = sparkData.map((val, i) => {
+            if (val > 0) return val;
+            if (i === 0 || i === 6) return BASE_KM; // anchor
+            return null; // gap in middle
+          });
 
-          // Build smooth cubic bezier path through active points
+          const linePts = lineVals
+            .map((val, i) =>
+              val !== null
+                ? {
+                    x: padLeft + (i / 6) * chartW,
+                    y: getY(val),
+                    val,
+                    i,
+                    isAnchor: sparkData[i] === 0,
+                  }
+                : null
+            )
+            .filter((p): p is { x: number; y: number; val: number; i: number; isAnchor: boolean } => p !== null);
+
+          // Build smooth cubic bezier path through all line points
           let pathD = '';
-          if (activePts.length === 1) {
-            pathD = `M ${activePts[0].x} ${activePts[0].y}`;
-          } else if (activePts.length > 1) {
-            pathD = `M ${activePts[0].x} ${activePts[0].y}`;
-            for (let k = 1; k < activePts.length; k++) {
-              const prev = activePts[k - 1];
-              const curr = activePts[k];
+          if (linePts.length === 1) {
+            pathD = `M ${linePts[0].x} ${linePts[0].y}`;
+          } else if (linePts.length > 1) {
+            pathD = `M ${linePts[0].x} ${linePts[0].y}`;
+            for (let k = 1; k < linePts.length; k++) {
+              const prev = linePts[k - 1];
+              const curr = linePts[k];
               const cpx = (prev.x + curr.x) / 2;
               pathD += ` C ${cpx} ${prev.y}, ${cpx} ${curr.y}, ${curr.x} ${curr.y}`;
             }
@@ -497,7 +513,7 @@ export const Dashboard: React.FC = () => {
                 </defs>
 
                 {/* Glow layers: thick outer → medium → sharp */}
-                {activePts.length > 0 && pathD && (
+                {linePts.length > 0 && pathD && (
                   <>
                     <path d={pathD} fill="none" stroke="rgba(255,255,255,0.10)" strokeWidth="14" strokeLinecap="round" filter="url(#lineBlur1)" />
                     <path d={pathD} fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="6" strokeLinecap="round" filter="url(#lineBlur2)" />
@@ -505,8 +521,8 @@ export const Dashboard: React.FC = () => {
                   </>
                 )}
 
-                {/* Dots with blurred halo */}
-                {activePts.map((p, k) => (
+                {/* Dots + labels — only for real data points (not anchors) */}
+                {linePts.filter(p => !p.isAnchor).map((p, k) => (
                   <g key={k}>
                     <circle cx={p.x} cy={p.y} r="5" fill="rgba(255,255,255,0.18)" filter="url(#dotBlur)" />
                     <circle cx={p.x} cy={p.y} r="3" fill="white" />
@@ -515,7 +531,7 @@ export const Dashboard: React.FC = () => {
                       y={p.y - 9}
                       textAnchor="middle"
                       fill="rgba(255,255,255,0.70)"
-                      fontSize="8"
+                      fontSize="6.5"
                       fontWeight="700"
                       fontFamily="system-ui, sans-serif"
                     >
@@ -524,15 +540,15 @@ export const Dashboard: React.FC = () => {
                   </g>
                 ))}
 
-                {/* Day labels */}
-                {pts.map((p, k) => (
+                {/* Day labels — all 7 days */}
+                {sparkData.map((_, k) => (
                   <text
                     key={k}
-                    x={p.x}
+                    x={padLeft + (k / 6) * chartW}
                     y={VH + 12}
                     textAnchor="middle"
                     fill="white"
-                    fontSize="9"
+                    fontSize="7"
                     fontWeight="700"
                     fontFamily="system-ui, sans-serif"
                   >
