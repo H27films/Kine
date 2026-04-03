@@ -367,12 +367,14 @@ export const Dashboard: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-4">
-      {/* WEEKLY SUMMARY BAR */}
-      <WeeklySummaryBar />
+    <div className="-mt-2">
+      {/* WEEKLY SUMMARY BAR — tight to top header */}
+      <div className="mb-4">
+        <WeeklySummaryBar />
+      </div>
 
-      {/* DATE SELECTOR — no horizontal padding so it stretches edge to edge */}
-      <div className="flex justify-between items-center py-2">
+      {/* DATE SELECTOR — pushed down, sits just above Movement */}
+      <div className="flex justify-between items-center py-1 mb-1">
         {Array.from({ length: 7 }, (_, i) => {
           const now = new Date();
           const d = new Date();
@@ -394,7 +396,7 @@ export const Dashboard: React.FC = () => {
         })}
       </div>
 
-      <section className="pt-2">
+      <section className="pt-1 mb-4">
         {/* Movement number + label row */}
         <div className="flex items-start">
           <div className="text-[4rem] font-black leading-none tracking-tighter text-white flex-shrink-0">
@@ -475,7 +477,7 @@ export const Dashboard: React.FC = () => {
         })()}
       </section>
 
-      <section>
+      <section className="mb-4">
         <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff' }}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
@@ -503,7 +505,7 @@ export const Dashboard: React.FC = () => {
         </div>
       </section>
 
-      <section>
+      <section className="mb-4">
         <WeeklyChart cardioWeeks={cardioWeeks} weightsWeeks={weightsWeeks} calorieWeeks={calorieWeeks} />
       </section>
 
