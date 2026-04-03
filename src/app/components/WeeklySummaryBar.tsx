@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase, weeksAgoMonday } from '../../lib/supabase';
+import { Dumbbell, Activity, Bike, Flame } from 'lucide-react';
 
 const TOTAL_CARDIO_IDS = [82, 83, 87];
-const WEIGHT_MAX = 30000;
-const CARDIO_MAX = 100;
-const CALORIES_MAX = 2500;
 
 interface WeeklyStats {
   chest: number;
@@ -14,30 +12,20 @@ interface WeeklyStats {
   avgCalories: number | null;
 }
 
-const StatRow: React.FC<{ label: string; value: string; pct: number }> = ({ label, value, pct }) => (
-  <div className="flex items-center gap-3">
+const StatCol: React.FC<{ icon: React.ReactNode; label: string; value: string }> = ({ icon, label, value }) => (
+  <div className="flex flex-col items-center gap-1" style={{ flex: 1 }}>
+    <div style={{ color: 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      {icon}
+    </div>
     <div
-      className="text-[10px] font-bold uppercase tracking-[1.5px] flex-shrink-0"
-      style={{ color: 'rgba(255,255,255,0.35)', width: '3rem' }}
+      className="font-bold uppercase tracking-widest"
+      style={{ fontSize: '9px', color: 'rgba(255,255,255,0.35)', letterSpacing: '1.5px' }}
     >
       {label}
     </div>
     <div
-      className="flex-1 rounded-full overflow-hidden"
-      style={{ height: '4px', backgroundColor: 'rgba(255,255,255,0.08)' }}
-    >
-      <div
-        className="h-full rounded-full"
-        style={{
-          width: `${Math.min(Math.max(pct * 100, 0), 100)}%`,
-          background: pct > 0 ? 'linear-gradient(90deg, #777 0%, #ffffff 100%)' : 'transparent',
-          transition: 'width 0.6s cubic-bezier(0.4,0,0.2,1)',
-        }}
-      />
-    </div>
-    <div
-      className="text-right flex-shrink-0 font-bold"
-      style={{ fontSize: '11px', color: '#ffffff', width: '5rem' }}
+      className="font-bold"
+      style={{ fontSize: '13px', color: '#ffffff' }}
     >
       {value}
     </div>
@@ -97,18 +85,43 @@ export const WeeklySummaryBar: React.FC = () => {
   }, []);
 
   const fmtWeight = (v: number) =>
-    v >= 1000 ? `${(v / 1000).toFixed(1)}k kg` : `${Math.round(v)} kg`;
+    v >= 1000 ? `${(v / 1000).toFixed(1)}k` : `${Math.round(v)}`;
 
   return (
-    <div style={{ paddingTop: '8px', paddingBottom: '12px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-      <StatRow label="Chest" value={fmtWeight(stats.chest)} pct={stats.chest / WEIGHT_MAX} />
-      <StatRow label="Back" value={fmtWeight(stats.back)} pct={stats.back / WEIGHT_MAX} />
-      <StatRow label="Legs" value={fmtWeight(stats.legs)} pct={stats.legs / WEIGHT_MAX} />
-      <StatRow label="Cardio" value={`${stats.cardio} km`} pct={stats.cardio / CARDIO_MAX} />
-      <StatRow
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'row',
+        paddingTop: '10px',
+        paddingBottom: '14px',
+        borderBottom: '1px solid rgba(255,255,255,0.07)',
+        marginBottom: '4px',
+      }}
+    >
+      <StatCol
+        icon={<Dumbbell size={14} />}
+        label="Chest"
+        value={fmtWeight(stats.chest) + ' kg'}
+      />
+      <StatCol
+        icon={<Dumbbell size={14} />}
+        label="Back"
+        value={fmtWeight(stats.back) + ' kg'}
+      />
+      <StatCol
+        icon={<Dumbbell size={14} />}
+        label="Legs"
+        value={fmtWeight(stats.legs) + ' kg'}
+      />
+      <StatCol
+        icon={<Bike size={14} />}
+        label="Cardio"
+        value={`${stats.cardio} km`}
+      />
+      <StatCol
+        icon={<Flame size={14} />}
         label="Avg Cal"
-        value={stats.avgCalories !== null ? `${stats.avgCalories.toLocaleString()} kcal` : '—'}
-        pct={stats.avgCalories !== null ? stats.avgCalories / CALORIES_MAX : 0}
+        value={stats.avgCalories !== null ? `${stats.avgCalories.toLocaleString()}` : '—'}
       />
     </div>
   );
