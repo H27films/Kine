@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown } from 'lucide-react'; // Plus rendered inline as text to avoid unused import warning
 import { Page } from '../../types';
 import { supabase, Exercise, todayStr, getISOWeek, getDayName, currentWeekMonday, recalculateDailyTotals } from '../../lib/supabase';
 
@@ -143,37 +143,45 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
 
       {/* Always-visible Tracker input area */}
       <section className="mb-10">
-        {/* Exercise selector — small, for switching type */}
+        {/* Exercise selector */}
         {cardioExercises.length > 1 && (
           <div className="relative mb-8">
             <button
               onClick={() => setExerciseOpen(o => !o)}
               className="flex items-center gap-2"
-              style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}
+              style={{ color: 'rgba(255,255,255,0.55)', fontSize: '1rem', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}
             >
               <span>{selectedExercise?.exercise_name || 'Select type'}</span>
-              <ChevronDown size={13} style={{ transform: exerciseOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+              <ChevronDown size={15} style={{ transform: exerciseOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
             </button>
             {exerciseOpen && (
               <div style={{
-                position: 'absolute', top: 'calc(100% + 6px)', left: 0,
+                position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0,
                 backgroundColor: '#000000', borderRadius: 0,
                 overflow: 'hidden', zIndex: 50,
                 boxShadow: '0 16px 40px rgba(0,0,0,0.8)',
-                minWidth: '160px',
               }}>
                 {cardioExercises.map((ex, i, arr) => (
                   <div key={ex.id}
                     onClick={() => { setSelectedExercise(ex); setExerciseOpen(false); }}
                     style={{
-                      padding: '12px 18px', cursor: 'pointer',
+                      padding: '14px 16px', cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                       color: selectedExercise?.id === ex.id ? '#ffffff' : '#aaaaaa',
                       fontWeight: selectedExercise?.id === ex.id ? 700 : 400,
-                      fontSize: '0.875rem',
-                      borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.07)' : 'none',
+                      fontSize: '1rem',
+                      borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.1)' : 'none',
                       backgroundColor: selectedExercise?.id === ex.id ? 'rgba(255,255,255,0.06)' : 'transparent',
                     }}>
-                    {ex.exercise_name}
+                    <span>{ex.exercise_name}</span>
+                    <div style={{
+                      width: 28, height: 28, borderRadius: '50%',
+                      backgroundColor: selectedExercise?.id === ex.id ? '#ffffff' : 'rgba(255,255,255,0.15)',
+                      color: selectedExercise?.id === ex.id ? '#000000' : '#ffffff',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                    }}>
+                      <span style={{ fontSize: '1.1rem', fontWeight: 700, lineHeight: 1 }}>+</span>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -183,11 +191,11 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
 
         {/* Distance */}
         <label className="text-[0.75rem] uppercase tracking-[0.3em] font-bold block mb-2" style={{ color: '#c6c6c6' }}>Distance</label>
-        <div className="flex items-baseline gap-4">
-          <input type="text" value={distance} onChange={e => setDistance(e.target.value)} placeholder="00.00"
-            className="text-[4.5rem] font-black tracking-tighter text-white w-full p-0"
+        <div className="flex items-baseline gap-3">
+          <input type="text" value={distance} onChange={e => setDistance(e.target.value)} placeholder="0.0"
+            className="text-[2.2rem] font-black tracking-tighter text-white w-full p-0"
             style={{ backgroundColor: 'transparent', border: 'none' }} />
-          <span className="text-[1.5rem] font-black tracking-tighter" style={{ color: '#c6c6c6' }}>KM</span>
+          <span className="text-[0.95rem] font-black tracking-tighter" style={{ color: '#c6c6c6' }}>KM</span>
         </div>
         {selectedExercise && distance && parseFloat(distance) > 0 && (
           <div className="text-[11px] mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>

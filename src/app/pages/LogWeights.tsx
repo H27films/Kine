@@ -368,16 +368,16 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     textTransform: 'uppercase', color: '#ffffff', marginBottom: '1.25rem',
   };
 
-  // No outer border, no rounded corners — clean sharp box with only internal dividers
+  // No outer border, no rounded corners — full width, clean sharp box with only internal dividers
   const dropdownStyle: React.CSSProperties = {
     position: 'absolute',
     top: 'calc(100% + 8px)',
     left: 0,
+    right: 0,
     zIndex: 50,
     backgroundColor: '#000000',
     borderRadius: 0,
     overflow: 'hidden',
-    minWidth: '180px',
     boxShadow: '0 16px 40px rgba(0,0,0,0.8)',
   };
 
@@ -399,15 +399,15 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
         const label = TYPE2_LABELS[t2] || t2;
         items.push(
           <div key={`header-${t2}`} style={{
-            padding: '8px 18px 5px 0',
-            borderTop: items.length > 0 ? '1px solid rgba(255,255,255,0.07)' : 'none',
+            padding: '10px 16px 6px 16px',
+            borderTop: items.length > 0 ? '1px solid rgba(255,255,255,0.12)' : 'none',
           }}>
             <span style={{
-              fontSize: '0.78rem',
-              fontWeight: 700,
-              letterSpacing: '0.1em',
+              fontSize: '0.82rem',
+              fontWeight: 800,
+              letterSpacing: '0.12em',
               textTransform: 'uppercase',
-              color: 'rgba(255,255,255,0.55)',
+              color: 'rgba(255,255,255,0.9)',
             }}>{label}</span>
           </div>
         );
@@ -418,7 +418,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
           key={ex.id}
           onClick={() => !alreadyAdded && handleAddExercise(ex)}
           style={{
-            padding: '10px 18px 10px 0',
+            padding: '10px 16px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -488,11 +488,11 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
             )}
           </div>
           {groupOpen && (
-            <div style={{ ...dropdownStyle, minWidth: '180px' }}>
-              {orderedGroups.map((group) => (
+            <div style={{ ...dropdownStyle }}>
+              {orderedGroups.map((group, idx) => (
                 <div key={group} onClick={() => handleSelectGroup(group)}
-                  style={{ padding: '12px 18px 12px 0', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'transparent' }}>
-                  <span style={{ color: selectedGroup === group ? '#ffffff' : '#cccccc', fontSize: '0.875rem', fontWeight: selectedGroup === group ? 700 : 400, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                  style={{ padding: '14px 16px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'transparent', borderBottom: idx < orderedGroups.length - 1 ? '1px solid rgba(255,255,255,0.1)' : 'none' }}>
+                  <span style={{ color: selectedGroup === group ? '#ffffff' : '#cccccc', fontSize: '0.95rem', fontWeight: selectedGroup === group ? 700 : 400, textTransform: 'uppercase', letterSpacing: '0.12em' }}>
                     {group}
                   </span>
                   {selectedGroup === group && <Check size={13} color="#ffffff" strokeWidth={2.5} />}
