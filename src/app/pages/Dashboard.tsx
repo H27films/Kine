@@ -91,7 +91,6 @@ const WeeklyChart: React.FC<{
   calorieWeeks: WeekData[];
 }> = ({ cardioWeeks, weightsWeeks, calorieWeeks }) => {
   const [activeTab, setActiveTab] = useState<ChartTab>('Cardio');
-  // Single shared week number — persists across tab switches
   const [selectedWeekNumber, setSelectedWeekNumber] = useState<number | null>(null);
 
   const chartConfig: Record<ChartTab, { weeks: WeekData[]; unit: string }> = {
@@ -102,7 +101,6 @@ const WeeklyChart: React.FC<{
 
   const { weeks, unit } = chartConfig[activeTab];
 
-  // All unique week numbers across all tabs, sorted descending
   const allWeekNumbers = Array.from(
     new Set([
       ...cardioWeeks.map(w => w.weekNumber),
@@ -111,92 +109,135 @@ const WeeklyChart: React.FC<{
     ])
   ).sort((a, b) => b - a);
 
-  // Default to most recent week once data loads
   const effectiveWeekNumber = selectedWeekNumber ?? (allWeekNumbers[0] ?? null);
-
-  // Find current week data for active tab (may be null if no data that week)
   const current = weeks.find(w => w.weekNumber === effectiveWeekNumber) ?? null;
   const data = current?.days || Array(7).fill(0);
   const rawMax = Math.max(...data, 1);
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   const weekLabel = effectiveWeekNumber !== null ? `${effectiveWeekNumber}` : '—';
 
-  // Navigation: move through the global list of week numbers
   const currentGlobalIdx = effectiveWeekNumber !== null ? allWeekNumbers.indexOf(effectiveWeekNumber) : 0;
   const canPrev = currentGlobalIdx < allWeekNumbers.length - 1;
   const canNext = currentGlobalIdx > 0;
   const onPrev = () => { if (canPrev) setSelectedWeekNumber(allWeekNumbers[currentGlobalIdx + 1]); };
   const onNext = () => { if (canNext) setSelectedWeekNumber(allWeekNumbers[currentGlobalIdx - 1]); };
 
-  // Y-axis min/max per tab
   const yMin = activeTab === 'Cardio' ? 5 : activeTab === 'Calories' ? 500 : 0;
   const yMax = activeTab === 'Cardio' ? 20 : rawMax;
 
-  // Summary stat: total for Cardio/Weights, average for Calories
-  const summaryLabel = (() => {
+  // Summary split into value + unit for big-number styling
+  const summaryParts = (() => {
     const nonZero = data.filter(v => v > 0);
     const total = data.reduce((s, v) => s + v, 0);
     if (activeTab === 'Cardio') {
-      return total > 0 ? `${total.toFixed(1)} KM` : '0.0 KM';
+      return { value: total > 0 ? total.toFixed(1) : '0.0', unit: 'KM' };
     } else if (activeTab === 'Weights') {
       const k = total / 1000;
-      return total > 0 ? `${k >= 10 ? Math.round(k) : k.toFixed(1)}K` : '0K';
+      return { value: total > 0 ? (k >= 10 ? `${Math.round(k)}K` : `${k.toFixed(1)}K`) : '0K', unit: '' };
     } else {
-      if (nonZero.length === 0) return '— Kcal';
+      if (nonZero.length === 0) return { value: '—', unit: 'Kcal' };
       const avg = Math.round(total / nonZero.length);
-      return `${avg.toLocaleString()} Kcal`;
+      return { value: avg.toLocaleString(), unit: 'Kcal' };
     }
   })();
 
   return (
-    <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff' }}>
-      {/* Top row: WEEKLY label + week toggle */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="text-[10px] font-bold uppercase tracking-[1.5px]" style={{ color: 'rgba(255,255,255,0.4)' }}>WEEKLY</div>
-        <div className="flex items-center gap-3">
-          <button onClick={onPrev} disabled={!canPrev} className="transition-opacity" style={{ opacity: !canPrev ? 0.2 : 0.6 }}><ChevronLeft size={16} color="white" /></button>
-          <span className="text-[10px] font-bold uppercase tracking-[1px] text-white/50 min-w-[24px] text-center">{weekLabel}</span>
-          <button onClick={onNext} disabled={!canNext} className="transition-opacity" style={{ opacity: !canNext ? 0.2 : 0.6 }}><ChevronRight size={16} color="white" /></button>
-        </div>
+    <div>
+      {/* WEEKLY header — outside the box, same style as Daily */}
+      <div style={{
+        fontSize: '1.15rem',
+        fontWeight: 800,
+        letterSpacing: '-0.03em',
+        textTransform: 'uppercase',
+        color: '#ffffff',
+        marginBottom: '0.85rem',
+      }}>
+        Weekly
       </div>
-      {/* Tab row + summary stat */}
-      <div className="flex items-center justify-between mb-5">
-        <div className="flex gap-4">
-          {(['Cardio', 'Weights', 'Calories'] as ChartTab[]).map(tab => (
-            <button key={tab} onClick={() => setActiveTab(tab)} className="text-[11px] font-bold uppercase tracking-[1px] pb-1 transition-all"
-              style={{ color: activeTab === tab ? '#ffffff' : 'rgba(255,255,255,0.3)', borderBottom: activeTab === tab ? '2px solid #ffffff' : '2px solid transparent' }}>
-              {tab}
-            </button>
-          ))}
-        </div>
-        <div className="text-[13px] font-black text-white tracking-tight pb-1">{summaryLabel}</div>
-      </div>
-      {/* Chart bars */}
-      <div className="flex items-end justify-between h-44" style={{ gap: '12px' }}>
-        {data.map((val, i) => {
-          const clampedVal = Math.min(Math.max(val, yMin), yMax);
-          const pct = val > 0 ? Math.max((clampedVal - yMin) / (yMax - yMin), 0.04) : 0;
-          const rawPct = rawMax > 0 ? val / rawMax : 0;
-          const brightness = Math.round(80 + rawPct * 175);
-          const barColor = val > 0 ? `rgb(${brightness},${brightness},${brightness})` : 'rgba(255,255,255,0.05)';
-          let barLabel = '';
-          if (val > 0) {
-            if (unit === 'kg') {
-              barLabel = `${Math.round(val / 1000)}k`;
-            } else if (unit === 'km') {
-              barLabel = `${+val.toFixed(1)}km`;
-            } else {
-              barLabel = `${Math.round(val)}`;
-            }
-          }
-          return (
-            <div key={i} className="flex flex-col items-center h-full justify-end" style={{ flex: '1', maxWidth: '28px' }}>
-              <div className="text-[8px] font-bold text-white/60 mb-1">{barLabel}</div>
-              <div className="w-full min-h-[4px] transition-all" style={{ height: `${pct * 100}%`, backgroundColor: barColor, borderRadius: '9999px 9999px 0 0' }} />
-              <div className="text-[9px] font-bold uppercase mt-2" style={{ color: '#ffffff' }}>{days[i]}</div>
+
+      <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff' }}>
+        {/* Single row: tabs (left) + big total + week nav (right) */}
+        <div className="flex items-center justify-between mb-5">
+          {/* Left: tabs + total */}
+          <div className="flex items-center gap-5">
+            {/* Tab buttons */}
+            <div className="flex gap-4">
+              {(['Cardio', 'Weights', 'Calories'] as ChartTab[]).map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className="text-[11px] font-bold uppercase tracking-[1px] pb-1 transition-all"
+                  style={{
+                    color: activeTab === tab ? '#ffffff' : 'rgba(255,255,255,0.3)',
+                    borderBottom: activeTab === tab ? '2px solid #ffffff' : '2px solid transparent',
+                  }}
+                >
+                  {tab}
+                </button>
+              ))}
             </div>
-          );
-        })}
+            {/* Big total — styled like DailyCard cardio KM */}
+            <div className="flex items-baseline gap-1">
+              <span style={{
+                fontSize: '1.6rem',
+                fontWeight: 900,
+                letterSpacing: '-0.04em',
+                color: '#ffffff',
+                lineHeight: 1,
+              }}>
+                {summaryParts.value}
+              </span>
+              {summaryParts.unit && (
+                <span style={{
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  color: 'rgba(255,255,255,0.4)',
+                  letterSpacing: '0.06em',
+                }}>
+                  {summaryParts.unit}
+                </span>
+              )}
+            </div>
+          </div>
+          {/* Right: week nav */}
+          <div className="flex items-center gap-3">
+            <button onClick={onPrev} disabled={!canPrev} className="transition-opacity" style={{ opacity: !canPrev ? 0.2 : 0.6 }}>
+              <ChevronLeft size={16} color="white" />
+            </button>
+            <span className="text-[10px] font-bold uppercase tracking-[1px] text-white/50 min-w-[24px] text-center">{weekLabel}</span>
+            <button onClick={onNext} disabled={!canNext} className="transition-opacity" style={{ opacity: !canNext ? 0.2 : 0.6 }}>
+              <ChevronRight size={16} color="white" />
+            </button>
+          </div>
+        </div>
+
+        {/* Chart bars */}
+        <div className="flex items-end justify-between h-44" style={{ gap: '12px' }}>
+          {data.map((val, i) => {
+            const clampedVal = Math.min(Math.max(val, yMin), yMax);
+            const pct = val > 0 ? Math.max((clampedVal - yMin) / (yMax - yMin), 0.04) : 0;
+            const rawPct = rawMax > 0 ? val / rawMax : 0;
+            const brightness = Math.round(80 + rawPct * 175);
+            const barColor = val > 0 ? `rgb(${brightness},${brightness},${brightness})` : 'rgba(255,255,255,0.05)';
+            let barLabel = '';
+            if (val > 0) {
+              if (unit === 'kg') {
+                barLabel = `${Math.round(val / 1000)}k`;
+              } else if (unit === 'km') {
+                barLabel = `${+val.toFixed(1)}km`;
+              } else {
+                barLabel = `${Math.round(val)}`;
+              }
+            }
+            return (
+              <div key={i} className="flex flex-col items-center h-full justify-end" style={{ flex: '1', maxWidth: '28px' }}>
+                <div className="text-[8px] font-bold text-white/60 mb-1">{barLabel}</div>
+                <div className="w-full min-h-[4px] transition-all" style={{ height: `${pct * 100}%`, backgroundColor: barColor, borderRadius: '9999px 9999px 0 0' }} />
+                <div className="text-[9px] font-bold uppercase mt-2" style={{ color: '#ffffff' }}>{days[i]}</div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
@@ -454,15 +495,13 @@ export const Dashboard: React.FC = () => {
           const chartW = VW - padLeft - padRight;
           const chartH = VH - padTop - padBottom;
 
-          // Scale includes 1km baseline so anchors always visible
           const maxVal = Math.max(...sparkData.filter(v => v > 0), BASE_KM, 0.1);
           const getY = (val: number) => padTop + (1 - val / maxVal) * chartH;
 
-          // Build line points: Mon anchor (1km if no data) + real data days + Sun anchor (1km if no data)
           const lineVals: (number | null)[] = sparkData.map((val, i) => {
             if (val > 0) return val;
-            if (i === 0 || i === 6) return BASE_KM; // anchor
-            return null; // gap in middle
+            if (i === 0 || i === 6) return BASE_KM;
+            return null;
           });
 
           const linePts = lineVals
@@ -479,7 +518,6 @@ export const Dashboard: React.FC = () => {
             )
             .filter((p): p is { x: number; y: number; val: number; i: number; isAnchor: boolean } => p !== null);
 
-          // Build smooth cubic bezier path through all line points
           let pathD = '';
           if (linePts.length === 1) {
             pathD = `M ${linePts[0].x} ${linePts[0].y}`;
@@ -512,7 +550,6 @@ export const Dashboard: React.FC = () => {
                   </filter>
                 </defs>
 
-                {/* Glow layers: thick outer → medium → sharp */}
                 {linePts.length > 0 && pathD && (
                   <>
                     <path d={pathD} fill="none" stroke="rgba(255,255,255,0.10)" strokeWidth="14" strokeLinecap="round" filter="url(#lineBlur1)" />
@@ -521,7 +558,6 @@ export const Dashboard: React.FC = () => {
                   </>
                 )}
 
-                {/* Dots + labels — only for real data points (not anchors) */}
                 {linePts.filter(p => !p.isAnchor).map((p, k) => (
                   <g key={k}>
                     <circle cx={p.x} cy={p.y} r="5" fill="rgba(255,255,255,0.18)" filter="url(#dotBlur)" />
@@ -540,7 +576,6 @@ export const Dashboard: React.FC = () => {
                   </g>
                 ))}
 
-                {/* Day labels — all 7 days */}
                 {sparkData.map((_, k) => (
                   <text
                     key={k}
