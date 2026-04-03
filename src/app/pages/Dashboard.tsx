@@ -393,9 +393,6 @@ export const Dashboard: React.FC = () => {
     ? +activityWeeklyData[selectedActivity].reduce((s, v) => s + v, 0).toFixed(1)
     : null;
   const displayMovement = weeklyActivityTotal !== null ? weeklyActivityTotal : totalMovement;
-  const displayLabel = selectedActivity
-    ? `${CARDIO_DISPLAY[selectedActivity]?.label || selectedActivity} THIS WEEK (KM)`
-    : 'MOVEMENT (KM)';
 
   return (
     <div className="-mt-2">
@@ -446,7 +443,16 @@ export const Dashboard: React.FC = () => {
               textTransform: 'uppercase',
               letterSpacing: '2.5px',
               color: '#ffffff',
-            }}>{displayLabel}</div>
+            }}>
+              {selectedActivity
+                ? `${CARDIO_DISPLAY[selectedActivity]?.label || selectedActivity} (KM)`
+                : 'MOVEMENT (KM)'}
+            </div>
+            {selectedActivity && (
+              <div className="text-[11px] font-medium mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                This week
+              </div>
+            )}
             {!selectedActivity && yesterdayMovement > 0 && (
               <div className="text-[11px] font-medium mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
                 Yesterday {yesterdayMovement.toFixed(1)} km

@@ -399,7 +399,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
         const label = TYPE2_LABELS[t2] || t2;
         items.push(
           <div key={`header-${t2}`} style={{
-            padding: '8px 18px 5px',
+            padding: '8px 18px 5px 0',
             borderTop: items.length > 0 ? '1px solid rgba(255,255,255,0.07)' : 'none',
           }}>
             <span style={{
@@ -418,7 +418,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
           key={ex.id}
           onClick={() => !alreadyAdded && handleAddExercise(ex)}
           style={{
-            padding: '10px 18px',
+            padding: '10px 18px 10px 0',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -489,10 +489,10 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
           </div>
           {groupOpen && (
             <div style={{ ...dropdownStyle, minWidth: '180px' }}>
-              {orderedGroups.map((group, i, arr) => (
+              {orderedGroups.map((group) => (
                 <div key={group} onClick={() => handleSelectGroup(group)}
-                  style={{ padding: '12px 18px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.08)' : 'none', backgroundColor: selectedGroup === group ? 'rgba(255,255,255,0.06)' : 'transparent' }}>
-                  <span style={{ color: selectedGroup === group ? '#ffffff' : '#cccccc', fontSize: '0.875rem', fontWeight: selectedGroup === group ? 700 : 400 }}>
+                  style={{ padding: '12px 18px 12px 0', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'transparent' }}>
+                  <span style={{ color: selectedGroup === group ? '#ffffff' : '#cccccc', fontSize: '0.875rem', fontWeight: selectedGroup === group ? 700 : 400, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
                     {group}
                   </span>
                   {selectedGroup === group && <Check size={13} color="#ffffff" strokeWidth={2.5} />}
