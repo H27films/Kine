@@ -428,7 +428,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
 
       {/* 30-day chart */}
       <section className="mb-20">
-        <div className="p-6 rounded-xl relative overflow-hidden" style={{ backgroundColor: '#121212', border: '1px solid rgba(255,255,255,0.1)' }}>
+        <div className="p-6 rounded-xl relative overflow-hidden" style={{ backgroundColor: '#121212' }}>
           {/* Header row */}
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 20 }}>
             <h3 style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#ffffff' }}>30 DAYS</h3>
@@ -441,55 +441,64 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
           {/* Bar chart */}
           {thirtyDayData.length > 0 && (() => {
             const BAR_COUNT = thirtyDayData.length;
-            const chartH = 90;
-            const MAX_Y = 23; // fixed 23km ceiling — gives headroom above bars
+            const chartH = 130;
+            const MAX_Y = 23;
             const avgLineY = chartH * (1 - avg30 / MAX_Y);
 
-            // Rounded-top bar path: top corners rounded, bottom corners square
-            const rt = (x: number, y: number, w: number, h: number, r: number) => {
-              const cr = Math.min(r, w / 2, h / 2);
-              return `M${x},${y + h} L${x},${y + cr} Q${x},${y} ${x + cr},${y} L${x + w - cr},${y} Q${x + w},${y} ${x + w},${y + cr} L${x + w},${y + h} Z`;
+            // True semicircle-top bar: rectangle body + arc cap
+            const semiBar = (x: number, y: number, w: number, h: number) => {
+              const r = w / 2;
+              if (h <= r) {
+                // bar too short for full semicircle — just draw a rounded pill
+                return `M${x},${y + h} L${x + w},${y + h} A${r},${r},0,0,1,${x},${y + h} Z`;
+              }
+              return [
+                `M${x},${y + h}`,
+                `L${x},${y + r}`,
+                `A${r},${r},0,0,1,${x + w},${y + r}`,
+                `L${x + w},${y + h}`,
+                'Z'
+              ].join(' ');
             };
 
             return (
-              <svg width="100%" viewBox={`0 0 300 ${chartH + 4}`} style={{ display: 'block', overflow: 'visible' }}>
+              <svg width="100%" viewBox={`0 0 300 ${chartH + 16}`} style={{ display: 'block', overflow: 'visible' }}>
                 <defs>
-                  <filter id="barGlow" x="-50%" y="-50%" width="200%" height="200%">
-                    <feGaussianBlur stdDeviation="2" result="blur" />
+                  <filter id="barGlow30" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation="2.5" result="blur" />
                     <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
                   </filter>
                 </defs>
                 {thirtyDayData.map((d, i) => {
                   const barW = Math.max(300 / BAR_COUNT - 1.5, 2);
                   const x = i * (300 / BAR_COUNT);
-                  const barH = d.total > 0 ? Math.max((d.total / MAX_Y) * chartH, 3) : 2;
+                  const barH = d.total > 0 ? Math.max((d.total / MAX_Y) * chartH, barW) : 2;
                   const y = chartH - barH;
                   const isPeak = i === maxIdx30;
                   const opacity = d.total > 0 ? (isPeak ? 1 : d.total >= avg30 ? 0.65 : 0.22) : 0.07;
-                  const radius = d.total > 0 ? Math.min(barW / 2, 3) : 1;
                   return (
                     <g key={i}>
                       <path
-                        d={rt(x, y, barW, barH, radius)}
+                        d={semiBar(x, y, barW, barH)}
                         fill={`rgba(255,255,255,${opacity})`}
-                        filter={isPeak ? 'url(#barGlow)' : undefined}
+                        filter={isPeak ? 'url(#barGlow30)' : undefined}
                       />
                       {isPeak && d.total > 0 && (
                         <text
                           x={x + barW / 2}
-                          y={y - 4}
+                          y={y - 5}
                           textAnchor="middle"
                           fill="white"
-                          fontSize="6.5"
+                          fontSize="7"
                           fontWeight="800"
                         >
-                          {d.total}km
+                          {d.total}
                         </text>
                       )}
                     </g>
                   );
                 })}
-                {/* Average line */}
+                {/* Average dashed line */}
                 {avg30 > 0 && (
                   <line
                     x1={0} y1={avgLineY}
