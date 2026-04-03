@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown } from 'lucide-react'; // Plus rendered inline as text to avoid unused import warning
+import { ChevronDown } from 'lucide-react';
 import { Page } from '../../types';
 import { supabase, Exercise, todayStr, getISOWeek, getDayName, currentWeekMonday, recalculateDailyTotals } from '../../lib/supabase';
 
@@ -16,12 +16,14 @@ const tabs: { label: string; page: Page }[] = [
 const heartRateBars = [40, 55, 70, 85, 95, 90, 80, 65, 50, 45, 40, 35, 60, 85, 100];
 
 export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
+  const [trackerDistance, setTrackerDistance] = useState('');
   const [distance, setDistance] = useState('');
   const [minutes, setMinutes] = useState('');
   const [seconds, setSeconds] = useState('');
   const [cardioExercises, setCardioExercises] = useState<Exercise[]>([]);
+  const [nonTrackerExercises, setNonTrackerExercises] = useState<Exercise[]>([]);
+  const [trackerExercise, setTrackerExercise] = useState<Exercise | null>(null);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
-  const [, setTrackerExercise] = useState<Exercise | null>(null);
   const [exerciseOpen, setExerciseOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -38,15 +40,18 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
       if (data) {
         const exercises = data as Exercise[];
         setCardioExercises(exercises);
-        // Find TRACKER as the primary always-present exercise
         const tracker = exercises.find(e =>
           e.exercise_name?.toUpperCase() === 'TRACKER' ||
           e.exercise_name?.toUpperCase() === 'RUNNING'
         );
-        if (tracker) {
-          setTrackerExercise(tracker);
-          setSelectedExercise(tracker);
-        }
+        if (tracker) setTrackerExercise(tracker);
+        // Non-tracker exercises for the EXERCISE dropdown
+        const others = exercises.filter(e =>
+          e.exercise_name?.toUpperCase() !== 'TRACKER' &&
+          e.exercise_name?.toUpperCase() !== 'RUNNING'
+        );
+        setNonTrackerExercises(others);
+        if (others.length > 0) setSelectedExercise(others[0]);
       }
     };
     loadExercises();
@@ -69,37 +74,54 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
   }, [saveSuccess]);
 
   const handleCommit = async () => {
-    if (!selectedExercise || !distance) return;
+    const hasTracker = trackerExercise && trackerDistance && parseFloat(trackerDistance) > 0;
+    const hasExercise = selectedExercise && distance && parseFloat(distance) > 0;
+    if (!hasTracker && !hasExercise) return;
+
     setSaving(true);
     setSaveError('');
     try {
       const today = todayStr();
-      const km = parseFloat(distance) || 0;
-      const totalCardio = +(km * Number(selectedExercise.multiplier)).toFixed(2);
-      const timeStr = minutes || seconds ? `${(minutes || '0').padStart(2, '0')}:${(seconds || '0').padStart(2, '0')}:00` : null;
+      const week = getISOWeek();
+      const day = getDayName();
 
-      const totalScoreK = Math.round(totalCardio * 1000);
+      // Save TRACKER entry
+      if (hasTracker && trackerExercise) {
+        const km = parseFloat(trackerDistance);
+        const totalCardio = +(km * Number(trackerExercise.multiplier)).toFixed(2);
+        const { error } = await supabase.from('workouts').insert({
+          date: today, week, day, type: 'CARDIO',
+          exercise_id: trackerExercise.id,
+          km, total_cardio: totalCardio,
+          multiplier: trackerExercise.multiplier,
+          total_score_k: Math.round(totalCardio * 1000),
+          new_entry: 'New', source: 'app',
+        });
+        if (error) throw error;
+      }
 
-      const { error } = await supabase.from('workouts').insert({
-        date: today,
-        week: getISOWeek(),
-        day: getDayName(),
-        type: 'CARDIO',
-        exercise_id: selectedExercise.id,
-        km,
-        total_cardio: totalCardio,
-        multiplier: selectedExercise.multiplier,
-        time: timeStr,
-        total_score_k: totalScoreK,
-        new_entry: 'New',
-        source: 'app',
-      });
-
-      if (error) throw error;
+      // Save EXERCISE entry
+      if (hasExercise && selectedExercise) {
+        const km = parseFloat(distance);
+        const totalCardio = +(km * Number(selectedExercise.multiplier)).toFixed(2);
+        const timeStr = minutes || seconds
+          ? `${(minutes || '0').padStart(2, '0')}:${(seconds || '0').padStart(2, '0')}:00`
+          : null;
+        const { error } = await supabase.from('workouts').insert({
+          date: today, week, day, type: 'CARDIO',
+          exercise_id: selectedExercise.id,
+          km, total_cardio: totalCardio,
+          multiplier: selectedExercise.multiplier,
+          time: timeStr,
+          total_score_k: Math.round(totalCardio * 1000),
+          new_entry: 'New', source: 'app',
+        });
+        if (error) throw error;
+      }
 
       await recalculateDailyTotals(today);
-
       setSaveSuccess(true);
+      setTrackerDistance('');
       setDistance('');
       setMinutes('');
       setSeconds('');
@@ -110,6 +132,25 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
       setSaving(false);
     }
   };
+
+  const labelStyle = {
+    color: '#c6c6c6',
+    fontSize: '0.75rem',
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.3em',
+    fontWeight: 700,
+  };
+
+  const separatorStyle = {
+    height: 1,
+    width: '100%',
+    backgroundColor: 'rgba(71,71,71,0.35)',
+    marginTop: 8,
+  };
+
+  const hasAnyInput =
+    (trackerDistance && parseFloat(trackerDistance) > 0) ||
+    (distance && parseFloat(distance) > 0);
 
   return (
     <div>
@@ -129,7 +170,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
       </nav>
 
       {/* Header: TRACKER + weekly total */}
-      <header className="mb-10">
+      <header className="mb-8">
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
           <h1 className="text-[2rem] font-black tracking-tighter leading-none text-white">TRACKER</h1>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', paddingBottom: '2px' }}>
@@ -141,87 +182,107 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
         </div>
       </header>
 
-      {/* Always-visible Tracker input area */}
-      <section className="mb-10">
-        {/* Exercise selector */}
-        {cardioExercises.length > 1 && (
-          <div className="relative mb-8">
-            <button
-              onClick={() => setExerciseOpen(o => !o)}
-              className="flex items-center gap-2"
-              style={{ color: 'rgba(255,255,255,0.55)', fontSize: '1rem', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}
-            >
-              <span>{selectedExercise?.exercise_name || 'Select type'}</span>
-              <ChevronDown size={15} style={{ transform: exerciseOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
-            </button>
-            {exerciseOpen && (
-              <div style={{
-                position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0,
-                backgroundColor: '#000000', borderRadius: 0,
-                overflow: 'hidden', zIndex: 50,
-                boxShadow: '0 16px 40px rgba(0,0,0,0.8)',
-              }}>
-                {cardioExercises.map((ex, i, arr) => (
-                  <div key={ex.id}
-                    onClick={() => { setSelectedExercise(ex); setExerciseOpen(false); }}
-                    style={{
-                      padding: '14px 16px', cursor: 'pointer',
-                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      color: selectedExercise?.id === ex.id ? '#ffffff' : '#aaaaaa',
-                      fontWeight: selectedExercise?.id === ex.id ? 700 : 400,
-                      fontSize: '1rem',
-                      borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.1)' : 'none',
-                      backgroundColor: selectedExercise?.id === ex.id ? 'rgba(255,255,255,0.06)' : 'transparent',
-                    }}>
-                    <span>{ex.exercise_name}</span>
-                    <div style={{
-                      width: 28, height: 28, borderRadius: '50%',
-                      backgroundColor: selectedExercise?.id === ex.id ? '#ffffff' : 'rgba(255,255,255,0.15)',
-                      color: selectedExercise?.id === ex.id ? '#000000' : '#ffffff',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                    }}>
-                      <span style={{ fontSize: '1.1rem', fontWeight: 700, lineHeight: 1 }}>+</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Distance */}
-        <label className="text-[0.75rem] uppercase tracking-[0.3em] font-bold block mb-2" style={{ color: '#c6c6c6' }}>Distance</label>
+      {/* TRACKER distance input */}
+      <section className="mb-8">
         <div className="flex items-baseline gap-3">
-          <input type="text" value={distance} onChange={e => setDistance(e.target.value)} placeholder="0.0"
-            className="text-[2.2rem] font-black tracking-tighter text-white w-full p-0"
-            style={{ backgroundColor: 'transparent', border: 'none' }} />
-          <span className="text-[0.95rem] font-black tracking-tighter" style={{ color: '#c6c6c6' }}>KM</span>
+          <input
+            type="text"
+            value={trackerDistance}
+            onChange={e => setTrackerDistance(e.target.value)}
+            placeholder="0.0"
+            className="text-[4.5rem] font-black tracking-tighter text-white w-full p-0"
+            style={{ backgroundColor: 'transparent', border: 'none' }}
+          />
+          <span style={{ fontSize: '1.5rem', fontWeight: 900, color: '#c6c6c6', letterSpacing: '-0.02em' }}>KM</span>
         </div>
-        {selectedExercise && distance && parseFloat(distance) > 0 && (
-          <div className="text-[11px] mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
-            Movement score: {(parseFloat(distance) * Number(selectedExercise.multiplier)).toFixed(2)} km
-          </div>
-        )}
-        <div className="h-px w-full" style={{ backgroundColor: 'rgba(71,71,71,0.2)' }} />
+        <div style={separatorStyle} />
       </section>
 
+      {/* EXERCISE section */}
+      <section className="mb-8">
+        {/* EXERCISE label */}
+        <label style={{ ...labelStyle, display: 'block', marginBottom: 10 }}>Exercise</label>
+
+        {/* Exercise type dropdown */}
+        <div className="relative mb-6">
+          <button
+            onClick={() => setExerciseOpen(o => !o)}
+            className="flex items-center justify-between w-full"
+            style={{ color: '#ffffff', fontSize: '1rem', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', padding: '4px 0' }}
+          >
+            <span>{selectedExercise?.exercise_name || 'Select type'}</span>
+            <ChevronDown size={16} style={{ transform: exerciseOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', color: 'rgba(255,255,255,0.5)' }} />
+          </button>
+          <div style={separatorStyle} />
+
+          {exerciseOpen && (
+            <div style={{
+              position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0,
+              backgroundColor: '#000000', borderRadius: 0,
+              overflow: 'hidden', zIndex: 50,
+              boxShadow: '0 16px 40px rgba(0,0,0,0.8)',
+            }}>
+              {nonTrackerExercises.map((ex, i, arr) => (
+                <div key={ex.id}
+                  onClick={() => { setSelectedExercise(ex); setExerciseOpen(false); }}
+                  style={{
+                    padding: '14px 16px', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    color: '#ffffff',
+                    fontWeight: selectedExercise?.id === ex.id ? 700 : 400,
+                    fontSize: '1rem',
+                    borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.1)' : 'none',
+                    backgroundColor: selectedExercise?.id === ex.id ? 'rgba(255,255,255,0.06)' : 'transparent',
+                  }}>
+                  <span>{ex.exercise_name}</span>
+                  <div style={{
+                    width: 28, height: 28, borderRadius: '50%',
+                    backgroundColor: selectedExercise?.id === ex.id ? '#ffffff' : 'rgba(255,255,255,0.15)',
+                    color: selectedExercise?.id === ex.id ? '#000000' : '#ffffff',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                  }}>
+                    <span style={{ fontSize: '1.1rem', fontWeight: 700, lineHeight: 1 }}>+</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Distance */}
+        <label style={{ ...labelStyle, display: 'block', marginBottom: 8 }}>Distance</label>
+        <div className="flex items-baseline gap-4">
+          <input
+            type="text"
+            value={distance}
+            onChange={e => setDistance(e.target.value)}
+            placeholder="00.00"
+            className="text-[4.5rem] font-black tracking-tighter text-white w-full p-0"
+            style={{ backgroundColor: 'transparent', border: 'none' }}
+          />
+          <span className="text-[1.5rem] font-black tracking-tighter" style={{ color: '#c6c6c6' }}>KM</span>
+        </div>
+        <div style={separatorStyle} />
+      </section>
+
+      {/* Duration */}
       <section className="mb-16">
-        <label className="text-[0.75rem] uppercase tracking-[0.3em] font-bold block mb-2" style={{ color: '#c6c6c6' }}>Duration</label>
+        <label style={{ ...labelStyle, display: 'block', marginBottom: 8 }}>Duration</label>
         <div className="flex items-baseline gap-4">
           <div className="flex items-baseline gap-2">
             <input type="text" value={minutes} onChange={e => setMinutes(e.target.value)} placeholder="00"
               className="text-[3.5rem] font-black tracking-tighter text-white w-20 text-right p-0"
               style={{ backgroundColor: 'transparent', border: 'none' }} />
-            <span className="text-[0.75rem] uppercase tracking-widest font-bold" style={{ color: '#c6c6c6' }}>MIN</span>
+            <span style={{ ...labelStyle }}>MIN</span>
           </div>
           <div className="flex items-baseline gap-2">
             <input type="text" value={seconds} onChange={e => setSeconds(e.target.value)} placeholder="00"
               className="text-[3.5rem] font-black tracking-tighter text-white w-20 text-right p-0"
               style={{ backgroundColor: 'transparent', border: 'none' }} />
-            <span className="text-[0.75rem] uppercase tracking-widest font-bold" style={{ color: '#c6c6c6' }}>SEC</span>
+            <span style={{ ...labelStyle }}>SEC</span>
           </div>
         </div>
-        <div className="h-px w-full" style={{ backgroundColor: 'rgba(71,71,71,0.2)' }} />
+        <div style={separatorStyle} />
       </section>
 
       <section className="mb-20">
@@ -242,9 +303,9 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
 
       <button
         onClick={handleCommit}
-        disabled={saving || !selectedExercise || !distance}
+        disabled={saving || !hasAnyInput}
         className="w-full rounded-full py-5 text-[0.75rem] uppercase tracking-[0.4em] font-black active:scale-95 transition-all"
-        style={{ backgroundColor: saveSuccess ? '#22c55e' : '#ffffff', color: '#000000', boxShadow: '0 12px 32px rgba(0,0,0,0.4)', opacity: saving || !distance ? 0.6 : 1 }}>
+        style={{ backgroundColor: saveSuccess ? '#22c55e' : '#ffffff', color: '#000000', boxShadow: '0 12px 32px rgba(0,0,0,0.4)', opacity: saving || !hasAnyInput ? 0.6 : 1 }}>
         {saving ? 'Saving...' : saveSuccess ? '✓ Session Saved!' : 'Commit Session'}
       </button>
     </div>
