@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase, weeksAgoMonday } from '../../lib/supabase';
-import { Dumbbell, Activity, Bike, Flame } from 'lucide-react';
+import { Dumbbell, Flame } from 'lucide-react';
 
 const TOTAL_CARDIO_IDS = [82, 83, 87];
 
@@ -11,6 +11,19 @@ interface WeeklyStats {
   cardio: number;
   avgCalories: number | null;
 }
+
+const RunnerIcon: React.FC<{ size?: number }> = ({ size = 14 }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <circle cx="14" cy="3" r="2" />
+    <path d="M10.5 8.5L7 10l1 3 3-1.5V15l-3.5 4h2.5l3-3.5 2 3.5H18l-3-6V9.5l2.5 2 1.5-2L16 7.5 14 7l-1.5 1-2-.5z" />
+  </svg>
+);
 
 const StatCol: React.FC<{ icon: React.ReactNode; label: string; value: string }> = ({ icon, label, value }) => (
   <div className="flex flex-col items-center gap-1" style={{ flex: 1 }}>
@@ -114,14 +127,14 @@ export const WeeklySummaryBar: React.FC = () => {
         value={fmtWeight(stats.legs) + ' kg'}
       />
       <StatCol
-        icon={<Bike size={14} />}
+        icon={<RunnerIcon size={14} />}
         label="Cardio"
         value={`${stats.cardio} km`}
       />
       <StatCol
         icon={<Flame size={14} />}
-        label="Avg Cal"
-        value={stats.avgCalories !== null ? `${stats.avgCalories.toLocaleString()}` : '—'}
+        label="Cal"
+        value={stats.avgCalories !== null ? `${stats.avgCalories.toLocaleString()}` : '\u2014'}
       />
     </div>
   );
