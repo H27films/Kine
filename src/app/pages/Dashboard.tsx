@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Dumbbell, ChevronLeft, ChevronRight, Bike, Footprints, Waves } from 'lucide-react';
 import { DailyActivityCards } from '../components/DailyActivityCards';
+import { WeeklySummaryBar } from '../components/WeeklySummaryBar';
 import { supabase, weeksAgoMonday } from '../../lib/supabase';
 
 type ChartTab = 'Cardio' | 'Weights' | 'Calories';
@@ -389,6 +390,9 @@ export const Dashboard: React.FC = () => {
           );
         })}
       </div>
+
+      {/* WEEKLY SUMMARY BAR */}
+      <WeeklySummaryBar />
 
       <section className="pt-2">
         {/* Movement number + label row */}
