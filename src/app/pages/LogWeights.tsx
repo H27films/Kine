@@ -586,23 +586,37 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                           <div key={idx} className="grid items-center mb-2" style={{ gridTemplateColumns: '1.8rem 1fr 1fr 1fr', gap: '0.5rem' }}>
                             <p className="font-black" style={{ fontSize: '1rem', color: numColor, lineHeight: 1, textAlign: 'center' }}>{idx + 1}</p>
 
-                            {/* KG column: − value + */}
+                            {/* KG column: − input + */}
                             <div
-                              className="flex items-center justify-between rounded-lg py-2 px-2"
+                              className="flex items-center justify-between rounded-lg py-1 px-2"
                               style={{ backgroundColor: '#1b1b1b', border: '1px solid rgba(255,255,255,0.07)' }}
                               onClick={e => e.stopPropagation()}
                             >
                               <button
                                 onClick={() => adjustWeight(ex.exercise.id, idx, -2.5)}
-                                style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1, padding: '0 2px' }}
+                                style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}
                               >−</button>
-                              <span
-                                className="font-bold"
-                                style={{ fontSize: '0.875rem', color: rowHasData ? '#ffffff' : 'rgba(255,255,255,0.3)', minWidth: '2.5rem', textAlign: 'center' }}
-                              >{rowHasData ? set.weight : '—'}</span>
+                              <input
+                                type="number"
+                                inputMode="decimal"
+                                value={set.weight}
+                                placeholder="—"
+                                onChange={e => updateSet(ex.exercise.id, idx, 'weight', e.target.value)}
+                                style={{
+                                  background: 'transparent',
+                                  border: 'none',
+                                  outline: 'none',
+                                  width: '100%',
+                                  textAlign: 'center',
+                                  fontSize: '0.875rem',
+                                  fontWeight: 700,
+                                  color: rowHasData ? '#ffffff' : 'rgba(255,255,255,0.3)',
+                                  MozAppearance: 'textfield',
+                                }}
+                              />
                               <button
                                 onClick={() => adjustWeight(ex.exercise.id, idx, 2.5)}
-                                style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1, padding: '0 2px' }}
+                                style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}
                               >+</button>
                             </div>
 
