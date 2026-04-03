@@ -98,7 +98,8 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
     const load30Day = async () => {
       const d30 = new Date();
       d30.setDate(d30.getDate() - 29);
-      const fromDate = d30.toISOString().split('T')[0];
+      const localStr = (d: Date) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      const fromDate = localStr(d30);
       const { data } = await supabase
         .from('workouts')
         .select('date, total_cardio')
@@ -114,7 +115,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
         for (let i = 29; i >= 0; i--) {
           const dd = new Date();
           dd.setDate(dd.getDate() - i);
-          const dateStr = dd.toISOString().split('T')[0];
+          const dateStr = localStr(dd);
           result.push({ date: dateStr, total: +(byDate[dateStr] || 0).toFixed(2) });
         }
         setThirtyDayData(result);

@@ -45,15 +45,23 @@ export interface Workout {
 }
 
 /** Today as YYYY-MM-DD */
+/** Returns YYYY-MM-DD in local time (not UTC) */
+function localDateStr(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 export function todayStr(): string {
-  return new Date().toISOString().split('T')[0];
+  return localDateStr(new Date());
 }
 
 /** Date N days offset from today as YYYY-MM-DD */
 export function dateOffsetStr(offset: number): string {
   const d = new Date();
   d.setDate(d.getDate() + offset);
-  return d.toISOString().split('T')[0];
+  return localDateStr(d);
 }
 
 /**
@@ -151,20 +159,20 @@ export function mapToWeeklyChart(
   return weeks;
 }
 
-/** Monday of the current ISO week as YYYY-MM-DD */
+/** Monday of the current ISO week as YYYY-MM-DD (local time) */
 export function currentWeekMonday(): string {
   const today = new Date();
   const dow = today.getDay();
   const monday = new Date(today);
   monday.setDate(today.getDate() - (dow === 0 ? 6 : dow - 1));
-  return monday.toISOString().split('T')[0];
+  return localDateStr(monday);
 }
 
-/** Monday of N weeks ago as YYYY-MM-DD */
+/** Monday of N weeks ago as YYYY-MM-DD (local time) */
 export function weeksAgoMonday(n: number): string {
   const today = new Date();
   const dow = today.getDay();
   const monday = new Date(today);
   monday.setDate(today.getDate() - (dow === 0 ? 6 : dow - 1) - n * 7);
-  return monday.toISOString().split('T')[0];
+  return localDateStr(monday);
 }
