@@ -59,10 +59,24 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
   useEffect(() => {
     const loadWeeklyTotal = async () => {
       const thisMonday = currentWeekMonday();
+      // Get IDs for Tracker, Row, Cycle exercises only
+      const { data: exData } = await supabase
+        .from('exercises')
+        .select('id, exercise_name')
+        .eq('type', 'CARDIO');
+      if (!exData) return;
+      const targetIds = (exData as any[])
+        .filter(e => {
+          const n = e.exercise_name?.toUpperCase();
+          return n === 'TRACKER' || n === 'RUNNING' || n === 'ROW' || n === 'CYCLE';
+        })
+        .map(e => e.id);
+      if (targetIds.length === 0) return;
       const { data } = await supabase
         .from('workouts')
         .select('total_cardio')
         .eq('type', 'CARDIO')
+        .in('exercise_id', targetIds)
         .gte('date', thisMonday);
       if (data) {
         const total = (data as any[]).reduce((sum, r) => sum + Number(r.total_cardio || 0), 0);
@@ -189,10 +203,10 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
             value={trackerDistance}
             onChange={e => setTrackerDistance(e.target.value)}
             placeholder="0.0"
-            className="text-[4.5rem] font-black tracking-tighter text-white w-full p-0"
+            className="text-[2.5rem] font-black tracking-tighter text-white w-full p-0"
             style={{ backgroundColor: 'transparent', border: 'none' }}
           />
-          <span style={{ fontSize: '1.5rem', fontWeight: 900, color: '#c6c6c6', letterSpacing: '-0.02em' }}>KM</span>
+          <span style={{ fontSize: '1rem', fontWeight: 700, color: '#c6c6c6', letterSpacing: '0.05em' }}>KM</span>
         </div>
         <div style={separatorStyle} />
       </section>
@@ -200,7 +214,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
       {/* EXERCISE section */}
       <section className="mb-8">
         {/* EXERCISE label */}
-        <label style={{ ...labelStyle, display: 'block', marginBottom: 10 }}>Exercise</label>
+        <label style={{ ...labelStyle, display: 'block', marginBottom: 20 }}>Exercise</label>
 
         {/* Exercise type dropdown */}
         <div className="relative mb-6">
@@ -255,8 +269,8 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
             type="text"
             value={distance}
             onChange={e => setDistance(e.target.value)}
-            placeholder="00.00"
-            className="text-[4.5rem] font-black tracking-tighter text-white w-full p-0"
+            placeholder="0.0"
+            className="text-[3.5rem] font-black tracking-tighter text-white w-full p-0"
             style={{ backgroundColor: 'transparent', border: 'none' }}
           />
           <span className="text-[1.5rem] font-black tracking-tighter" style={{ color: '#c6c6c6' }}>KM</span>
