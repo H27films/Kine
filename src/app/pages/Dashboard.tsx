@@ -445,33 +445,101 @@ export const Dashboard: React.FC = () => {
           const sparkData = activityWeeklyData[selectedActivity];
           const sparkDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
           const maxVal = Math.max(...sparkData, 0.1);
-          const chartH = 90;
-          const getBottom = (val: number) => maxVal > 0 ? (val / maxVal) * chartH : 0;
+          const VW = 280;
+          const VH = 110;
+          const padTop = 20;
+          const padBottom = 6;
+          const padLeft = 10;
+          const padRight = 10;
+          const chartW = VW - padLeft - padRight;
+          const chartH = VH - padTop - padBottom;
+
+          const pts = sparkData.map((val, i) => ({
+            x: padLeft + (i / 6) * chartW,
+            y: val > 0 ? padTop + (1 - val / maxVal) * chartH : null,
+            val,
+            i,
+          }));
+
+          const activePts = pts.filter(p => p.y !== null) as { x: number; y: number; val: number; i: number }[];
+
+          // Build smooth cubic bezier path through active points
+          let pathD = '';
+          if (activePts.length === 1) {
+            pathD = `M ${activePts[0].x} ${activePts[0].y}`;
+          } else if (activePts.length > 1) {
+            pathD = `M ${activePts[0].x} ${activePts[0].y}`;
+            for (let k = 1; k < activePts.length; k++) {
+              const prev = activePts[k - 1];
+              const curr = activePts[k];
+              const cpx = (prev.x + curr.x) / 2;
+              pathD += ` C ${cpx} ${prev.y}, ${cpx} ${curr.y}, ${curr.x} ${curr.y}`;
+            }
+          }
+
           return (
-            <div className="mt-8 relative" style={{ height: `${chartH + 30}px` }}>
-              <div className="flex items-end justify-between relative" style={{ height: `${chartH}px` }}>
-                {sparkData.map((val, i) => {
-                  const bottom = getBottom(val);
-                  return (
-                    <div key={i} className="flex flex-col items-center h-full justify-end relative" style={{ flex: '1' }}>
-                      {val > 0 && (
-                        <>
-                          <div className="absolute left-0 right-0 flex flex-col items-center" style={{ bottom: `${bottom}px` }}>
-                            <div className="text-[9px] font-bold text-white/70 mb-1 whitespace-nowrap">{val}</div>
-                            <div className="w-[7px] h-[7px] rounded-full bg-white" />
-                          </div>
-                          <div className="absolute left-1/2 -translate-x-1/2 bottom-0" style={{ height: `${bottom}px`, width: '1px', backgroundColor: 'rgba(255,255,255,0.25)' }} />
-                        </>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="flex justify-between mt-2">
-                {sparkDays.map((d, i) => (
-                  <div key={i} className="text-[9px] font-bold uppercase text-center" style={{ flex: '1', color: '#ffffff' }}>{d}</div>
+            <div className="mt-6">
+              <svg
+                width="100%"
+                viewBox={`0 0 ${VW} ${VH + 14}`}
+                style={{ overflow: 'visible', display: 'block' }}
+              >
+                <defs>
+                  <filter id="lineBlur1" x="-50%" y="-100%" width="200%" height="300%">
+                    <feGaussianBlur stdDeviation="6" />
+                  </filter>
+                  <filter id="lineBlur2" x="-50%" y="-100%" width="200%" height="300%">
+                    <feGaussianBlur stdDeviation="3" />
+                  </filter>
+                  <filter id="dotBlur" x="-100%" y="-100%" width="300%" height="300%">
+                    <feGaussianBlur stdDeviation="2.5" />
+                  </filter>
+                </defs>
+
+                {/* Glow layers: thick outer → medium → sharp */}
+                {activePts.length > 0 && pathD && (
+                  <>
+                    <path d={pathD} fill="none" stroke="rgba(255,255,255,0.10)" strokeWidth="14" strokeLinecap="round" filter="url(#lineBlur1)" />
+                    <path d={pathD} fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="6" strokeLinecap="round" filter="url(#lineBlur2)" />
+                    <path d={pathD} fill="none" stroke="rgba(255,255,255,0.60)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </>
+                )}
+
+                {/* Dots with blurred halo */}
+                {activePts.map((p, k) => (
+                  <g key={k}>
+                    <circle cx={p.x} cy={p.y} r="5" fill="rgba(255,255,255,0.18)" filter="url(#dotBlur)" />
+                    <circle cx={p.x} cy={p.y} r="3" fill="white" />
+                    <text
+                      x={p.x}
+                      y={p.y - 9}
+                      textAnchor="middle"
+                      fill="rgba(255,255,255,0.70)"
+                      fontSize="8"
+                      fontWeight="700"
+                      fontFamily="system-ui, sans-serif"
+                    >
+                      {p.val}
+                    </text>
+                  </g>
                 ))}
-              </div>
+
+                {/* Day labels */}
+                {pts.map((p, k) => (
+                  <text
+                    key={k}
+                    x={p.x}
+                    y={VH + 12}
+                    textAnchor="middle"
+                    fill="white"
+                    fontSize="9"
+                    fontWeight="700"
+                    fontFamily="system-ui, sans-serif"
+                  >
+                    {sparkDays[k]}
+                  </text>
+                ))}
+              </svg>
             </div>
           );
         })()}
