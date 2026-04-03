@@ -13,7 +13,8 @@ const tabs: { label: string; page: Page }[] = [
   { label: 'Calories', page: 'calories' },
 ];
 
-const heartRateBars = [40, 55, 70, 85, 95, 90, 80, 65, 50, 45, 40, 35, 60, 85, 100];
+// Same IDs as Dashboard TOTAL_CARDIO_IDS: Tracker=82, Row=83, Cycle=87
+const TOTAL_CARDIO_IDS = [82, 83, 87];
 
 export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
   const [trackerDistance, setTrackerDistance] = useState('');
@@ -31,6 +32,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
   const [weeklyTotal, setWeeklyTotal] = useState<number>(0);
   const [trackerChartVisible, setTrackerChartVisible] = useState(false);
   const [weekChartData, setWeekChartData] = useState<number[]>(Array(7).fill(0));
+  const [thirtyDayData, setThirtyDayData] = useState<{ date: string; total: number }[]>([]);
 
   useEffect(() => {
     const loadExercises = async () => {
@@ -41,23 +43,15 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
         .order('exercise_name');
       if (data) {
         const exercises = data as Exercise[];
-        const tracker = exercises.find(e =>
-          e.exercise_name?.toUpperCase() === 'TRACKER'
-        );
+        const tracker = exercises.find(e => e.exercise_name?.toUpperCase() === 'TRACKER');
         if (tracker) setTrackerExercise(tracker);
-        // All cardio exercises except TRACKER go in the exercise dropdown
-        const others = exercises.filter(e =>
-          e.exercise_name?.toUpperCase() !== 'TRACKER'
-        );
+        const others = exercises.filter(e => e.exercise_name?.toUpperCase() !== 'TRACKER');
         setNonTrackerExercises(others);
         if (others.length > 0) setSelectedExercise(others[0]);
       }
     };
     loadExercises();
   }, []);
-
-  // Same IDs as Dashboard TOTAL_CARDIO_IDS: Tracker=82, Row=83, Cycle=87
-  const TOTAL_CARDIO_IDS = [82, 83, 87];
 
   useEffect(() => {
     const loadWeeklyTotal = async () => {
@@ -100,6 +94,35 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
     loadWeekChart();
   }, [saveSuccess]);
 
+  useEffect(() => {
+    const load30Day = async () => {
+      const d30 = new Date();
+      d30.setDate(d30.getDate() - 29);
+      const fromDate = d30.toISOString().split('T')[0];
+      const { data } = await supabase
+        .from('workouts')
+        .select('date, total_cardio')
+        .eq('type', 'CARDIO')
+        .in('exercise_id', TOTAL_CARDIO_IDS)
+        .gte('date', fromDate);
+      if (data) {
+        const byDate: Record<string, number> = {};
+        (data as any[]).forEach(r => {
+          byDate[r.date] = (byDate[r.date] || 0) + Number(r.total_cardio || 0);
+        });
+        const result: { date: string; total: number }[] = [];
+        for (let i = 29; i >= 0; i--) {
+          const dd = new Date();
+          dd.setDate(dd.getDate() - i);
+          const dateStr = dd.toISOString().split('T')[0];
+          result.push({ date: dateStr, total: +(byDate[dateStr] || 0).toFixed(2) });
+        }
+        setThirtyDayData(result);
+      }
+    };
+    load30Day();
+  }, [saveSuccess]);
+
   const handleCommit = async () => {
     const hasTracker = trackerExercise && trackerDistance && parseFloat(trackerDistance) > 0;
     const hasExercise = selectedExercise && distance && parseFloat(distance) > 0;
@@ -112,7 +135,6 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
       const week = getISOWeek();
       const day = getDayName();
 
-      // Save TRACKER entry
       if (hasTracker && trackerExercise) {
         const km = parseFloat(trackerDistance);
         const totalCardio = +(km * Number(trackerExercise.multiplier)).toFixed(2);
@@ -127,7 +149,6 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
         if (error) throw error;
       }
 
-      // Save EXERCISE entry
       if (hasExercise && selectedExercise) {
         const km = parseFloat(distance);
         const totalCardio = +(km * Number(selectedExercise.multiplier)).toFixed(2);
@@ -179,6 +200,14 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
     (trackerDistance && parseFloat(trackerDistance) > 0) ||
     (distance && parseFloat(distance) > 0);
 
+  // 30-day chart calculations
+  const activeDays = thirtyDayData.filter(d => d.total > 0);
+  const avg30 = activeDays.length > 0
+    ? +(activeDays.reduce((s, d) => s + d.total, 0) / activeDays.length).toFixed(1)
+    : 0;
+  const max30 = thirtyDayData.length > 0 ? Math.max(...thirtyDayData.map(d => d.total)) : 0;
+  const maxIdx30 = thirtyDayData.findIndex(d => d.total === max30 && max30 > 0);
+
   return (
     <div>
       <nav className="flex gap-8 mb-12 items-end">
@@ -201,7 +230,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
           <button
             onClick={() => setTrackerChartVisible(v => !v)}
-            style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+            style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
           >
             <h1 className="text-[2rem] font-black tracking-tighter leading-none text-white">TRACKER</h1>
           </button>
@@ -294,24 +323,25 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
       </header>
 
       {/* TRACKER distance input — hidden when chart is open */}
-      <section className="mb-8" style={{ display: trackerChartVisible ? 'none' : undefined }}>
-        <div className="flex items-baseline gap-3">
-          <input
-            type="text"
-            value={trackerDistance}
-            onChange={e => setTrackerDistance(e.target.value)}
-            placeholder="0.0"
-            className="text-[2.5rem] font-black tracking-tighter text-white w-full p-0"
-            style={{ backgroundColor: 'transparent', border: 'none' }}
-          />
-          <span style={{ fontSize: '1rem', fontWeight: 700, color: '#c6c6c6', letterSpacing: '0.05em' }}>KM</span>
-        </div>
-        <div style={separatorStyle} />
-      </section>
+      {!trackerChartVisible && (
+        <section className="mb-8">
+          <div className="flex items-baseline gap-3">
+            <input
+              type="text"
+              value={trackerDistance}
+              onChange={e => setTrackerDistance(e.target.value)}
+              placeholder="0.0"
+              className="text-[2.5rem] font-black tracking-tighter text-white w-full p-0"
+              style={{ backgroundColor: 'transparent', border: 'none' }}
+            />
+            <span style={{ fontSize: '1rem', fontWeight: 700, color: '#c6c6c6', letterSpacing: '0.05em' }}>KM</span>
+          </div>
+          <div style={separatorStyle} />
+        </section>
+      )}
 
       {/* EXERCISE section */}
       <section className="mb-8">
-        {/* EXERCISE label */}
         <label style={{ display: 'block', marginBottom: 20, fontSize: '2rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.03em', textTransform: 'uppercase', lineHeight: 1 }}>Exercise</label>
 
         {/* Exercise type dropdown */}
@@ -368,10 +398,10 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
             value={distance}
             onChange={e => setDistance(e.target.value)}
             placeholder="0.0"
-            className="text-[3.5rem] font-black tracking-tighter text-white w-full p-0"
+            className="text-[2.5rem] font-black tracking-tighter text-white w-full p-0"
             style={{ backgroundColor: 'transparent', border: 'none' }}
           />
-          <span className="text-[1.5rem] font-black tracking-tighter" style={{ color: '#c6c6c6' }}>KM</span>
+          <span className="text-[1rem] font-black tracking-tighter" style={{ color: '#c6c6c6' }}>KM</span>
         </div>
         <div style={separatorStyle} />
       </section>
@@ -382,13 +412,13 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
         <div className="flex items-baseline gap-4">
           <div className="flex items-baseline gap-2">
             <input type="text" value={minutes} onChange={e => setMinutes(e.target.value)} placeholder="00"
-              className="text-[3.5rem] font-black tracking-tighter text-white w-20 text-right p-0"
+              className="text-[2.5rem] font-black tracking-tighter text-white w-20 text-right p-0"
               style={{ backgroundColor: 'transparent', border: 'none' }} />
             <span style={{ ...labelStyle }}>MIN</span>
           </div>
           <div className="flex items-baseline gap-2">
             <input type="text" value={seconds} onChange={e => setSeconds(e.target.value)} placeholder="00"
-              className="text-[3.5rem] font-black tracking-tighter text-white w-20 text-right p-0"
+              className="text-[2.5rem] font-black tracking-tighter text-white w-20 text-right p-0"
               style={{ backgroundColor: 'transparent', border: 'none' }} />
             <span style={{ ...labelStyle }}>SEC</span>
           </div>
@@ -396,16 +426,87 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
         <div style={separatorStyle} />
       </section>
 
+      {/* 30-day chart */}
       <section className="mb-20">
-        <div className="p-8 rounded-xl relative overflow-hidden" style={{ backgroundColor: '#121212', border: '1px solid rgba(255,255,255,0.1)' }}>
-          <div className="relative z-10">
-            <h3 className="text-[0.75rem] uppercase tracking-widest text-white font-bold mb-8">HEART RATE TELEMETRY</h3>
-            <div className="flex items-end gap-1 h-32">
-              {heartRateBars.map((h, i) => (
-                <div key={i} className="w-2 rounded-t-full" style={{ height: `${h}%`, backgroundColor: h >= 80 ? '#ffffff' : h >= 50 ? `rgba(255,255,255,${h / 150})` : 'rgba(255,255,255,0.1)' }} />
-              ))}
+        <div className="p-6 rounded-xl relative overflow-hidden" style={{ backgroundColor: '#121212', border: '1px solid rgba(255,255,255,0.1)' }}>
+          {/* Header row */}
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 20 }}>
+            <h3 style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#ffffff' }}>30 DAYS</h3>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+              <span style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.03em' }}>{avg30}</span>
+              <span style={{ fontSize: '0.6rem', fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>avg km</span>
             </div>
           </div>
+
+          {/* Bar chart */}
+          {thirtyDayData.length > 0 && (() => {
+            const BAR_COUNT = thirtyDayData.length;
+            const chartH = 80;
+            const avgLineY = max30 > 0 ? chartH * (1 - avg30 / max30) : chartH;
+            return (
+              <svg width="100%" viewBox={`0 0 300 ${chartH + 16}`} style={{ display: 'block', overflow: 'visible' }}>
+                <defs>
+                  <filter id="barGlow" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation="1.5" result="blur" />
+                    <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                  </filter>
+                </defs>
+                {thirtyDayData.map((d, i) => {
+                  const barW = 300 / BAR_COUNT - 1;
+                  const x = i * (300 / BAR_COUNT);
+                  const barH = max30 > 0 ? (d.total / max30) * chartH : 0;
+                  const y = chartH - barH;
+                  const isPeak = i === maxIdx30;
+                  const opacity = d.total > 0 ? (isPeak ? 1 : d.total >= avg30 ? 0.7 : 0.25) : 0.08;
+                  return (
+                    <g key={i}>
+                      <rect
+                        x={x}
+                        y={d.total > 0 ? y : chartH - 2}
+                        width={barW}
+                        height={d.total > 0 ? barH : 2}
+                        rx={1.5}
+                        fill={`rgba(255,255,255,${opacity})`}
+                        filter={isPeak ? 'url(#barGlow)' : undefined}
+                      />
+                      {isPeak && (
+                        <text
+                          x={x + barW / 2}
+                          y={y - 5}
+                          textAnchor="middle"
+                          fill="white"
+                          fontSize="7"
+                          fontWeight="800"
+                        >
+                          {d.total}
+                        </text>
+                      )}
+                    </g>
+                  );
+                })}
+                {/* Average line */}
+                {avg30 > 0 && (
+                  <>
+                    <line
+                      x1={0} y1={avgLineY}
+                      x2={300} y2={avgLineY}
+                      stroke="rgba(255,255,255,0.25)"
+                      strokeWidth="0.75"
+                      strokeDasharray="4 3"
+                    />
+                  </>
+                )}
+                {/* X-axis label: just first and last date abbreviated */}
+                <text x={0} y={chartH + 13} textAnchor="start" fill="rgba(255,255,255,0.3)" fontSize="6" fontWeight="600">
+                  {thirtyDayData[0]?.date ? thirtyDayData[0].date.slice(5).replace('-', '/') : ''}
+                </text>
+                <text x={300} y={chartH + 13} textAnchor="end" fill="rgba(255,255,255,0.3)" fontSize="6" fontWeight="600">
+                  {thirtyDayData[29]?.date ? thirtyDayData[29].date.slice(5).replace('-', '/') : ''}
+                </text>
+              </svg>
+            );
+          })()}
+
           <div className="absolute inset-0 pointer-events-none" style={{ opacity: 0.05, background: 'radial-gradient(circle at top right, white, transparent, transparent)' }} />
         </div>
       </section>
