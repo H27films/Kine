@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { Page } from '../../types';
-import { supabase, Exercise, todayStr, getISOWeek, getDayName, recalculateDailyTotals } from '../../lib/supabase';
+import { supabase, Exercise, todayStr, getISOWeek, getDayName, currentWeekMonday, recalculateDailyTotals } from '../../lib/supabase';
 
 interface LogCardioProps {
   onNavigate: (page: Page) => void;
@@ -21,10 +21,12 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
   const [seconds, setSeconds] = useState('');
   const [cardioExercises, setCardioExercises] = useState<Exercise[]>([]);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
+  const [trackerExercise, setTrackerExercise] = useState<Exercise | null>(null);
   const [exerciseOpen, setExerciseOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState('');
+  const [weeklyTotal, setWeeklyTotal] = useState<number>(0);
 
   useEffect(() => {
     const loadExercises = async () => {
@@ -36,13 +38,35 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
       if (data) {
         const exercises = data as Exercise[];
         setCardioExercises(exercises);
-        // Default to RUNNING if available
-        const running = exercises.find(e => e.exercise_name === 'RUNNING');
-        if (running) setSelectedExercise(running);
+        // Find TRACKER as the primary always-present exercise
+        const tracker = exercises.find(e =>
+          e.exercise_name?.toUpperCase() === 'TRACKER' ||
+          e.exercise_name?.toUpperCase() === 'RUNNING'
+        );
+        if (tracker) {
+          setTrackerExercise(tracker);
+          setSelectedExercise(tracker);
+        }
       }
     };
     loadExercises();
   }, []);
+
+  useEffect(() => {
+    const loadWeeklyTotal = async () => {
+      const thisMonday = currentWeekMonday();
+      const { data } = await supabase
+        .from('workouts')
+        .select('total_cardio')
+        .eq('type', 'CARDIO')
+        .gte('date', thisMonday);
+      if (data) {
+        const total = (data as any[]).reduce((sum, r) => sum + Number(r.total_cardio || 0), 0);
+        setWeeklyTotal(+total.toFixed(2));
+      }
+    };
+    loadWeeklyTotal();
+  }, [saveSuccess]);
 
   const handleCommit = async () => {
     if (!selectedExercise || !distance) return;
@@ -54,7 +78,6 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
       const totalCardio = +(km * Number(selectedExercise.multiplier)).toFixed(2);
       const timeStr = minutes || seconds ? `${(minutes || '0').padStart(2, '0')}:${(seconds || '0').padStart(2, '0')}:00` : null;
 
-      // total_score_k for cardio = total_cardio × 1000 (row-specific)
       const totalScoreK = Math.round(totalCardio * 1000);
 
       const { error } = await supabase.from('workouts').insert({
@@ -74,7 +97,6 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
 
       if (error) throw error;
 
-      // Recalculate daily total_score and tracker_daily for all rows today
       await recalculateDailyTotals(today);
 
       setSaveSuccess(true);
@@ -106,41 +128,60 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
         })}
       </nav>
 
+      {/* Header: TRACKER + weekly total */}
       <header className="mb-10">
-        <h1 className="text-[2rem] font-black tracking-tighter leading-none mb-2 text-white">LOG PERFORMANCE</h1>
-        <p className="text-[0.75rem] uppercase tracking-[0.2em] font-medium" style={{ color: '#c6c6c6' }}>Cardio</p>
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+          <h1 className="text-[2rem] font-black tracking-tighter leading-none text-white">TRACKER</h1>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', paddingBottom: '2px' }}>
+            <span style={{ fontSize: '1.6rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.04em', lineHeight: 1 }}>
+              {weeklyTotal.toFixed(1)}
+            </span>
+            <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>km this week</span>
+          </div>
+        </div>
       </header>
 
-      {/* Exercise Selector */}
+      {/* Always-visible Tracker input area */}
       <section className="mb-10">
-        <label className="text-[0.75rem] uppercase tracking-[0.3em] font-bold block mb-3" style={{ color: '#c6c6c6' }}>Exercise</label>
-        <div className="relative">
-          <button
-            onClick={() => setExerciseOpen(o => !o)}
-            className="flex items-center justify-between w-full py-3"
-            style={{ borderBottom: '1px solid rgba(255,255,255,0.15)' }}
-          >
-            <span className="text-white font-bold text-lg">
-              {selectedExercise ? selectedExercise.exercise_name : 'Select exercise...'}
-            </span>
-            <ChevronDown size={18} style={{ color: 'rgba(255,255,255,0.4)', transform: exerciseOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
-          </button>
-          {exerciseOpen && (
-            <div style={{ position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, backgroundColor: '#222222', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '14px', overflow: 'hidden', zIndex: 50, boxShadow: '0 16px 40px rgba(0,0,0,0.6)' }}>
-              {cardioExercises.map((ex, i, arr) => (
-                <div key={ex.id}
-                  onClick={() => { setSelectedExercise(ex); setExerciseOpen(false); }}
-                  style={{ padding: '14px 18px', cursor: 'pointer', color: selectedExercise?.id === ex.id ? '#ffffff' : '#aaaaaa', fontWeight: selectedExercise?.id === ex.id ? 700 : 400, fontSize: '0.875rem', borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none', backgroundColor: selectedExercise?.id === ex.id ? 'rgba(255,255,255,0.06)' : 'transparent' }}>
-                  <div>{ex.exercise_name}</div>
-                  <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)', marginTop: '2px' }}>Multiplier: ×{ex.multiplier}</div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
+        {/* Exercise selector — small, for switching type */}
+        {cardioExercises.length > 1 && (
+          <div className="relative mb-8">
+            <button
+              onClick={() => setExerciseOpen(o => !o)}
+              className="flex items-center gap-2"
+              style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}
+            >
+              <span>{selectedExercise?.exercise_name || 'Select type'}</span>
+              <ChevronDown size={13} style={{ transform: exerciseOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+            </button>
+            {exerciseOpen && (
+              <div style={{
+                position: 'absolute', top: 'calc(100% + 6px)', left: 0,
+                backgroundColor: '#000000', borderRadius: 0,
+                overflow: 'hidden', zIndex: 50,
+                boxShadow: '0 16px 40px rgba(0,0,0,0.8)',
+                minWidth: '160px',
+              }}>
+                {cardioExercises.map((ex, i, arr) => (
+                  <div key={ex.id}
+                    onClick={() => { setSelectedExercise(ex); setExerciseOpen(false); }}
+                    style={{
+                      padding: '12px 18px', cursor: 'pointer',
+                      color: selectedExercise?.id === ex.id ? '#ffffff' : '#aaaaaa',
+                      fontWeight: selectedExercise?.id === ex.id ? 700 : 400,
+                      fontSize: '0.875rem',
+                      borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.07)' : 'none',
+                      backgroundColor: selectedExercise?.id === ex.id ? 'rgba(255,255,255,0.06)' : 'transparent',
+                    }}>
+                    {ex.exercise_name}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
-      <section className="mb-16">
+        {/* Distance */}
         <label className="text-[0.75rem] uppercase tracking-[0.3em] font-bold block mb-2" style={{ color: '#c6c6c6' }}>Distance</label>
         <div className="flex items-baseline gap-4">
           <input type="text" value={distance} onChange={e => setDistance(e.target.value)} placeholder="00.00"

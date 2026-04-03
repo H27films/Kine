@@ -403,11 +403,11 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
             borderTop: items.length > 0 ? '1px solid rgba(255,255,255,0.07)' : 'none',
           }}>
             <span style={{
-              fontSize: '0.65rem',
+              fontSize: '0.78rem',
               fontWeight: 700,
               letterSpacing: '0.1em',
               textTransform: 'uppercase',
-              color: 'rgba(255,255,255,0.3)',
+              color: 'rgba(255,255,255,0.55)',
             }}>{label}</span>
           </div>
         );
