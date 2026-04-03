@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Dumbbell, ChevronLeft, ChevronRight, Bike, Footprints, Waves } from 'lucide-react';
 import { DailyActivityCards } from '../components/DailyActivityCards';
-import { supabase, dateOffsetStr, weeksAgoMonday } from '../../lib/supabase';
+import { supabase, weeksAgoMonday } from '../../lib/supabase';
 
 type ChartTab = 'Cardio' | 'Weights' | 'Calories';
 
@@ -66,14 +66,6 @@ interface WeekData {
   weekNumber: number;
   days: number[]; // 7 values Mon-Sun
 }
-
-const getDayLabel = (offset: number): string => {
-  if (offset === 0) return 'Today';
-  if (offset === -1) return 'Yesterday';
-  const d = new Date();
-  d.setDate(d.getDate() + offset);
-  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-};
 
 /** Group raw rows (with week, day, value) into WeekData[] sorted most-recent first */
 function groupByWeek(rows: { week: number; day: string; value: number }[]): WeekData[] {
@@ -207,7 +199,6 @@ const WeeklyChart: React.FC<{
 
 export const Dashboard: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [dayOffset, setDayOffset] = useState(0);
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
 
   const [todayActivities, setTodayActivities] = useState<DayActivity[]>([]);
@@ -490,7 +481,7 @@ export const Dashboard: React.FC = () => {
         <WeeklyChart cardioWeeks={cardioWeeks} weightsWeeks={weightsWeeks} calorieWeeks={calorieWeeks} />
       </section>
 
-      <DailyActivityCards selectedDate={selectedDate.toISOString().split('T')[0]} />
+      <DailyActivityCards />
     </div>
   );
 };
