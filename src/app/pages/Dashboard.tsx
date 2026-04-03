@@ -368,6 +368,9 @@ export const Dashboard: React.FC = () => {
 
   return (
     <div className="space-y-4">
+      {/* WEEKLY SUMMARY BAR */}
+      <WeeklySummaryBar />
+
       {/* DATE SELECTOR */}
       <div className="flex justify-between items-center py-2 px-2">
         {Array.from({ length: 7 }, (_, i) => {
@@ -390,9 +393,6 @@ export const Dashboard: React.FC = () => {
           );
         })}
       </div>
-
-      {/* WEEKLY SUMMARY BAR */}
-      <WeeklySummaryBar />
 
       <section className="pt-2">
         {/* Movement number + label row */}
