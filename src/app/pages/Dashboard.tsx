@@ -353,8 +353,6 @@ export const Dashboard: React.FC = () => {
     loadWeeklyCharts();
   }, []);
 
-  const displayActivities = todayActivities.filter(a => a.km > 0);
-
   return (
     <div className="space-y-4">
       {/* DATE SELECTOR */}
@@ -395,23 +393,31 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {displayActivities.length > 0 && (
-          <div className="flex items-center gap-5 mt-5">
-            {displayActivities.map((activity, i) => {
-              const display = CARDIO_DISPLAY[activity.exercise_name] || { label: activity.exercise_name, icon: <Footprints size={18} /> };
-              return (
-                <div key={i}
-                  className="flex items-center gap-2 cursor-pointer transition-opacity"
-                  style={{ opacity: selectedActivity && selectedActivity !== activity.exercise_name ? 0.4 : 1 }}
-                  onClick={() => setSelectedActivity(selectedActivity === activity.exercise_name ? null : activity.exercise_name)}
-                >
-                  <div className="text-white/60">{display.icon}</div>
-                  <div className="text-[12px] font-bold text-white/80">{display.label} {activity.km}km</div>
+        {/* Always show all cardio types — blank value if none logged today */}
+        <div className="flex items-center gap-5 mt-5 flex-wrap">
+          {Object.entries(CARDIO_DISPLAY).map(([key, display]) => {
+            const activity = todayActivities.find(a => a.exercise_name === key);
+            const hasData = activity && activity.km > 0;
+            return (
+              <div
+                key={key}
+                className="flex items-center gap-2 transition-opacity"
+                style={{
+                  opacity: selectedActivity && selectedActivity !== key ? 0.3 : 1,
+                  cursor: hasData ? 'pointer' : 'default',
+                }}
+                onClick={() => {
+                  if (hasData) setSelectedActivity(selectedActivity === key ? null : key);
+                }}
+              >
+                <div className="text-white/60">{display.icon}</div>
+                <div className="text-[12px] font-bold" style={{ color: hasData ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.3)' }}>
+                  {display.label}{hasData ? ` ${activity!.km}km` : ''}
                 </div>
-              );
-            })}
-          </div>
-        )}
+              </div>
+            );
+          })}
+        </div>
 
         {selectedActivity && activityWeeklyData[selectedActivity] && (() => {
           const sparkData = activityWeeklyData[selectedActivity];
