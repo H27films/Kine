@@ -622,12 +622,12 @@ export const Dashboard: React.FC = () => {
       </section>
 
       {/* Extra top margin to visually separate WEEKLY from Weights above */}
-      <section className="mb-4 mt-6">
+      <section className="mb-4 mt-8">
         <WeeklyChart cardioWeeks={cardioWeeks} weightsWeeks={weightsWeeks} calorieWeeks={calorieWeeks} />
       </section>
 
       {/* Extra top margin to visually separate DAILY from Weekly above */}
-      <section className="mt-6">
+      <section className="mt-8">
         <DailyActivityCards />
       </section>
     </div>
