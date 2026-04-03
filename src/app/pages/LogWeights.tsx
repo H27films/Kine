@@ -368,13 +368,13 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     textTransform: 'uppercase', color: '#ffffff', marginBottom: '1.25rem',
   };
 
+  // No outer border, no rounded corners — clean sharp box with only internal dividers
   const dropdownStyle: React.CSSProperties = {
     position: 'absolute',
     top: 'calc(100% + 8px)',
     left: 0,
     zIndex: 50,
     backgroundColor: '#000000',
-    border: '1px solid rgba(255,255,255,0.15)',
     borderRadius: 0,
     overflow: 'hidden',
     minWidth: '180px',
@@ -422,7 +422,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            borderBottom: i < exercises.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
+            borderBottom: i < exercises.length - 1 ? '1px solid rgba(255,255,255,0.07)' : 'none',
             backgroundColor: alreadyAdded ? 'rgba(255,255,255,0.04)' : 'transparent',
             cursor: alreadyAdded ? 'default' : 'pointer',
           }}

@@ -388,6 +388,15 @@ export const Dashboard: React.FC = () => {
     ),
   ];
 
+  // When a pill is selected, show that activity's weekly km total instead of today's movement
+  const weeklyActivityTotal = selectedActivity && activityWeeklyData[selectedActivity]
+    ? +activityWeeklyData[selectedActivity].reduce((s, v) => s + v, 0).toFixed(1)
+    : null;
+  const displayMovement = weeklyActivityTotal !== null ? weeklyActivityTotal : totalMovement;
+  const displayLabel = selectedActivity
+    ? `${CARDIO_DISPLAY[selectedActivity]?.label || selectedActivity} THIS WEEK (KM)`
+    : 'MOVEMENT (KM)';
+
   return (
     <div className="-mt-2">
       {/* WEEKLY SUMMARY BAR */}
@@ -428,7 +437,7 @@ export const Dashboard: React.FC = () => {
         {/* Movement */}
         <div className="flex items-start">
           <div className="text-[4rem] font-black leading-none tracking-tighter text-white flex-shrink-0">
-            {totalMovement > 0 ? totalMovement.toFixed(1) : '0.0'}
+            {displayMovement > 0 ? displayMovement.toFixed(1) : '0.0'}
           </div>
           <div className="flex flex-col justify-center ml-4 pt-3 flex-1 min-w-0">
             <div style={{
@@ -437,8 +446,8 @@ export const Dashboard: React.FC = () => {
               textTransform: 'uppercase',
               letterSpacing: '2.5px',
               color: '#ffffff',
-            }}>MOVEMENT (KM)</div>
-            {yesterdayMovement > 0 && (
+            }}>{displayLabel}</div>
+            {!selectedActivity && yesterdayMovement > 0 && (
               <div className="text-[11px] font-medium mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
                 Yesterday {yesterdayMovement.toFixed(1)} km
               </div>
