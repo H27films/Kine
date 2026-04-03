@@ -156,50 +156,24 @@ const WeeklyChart: React.FC<{
       </div>
 
       <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff' }}>
-        {/* Single row: tabs (left) + big total + week nav (right) */}
-        <div className="flex items-center justify-between mb-5">
-          {/* Left: tabs + total */}
-          <div className="flex items-center gap-5">
-            {/* Tab buttons */}
-            <div className="flex gap-4">
-              {(['Cardio', 'Weights', 'Calories'] as ChartTab[]).map(tab => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className="text-[11px] font-bold uppercase tracking-[1px] pb-1 transition-all"
-                  style={{
-                    color: activeTab === tab ? '#ffffff' : 'rgba(255,255,255,0.3)',
-                    borderBottom: activeTab === tab ? '2px solid #ffffff' : '2px solid transparent',
-                  }}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
-            {/* Big total — styled like DailyCard cardio KM */}
-            <div className="flex items-baseline gap-1">
-              <span style={{
-                fontSize: '1.6rem',
-                fontWeight: 900,
-                letterSpacing: '-0.04em',
-                color: '#ffffff',
-                lineHeight: 1,
-              }}>
-                {summaryParts.value}
-              </span>
-              {summaryParts.unit && (
-                <span style={{
-                  fontSize: '11px',
-                  fontWeight: 700,
-                  color: 'rgba(255,255,255,0.4)',
-                  letterSpacing: '0.06em',
-                }}>
-                  {summaryParts.unit}
-                </span>
-              )}
-            </div>
+        {/* Row 1: tabs (left) + week nav (right) */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex gap-4">
+            {(['Cardio', 'Weights', 'Calories'] as ChartTab[]).map(tab => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className="text-[11px] font-bold uppercase tracking-[1px] pb-1 transition-all"
+                style={{
+                  color: activeTab === tab ? '#ffffff' : 'rgba(255,255,255,0.3)',
+                  borderBottom: activeTab === tab ? '2px solid #ffffff' : '2px solid transparent',
+                }}
+              >
+                {tab}
+              </button>
+            ))}
           </div>
-          {/* Right: week nav */}
+          {/* Week nav */}
           <div className="flex items-center gap-3">
             <button onClick={onPrev} disabled={!canPrev} className="transition-opacity" style={{ opacity: !canPrev ? 0.2 : 0.6 }}>
               <ChevronLeft size={16} color="white" />
@@ -209,6 +183,29 @@ const WeeklyChart: React.FC<{
               <ChevronRight size={16} color="white" />
             </button>
           </div>
+        </div>
+
+        {/* Row 2: big total below tabs */}
+        <div className="flex items-baseline gap-1 mb-5">
+          <span style={{
+            fontSize: '1.6rem',
+            fontWeight: 900,
+            letterSpacing: '-0.04em',
+            color: '#ffffff',
+            lineHeight: 1,
+          }}>
+            {summaryParts.value}
+          </span>
+          {summaryParts.unit && (
+            <span style={{
+              fontSize: '11px',
+              fontWeight: 700,
+              color: 'rgba(255,255,255,0.4)',
+              letterSpacing: '0.06em',
+            }}>
+              {summaryParts.unit}
+            </span>
+          )}
         </div>
 
         {/* Chart bars */}
