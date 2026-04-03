@@ -371,8 +371,8 @@ export const Dashboard: React.FC = () => {
       {/* WEEKLY SUMMARY BAR */}
       <WeeklySummaryBar />
 
-      {/* DATE SELECTOR */}
-      <div className="flex justify-between items-center py-2 px-2">
+      {/* DATE SELECTOR — no horizontal padding so it stretches edge to edge */}
+      <div className="flex justify-between items-center py-2">
         {Array.from({ length: 7 }, (_, i) => {
           const now = new Date();
           const d = new Date();
