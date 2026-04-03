@@ -369,11 +369,11 @@ export const Dashboard: React.FC = () => {
   return (
     <div className="-mt-2">
       {/* WEEKLY SUMMARY BAR — tight to top header */}
-      <div className="mb-4">
+      <div className="mb-6">
         <WeeklySummaryBar />
       </div>
 
-      {/* DATE SELECTOR — pushed down, sits just above Movement */}
+      {/* DATE SELECTOR — sits just above Movement */}
       <div className="flex justify-between items-center py-1 mb-1">
         {Array.from({ length: 7 }, (_, i) => {
           const now = new Date();
