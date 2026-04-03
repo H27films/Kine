@@ -44,7 +44,6 @@ const StatCol: React.FC<{ icon: React.ReactNode; label: string; value: string }>
     </div>
     <div
       style={{
-        fontFamily: "'Raleway', sans-serif",
         fontSize: '13px',
         fontWeight: 800,
         color: '#ffffff',
