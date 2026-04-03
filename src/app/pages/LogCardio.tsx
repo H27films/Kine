@@ -29,6 +29,8 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [weeklyTotal, setWeeklyTotal] = useState<number>(0);
+  const [trackerChartVisible, setTrackerChartVisible] = useState(false);
+  const [weekChartData, setWeekChartData] = useState<number[]>(Array(7).fill(0));
 
   useEffect(() => {
     const loadExercises = async () => {
@@ -40,14 +42,12 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
       if (data) {
         const exercises = data as Exercise[];
         const tracker = exercises.find(e =>
-          e.exercise_name?.toUpperCase() === 'TRACKER' ||
-          e.exercise_name?.toUpperCase() === 'RUNNING'
+          e.exercise_name?.toUpperCase() === 'TRACKER'
         );
         if (tracker) setTrackerExercise(tracker);
-        // Non-tracker exercises for the EXERCISE dropdown
+        // All cardio exercises except TRACKER go in the exercise dropdown
         const others = exercises.filter(e =>
-          e.exercise_name?.toUpperCase() !== 'TRACKER' &&
-          e.exercise_name?.toUpperCase() !== 'RUNNING'
+          e.exercise_name?.toUpperCase() !== 'TRACKER'
         );
         setNonTrackerExercises(others);
         if (others.length > 0) setSelectedExercise(others[0]);
@@ -74,6 +74,30 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
       }
     };
     loadWeeklyTotal();
+  }, [saveSuccess]);
+
+  const DAY_ORDER = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+
+  useEffect(() => {
+    const loadWeekChart = async () => {
+      const thisMonday = currentWeekMonday();
+      const { data } = await supabase
+        .from('workouts')
+        .select('day, total_cardio')
+        .eq('type', 'CARDIO')
+        .in('exercise_id', TOTAL_CARDIO_IDS)
+        .gte('date', thisMonday)
+        .not('day', 'is', null);
+      if (data) {
+        const days = Array(7).fill(0);
+        (data as any[]).forEach(r => {
+          const idx = DAY_ORDER.indexOf((r.day || '').toUpperCase());
+          if (idx >= 0) days[idx] = +(days[idx] + Number(r.total_cardio || 0)).toFixed(2);
+        });
+        setWeekChartData(days);
+      }
+    };
+    loadWeekChart();
   }, [saveSuccess]);
 
   const handleCommit = async () => {
@@ -175,7 +199,13 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
       {/* Header: TRACKER + weekly total */}
       <header className="mb-3">
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
-          <h1 className="text-[2rem] font-black tracking-tighter leading-none text-white">TRACKER</h1>
+          <button
+            onClick={() => setTrackerChartVisible(v => !v)}
+            style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+          >
+            <h1 className="text-[2rem] font-black tracking-tighter leading-none text-white">TRACKER</h1>
+            <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.35)', transform: trackerChartVisible ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', marginTop: 4 }}>▼</span>
+          </button>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', paddingBottom: '2px' }}>
             <span style={{ fontSize: '1.6rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.04em', lineHeight: 1 }}>
               {weeklyTotal.toFixed(1)}
@@ -183,6 +213,85 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
             <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>km this week</span>
           </div>
         </div>
+
+        {/* Sparkline chart — visible when header tapped */}
+        {trackerChartVisible && (() => {
+          const sparkData = weekChartData;
+          const sparkDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+          const BASE_KM = 1;
+          const VW = 280;
+          const VH = 90;
+          const padTop = 18;
+          const padBottom = 6;
+          const padLeft = 10;
+          const padRight = 10;
+          const chartW = VW - padLeft - padRight;
+          const chartH = VH - padTop - padBottom;
+          const maxVal = Math.max(...sparkData.filter(v => v > 0), BASE_KM, 0.1);
+          const getY = (val: number) => padTop + (1 - val / maxVal) * chartH;
+          const lineVals: (number | null)[] = sparkData.map((val, i) => {
+            if (val > 0) return val;
+            if (i === 0 || i === 6) return BASE_KM;
+            return null;
+          });
+          const linePts = lineVals
+            .map((val, i) =>
+              val !== null
+                ? { x: padLeft + (i / 6) * chartW, y: getY(val), val, i, isAnchor: sparkData[i] === 0 }
+                : null
+            )
+            .filter((p): p is { x: number; y: number; val: number; i: number; isAnchor: boolean } => p !== null);
+          let pathD = '';
+          if (linePts.length === 1) {
+            pathD = `M ${linePts[0].x} ${linePts[0].y}`;
+          } else if (linePts.length > 1) {
+            pathD = `M ${linePts[0].x} ${linePts[0].y}`;
+            for (let k = 1; k < linePts.length; k++) {
+              const prev = linePts[k - 1];
+              const curr = linePts[k];
+              const cpx = (prev.x + curr.x) / 2;
+              pathD += ` C ${cpx} ${prev.y}, ${cpx} ${curr.y}, ${curr.x} ${curr.y}`;
+            }
+          }
+          return (
+            <div style={{ marginTop: 8, marginBottom: 4 }}>
+              <svg width="100%" viewBox={`0 0 ${VW} ${VH + 14}`} style={{ overflow: 'visible', display: 'block' }}>
+                <defs>
+                  <filter id="lcLineBlur1" x="-50%" y="-100%" width="200%" height="300%">
+                    <feGaussianBlur stdDeviation="6" />
+                  </filter>
+                  <filter id="lcLineBlur2" x="-50%" y="-100%" width="200%" height="300%">
+                    <feGaussianBlur stdDeviation="3" />
+                  </filter>
+                  <filter id="lcDotBlur" x="-100%" y="-100%" width="300%" height="300%">
+                    <feGaussianBlur stdDeviation="2.5" />
+                  </filter>
+                </defs>
+                {linePts.length > 0 && pathD && (
+                  <>
+                    <path d={pathD} fill="none" stroke="rgba(255,255,255,0.10)" strokeWidth="14" strokeLinecap="round" filter="url(#lcLineBlur1)" />
+                    <path d={pathD} fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="6" strokeLinecap="round" filter="url(#lcLineBlur2)" />
+                    <path d={pathD} fill="none" stroke="rgba(255,255,255,0.60)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </>
+                )}
+                {linePts.filter(p => !p.isAnchor).map((p, k) => (
+                  <g key={k}>
+                    <circle cx={p.x} cy={p.y} r="5" fill="rgba(255,255,255,0.18)" filter="url(#lcDotBlur)" />
+                    <circle cx={p.x} cy={p.y} r="3" fill="white" />
+                    <text x={p.x} y={p.y - 9} textAnchor="middle" fill="rgba(255,255,255,0.70)" fontSize="6.5" fontWeight="700">
+                      {p.val}
+                    </text>
+                  </g>
+                ))}
+                {sparkDays.map((d, k) => (
+                  <text key={k} x={padLeft + (k / 6) * chartW} y={VH + 12} textAnchor="middle" fill="white" fontSize="7" fontWeight="700">
+                    {d}
+                  </text>
+                ))}
+              </svg>
+            </div>
+          );
+        })()}
       </header>
 
       {/* TRACKER distance input */}
