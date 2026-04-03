@@ -12,7 +12,7 @@ interface WeeklyStats {
   avgCalories: number | null;
 }
 
-const RunnerIcon: React.FC<{ size?: number }> = ({ size = 14 }) => (
+const RunnerIcon: React.FC<{ size?: number }> = ({ size = 16 }) => (
   <svg
     width={size}
     height={size}
@@ -25,25 +25,30 @@ const RunnerIcon: React.FC<{ size?: number }> = ({ size = 14 }) => (
   </svg>
 );
 
-const StatCol: React.FC<{ icon: React.ReactNode; label: string; value: string }> = ({ icon, label, value }) => (
-  <div className="flex flex-col items-center gap-1" style={{ flex: 1 }}>
-    <div style={{ color: 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      {icon}
+type Align = 'start' | 'center' | 'end';
+
+const StatCol: React.FC<{ icon: React.ReactNode; label: string; value: string; align?: Align }> = ({ icon, label, value, align = 'center' }) => {
+  const alignClass = align === 'start' ? 'items-start' : align === 'end' ? 'items-end' : 'items-center';
+  return (
+    <div className={`flex flex-col ${alignClass} gap-1`}>
+      <div style={{ color: 'rgba(255,255,255,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {icon}
+      </div>
+      <div
+        className="font-bold uppercase tracking-widest"
+        style={{ fontSize: '11px', color: 'rgba(255,255,255,0.65)', letterSpacing: '1.2px' }}
+      >
+        {label}
+      </div>
+      <div
+        className="font-bold"
+        style={{ fontSize: '13px', color: '#ffffff' }}
+      >
+        {value}
+      </div>
     </div>
-    <div
-      className="font-bold uppercase tracking-widest"
-      style={{ fontSize: '9px', color: 'rgba(255,255,255,0.35)', letterSpacing: '1.5px' }}
-    >
-      {label}
-    </div>
-    <div
-      className="font-bold"
-      style={{ fontSize: '13px', color: '#ffffff' }}
-    >
-      {value}
-    </div>
-  </div>
-);
+  );
+};
 
 export const WeeklySummaryBar: React.FC = () => {
   const [stats, setStats] = useState<WeeklyStats>({
@@ -105,36 +110,40 @@ export const WeeklySummaryBar: React.FC = () => {
       style={{
         display: 'flex',
         flexDirection: 'row',
-        paddingTop: '10px',
-        paddingBottom: '14px',
-        borderBottom: '1px solid rgba(255,255,255,0.07)',
-        marginBottom: '4px',
+        justifyContent: 'space-between',
+        paddingTop: '6px',
+        paddingBottom: '6px',
       }}
     >
       <StatCol
-        icon={<Dumbbell size={14} />}
+        icon={<Dumbbell size={16} />}
         label="Chest"
         value={fmtWeight(stats.chest) + ' kg'}
+        align="start"
       />
       <StatCol
-        icon={<Dumbbell size={14} />}
+        icon={<Dumbbell size={16} />}
         label="Back"
         value={fmtWeight(stats.back) + ' kg'}
+        align="center"
       />
       <StatCol
-        icon={<Dumbbell size={14} />}
+        icon={<Dumbbell size={16} />}
         label="Legs"
         value={fmtWeight(stats.legs) + ' kg'}
+        align="center"
       />
       <StatCol
-        icon={<RunnerIcon size={14} />}
+        icon={<RunnerIcon size={16} />}
         label="Cardio"
         value={`${stats.cardio} km`}
+        align="center"
       />
       <StatCol
-        icon={<Flame size={14} />}
+        icon={<Flame size={16} />}
         label="Cal"
         value={stats.avgCalories !== null ? `${stats.avgCalories.toLocaleString()}` : '\u2014'}
+        align="end"
       />
     </div>
   );
