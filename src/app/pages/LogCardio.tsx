@@ -200,13 +200,6 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
     (trackerDistance && parseFloat(trackerDistance) > 0) ||
     (distance && parseFloat(distance) > 0);
 
-  // Rounded-top bar path helper
-  const roundedTopRect = (x: number, y: number, w: number, h: number, r: number): string => {
-    if (h <= 0) return '';
-    const safeR = Math.min(r, w / 2, h);
-    return `M ${x} ${y + h} L ${x} ${y + safeR} Q ${x} ${y} ${x + safeR} ${y} L ${x + w - safeR} ${y} Q ${x + w} ${y} ${x + w} ${y + safeR} L ${x + w} ${y + h} Z`;
-  };
-
   // 30-day chart calculations
   const activeDays = thirtyDayData.filter(d => d.total > 0);
   const avg30 = activeDays.length > 0
@@ -348,8 +341,8 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
       )}
 
       {/* EXERCISE section */}
-      <section className="mb-8" style={{ marginTop: 36 }}>
-        <label style={{ display: 'block', marginBottom: 20, fontSize: '1.1rem', fontWeight: 600, color: '#ffffff', letterSpacing: '0.12em', textTransform: 'uppercase', lineHeight: 1 }}>Exercise</label>
+      <section className="mb-8">
+        <label style={{ display: 'block', marginBottom: 20, fontSize: '2rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.03em', textTransform: 'uppercase', lineHeight: 1 }}>Exercise</label>
 
         {/* Exercise type dropdown */}
         <div className="relative mb-6">
@@ -419,14 +412,14 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
         <div className="flex items-baseline gap-4">
           <div className="flex items-baseline gap-2">
             <input type="text" value={minutes} onChange={e => setMinutes(e.target.value)} placeholder="00"
-              className="text-[2.5rem] font-black tracking-tighter text-white w-20 p-0"
-              style={{ backgroundColor: 'transparent', border: 'none', textAlign: 'left' }} />
+              className="text-[2.5rem] font-black tracking-tighter text-white w-20 text-right p-0"
+              style={{ backgroundColor: 'transparent', border: 'none' }} />
             <span style={{ ...labelStyle }}>MIN</span>
           </div>
           <div className="flex items-baseline gap-2">
             <input type="text" value={seconds} onChange={e => setSeconds(e.target.value)} placeholder="00"
-              className="text-[2.5rem] font-black tracking-tighter text-white w-20 p-0"
-              style={{ backgroundColor: 'transparent', border: 'none', textAlign: 'left' }} />
+              className="text-[2.5rem] font-black tracking-tighter text-white w-20 text-right p-0"
+              style={{ backgroundColor: 'transparent', border: 'none' }} />
             <span style={{ ...labelStyle }}>SEC</span>
           </div>
         </div>
@@ -435,57 +428,62 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
 
       {/* 30-day chart */}
       <section className="mb-20">
-        <div className="p-6 rounded-xl relative overflow-hidden" style={{ backgroundColor: '#121212' }}>
+        <div className="p-6 rounded-xl relative overflow-hidden" style={{ backgroundColor: '#121212', border: '1px solid rgba(255,255,255,0.1)' }}>
           {/* Header row */}
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 20 }}>
             <h3 style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#ffffff' }}>30 DAYS</h3>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 3 }}>
               <span style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.03em' }}>{avg30}</span>
-              <span style={{ fontSize: '0.6rem', fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>km</span>
+              <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.05em' }}>km</span>
             </div>
           </div>
 
           {/* Bar chart */}
           {thirtyDayData.length > 0 && (() => {
             const BAR_COUNT = thirtyDayData.length;
-            const chartH = 80;
-            const avgLineY = max30 > 0 ? chartH * (1 - avg30 / max30) : chartH;
+            const chartH = 90;
+            const MAX_Y = 23; // fixed 23km ceiling — gives headroom above bars
+            const avgLineY = chartH * (1 - avg30 / MAX_Y);
+
+            // Rounded-top bar path: top corners rounded, bottom corners square
+            const rt = (x: number, y: number, w: number, h: number, r: number) => {
+              const cr = Math.min(r, w / 2, h / 2);
+              return `M${x},${y + h} L${x},${y + cr} Q${x},${y} ${x + cr},${y} L${x + w - cr},${y} Q${x + w},${y} ${x + w},${y + cr} L${x + w},${y + h} Z`;
+            };
+
             return (
               <svg width="100%" viewBox={`0 0 300 ${chartH + 4}`} style={{ display: 'block', overflow: 'visible' }}>
                 <defs>
                   <filter id="barGlow" x="-50%" y="-50%" width="200%" height="200%">
-                    <feGaussianBlur stdDeviation="1.5" result="blur" />
+                    <feGaussianBlur stdDeviation="2" result="blur" />
                     <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
                   </filter>
                 </defs>
                 {thirtyDayData.map((d, i) => {
-                  const barW = 300 / BAR_COUNT - 1;
+                  const barW = Math.max(300 / BAR_COUNT - 1.5, 2);
                   const x = i * (300 / BAR_COUNT);
-                  const barH = max30 > 0 ? (d.total / max30) * chartH : 0;
+                  const barH = d.total > 0 ? Math.max((d.total / MAX_Y) * chartH, 3) : 2;
                   const y = chartH - barH;
                   const isPeak = i === maxIdx30;
-                  const opacity = d.total > 0 ? (isPeak ? 1 : d.total >= avg30 ? 0.7 : 0.25) : 0.08;
+                  const opacity = d.total > 0 ? (isPeak ? 1 : d.total >= avg30 ? 0.65 : 0.22) : 0.07;
+                  const radius = d.total > 0 ? Math.min(barW / 2, 3) : 1;
                   return (
                     <g key={i}>
-                      {d.total > 0 ? (
-                        <path
-                          d={roundedTopRect(x, y, barW, barH, 2.5)}
-                          fill={`rgba(255,255,255,${opacity})`}
-                          filter={isPeak ? 'url(#barGlow)' : undefined}
-                        />
-                      ) : (
-                        <rect x={x} y={chartH - 2} width={barW} height={2} rx={1} fill={`rgba(255,255,255,${opacity})`} />
-                      )}
-                      {isPeak && (
+                      <path
+                        d={rt(x, y, barW, barH, radius)}
+                        fill={`rgba(255,255,255,${opacity})`}
+                        filter={isPeak ? 'url(#barGlow)' : undefined}
+                      />
+                      {isPeak && d.total > 0 && (
                         <text
                           x={x + barW / 2}
-                          y={y - 5}
+                          y={y - 4}
                           textAnchor="middle"
                           fill="white"
-                          fontSize="7"
+                          fontSize="6.5"
                           fontWeight="800"
                         >
-                          {d.total}
+                          {d.total}km
                         </text>
                       )}
                     </g>
@@ -496,7 +494,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
                   <line
                     x1={0} y1={avgLineY}
                     x2={300} y2={avgLineY}
-                    stroke="rgba(255,255,255,0.25)"
+                    stroke="rgba(255,255,255,0.28)"
                     strokeWidth="0.75"
                     strokeDasharray="4 3"
                   />
