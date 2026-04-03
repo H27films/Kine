@@ -20,7 +20,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
   const [distance, setDistance] = useState('');
   const [minutes, setMinutes] = useState('');
   const [seconds, setSeconds] = useState('');
-  const [cardioExercises, setCardioExercises] = useState<Exercise[]>([]);
+
   const [nonTrackerExercises, setNonTrackerExercises] = useState<Exercise[]>([]);
   const [trackerExercise, setTrackerExercise] = useState<Exercise | null>(null);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
@@ -39,7 +39,6 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
         .order('exercise_name');
       if (data) {
         const exercises = data as Exercise[];
-        setCardioExercises(exercises);
         const tracker = exercises.find(e =>
           e.exercise_name?.toUpperCase() === 'TRACKER' ||
           e.exercise_name?.toUpperCase() === 'RUNNING'
