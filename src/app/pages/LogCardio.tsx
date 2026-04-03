@@ -21,7 +21,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
   const [seconds, setSeconds] = useState('');
   const [cardioExercises, setCardioExercises] = useState<Exercise[]>([]);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
-  const [trackerExercise, setTrackerExercise] = useState<Exercise | null>(null);
+  const [, setTrackerExercise] = useState<Exercise | null>(null);
   const [exerciseOpen, setExerciseOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
