@@ -204,7 +204,6 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
             style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
           >
             <h1 className="text-[2rem] font-black tracking-tighter leading-none text-white">TRACKER</h1>
-            <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.35)', transform: trackerChartVisible ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', marginTop: 4 }}>▼</span>
           </button>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', paddingBottom: '2px' }}>
             <span style={{ fontSize: '1.6rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.04em', lineHeight: 1 }}>
@@ -294,8 +293,8 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
         })()}
       </header>
 
-      {/* TRACKER distance input */}
-      <section className="mb-8">
+      {/* TRACKER distance input — hidden when chart is open */}
+      <section className="mb-8" style={{ display: trackerChartVisible ? 'none' : undefined }}>
         <div className="flex items-baseline gap-3">
           <input
             type="text"
@@ -313,7 +312,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
       {/* EXERCISE section */}
       <section className="mb-8">
         {/* EXERCISE label */}
-        <label style={{ ...labelStyle, display: 'block', marginBottom: 20 }}>Exercise</label>
+        <label style={{ display: 'block', marginBottom: 20, fontSize: '2rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.03em', textTransform: 'uppercase', lineHeight: 1 }}>Exercise</label>
 
         {/* Exercise type dropdown */}
         <div className="relative mb-6">
