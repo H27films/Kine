@@ -470,7 +470,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
                   </filter>
                 </defs>
                 {thirtyDayData.map((d, i) => {
-                  const barW = Math.max(300 / BAR_COUNT - 1.5, 2);
+                  const barW = Math.max(300 / BAR_COUNT - 3.5, 2);
                   const x = i * (300 / BAR_COUNT);
                   const barH = d.total > 0 ? Math.max((d.total / MAX_Y) * chartH, barW) : 2;
                   const y = chartH - barH;
@@ -512,7 +512,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
             );
           })()}
 
-          <div className="absolute inset-0 pointer-events-none" style={{ opacity: 0.05, background: 'radial-gradient(circle at top right, white, transparent, transparent)' }} />
+          <div className="absolute inset-0 pointer-events-none" style={{ opacity: 0.025, background: 'radial-gradient(circle at top right, white, transparent, transparent)' }} />
         </div>
       </section>
 
