@@ -95,7 +95,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
   const groupRef = useRef<HTMLDivElement>(null);
   const exerciseRef = useRef<HTMLDivElement>(null);
 
-  // Persist selected group and exercises to localStorage
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({ selectedGroup, addedExercises }));
@@ -140,7 +139,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
         .limit(5);
       if (data) {
         setRecentLogs((data as any[]).map(r => {
-          // Find last non-zero weight across w1-w6
           let lastWeight: number | null = null;
           for (let i = 6; i >= 1; i--) {
             const w = Number(r[`w${i}`] || 0);
@@ -370,6 +368,19 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     textTransform: 'uppercase', color: '#ffffff', marginBottom: '1.25rem',
   };
 
+  const dropdownStyle: React.CSSProperties = {
+    position: 'absolute',
+    top: 'calc(100% + 8px)',
+    left: 0,
+    zIndex: 50,
+    backgroundColor: '#000000',
+    border: '1px solid rgba(255,255,255,0.15)',
+    borderRadius: 0,
+    overflow: 'hidden',
+    minWidth: '180px',
+    boxShadow: '0 16px 40px rgba(0,0,0,0.8)',
+  };
+
   const orderedGroups = GROUP_ORDER.filter(g => exercisesByGroup[g]);
 
   const renderExerciseDropdown = () => {
@@ -477,10 +488,10 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
             )}
           </div>
           {groupOpen && (
-            <div style={{ position: 'absolute', top: 'calc(100% + 8px)', left: 0, zIndex: 50, backgroundColor: '#222222', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '14px', overflow: 'hidden', minWidth: '180px', boxShadow: '0 16px 40px rgba(0,0,0,0.6)' }}>
+            <div style={{ ...dropdownStyle, minWidth: '180px' }}>
               {orderedGroups.map((group, i, arr) => (
                 <div key={group} onClick={() => handleSelectGroup(group)}
-                  style={{ padding: '12px 18px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none', backgroundColor: selectedGroup === group ? 'rgba(255,255,255,0.04)' : 'transparent' }}>
+                  style={{ padding: '12px 18px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.08)' : 'none', backgroundColor: selectedGroup === group ? 'rgba(255,255,255,0.06)' : 'transparent' }}>
                   <span style={{ color: selectedGroup === group ? '#ffffff' : '#cccccc', fontSize: '0.875rem', fontWeight: selectedGroup === group ? 700 : 400 }}>
                     {group}
                   </span>
@@ -505,7 +516,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
               )}
             </div>
             {exerciseOpen && (
-              <div style={{ position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, backgroundColor: '#222222', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '14px', overflow: 'hidden', zIndex: 50, boxShadow: '0 16px 40px rgba(0,0,0,0.6)', maxHeight: '65vh', overflowY: 'auto' }}>
+              <div style={{ ...dropdownStyle, top: 'calc(100% + 6px)', left: 0, right: 0, maxHeight: '65vh', overflowY: 'auto' }}>
                 {renderExerciseDropdown()}
               </div>
             )}
@@ -536,7 +547,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                     className="flex items-center gap-4 py-4"
                     style={{ borderBottom: ex.expanded ? 'none' : '1px solid rgba(255,255,255,0.06)' }}
                   >
-                    {/* Circle: tap to load full last session */}
                     <div
                       onClick={(e) => { e.stopPropagation(); loadLastSession(ex.exercise.id); }}
                       style={{
@@ -551,7 +561,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                       {(hasData || ex.logged) && <Check size={14} color="#1a1a1a" strokeWidth={3} />}
                     </div>
 
-                    {/* Rest of row toggles expand */}
                     <div className="flex-grow flex items-center justify-between" onClick={() => toggleExpanded(ex.exercise.id)} style={{ cursor: 'pointer' }}>
                       <div>
                         <p className="font-bold text-sm text-white">
@@ -596,7 +605,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                           <div key={idx} className="grid items-center mb-2" style={{ gridTemplateColumns: '1.8rem 1fr 1fr 1fr', gap: '0.5rem' }}>
                             <p className="font-black" style={{ fontSize: '1rem', color: numColor, lineHeight: 1, textAlign: 'center' }}>{idx + 1}</p>
 
-                            {/* KG column: − input + */}
                             <div
                               className="flex items-center justify-between rounded-lg py-1 px-2"
                               style={{ backgroundColor: '#1b1b1b', border: '1px solid rgba(255,255,255,0.07)' }}
@@ -630,7 +638,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                               >+</button>
                             </div>
 
-                            {/* Reps column */}
                             <div className="flex items-center justify-between rounded-lg py-2 px-2" style={{ backgroundColor: '#1b1b1b', border: '1px solid rgba(255,255,255,0.07)' }} onClick={e => e.stopPropagation()}>
                               <button onClick={() => updateSet(ex.exercise.id, idx, 'reps', Math.max(1, set.reps - 1))} style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}>−</button>
                               <span className="font-bold" style={{ fontSize: '0.875rem', color: rowHasData ? '#ffffff' : 'rgba(255,255,255,0.3)' }}>{set.reps}</span>
@@ -642,7 +649,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                         );
                       })}
 
-                      {/* Action buttons row */}
                       <div className="flex items-center gap-5 mt-4 flex-wrap">
                         {ex.sets.length < 6 && (
                           <button
@@ -660,7 +666,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                         >
                           <Minus size={13} /><span>Remove Ex.</span>
                         </button>
-                        {/* Fail pill */}
                         <button
                           onClick={(e) => { e.stopPropagation(); toggleFail(ex.exercise.id); }}
                           className="text-xs font-bold uppercase tracking-widest"

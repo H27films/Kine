@@ -125,7 +125,6 @@ const WeeklyChart: React.FC<{
 
   return (
     <div>
-      {/* WEEKLY header — outside the box, default font */}
       <div style={{
         fontSize: '1.1rem',
         fontWeight: 800,
@@ -138,7 +137,6 @@ const WeeklyChart: React.FC<{
       </div>
 
       <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff' }}>
-        {/* Row 1: tabs (left) + week nav (right) */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex gap-4">
             {(['Cardio', 'Weights', 'Calories'] as ChartTab[]).map(tab => (
@@ -163,7 +161,6 @@ const WeeklyChart: React.FC<{
               </button>
             ))}
           </div>
-          {/* Week nav */}
           <div className="flex items-center gap-3">
             <button onClick={onPrev} disabled={!canPrev} className="transition-opacity" style={{ opacity: !canPrev ? 0.2 : 0.6 }}>
               <ChevronLeft size={16} color="white" />
@@ -175,7 +172,6 @@ const WeeklyChart: React.FC<{
           </div>
         </div>
 
-        {/* Row 2: big total below tabs */}
         <div className="flex items-baseline gap-1 mb-5">
           <span style={{
             fontSize: '1.6rem',
@@ -198,7 +194,6 @@ const WeeklyChart: React.FC<{
           )}
         </div>
 
-        {/* Chart bars */}
         <div className="flex items-end justify-between h-44" style={{ gap: '12px' }}>
           {data.map((val, i) => {
             const clampedVal = Math.min(Math.max(val, yMin), yMax);
@@ -451,8 +446,20 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Cardio type pills */}
-        <div className="flex items-center mt-3 overflow-hidden" style={{ gap: '14px' }}>
+        {/* Cardio type pills — horizontal scroll on mobile */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            marginTop: '12px',
+            gap: '14px',
+            overflowX: 'auto',
+            WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            paddingBottom: '4px',
+          }}
+        >
           {visibleCardioKeys.map(key => {
             const display = CARDIO_DISPLAY[key];
             if (!display) return null;
