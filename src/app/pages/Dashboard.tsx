@@ -50,6 +50,10 @@ const CARDIO_DISPLAY: Record<string, { label: string; icon: React.ReactNode }> =
   },
 };
 
+// Core items always shown; conditional ones only if logged today
+const CARDIO_ALWAYS = ['TRACKER', 'RUNNING', 'ROW', 'CROSS TRAINER'];
+const CARDIO_CONDITIONAL = ['WALKING', 'CYCLE'];
+
 interface DayActivity {
   exercise_id: number;
   exercise_name: string;
@@ -145,7 +149,7 @@ const WeeklyChart: React.FC<{
 
   return (
     <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff' }}>
-      {/* Top row: WEEKLY label + week toggle — increased mb for more breathing room */}
+      {/* Top row: WEEKLY label + week toggle */}
       <div className="flex items-center justify-between mb-6">
         <div className="text-[10px] font-bold uppercase tracking-[1.5px]" style={{ color: 'rgba(255,255,255,0.4)' }}>WEEKLY</div>
         <div className="flex items-center gap-3">
@@ -154,7 +158,7 @@ const WeeklyChart: React.FC<{
           <button onClick={onNext} disabled={!canNext} className="transition-opacity" style={{ opacity: !canNext ? 0.2 : 0.6 }}><ChevronRight size={16} color="white" /></button>
         </div>
       </div>
-      {/* Tab row + summary stat — pb-1 on both sides keeps them baseline-aligned */}
+      {/* Tab row + summary stat */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex gap-4">
           {(['Cardio', 'Weights', 'Calories'] as ChartTab[]).map(tab => (
@@ -353,6 +357,14 @@ export const Dashboard: React.FC = () => {
     loadWeeklyCharts();
   }, []);
 
+  // Build ordered list of cardio keys to display
+  const visibleCardioKeys = [
+    ...CARDIO_ALWAYS,
+    ...CARDIO_CONDITIONAL.filter(key =>
+      todayActivities.some(a => a.exercise_name === key && a.km > 0)
+    ),
+  ];
+
   return (
     <div className="space-y-4">
       {/* DATE SELECTOR */}
@@ -393,25 +405,28 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Always show all cardio types — blank value if none logged today */}
-        <div className="flex items-center gap-5 mt-5 flex-wrap">
-          {Object.entries(CARDIO_DISPLAY).map(([key, display]) => {
+        {/* Cardio type pills — core 4 always shown, Walk/Cycle only if logged */}
+        <div className="flex items-center mt-5 overflow-hidden" style={{ gap: '14px' }}>
+          {visibleCardioKeys.map(key => {
+            const display = CARDIO_DISPLAY[key];
+            if (!display) return null;
             const activity = todayActivities.find(a => a.exercise_name === key);
-            const hasData = activity && activity.km > 0;
+            const hasData = !!(activity && activity.km > 0);
+            const isSelected = selectedActivity === key;
             return (
               <div
                 key={key}
-                className="flex items-center gap-2 transition-opacity"
-                style={{
-                  opacity: selectedActivity && selectedActivity !== key ? 0.3 : 1,
-                  cursor: hasData ? 'pointer' : 'default',
-                }}
-                onClick={() => {
-                  if (hasData) setSelectedActivity(selectedActivity === key ? null : key);
-                }}
+                className="flex items-center gap-1.5 cursor-pointer transition-opacity flex-shrink-0"
+                style={{ opacity: selectedActivity && !isSelected ? 0.3 : 1 }}
+                onClick={() => setSelectedActivity(isSelected ? null : key)}
               >
-                <div className="text-white/60">{display.icon}</div>
-                <div className="text-[12px] font-bold" style={{ color: hasData ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.3)' }}>
+                <div style={{ color: hasData ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.25)' }}>
+                  {display.icon}
+                </div>
+                <div
+                  className="text-[11px] font-bold whitespace-nowrap"
+                  style={{ color: hasData ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.25)' }}
+                >
                   {display.label}{hasData ? ` ${activity!.km}km` : ''}
                 </div>
               </div>
