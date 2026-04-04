@@ -746,12 +746,12 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                             <p className="font-black" style={{ fontSize: '1rem', color: numColor, lineHeight: 1, textAlign: 'center' }}>{idx + 1}</p>
 
                             <div
-                              className="flex items-center justify-between rounded-lg py-1 px-2"
+                              className="flex items-center justify-between rounded-lg py-2 px-2"
                               style={{ backgroundColor: '#1b1b1b', border: '1px solid rgba(255,255,255,0.07)' }}
                               onClick={e => e.stopPropagation()}
                             >
                               <button
-                                onClick={() => adjustWeight(ex.exercise.id, idx, -2.5)}
+                                onClick={() => adjustWeight(ex.exercise.id, idx, -1)}
                                 style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}
                               >−</button>
                               <input
@@ -773,7 +773,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                                 }}
                               />
                               <button
-                                onClick={() => adjustWeight(ex.exercise.id, idx, 2.5)}
+                                onClick={() => adjustWeight(ex.exercise.id, idx, 1)}
                                 style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}
                               >+</button>
                             </div>
@@ -936,8 +936,8 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                         <div key={idx} className="grid items-center mb-2" style={{ gridTemplateColumns: '1.8rem 1fr 1fr 1fr', gap: '0.5rem' }}>
                           <p className="font-black text-center" style={{ fontSize: '1rem', color: numColor, lineHeight: 1 }}>{idx + 1}</p>
 
-                          <div className="flex items-center justify-between rounded-lg py-1 px-2" style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.07)' }}>
-                            <button onClick={() => adjustRecentWeight(log.id, idx, -2.5)} style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>−</button>
+                          <div className="flex items-center justify-between rounded-lg py-2 px-2" style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.07)' }}>
+                            <button onClick={() => adjustRecentWeight(log.id, idx, -1)} style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>−</button>
                             <input
                               type="number"
                               inputMode="decimal"
@@ -950,7 +950,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                               })}
                               style={{ background: 'transparent', border: 'none', outline: 'none', width: '100%', textAlign: 'center', fontSize: '0.875rem', fontWeight: 700, color: hasData ? '#ffffff' : 'rgba(255,255,255,0.3)', MozAppearance: 'textfield' }}
                             />
-                            <button onClick={() => adjustRecentWeight(log.id, idx, 2.5)} style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>+</button>
+                            <button onClick={() => adjustRecentWeight(log.id, idx, 1)} style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>+</button>
                           </div>
 
                           <div className="flex items-center justify-between rounded-lg py-2 px-2" style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.07)' }}>
