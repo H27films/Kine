@@ -34,6 +34,8 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
   const [trackerChartVisible, setTrackerChartVisible] = useState(false);
   const [weekChartData, setWeekChartData] = useState<number[]>(Array(7).fill(0));
   const [thirtyDayData, setThirtyDayData] = useState<{ date: string; total: number }[]>([]);
+  const [thirtyDayOffset, setThirtyDayOffset] = useState(0);
+  const [hasOlderCardioData, setHasOlderCardioData] = useState(false);
 
   const isRunning = selectedExercise?.exercise_name?.toUpperCase() === 'RUNNING';
 
@@ -99,16 +101,20 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
 
   useEffect(() => {
     const load30Day = async () => {
-      const d30 = new Date();
-      d30.setDate(d30.getDate() - 29);
       const localStr = (d: Date) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-      const fromDate = localStr(d30);
+      const toD = new Date();
+      toD.setDate(toD.getDate() - thirtyDayOffset * 30);
+      const fromD = new Date(toD);
+      fromD.setDate(fromD.getDate() - 29);
+      const fromDate = localStr(fromD);
+      const toDate = localStr(toD);
       const { data } = await supabase
         .from('workouts')
         .select('date, total_cardio')
         .eq('type', 'CARDIO')
         .in('exercise_id', TOTAL_CARDIO_IDS)
-        .gte('date', fromDate);
+        .gte('date', fromDate)
+        .lte('date', toDate);
       if (data) {
         const byDate: Record<string, number> = {};
         (data as any[]).forEach(r => {
@@ -116,16 +122,27 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
         });
         const result: { date: string; total: number }[] = [];
         for (let i = 29; i >= 0; i--) {
-          const dd = new Date();
+          const dd = new Date(toD);
           dd.setDate(dd.getDate() - i);
           const dateStr = localStr(dd);
           result.push({ date: dateStr, total: +(byDate[dateStr] || 0).toFixed(2) });
         }
         setThirtyDayData(result);
+        // Check if older data exists beyond this window
+        const olderTo = new Date(fromD);
+        olderTo.setDate(olderTo.getDate() - 1);
+        const { data: olderCheck } = await supabase
+          .from('workouts')
+          .select('date')
+          .eq('type', 'CARDIO')
+          .in('exercise_id', TOTAL_CARDIO_IDS)
+          .lte('date', localStr(olderTo))
+          .limit(1);
+        setHasOlderCardioData(!!(olderCheck && olderCheck.length > 0));
       }
     };
     load30Day();
-  }, [saveSuccess]);
+  }, [saveSuccess, thirtyDayOffset]);
 
   const handleCommit = async () => {
     const hasTracker = trackerExercise && trackerDistance && parseFloat(trackerDistance) > 0;
@@ -203,6 +220,13 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
   const hasAnyInput =
     (trackerDistance && parseFloat(trackerDistance) > 0) ||
     (distance && parseFloat(distance) > 0);
+
+  // 30-day period label
+  const periodLabel = thirtyDayOffset === 0
+    ? '30 DAYS'
+    : thirtyDayOffset === 1
+    ? 'PREVIOUS 30 DAYS'
+    : `${'<'.repeat(thirtyDayOffset)} 30 DAYS`;
 
   // 30-day chart calculations
   const activeDays = thirtyDayData.filter(d => d.total > 0);
@@ -435,14 +459,26 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
 
       {/* 30-day chart */}
       <section className="mb-12">
-        <div style={{ paddingLeft: '2px', marginBottom: '10px' }}>
+        <div style={{ paddingLeft: '2px', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span style={{ fontSize: '14px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', color: '#ffffff' }}>Movement</span>
+          <div style={{ display: 'flex', gap: 2 }}>
+            <button
+              onClick={() => setThirtyDayOffset(o => o - 1)}
+              disabled={thirtyDayOffset === 0}
+              style={{ background: 'none', border: 'none', padding: '0 6px', cursor: thirtyDayOffset === 0 ? 'default' : 'pointer', opacity: thirtyDayOffset === 0 ? 0.2 : 0.85, color: '#fff', fontSize: '18px', lineHeight: 1 }}
+            >‹</button>
+            <button
+              onClick={() => setThirtyDayOffset(o => o + 1)}
+              disabled={!hasOlderCardioData}
+              style={{ background: 'none', border: 'none', padding: '0 6px', cursor: !hasOlderCardioData ? 'default' : 'pointer', opacity: !hasOlderCardioData ? 0.2 : 0.85, color: '#fff', fontSize: '18px', lineHeight: 1 }}
+            >›</button>
+          </div>
         </div>
         <div className="p-6 rounded-xl relative" style={{ backgroundColor: '#121212' }}>
           {/* Inside box header: 30 DAYS left, total+avg stacked on right */}
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
             {/* 30 DAYS — left, smaller, not bold */}
-            <h3 style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '1.5px', color: '#ffffff', lineHeight: 1, margin: 0, textTransform: 'uppercase' }}>30 DAYS</h3>
+            <h3 style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '1.5px', color: '#ffffff', lineHeight: 1, margin: 0, textTransform: 'uppercase' }}>{periodLabel}</h3>
 
             {/* Total only — right */}
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 3 }}>
