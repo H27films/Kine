@@ -308,7 +308,9 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
         </div>
 
         {/* Distance */}
-        <label style={{ ...labelStyle, display: 'block', marginBottom: 8 }}>Distance</label>
+        <label style={{ ...labelStyle, display: 'block', marginBottom: 8 }}>
+          {selectedExercise ? selectedExercise.exercise_name?.toUpperCase() : 'Distance'}
+        </label>
         <div className="flex items-baseline gap-4">
           <input
             type="text"

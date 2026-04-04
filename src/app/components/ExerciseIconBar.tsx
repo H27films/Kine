@@ -52,12 +52,16 @@ const IconSVG: React.FC<{ iconKey: IconKey; color: string }> = ({ iconKey, color
     case 'walking':
       return (
         <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-          <circle cx="50" cy="18" r="7" fill={c}/>
-          <path d="M50 25L42 50L30 62" stroke={c} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M42 50L58 55" stroke={c} strokeWidth="6" strokeLinecap="round"/>
-          <path d="M50 25L60 38L72 42" stroke={c} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M42 50L38 68L30 82" stroke={c} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M42 50L52 68L60 82" stroke={c} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M40 70C40 80 30 85 25 80C20 75 25 60 30 50C35 40 45 40 45 50C45 60 40 60 40 70Z" fill={c}/>
+          <circle cx="25" cy="40" r="3" fill={c}/>
+          <circle cx="32" cy="35" r="3" fill={c}/>
+          <circle cx="40" cy="35" r="3" fill={c}/>
+          <circle cx="48" cy="40" r="3" fill={c}/>
+          <path d="M60 70C60 80 70 85 75 80C80 75 75 60 70 50C65 40 55 40 55 50C55 60 60 60 60 70Z" fill={c}/>
+          <circle cx="75" cy="40" r="3" fill={c}/>
+          <circle cx="68" cy="35" r="3" fill={c}/>
+          <circle cx="60" cy="35" r="3" fill={c}/>
+          <circle cx="52" cy="40" r="3" fill={c}/>
         </svg>
       );
     case 'cycling':
@@ -129,18 +133,7 @@ const ExerciseIconBar: React.FC<Props> = ({ exercises, selectedExercise, onSelec
         })}
       </div>
 
-      {/* Exercise name label */}
-      <div style={{
-        height: 22,
-        marginTop: 10,
-        textAlign: 'center',
-        fontSize: 11,
-        fontWeight: 700,
-        letterSpacing: '1.5px',
-        color: selectedKey ? 'rgba(255,255,255,0.85)' : 'transparent',
-      }}>
-        {selectedKey ? DISPLAY_NAMES[selectedKey] : '·'}
-      </div>
+
     </div>
   );
 };
