@@ -331,7 +331,7 @@ export const CardioTypeChart: React.FC = () => {
               }}>
                 <span style={{
                   position: 'absolute',
-                  right: 4,
+                  right: -1,
                   top: '50%',
                   transform: 'translateY(-50%)',
                   fontSize: '9px',

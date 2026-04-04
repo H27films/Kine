@@ -439,7 +439,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
           {/* Inside box header: 30 DAYS left, total+avg stacked on right */}
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
             {/* 30 DAYS — left, smaller, not bold */}
-            <h3 style={{ fontSize: '0.85rem', fontWeight: 400, letterSpacing: '0.25em', color: '#ffffff', lineHeight: 1, margin: 0, textTransform: 'uppercase' }}>30 DAYS</h3>
+            <h3 style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '1.5px', color: '#ffffff', lineHeight: 1, margin: 0, textTransform: 'uppercase' }}>30 DAYS</h3>
 
             {/* Total only — right */}
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 3 }}>
