@@ -276,7 +276,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
               const sparkDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
               const BASE_KM = 1;
               const VW = 200;
-              const VH = 90;
+              const VH = 70;
               const padTop = 18;
               const padBottom = 6;
               const padLeft = 6;
@@ -333,13 +333,13 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
                     <g key={k}>
                       <circle cx={p.x} cy={p.y} r="5" fill="rgba(255,255,255,0.18)" filter="url(#lcDotBlur)" />
                       <circle cx={p.x} cy={p.y} r="3" fill="white" />
-                      <text x={p.x} y={p.y - 9} textAnchor="middle" fill="rgba(255,255,255,0.70)" fontSize="7" fontWeight="700">
+                      <text x={p.x} y={p.y - 9} textAnchor="middle" fill="rgba(255,255,255,0.70)" fontSize="5" fontWeight="700">
                         {p.val}
                       </text>
                     </g>
                   ))}
                   {sparkDays.map((d, k) => (
-                    <text key={k} x={padLeft + (k / 6) * chartW} y={VH + 12} textAnchor="middle" fill="white" fontSize="8" fontWeight="700">
+                    <text key={k} x={padLeft + (k / 6) * chartW} y={VH + 12} textAnchor="middle" fill="white" fontSize="6" fontWeight="700">
                       {d}
                     </text>
                   ))}
