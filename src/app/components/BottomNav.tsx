@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Dumbbell, BarChart3, User, Activity } from 'lucide-react';
+import { Home, Dumbbell, BarChart3, User } from 'lucide-react';
 import { Page, NavigationProps } from '../../types';
 
 interface NavItem {
@@ -23,8 +23,22 @@ export const BottomNav: React.FC<NavigationProps> = ({ currentPage, onNavigate }
       page: 'weights',
     },
     {
-      icon: <Activity size={22} />,
-      activeIcon: <Activity size={22} strokeWidth={2.5} />,
+      icon: (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="14" cy="3" r="1.5"/>
+          <path d="M11.5 7.5L9 12l3 2 1.5 4.5H15l-1.5-5-2-1.5 1.5-3 1.5 1.5H17V9h-2.5L13 7.5z"/>
+          <path d="M9 12.5L7 17h1.5l2-3.5z"/>
+          <path d="M13 9.5l2.5 3H18v-1.5h-2l-2-2.5z"/>
+        </svg>
+      ),
+      activeIcon: (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="14" cy="3" r="1.5"/>
+          <path d="M11.5 7.5L9 12l3 2 1.5 4.5H15l-1.5-5-2-1.5 1.5-3 1.5 1.5H17V9h-2.5L13 7.5z"/>
+          <path d="M9 12.5L7 17h1.5l2-3.5z"/>
+          <path d="M13 9.5l2.5 3H18v-1.5h-2l-2-2.5z"/>
+        </svg>
+      ),
       page: 'cardio',
     },
     {
