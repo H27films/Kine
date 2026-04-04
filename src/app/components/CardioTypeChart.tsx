@@ -311,6 +311,17 @@ export const CardioTypeChart: React.FC = () => {
                     {DAY_SHORT[i]}
                   </div>
                 )}
+                {viewMode === 'monthly' && (
+                  <div style={{
+                    fontSize: '6px',
+                    fontWeight: 700,
+                    color: (i + 1) % 5 === 0 || i === 0 ? 'rgba(255,255,255,0.45)' : 'transparent',
+                    marginTop: '6px',
+                    lineHeight: 1,
+                  }}>
+                    {i + 1}
+                  </div>
+                )}
               </div>
             );
           })}
