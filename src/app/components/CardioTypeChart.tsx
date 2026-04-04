@@ -290,7 +290,7 @@ export const CardioTypeChart: React.FC = () => {
         {/* Bar chart */}
         <div
           className="flex items-end justify-between"
-          style={{ height: '176px', gap: viewMode === 'weekly' ? '12px' : '6px', position: 'relative' }}
+          style={{ height: '176px', gap: viewMode === 'weekly' ? '12px' : '6px', position: 'relative', paddingRight: viewMode === 'monthly' ? '42px' : '0' }}
         >
           {/* Monthly: vertical week separator lines */}
           {viewMode === 'monthly' && (() => {
