@@ -88,6 +88,8 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
 
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [swipeOffsets, setSwipeOffsets] = useState<Record<number, number>>({});
+  const touchStartX = useRef<Record<number, number>>({});
 
   const [exercisesByGroup, setExercisesByGroup] = useState<Record<string, Exercise[]>>({});
   const [recentLogs, setRecentLogs] = useState<RecentLog[]>([]);
@@ -683,11 +685,47 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
               const hasData = ex.sets.some(s => s.weight !== '');
               const exTotal = calcExerciseTotal(ex.sets, ex.exercise.multiplier ?? 1);
 
+              const swipeOffset = swipeOffsets[ex.exercise.id] || 0;
+
               return (
-                <div key={ex.exercise.id}>
+                <div key={ex.exercise.id} style={{ position: 'relative', overflow: 'hidden' }}>
+                  {/* Red remove reveal */}
+                  {!ex.expanded && (
+                    <div style={{
+                      position: 'absolute', right: 0, top: 0, bottom: 0,
+                      width: 80, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      backgroundColor: '#ef4444',
+                    }}>
+                      <span style={{ color: '#fff', fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.1em' }}>REMOVE</span>
+                    </div>
+                  )}
                   <div
                     className="flex items-center gap-4 py-4"
-                    style={{ borderBottom: ex.expanded ? 'none' : '1px solid rgba(255,255,255,0.06)' }}
+                    style={{
+                      borderBottom: ex.expanded ? 'none' : '1px solid rgba(255,255,255,0.06)',
+                      transform: ex.expanded ? 'none' : `translateX(${swipeOffset}px)`,
+                      transition: swipeOffset === 0 ? 'transform 0.25s ease' : 'none',
+                      backgroundColor: '#111111',
+                      willChange: 'transform',
+                    }}
+                    onTouchStart={ex.expanded ? undefined : (e) => {
+                      touchStartX.current[ex.exercise.id] = e.touches[0].clientX;
+                    }}
+                    onTouchMove={ex.expanded ? undefined : (e) => {
+                      const dx = e.touches[0].clientX - (touchStartX.current[ex.exercise.id] || 0);
+                      if (dx < 0) {
+                        setSwipeOffsets(prev => ({ ...prev, [ex.exercise.id]: Math.max(dx, -80) }));
+                      }
+                    }}
+                    onTouchEnd={ex.expanded ? undefined : () => {
+                      const offset = swipeOffsets[ex.exercise.id] || 0;
+                      if (offset < -50) {
+                        setAddedExercises(prev => prev.filter(e => e.exercise.id !== ex.exercise.id));
+                        setSwipeOffsets(prev => { const n = { ...prev }; delete n[ex.exercise.id]; return n; });
+                      } else {
+                        setSwipeOffsets(prev => ({ ...prev, [ex.exercise.id]: 0 }));
+                      }
+                    }}
                   >
                     <div
                       onClick={(e) => { e.stopPropagation(); loadLastSession(ex.exercise.id); }}
