@@ -46,11 +46,11 @@ interface AddedExercise {
 }
 
 interface RecentLog {
+  id: number;
   name: string;
-  sets: number;
-  reps: number;
   weight: number;
-  lastWeight: number | null;
+  setsData: { w: number; r: number }[];
+  date: string;
 }
 
 interface WeeklyGroupData {
@@ -90,6 +90,8 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
 
   const [exercisesByGroup, setExercisesByGroup] = useState<Record<string, Exercise[]>>({});
   const [recentLogs, setRecentLogs] = useState<RecentLog[]>([]);
+  const [expandedLogId, setExpandedLogId] = useState<number | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
   const [weeklyData, setWeeklyData] = useState<WeeklyGroupData[]>([]);
   const [thisWeekTotal, setThisWeekTotal] = useState<number>(0);
   const [lastWeekTotal, setLastWeekTotal] = useState<number>(0);
@@ -136,23 +138,24 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     const loadRecent = async () => {
       const { data } = await supabase
         .from('workouts')
-        .select('total_weight, sets, r1, w1, w2, w3, w4, w5, w6, exercises:exercise_id(exercise_name)')
+        .select('id, date, total_weight, w1, r1, w2, r2, w3, r3, w4, r4, w5, r5, w6, r6, exercises:exercise_id(exercise_name)')
         .in('type', WEIGHT_TYPES)
         .order('date', { ascending: false })
         .limit(5);
       if (data) {
         setRecentLogs((data as any[]).map(r => {
-          let lastWeight: number | null = null;
-          for (let i = 6; i >= 1; i--) {
+          const setsData: { w: number; r: number }[] = [];
+          for (let i = 1; i <= 6; i++) {
             const w = Number(r[`w${i}`] || 0);
-            if (w > 0) { lastWeight = w; break; }
+            const reps = Number(r[`r${i}`] || 0);
+            if (w > 0) setsData.push({ w, r: reps });
           }
           return {
+            id: r.id,
             name: r.exercises?.exercise_name || 'Unknown',
-            sets: r.sets || 1,
-            reps: r.r1 || 10,
             weight: Number(r.total_weight || 0),
-            lastWeight,
+            setsData,
+            date: r.date,
           };
         }));
       }
@@ -223,6 +226,13 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     };
     loadVolume();
   }, []);
+
+  const deleteLog = async (id: number) => {
+    await supabase.from('workouts').delete().eq('id', id);
+    setRecentLogs(prev => prev.filter(l => l.id !== id));
+    setDeleteConfirmId(null);
+    setExpandedLogId(null);
+  };
 
   const fmtVol = (v: number) =>
     v >= 1000 ? `${(v / 1000).toFixed(1)}k` : `${Math.round(v)}`;
@@ -511,7 +521,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
 
       {/* Weekly volume display */}
       <div className="flex items-start mb-8">
-        <div className="text-[4rem] font-black leading-none tracking-tighter text-white flex-shrink-0">
+        <div className="text-[3.25rem] font-black leading-none tracking-tighter text-white flex-shrink-0">
           {fmtVol(thisWeekTotal)}
         </div>
         <div className="flex flex-col justify-center ml-4 pt-3 flex-1 min-w-0">
@@ -800,24 +810,88 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
           <p style={sectionLabelStyle}>Recent Logs</p>
           <Clock size={15} style={{ color: 'rgba(255,255,255,0.5)', marginBottom: '1.25rem' }} />
         </div>
-        <div className="space-y-4">
-          {recentLogs.map((log, i) => (
-            <div key={i} className="flex items-center gap-4 p-4 rounded-lg" style={{ backgroundColor: '#1b1b1b' }}>
-              <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#353535' }}>
-                <Dumbbell size={18} color="white" />
+        <div className="space-y-3">
+          {recentLogs.map((log) => {
+            const isExpanded = expandedLogId === log.id;
+            const isConfirming = deleteConfirmId === log.id;
+            return (
+              <div key={log.id} className="rounded-lg overflow-hidden" style={{ backgroundColor: '#1b1b1b' }}>
+                {/* Collapsed / header row */}
+                <div
+                  className="flex items-center gap-4 p-4 cursor-pointer"
+                  onClick={() => {
+                    setExpandedLogId(isExpanded ? null : log.id);
+                    setDeleteConfirmId(null);
+                  }}
+                >
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#353535' }}>
+                    <Dumbbell size={16} color="white" />
+                  </div>
+                  <div className="flex-grow min-w-0">
+                    <h4 className="font-bold text-sm uppercase tracking-tight text-white truncate">{log.name}</h4>
+                    <p className="text-[10px] uppercase tracking-widest" style={{ color: '#c6c6c6' }}>
+                      {log.setsData.length} Sets • {log.date}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3 flex-shrink-0">
+                    <div className="text-right">
+                      <div className="text-lg font-black tracking-tighter text-white">{Math.round(log.weight).toLocaleString()}</div>
+                      <div className="text-[8px] font-bold uppercase tracking-widest" style={{ color: '#c6c6c6' }}>Kilos</div>
+                    </div>
+                    <ChevronDown size={14} style={{ color: 'rgba(255,255,255,0.35)', transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                  </div>
+                </div>
+
+                {/* Expanded section */}
+                {isExpanded && (
+                  <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', padding: '12px 16px 16px' }}>
+                    {/* Set breakdown */}
+                    <div className="space-y-2 mb-4">
+                      {log.setsData.map((s, idx) => (
+                        <div key={idx} className="flex items-center gap-3">
+                          <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '1.5px', color: 'rgba(255,255,255,0.35)', width: '36px' }}>
+                            SET {idx + 1}
+                          </span>
+                          <span style={{ fontSize: '14px', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.02em' }}>
+                            {s.w} <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 400, fontSize: '12px' }}>kg</span>
+                            <span style={{ color: 'rgba(255,255,255,0.3)', margin: '0 6px' }}>×</span>
+                            {s.r} <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 400, fontSize: '12px' }}>reps</span>
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Delete button / confirm */}
+                    {isConfirming ? (
+                      <div className="flex items-center gap-3">
+                        <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.55)', flex: 1 }}>Delete this entry?</span>
+                        <button
+                          onClick={() => deleteLog(log.id)}
+                          style={{ fontSize: '11px', fontWeight: 700, color: '#ff4444', padding: '6px 14px', border: '1px solid rgba(255,68,68,0.4)', borderRadius: '6px', backgroundColor: 'rgba(255,68,68,0.1)' }}
+                        >
+                          Yes, Delete
+                        </button>
+                        <button
+                          onClick={() => setDeleteConfirmId(null)}
+                          style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.4)', padding: '6px 14px', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px' }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setDeleteConfirmId(log.id); }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 700, letterSpacing: '1px', color: 'rgba(255,80,80,0.7)', padding: '6px 0' }}
+                      >
+                        <X size={13} strokeWidth={2.5} />
+                        DELETE ENTRY
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
-              <div className="flex-grow">
-                <h4 className="font-bold text-sm uppercase tracking-tight text-white">{log.name}</h4>
-                <p className="text-[10px] uppercase tracking-widest" style={{ color: '#c6c6c6' }}>
-                  {log.sets} Sets • {log.reps} Reps{log.lastWeight ? ` • ${log.lastWeight} KG` : ''}
-                </p>
-              </div>
-              <div className="text-right">
-                <div className="text-lg font-black tracking-tighter text-white">{Math.round(log.weight).toLocaleString()}</div>
-                <div className="text-[8px] font-bold uppercase tracking-widest" style={{ color: '#c6c6c6' }}>Kilos</div>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
     </div>
