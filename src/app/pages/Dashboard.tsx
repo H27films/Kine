@@ -420,7 +420,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
                 fontWeight: 700,
                 letterSpacing: '1.5px',
                 marginBottom: '8px',
-                color: isSelected ? '#ffffff' : 'rgba(255,255,255,0.3)',
+                color: showWeeklySummary ? 'rgba(255,255,255,0.3)' : '#ffffff',
               }}>
                 {date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()}
               </span>
