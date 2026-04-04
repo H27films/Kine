@@ -515,12 +515,13 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
                   </filter>
                 </defs>
                 {thirtyDayData.map((d, i) => {
+                  if (d.total === 0) return null;
                   const barW = Math.max(300 / BAR_COUNT - 3.5, 2);
                   const x = i * (300 / BAR_COUNT);
-                  const barH = d.total > 0 ? Math.max((d.total / MAX_Y) * chartH, barW) : 2;
+                  const barH = Math.max((d.total / MAX_Y) * chartH, barW);
                   const y = chartH - barH;
                   const isPeak = i === maxIdx30;
-                  const opacity = d.total > 0 ? (isPeak ? 1 : d.total >= avg30 ? 0.65 : 0.22) : 0.07;
+                  const opacity = isPeak ? 1 : d.total >= avg30 ? 0.65 : 0.22;
                   return (
                     <g key={i}>
                       <path
@@ -528,7 +529,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
                         fill={`rgba(255,255,255,${opacity})`}
                         filter={isPeak ? 'url(#barGlow30)' : undefined}
                       />
-                      {isPeak && d.total > 0 && (
+                      {isPeak && (
                         <text
                           x={x + barW / 2}
                           y={y - 5}
