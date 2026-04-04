@@ -434,7 +434,10 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
       )}
 
       {/* 30-day chart */}
-      <section className="mb-20">
+      <section className="mb-12">
+        <div style={{ paddingLeft: '2px', marginBottom: '10px' }}>
+          <span style={{ fontSize: '14px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', color: '#ffffff' }}>Movement</span>
+        </div>
         <div className="p-6 rounded-xl relative" style={{ backgroundColor: '#121212' }}>
           {/* Inside box header: 30 DAYS left, total+avg stacked on right */}
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
