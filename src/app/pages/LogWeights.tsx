@@ -705,7 +705,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                       borderBottom: ex.expanded ? 'none' : '1px solid rgba(255,255,255,0.06)',
                       transform: ex.expanded ? 'none' : `translateX(${swipeOffset}px)`,
                       transition: swipeOffset === 0 ? 'transform 0.25s ease' : 'none',
-                      backgroundColor: '#111111',
+                      backgroundColor: '#000000',
                       willChange: 'transform',
                     }}
                     onTouchStart={ex.expanded ? undefined : (e) => {
