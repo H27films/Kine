@@ -907,12 +907,11 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                     )}
                   </div>
                   {log.weight > 0 && (
-                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px', flexShrink: 0, marginRight: '6px' }}>
-                      <span style={{ color: '#ffffff', fontWeight: 900, fontSize: '1.4rem', letterSpacing: '-0.02em', lineHeight: 1 }}>{Math.round(log.weight).toLocaleString()}</span>
-                      <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>KG</span>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px', flexShrink: 0, marginLeft: 'auto' }}>
+                      <span style={{ color: '#ffffff', fontWeight: 900, fontSize: '1.15rem', letterSpacing: '-0.02em', lineHeight: 1 }}>{Math.round(log.weight).toLocaleString()}</span>
+                      <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 700, fontSize: '0.65rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>KG</span>
                     </div>
                   )}
-                  <ChevronDown size={14} style={{ color: 'rgba(255,255,255,0.35)', flexShrink: 0, transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
                 </div>
 
                 {/* Expanded section */}
