@@ -93,6 +93,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
   const [weeklyData, setWeeklyData] = useState<WeeklyGroupData[]>([]);
   const [thisWeekTotal, setThisWeekTotal] = useState<number>(0);
   const [lastWeekTotal, setLastWeekTotal] = useState<number>(0);
+  const [todayTotal, setTodayTotal] = useState<number>(0);
 
   const groupRef = useRef<HTMLDivElement>(null);
   const exerciseRef = useRef<HTMLDivElement>(null);
@@ -195,7 +196,8 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     const loadVolume = async () => {
       const thisMonday = weeksAgoMonday(0);
       const lastMonday = weeksAgoMonday(1);
-      const [{ data: thisData }, { data: lastData }] = await Promise.all([
+      const today = todayStr();
+      const [{ data: thisData }, { data: lastData }, { data: todayData }] = await Promise.all([
         supabase
           .from('workouts')
           .select('total_weight')
@@ -207,11 +209,17 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
           .in('type', ['CHEST', 'BACK', 'LEGS'])
           .gte('date', lastMonday)
           .lt('date', thisMonday),
+        supabase
+          .from('workouts')
+          .select('total_weight')
+          .in('type', ['CHEST', 'BACK', 'LEGS'])
+          .eq('date', today),
       ]);
       const sum = (rows: any[] | null) =>
         (rows || []).reduce((s: number, r: any) => s + Number(r.total_weight || 0), 0);
       setThisWeekTotal(sum(thisData));
       setLastWeekTotal(sum(lastData));
+      setTodayTotal(sum(todayData));
     };
     loadVolume();
   }, []);
@@ -528,11 +536,21 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
               </span>
               <ChevronDown size={16} style={{ color: 'rgba(255,255,255,0.45)', transform: groupOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', flexShrink: 0 }} />
             </div>
-            {selectedGroup && (
-              <button onClick={cancelSelection} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.35)', padding: '4px', flexShrink: 0, marginLeft: '8px' }}>
-                <X size={16} strokeWidth={2} />
-              </button>
-            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+              {todayTotal > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                  <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '2px', color: 'rgba(255,255,255,0.65)', textTransform: 'uppercase', lineHeight: 1 }}>Today</div>
+                  <div style={{ fontSize: '13px', fontWeight: 800, color: '#ffffff', letterSpacing: '0.5px', lineHeight: 1.2 }}>
+                    {Math.round(todayTotal).toLocaleString()}<span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '1px' }}>KG</span>
+                  </div>
+                </div>
+              )}
+              {selectedGroup && (
+                <button onClick={cancelSelection} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.35)', padding: '4px' }}>
+                  <X size={16} strokeWidth={2} />
+                </button>
+              )}
+            </div>
           </div>
           {groupOpen && (
             <div style={{ ...dropdownStyle }}>
