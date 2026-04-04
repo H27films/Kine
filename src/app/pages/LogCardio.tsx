@@ -299,7 +299,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
       </header>
 
       {/* EXERCISE section — icon picker */}
-      <section className="mb-8" style={{ marginTop: 32 }}>
+      <section className="mb-8" style={{ marginTop: 56 }}>
         <div style={{ marginBottom: 20 }}>
           <ExerciseIconBar
             exercises={nonTrackerExercises}
