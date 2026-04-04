@@ -615,8 +615,9 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
               {todayTotal > 0 && (
-                <div style={{ fontSize: '13px', fontWeight: 800, color: '#ffffff', letterSpacing: '0.5px', lineHeight: 1 }}>
-                  {Math.round(todayTotal).toLocaleString()}<span style={{ color: 'rgba(255,255,255,0.45)', fontWeight: 700, fontSize: '11px', marginLeft: '2px' }}>kg</span>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
+                  <span style={{ color: '#ffffff', fontWeight: 900, fontSize: '1.4rem', letterSpacing: '-0.02em', lineHeight: 1 }}>{Math.round(todayTotal).toLocaleString()}</span>
+                  <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>KG</span>
                 </div>
               )}
               {selectedGroup && (
@@ -896,8 +897,8 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                     <Dumbbell size={16} color="white" />
                   </div>
                   <div className="flex-grow min-w-0">
-                    <p className="font-bold text-sm text-white truncate">
-                      {log.name.charAt(0).toUpperCase() + log.name.slice(1).toLowerCase()}
+                    <p className="font-bold text-sm text-white truncate uppercase tracking-wide">
+                      {log.name}
                     </p>
                     {lastSet && (
                       <p className="text-[10px] uppercase tracking-widest mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
@@ -905,6 +906,12 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                       </p>
                     )}
                   </div>
+                  {log.weight > 0 && (
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px', flexShrink: 0, marginRight: '6px' }}>
+                      <span style={{ color: '#ffffff', fontWeight: 900, fontSize: '1.4rem', letterSpacing: '-0.02em', lineHeight: 1 }}>{Math.round(log.weight).toLocaleString()}</span>
+                      <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>KG</span>
+                    </div>
+                  )}
                   <ChevronDown size={14} style={{ color: 'rgba(255,255,255,0.35)', flexShrink: 0, transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
                 </div>
 
@@ -919,8 +926,9 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                       ))}
                     </div>
 
-                    {/* Set rows */}
+                    {/* Set rows — only show originally-logged (non-zero) sets */}
                     {sets.map((s, idx) => {
+                      if ((log.allSets[idx]?.w || 0) === 0) return null;
                       const w = parseFloat(s.w) || 0;
                       const rowTotal = w * s.r;
                       const hasData = s.w !== '' && w > 0;
@@ -958,19 +966,19 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                     })}
 
                     {/* Save + Delete */}
-                    <div className="flex items-center justify-between mt-4">
+                    <div className="flex items-center gap-3 mt-4">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); saveRecentLog(log.id); }}
+                        style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '1px', color: savingLogId === log.id ? 'rgba(255,255,255,0.3)' : '#ffffff', padding: '6px 14px', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '6px', backgroundColor: 'rgba(255,255,255,0.06)' }}
+                      >
+                        {savingLogId === log.id ? 'SAVING…' : 'SAVE'}
+                      </button>
                       <button
                         onClick={(e) => { e.stopPropagation(); setDeleteConfirmId(log.id); }}
                         style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 700, letterSpacing: '1px', color: 'rgba(255,80,80,0.7)', padding: '6px 0' }}
                       >
                         <X size={13} strokeWidth={2.5} />
                         DELETE ENTRY
-                      </button>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); saveRecentLog(log.id); }}
-                        style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '1px', color: savingLogId === log.id ? 'rgba(255,255,255,0.3)' : '#ffffff', padding: '6px 14px', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '6px', backgroundColor: 'rgba(255,255,255,0.06)' }}
-                      >
-                        {savingLogId === log.id ? 'SAVING…' : 'SAVE'}
                       </button>
                     </div>
 
