@@ -1,16 +1,10 @@
 import React from 'react';
-
-interface Exercise {
-  id: number | string;
-  exercise_name?: string;
-  multiplier?: number;
-  [key: string]: unknown;
-}
+import { Exercise } from '../../lib/supabase';
 
 interface Props {
   exercises: Exercise[];
   selectedExercise: Exercise | null;
-  onSelect: (ex: Exercise) => void;
+  onSelect: (ex: Exercise | null) => void;
 }
 
 const ICON_KEYS = ['running', 'rowing', 'walking', 'cycling', 'crosstrainer'] as const;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown } from 'lucide-react';
+
 import { Page } from '../../types';
 import { supabase, Exercise, todayStr, getISOWeek, getDayName, currentWeekMonday, recalculateDailyTotals } from '../../lib/supabase';
 import { CardioTypeChart } from '../components/CardioTypeChart';
@@ -28,7 +28,6 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
   const [nonTrackerExercises, setNonTrackerExercises] = useState<Exercise[]>([]);
   const [trackerExercise, setTrackerExercise] = useState<Exercise | null>(null);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
-  const [exerciseOpen, setExerciseOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState('');
