@@ -548,11 +548,8 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
               {todayTotal > 0 && (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                  <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '2px', color: 'rgba(255,255,255,0.65)', textTransform: 'uppercase', lineHeight: 1 }}>Today</div>
-                  <div style={{ fontSize: '13px', fontWeight: 800, color: '#ffffff', letterSpacing: '0.5px', lineHeight: 1.2 }}>
-                    {Math.round(todayTotal).toLocaleString()}<span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '1px' }}>KG</span>
-                  </div>
+                <div style={{ fontSize: '13px', fontWeight: 800, color: '#ffffff', letterSpacing: '0.5px', lineHeight: 1 }}>
+                  {Math.round(todayTotal).toLocaleString()}<span style={{ color: 'rgba(255,255,255,0.45)', fontWeight: 700, fontSize: '11px', marginLeft: '2px' }}>kg</span>
                 </div>
               )}
               {selectedGroup && (
