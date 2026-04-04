@@ -411,15 +411,17 @@ export const CardioTypeChart: React.FC = () => {
                     {barLabel}
                   </div>
                 ) : null}
-                <div
-                  className="w-full min-h-[4px] transition-all"
-                  style={{
-                    height: `${pct * 100}%`,
-                    backgroundColor: barColor,
-                    borderRadius: '9999px 9999px 0 0',
-                    boxShadow: barGlow,
-                  }}
-                />
+                {val > 0 && (
+                  <div
+                    className="w-full transition-all"
+                    style={{
+                      height: `${pct * 100}%`,
+                      backgroundColor: barColor,
+                      borderRadius: '9999px 9999px 0 0',
+                      boxShadow: barGlow,
+                    }}
+                  />
+                )}
                 {isWeekly && (
                   <div style={{
                     fontSize: '8px',
