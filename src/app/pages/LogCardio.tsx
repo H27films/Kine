@@ -37,7 +37,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
   const [thirtyDayData, setThirtyDayData] = useState<{ date: string; total: number }[]>([]);
   const [thirtyDayOffset, setThirtyDayOffset] = useState(0);
   const [hasOlderCardioData, setHasOlderCardioData] = useState(false);
-  const [trackerInputVisible, setTrackerInputVisible] = useState(false);
+
 
   const isRunning = selectedExercise?.exercise_name?.toUpperCase() === 'RUNNING';
 
@@ -263,8 +263,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 14 }}>
           <h1
             className="text-[2rem] font-black tracking-tighter leading-none text-white"
-            style={{ cursor: 'pointer' }}
-            onClick={() => setTrackerInputVisible(v => !v)}
+            style={{ cursor: 'default' }}
           >TRACKER</h1>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
             <span style={{ fontSize: '1.8rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.04em', lineHeight: 1 }}>
@@ -274,13 +273,8 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
           </div>
         </div>
 
-        {/* Row 2: full-width sparkline */}
-        <div style={{ width: '100%' }}>
-          <TrackerSparkline weekChartData={weekChartData} />
-        </div>
-
-        {/* Row 3: Full-width distance input — shown when TRACKER tapped */}
-        {trackerInputVisible && <div style={{ marginTop: 18 }}>
+        {/* Row 2: Full-width distance input — always visible */}
+        <div style={{ marginBottom: 14 }}>
           <div className="flex items-baseline gap-3">
             <input
               type="text"
@@ -293,7 +287,12 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
             <span className="text-[1rem] font-black tracking-tighter" style={{ color: '#c6c6c6' }}>KM</span>
           </div>
           <div style={separatorStyle} />
-        </div>}
+        </div>
+
+        {/* Row 3: full-width sparkline */}
+        <div style={{ width: '100%' }}>
+          <TrackerSparkline weekChartData={weekChartData} />
+        </div>
       </header>
 
       {/* EXERCISE section — icon picker */}

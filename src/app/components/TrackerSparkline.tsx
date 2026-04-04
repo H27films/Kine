@@ -69,13 +69,13 @@ const TrackerSparkline: React.FC<Props> = ({ weekChartData }) => {
         <g key={k}>
           <circle cx={p.x} cy={p.y} r="3.5" fill="rgba(255,255,255,0.18)" filter="url(#lcDotBlur)" />
           <circle cx={p.x} cy={p.y} r="2" fill="white" />
-          <text x={p.x} y={p.y - 6} textAnchor="middle" fill="rgba(255,255,255,0.70)" fontSize="3.5" fontWeight="700">
+          <text x={p.x} y={p.y - 6} textAnchor="middle" fill="rgba(255,255,255,0.70)" fontSize="4.5" fontWeight="700">
             {p.val}
           </text>
         </g>
       ))}
       {sparkDays.map((d, k) => (
-        <text key={k} x={padLeft + (k / 6) * chartW} y={VH + 12} textAnchor="middle" fill="white" fontSize="3.5" fontWeight="700">
+        <text key={k} x={padLeft + (k / 6) * chartW} y={VH + 12} textAnchor="middle" fill="white" fontSize="4.5" fontWeight="700">
           {d}
         </text>
       ))}
