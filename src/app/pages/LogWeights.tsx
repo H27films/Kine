@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Dumbbell, ChevronDown, ChevronRight, ChevronUp, Plus, Minus, Clock, Check, X, Calendar } from 'lucide-react';
 import { Page } from '../../types';
 import { supabase, Exercise, todayStr, getISOWeek, getDayName, currentWeekMonday, weeksAgoMonday, recalculateDailyTotals } from '../../lib/supabase';
@@ -137,37 +137,38 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     loadExercises();
   }, []);
 
-  useEffect(() => {
-    const loadRecent = async () => {
-      const { data } = await supabase
-        .from('workouts')
-        .select('id, date, total_weight, w1, r1, w2, r2, w3, r3, w4, r4, w5, r5, w6, r6, exercises:exercise_id(exercise_name)')
-        .in('type', WEIGHT_TYPES)
-        .order('date', { ascending: false })
-        .limit(5);
-      if (data) {
-        setRecentLogs((data as any[]).map(r => {
-          const setsData: { w: number; r: number }[] = [];
-          const allSets: { w: number; r: number }[] = [];
-          for (let i = 1; i <= 6; i++) {
-            const w = Number(r[`w${i}`] || 0);
-            const reps = Number(r[`r${i}`] || 0);
-            allSets.push({ w, r: reps });
-            if (w > 0) setsData.push({ w, r: reps });
-          }
-          return {
-            id: r.id,
-            name: r.exercises?.exercise_name || 'Unknown',
-            weight: Number(r.total_weight || 0),
-            setsData,
-            allSets,
-            date: r.date,
-          };
-        }));
-      }
-    };
-    loadRecent();
+  const loadRecent = useCallback(async () => {
+    const { data } = await supabase
+      .from('workouts')
+      .select('id, date, total_weight, w1, r1, w2, r2, w3, r3, w4, r4, w5, r5, w6, r6, exercises:exercise_id(exercise_name)')
+      .in('type', WEIGHT_TYPES)
+      .order('date', { ascending: false })
+      .limit(5);
+    if (data) {
+      setRecentLogs((data as any[]).map(r => {
+        const setsData: { w: number; r: number }[] = [];
+        const allSets: { w: number; r: number }[] = [];
+        for (let i = 1; i <= 6; i++) {
+          const w = Number(r[`w${i}`] || 0);
+          const reps = Number(r[`r${i}`] || 0);
+          allSets.push({ w, r: reps });
+          if (w > 0) setsData.push({ w, r: reps });
+        }
+        return {
+          id: r.id,
+          name: r.exercises?.exercise_name || 'Unknown',
+          weight: Number(r.total_weight || 0),
+          setsData,
+          allSets,
+          date: r.date,
+        };
+      }));
+    }
   }, []);
+
+  useEffect(() => {
+    loadRecent();
+  }, [loadRecent]);
 
   useEffect(() => {
     const loadWeekly = async () => {
@@ -461,7 +462,8 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
 
       await recalculateDailyTotals(today);
 
-      setAddedExercises(prev => prev.map(e => ({ ...e, logged: true, expanded: false })));
+      setAddedExercises([]);
+      loadRecent();
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
     } finally {
@@ -907,7 +909,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                     )}
                   </div>
                   {log.weight > 0 && (
-                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px', flexShrink: 0, marginLeft: 'auto', alignSelf: 'flex-start' }}>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px', flexShrink: 0, marginLeft: 'auto', alignSelf: 'flex-start', marginTop: '2px' }}>
                       <span style={{ color: '#ffffff', fontWeight: 900, fontSize: '1.15rem', letterSpacing: '-0.02em', lineHeight: 1 }}>{Math.round(log.weight).toLocaleString()}</span>
                       <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 700, fontSize: '0.65rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>KG</span>
                     </div>
