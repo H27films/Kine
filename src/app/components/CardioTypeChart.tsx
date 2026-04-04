@@ -321,18 +321,19 @@ export const CardioTypeChart: React.FC = () => {
               <div style={{
                 position: 'absolute',
                 left: 0,
-                right: 0,
+                right: 4,
                 bottom: `${avgPct * 100}%`,
                 height: '1px',
                 borderTop: '1px dashed rgba(255,255,255,0.35)',
                 pointerEvents: 'none',
                 zIndex: 10,
+                overflow: 'visible',
               }}>
                 <span style={{
                   position: 'absolute',
                   right: 0,
                   top: '50%',
-                  transform: 'translateY(-50%)',
+                  transform: 'translate(100%, -50%)',
                   fontSize: '9px',
                   fontWeight: 800,
                   color: '#000000',
