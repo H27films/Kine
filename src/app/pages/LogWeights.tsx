@@ -91,6 +91,8 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
   const [exercisesByGroup, setExercisesByGroup] = useState<Record<string, Exercise[]>>({});
   const [recentLogs, setRecentLogs] = useState<RecentLog[]>([]);
   const [weeklyData, setWeeklyData] = useState<WeeklyGroupData[]>([]);
+  const [thisWeekTotal, setThisWeekTotal] = useState<number>(0);
+  const [lastWeekTotal, setLastWeekTotal] = useState<number>(0);
 
   const groupRef = useRef<HTMLDivElement>(null);
   const exerciseRef = useRef<HTMLDivElement>(null);
@@ -188,6 +190,34 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
+
+  useEffect(() => {
+    const loadVolume = async () => {
+      const thisMonday = weeksAgoMonday(0);
+      const lastMonday = weeksAgoMonday(1);
+      const [{ data: thisData }, { data: lastData }] = await Promise.all([
+        supabase
+          .from('workouts')
+          .select('total_weight')
+          .in('type', ['CHEST', 'BACK', 'LEGS'])
+          .gte('date', thisMonday),
+        supabase
+          .from('workouts')
+          .select('total_weight')
+          .in('type', ['CHEST', 'BACK', 'LEGS'])
+          .gte('date', lastMonday)
+          .lt('date', thisMonday),
+      ]);
+      const sum = (rows: any[] | null) =>
+        (rows || []).reduce((s: number, r: any) => s + Number(r.total_weight || 0), 0);
+      setThisWeekTotal(sum(thisData));
+      setLastWeekTotal(sum(lastData));
+    };
+    loadVolume();
+  }, []);
+
+  const fmtVol = (v: number) =>
+    v >= 1000 ? `${(v / 1000).toFixed(1)}k` : `${Math.round(v)}`;
 
   const handleSelectGroup = (group: string) => {
     setSelectedGroup(group);
@@ -470,6 +500,23 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
           );
         })}
       </nav>
+
+      {/* Weekly volume display */}
+      <div className="flex items-start mb-8">
+        <div className="text-[4rem] font-black leading-none tracking-tighter text-white flex-shrink-0">
+          {fmtVol(thisWeekTotal)}
+        </div>
+        <div className="flex flex-col justify-center ml-4 pt-3 flex-1 min-w-0">
+          <div style={{ fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2.5px', color: '#ffffff' }}>
+            VOLUME (KG)
+          </div>
+          {lastWeekTotal > 0 && (
+            <div className="text-[11px] font-medium mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              Last week {fmtVol(lastWeekTotal)} kg
+            </div>
+          )}
+        </div>
+      </div>
 
       <section className="mb-12">
         {/* Muscle group selector */}
