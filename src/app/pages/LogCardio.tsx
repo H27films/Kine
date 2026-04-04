@@ -226,7 +226,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
     ? '30 DAYS'
     : thirtyDayOffset === 1
     ? 'PREVIOUS 30 DAYS'
-    : `${'<'.repeat(thirtyDayOffset)} 30 DAYS`;
+    : `PREVIOUS 30 DAYS ${'+'.repeat(thirtyDayOffset - 1)}`;
 
   // 30-day chart calculations
   const activeDays = thirtyDayData.filter(d => d.total > 0);
@@ -459,20 +459,18 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
 
       {/* 30-day chart */}
       <section className="mb-12">
-        <div style={{ paddingLeft: '2px', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ paddingLeft: '2px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: 4 }}>
           <span style={{ fontSize: '14px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', color: '#ffffff' }}>Movement</span>
-          <div style={{ display: 'flex', gap: 2 }}>
-            <button
-              onClick={() => setThirtyDayOffset(o => o - 1)}
-              disabled={thirtyDayOffset === 0}
-              style={{ background: 'none', border: 'none', padding: '0 6px', cursor: thirtyDayOffset === 0 ? 'default' : 'pointer', opacity: thirtyDayOffset === 0 ? 0.2 : 0.85, color: '#fff', fontSize: '18px', lineHeight: 1 }}
-            >‹</button>
-            <button
-              onClick={() => setThirtyDayOffset(o => o + 1)}
-              disabled={!hasOlderCardioData}
-              style={{ background: 'none', border: 'none', padding: '0 6px', cursor: !hasOlderCardioData ? 'default' : 'pointer', opacity: !hasOlderCardioData ? 0.2 : 0.85, color: '#fff', fontSize: '18px', lineHeight: 1 }}
-            >›</button>
-          </div>
+          <button
+            onClick={() => setThirtyDayOffset(o => o + 1)}
+            disabled={!hasOlderCardioData}
+            style={{ background: 'none', border: 'none', padding: '0 4px', cursor: !hasOlderCardioData ? 'default' : 'pointer', opacity: !hasOlderCardioData ? 0.2 : 0.85, color: '#fff', fontSize: '18px', lineHeight: 1 }}
+          >‹</button>
+          <button
+            onClick={() => setThirtyDayOffset(o => o - 1)}
+            disabled={thirtyDayOffset === 0}
+            style={{ background: 'none', border: 'none', padding: '0 4px', cursor: thirtyDayOffset === 0 ? 'default' : 'pointer', opacity: thirtyDayOffset === 0 ? 0.2 : 0.85, color: '#fff', fontSize: '18px', lineHeight: 1 }}
+          >›</button>
         </div>
         <div className="p-6 rounded-xl relative" style={{ backgroundColor: '#121212' }}>
           {/* Inside box header: 30 DAYS left, total+avg stacked on right */}
