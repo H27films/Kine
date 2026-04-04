@@ -34,6 +34,8 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
   const [weekChartData, setWeekChartData] = useState<number[]>(Array(7).fill(0));
   const [thirtyDayData, setThirtyDayData] = useState<{ date: string; total: number }[]>([]);
 
+  const isRunning = selectedExercise?.exercise_name?.toUpperCase() === 'RUNNING';
+
   useEffect(() => {
     const loadExercises = async () => {
       const { data } = await supabase
@@ -153,7 +155,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
       if (hasExercise && selectedExercise) {
         const km = parseFloat(distance);
         const totalCardio = +(km * Number(selectedExercise.multiplier)).toFixed(2);
-        const timeStr = minutes || seconds
+        const timeStr = isRunning && (minutes || seconds)
           ? `00:${(minutes || '0').padStart(2, '0')}:${(seconds || '0').padStart(2, '0')}`
           : null;
         const { error } = await supabase.from('workouts').insert({
@@ -407,25 +409,27 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
         <div style={separatorStyle} />
       </section>
 
-      {/* Duration */}
-      <section className="mb-16">
-        <label style={{ ...labelStyle, display: 'block', marginBottom: 8 }}>Duration</label>
-        <div className="flex items-baseline gap-4">
-          <div className="flex items-baseline gap-2">
-            <input type="text" value={minutes} onChange={e => setMinutes(e.target.value)} placeholder="00"
-              className="text-[2.5rem] font-black tracking-tighter text-white w-16 text-left p-0"
-              style={{ backgroundColor: 'transparent', border: 'none' }} />
-            <span style={{ ...labelStyle }}>MIN</span>
+      {/* Duration — only shown for Running */}
+      {isRunning && (
+        <section className="mb-16">
+          <label style={{ ...labelStyle, display: 'block', marginBottom: 8 }}>Duration</label>
+          <div className="flex items-baseline gap-4">
+            <div className="flex items-baseline gap-2">
+              <input type="text" value={minutes} onChange={e => setMinutes(e.target.value)} placeholder="00"
+                className="text-[2.5rem] font-black tracking-tighter text-white w-16 text-left p-0"
+                style={{ backgroundColor: 'transparent', border: 'none' }} />
+              <span style={{ ...labelStyle }}>MIN</span>
+            </div>
+            <div className="flex items-baseline gap-2">
+              <input type="text" value={seconds} onChange={e => setSeconds(e.target.value)} placeholder="00"
+                className="text-[2.5rem] font-black tracking-tighter text-white w-16 text-left p-0"
+                style={{ backgroundColor: 'transparent', border: 'none' }} />
+              <span style={{ ...labelStyle }}>SEC</span>
+            </div>
           </div>
-          <div className="flex items-baseline gap-2">
-            <input type="text" value={seconds} onChange={e => setSeconds(e.target.value)} placeholder="00"
-              className="text-[2.5rem] font-black tracking-tighter text-white w-16 text-left p-0"
-              style={{ backgroundColor: 'transparent', border: 'none' }} />
-            <span style={{ ...labelStyle }}>SEC</span>
-          </div>
-        </div>
-        <div style={separatorStyle} />
-      </section>
+          <div style={separatorStyle} />
+        </section>
+      )}
 
       {/* 30-day chart */}
       <section className="mb-20">
