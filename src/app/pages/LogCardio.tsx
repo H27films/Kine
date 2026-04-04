@@ -31,7 +31,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [weeklyTotal, setWeeklyTotal] = useState<number>(0);
-  const [trackerChartVisible, setTrackerChartVisible] = useState(false);
+
   const [weekChartData, setWeekChartData] = useState<number[]>(Array(7).fill(0));
   const [thirtyDayData, setThirtyDayData] = useState<{ date: string; total: number }[]>([]);
   const [thirtyDayOffset, setThirtyDayOffset] = useState(0);
@@ -254,120 +254,121 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
         })}
       </nav>
 
-      {/* Header: TRACKER + weekly total */}
-      <header className="mb-3">
-        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
-          <button
-            onClick={() => setTrackerChartVisible(v => !v)}
-            style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
-          >
+      {/* Header: two-column — TRACKER info left, sparkline right */}
+      <header className="mb-6">
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+
+          {/* Left column */}
+          <div style={{ display: 'flex', flexDirection: 'column', width: '42%', flexShrink: 0 }}>
+            {/* TRACKER title */}
             <h1 className="text-[2rem] font-black tracking-tighter leading-none text-white">TRACKER</h1>
-          </button>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', paddingBottom: '2px' }}>
-            <span style={{ fontSize: '1.6rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.04em', lineHeight: 1 }}>
-              {weeklyTotal.toFixed(1)}
-            </span>
-            <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>km this week</span>
-          </div>
-        </div>
 
-        {/* Sparkline chart — visible when header tapped */}
-        {trackerChartVisible && (() => {
-          const sparkData = weekChartData;
-          const sparkDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-          const BASE_KM = 1;
-          const VW = 280;
-          const VH = 90;
-          const padTop = 18;
-          const padBottom = 6;
-          const padLeft = 10;
-          const padRight = 10;
-          const chartW = VW - padLeft - padRight;
-          const chartH = VH - padTop - padBottom;
-          const maxVal = Math.max(...sparkData.filter(v => v > 0), BASE_KM, 0.1);
-          const getY = (val: number) => padTop + (1 - val / maxVal) * chartH;
-          const lineVals: (number | null)[] = sparkData.map((val, i) => {
-            if (val > 0) return val;
-            if (i === 0 || i === 6) return BASE_KM;
-            return null;
-          });
-          const linePts = lineVals
-            .map((val, i) =>
-              val !== null
-                ? { x: padLeft + (i / 6) * chartW, y: getY(val), val, i, isAnchor: sparkData[i] === 0 }
-                : null
-            )
-            .filter((p): p is { x: number; y: number; val: number; i: number; isAnchor: boolean } => p !== null);
-          let pathD = '';
-          if (linePts.length === 1) {
-            pathD = `M ${linePts[0].x} ${linePts[0].y}`;
-          } else if (linePts.length > 1) {
-            pathD = `M ${linePts[0].x} ${linePts[0].y}`;
-            for (let k = 1; k < linePts.length; k++) {
-              const prev = linePts[k - 1];
-              const curr = linePts[k];
-              const cpx = (prev.x + curr.x) / 2;
-              pathD += ` C ${cpx} ${prev.y}, ${cpx} ${curr.y}, ${curr.x} ${curr.y}`;
-            }
-          }
-          return (
-            <div style={{ marginTop: 8, marginBottom: 4 }}>
-              <svg width="100%" viewBox={`0 0 ${VW} ${VH + 14}`} style={{ overflow: 'visible', display: 'block' }}>
-                <defs>
-                  <filter id="lcLineBlur1" x="-50%" y="-100%" width="200%" height="300%">
-                    <feGaussianBlur stdDeviation="6" />
-                  </filter>
-                  <filter id="lcLineBlur2" x="-50%" y="-100%" width="200%" height="300%">
-                    <feGaussianBlur stdDeviation="3" />
-                  </filter>
-                  <filter id="lcDotBlur" x="-100%" y="-100%" width="300%" height="300%">
-                    <feGaussianBlur stdDeviation="2.5" />
-                  </filter>
-                </defs>
-                {linePts.length > 0 && pathD && (
-                  <>
-                    <path d={pathD} fill="none" stroke="rgba(255,255,255,0.10)" strokeWidth="14" strokeLinecap="round" filter="url(#lcLineBlur1)" />
-                    <path d={pathD} fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="6" strokeLinecap="round" filter="url(#lcLineBlur2)" />
-                    <path d={pathD} fill="none" stroke="rgba(255,255,255,0.60)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </>
-                )}
-                {linePts.filter(p => !p.isAnchor).map((p, k) => (
-                  <g key={k}>
-                    <circle cx={p.x} cy={p.y} r="5" fill="rgba(255,255,255,0.18)" filter="url(#lcDotBlur)" />
-                    <circle cx={p.x} cy={p.y} r="3" fill="white" />
-                    <text x={p.x} y={p.y - 9} textAnchor="middle" fill="rgba(255,255,255,0.70)" fontSize="6.5" fontWeight="700">
-                      {p.val}
-                    </text>
-                  </g>
-                ))}
-                {sparkDays.map((d, k) => (
-                  <text key={k} x={padLeft + (k / 6) * chartW} y={VH + 12} textAnchor="middle" fill="white" fontSize="7" fontWeight="700">
-                    {d}
-                  </text>
-                ))}
-              </svg>
+            {/* Weekly total */}
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginTop: 8 }}>
+              <span style={{ fontSize: '1.8rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.04em', lineHeight: 1 }}>
+                {weeklyTotal.toFixed(1)}
+              </span>
+              <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>km</span>
             </div>
-          );
-        })()}
-      </header>
 
-      {/* TRACKER distance input — hidden when chart is open */}
-      {!trackerChartVisible && (
-        <section className="mb-8">
-          <div className="flex items-baseline gap-3">
-            <input
-              type="text"
-              value={trackerDistance}
-              onChange={e => setTrackerDistance(e.target.value)}
-              placeholder="0.0"
-              className="text-[2.5rem] font-black tracking-tighter text-white w-full p-0"
-              style={{ backgroundColor: 'transparent', border: 'none' }}
-            />
-            <span className="text-[1rem] font-black tracking-tighter" style={{ color: '#c6c6c6' }}>KM</span>
+            {/* Tracker distance input */}
+            <div style={{ marginTop: 14 }}>
+              <div className="flex items-baseline gap-3">
+                <input
+                  type="text"
+                  value={trackerDistance}
+                  onChange={e => setTrackerDistance(e.target.value)}
+                  placeholder="0.0"
+                  className="text-[2.5rem] font-black tracking-tighter text-white w-full p-0"
+                  style={{ backgroundColor: 'transparent', border: 'none' }}
+                />
+                <span className="text-[1rem] font-black tracking-tighter" style={{ color: '#c6c6c6' }}>KM</span>
+              </div>
+              <div style={separatorStyle} />
+            </div>
           </div>
-          <div style={separatorStyle} />
-        </section>
-      )}
+
+          {/* Right column — sparkline always visible */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            {(() => {
+              const sparkData = weekChartData;
+              const sparkDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+              const BASE_KM = 1;
+              const VW = 200;
+              const VH = 90;
+              const padTop = 18;
+              const padBottom = 6;
+              const padLeft = 6;
+              const padRight = 6;
+              const chartW = VW - padLeft - padRight;
+              const chartH = VH - padTop - padBottom;
+              const maxVal = Math.max(...sparkData.filter(v => v > 0), BASE_KM, 0.1);
+              const getY = (val: number) => padTop + (1 - val / maxVal) * chartH;
+              const lineVals: (number | null)[] = sparkData.map((val, i) => {
+                if (val > 0) return val;
+                if (i === 0 || i === 6) return BASE_KM;
+                return null;
+              });
+              const linePts = lineVals
+                .map((val, i) =>
+                  val !== null
+                    ? { x: padLeft + (i / 6) * chartW, y: getY(val), val, i, isAnchor: sparkData[i] === 0 }
+                    : null
+                )
+                .filter((p): p is { x: number; y: number; val: number; i: number; isAnchor: boolean } => p !== null);
+              let pathD = '';
+              if (linePts.length === 1) {
+                pathD = `M ${linePts[0].x} ${linePts[0].y}`;
+              } else if (linePts.length > 1) {
+                pathD = `M ${linePts[0].x} ${linePts[0].y}`;
+                for (let k = 1; k < linePts.length; k++) {
+                  const prev = linePts[k - 1];
+                  const curr = linePts[k];
+                  const cpx = (prev.x + curr.x) / 2;
+                  pathD += ` C ${cpx} ${prev.y}, ${cpx} ${curr.y}, ${curr.x} ${curr.y}`;
+                }
+              }
+              return (
+                <svg width="100%" viewBox={`0 0 ${VW} ${VH + 14}`} style={{ overflow: 'visible', display: 'block' }}>
+                  <defs>
+                    <filter id="lcLineBlur1" x="-50%" y="-100%" width="200%" height="300%">
+                      <feGaussianBlur stdDeviation="6" />
+                    </filter>
+                    <filter id="lcLineBlur2" x="-50%" y="-100%" width="200%" height="300%">
+                      <feGaussianBlur stdDeviation="3" />
+                    </filter>
+                    <filter id="lcDotBlur" x="-100%" y="-100%" width="300%" height="300%">
+                      <feGaussianBlur stdDeviation="2.5" />
+                    </filter>
+                  </defs>
+                  {linePts.length > 0 && pathD && (
+                    <>
+                      <path d={pathD} fill="none" stroke="rgba(255,255,255,0.10)" strokeWidth="14" strokeLinecap="round" filter="url(#lcLineBlur1)" />
+                      <path d={pathD} fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="6" strokeLinecap="round" filter="url(#lcLineBlur2)" />
+                      <path d={pathD} fill="none" stroke="rgba(255,255,255,0.60)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </>
+                  )}
+                  {linePts.filter(p => !p.isAnchor).map((p, k) => (
+                    <g key={k}>
+                      <circle cx={p.x} cy={p.y} r="5" fill="rgba(255,255,255,0.18)" filter="url(#lcDotBlur)" />
+                      <circle cx={p.x} cy={p.y} r="3" fill="white" />
+                      <text x={p.x} y={p.y - 9} textAnchor="middle" fill="rgba(255,255,255,0.70)" fontSize="7" fontWeight="700">
+                        {p.val}
+                      </text>
+                    </g>
+                  ))}
+                  {sparkDays.map((d, k) => (
+                    <text key={k} x={padLeft + (k / 6) * chartW} y={VH + 12} textAnchor="middle" fill="white" fontSize="8" fontWeight="700">
+                      {d}
+                    </text>
+                  ))}
+                </svg>
+              );
+            })()}
+          </div>
+
+        </div>
+      </header>
 
       {/* EXERCISE section */}
       <section className="mb-8" style={{ marginTop: 32 }}>
