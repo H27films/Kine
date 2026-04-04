@@ -282,7 +282,7 @@ export const CardioTypeChart: React.FC = () => {
         {/* Bar chart */}
         <div
           className="flex items-end justify-between"
-          style={{ height: '176px', gap: viewMode === 'weekly' ? '12px' : '4px', position: 'relative' }}
+          style={{ height: '176px', gap: viewMode === 'weekly' ? '12px' : '6px', position: 'relative' }}
         >
           {/* Monthly: vertical week separator lines */}
           {viewMode === 'monthly' && (() => {
@@ -316,20 +316,20 @@ export const CardioTypeChart: React.FC = () => {
                 right: 0,
                 bottom: `${avgPct * 100}%`,
                 height: '1px',
-                backgroundColor: 'rgba(255,255,255,0.3)',
+                borderTop: '1px dashed rgba(255,255,255,0.35)',
                 pointerEvents: 'none',
                 zIndex: 10,
               }}>
                 <span style={{
                   position: 'absolute',
                   right: 0,
-                  top: '-9px',
-                  fontSize: '7px',
+                  top: '-11px',
+                  fontSize: '9px',
                   fontWeight: 700,
-                  color: 'rgba(255,255,255,0.4)',
+                  color: 'rgba(255,255,255,0.6)',
                   letterSpacing: '0.3px',
                 }}>
-                  avg {+avg.toFixed(1)}
+                  {+avg.toFixed(1)}
                 </span>
               </div>
             );
@@ -352,9 +352,9 @@ export const CardioTypeChart: React.FC = () => {
               >
                 {/* Data label above bar */}
                 <div style={{
-                  fontSize: isWeekly ? '7.5px' : '7px',
+                  fontSize: isWeekly ? '7.5px' : '9px',
                   fontWeight: 700,
-                  color: val > 0 ? 'rgba(255,255,255,0.6)' : 'transparent',
+                  color: val > 0 ? 'rgba(255,255,255,0.7)' : 'transparent',
                   marginBottom: isWeekly ? '4px' : '3px',
                   lineHeight: 1,
                   whiteSpace: 'nowrap',
