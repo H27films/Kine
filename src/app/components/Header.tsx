@@ -7,6 +7,8 @@ interface HeaderProps {
   currentPage?: Page;
   onBack?: () => void;
   onNavigate?: (page: Page) => void;
+  onToggleWeeklySummary?: () => void;
+  showWeeklySummary?: boolean;
 }
 
 const RunningManIcon = () => (
@@ -15,7 +17,7 @@ const RunningManIcon = () => (
   </svg>
 );
 
-export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNavigate }) => {
+export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNavigate, onToggleWeeklySummary, showWeeklySummary }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -96,7 +98,18 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
       </div>
 
       {isDashboard ? (
-        <span className="absolute left-1/2 -translate-x-1/2 text-xl font-black tracking-tighter text-white uppercase">Kiné</span>
+        <button
+          onClick={onToggleWeeklySummary}
+          className="absolute left-1/2 -translate-x-1/2 hover:opacity-70 transition-opacity"
+          style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+        >
+          <span
+            className="text-xl font-black tracking-tighter text-white uppercase"
+            style={{ opacity: showWeeklySummary ? 1 : 0.6 }}
+          >
+            Kiné
+          </span>
+        </button>
       ) : (
         <>
           <div className="absolute left-1/2 -translate-x-1/2">

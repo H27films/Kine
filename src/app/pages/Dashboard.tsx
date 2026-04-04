@@ -225,7 +225,7 @@ const WeeklyChart: React.FC<{
   );
 };
 
-export const Dashboard: React.FC = () => {
+export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeeklySummary = false }) => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
 
@@ -396,10 +396,12 @@ export const Dashboard: React.FC = () => {
 
   return (
     <div className="-mt-2">
-      {/* WEEKLY SUMMARY BAR */}
-      <div className="mb-6">
-        <WeeklySummaryBar />
-      </div>
+      {/* WEEKLY SUMMARY BAR — toggled by tapping KINÉ in header */}
+      {showWeeklySummary && (
+        <div className="mb-6">
+          <WeeklySummaryBar />
+        </div>
+      )}
 
       {/* DATE SELECTOR */}
       <div className="flex justify-between items-center py-1 mb-1">

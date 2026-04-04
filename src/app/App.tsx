@@ -12,6 +12,7 @@ import { Summary } from './pages/Summary';
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>('dashboard');
+  const [showWeeklySummary, setShowWeeklySummary] = useState(false);
 
   const getHeaderTitle = (): string => {
     switch (currentPage) {
@@ -29,7 +30,7 @@ const App: React.FC = () => {
   const renderPage = () => {
     switch (currentPage) {
       case 'dashboard':
-        return <Dashboard />;
+        return <Dashboard showWeeklySummary={showWeeklySummary} />;
       case 'weights':
         return <LogWeights onNavigate={setCurrentPage} />;
       case 'cardio':
@@ -54,6 +55,8 @@ const App: React.FC = () => {
         currentPage={currentPage}
         onBack={showBackButton ? () => setCurrentPage('dashboard') : undefined}
         onNavigate={setCurrentPage}
+        onToggleWeeklySummary={() => setShowWeeklySummary(v => !v)}
+        showWeeklySummary={showWeeklySummary}
       />
       <main className="pt-20 pb-32 px-4 max-w-lg mx-auto">
         {renderPage()}
