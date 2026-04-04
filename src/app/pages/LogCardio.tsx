@@ -435,22 +435,16 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
 
       {/* 30-day chart */}
       <section className="mb-20">
-        <div className="p-6 rounded-xl relative overflow-hidden" style={{ backgroundColor: '#121212' }}>
+        <div className="p-6 rounded-xl relative" style={{ backgroundColor: '#121212' }}>
           {/* Inside box header: 30 DAYS left, total+avg stacked on right */}
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
             {/* 30 DAYS — left, smaller, not bold */}
             <h3 style={{ fontSize: '0.85rem', fontWeight: 400, letterSpacing: '0.25em', color: '#ffffff', lineHeight: 1, margin: 0, textTransform: 'uppercase' }}>30 DAYS</h3>
 
-            {/* Total + Avg stacked — right */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 3 }}>
-                <span style={{ fontSize: '1.1rem', fontWeight: 900, letterSpacing: '-0.05em', color: '#ffffff', lineHeight: 1 }}>{total30}</span>
-                <span style={{ fontSize: '0.6rem', fontWeight: 700, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>km</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 3 }}>
-                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)', letterSpacing: '-0.02em', lineHeight: 1 }}>{avg30}</span>
-                <span style={{ fontSize: '0.6rem', fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>km</span>
-              </div>
+            {/* Total only — right */}
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 3 }}>
+              <span style={{ fontSize: '1.1rem', fontWeight: 900, letterSpacing: '-0.05em', color: '#ffffff', lineHeight: 1 }}>{total30}</span>
+              <span style={{ fontSize: '0.6rem', fontWeight: 700, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>km</span>
             </div>
           </div>
 
@@ -512,15 +506,40 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
                     </g>
                   );
                 })}
-                {avg30 > 0 && (
-                  <line
-                    x1={0} y1={avgLineY}
-                    x2={300} y2={avgLineY}
-                    stroke="rgba(255,255,255,0.28)"
-                    strokeWidth="0.75"
-                    strokeDasharray="4 3"
-                  />
-                )}
+                {avg30 > 0 && (() => {
+                  const pillW = 30;
+                  const pillH = 14;
+                  const pillX = 304;
+                  const pillY = avgLineY - pillH / 2;
+                  return (
+                    <g>
+                      <line
+                        x1={0} y1={avgLineY}
+                        x2={300} y2={avgLineY}
+                        stroke="rgba(255,255,255,0.28)"
+                        strokeWidth="0.75"
+                        strokeDasharray="4 3"
+                      />
+                      <rect
+                        x={pillX} y={pillY}
+                        width={pillW} height={pillH}
+                        rx={pillH / 2} ry={pillH / 2}
+                        fill="white"
+                      />
+                      <text
+                        x={pillX + pillW / 2}
+                        y={pillY + pillH / 2 + 3.5}
+                        textAnchor="middle"
+                        fill="black"
+                        fontSize="8"
+                        fontWeight="800"
+                        letterSpacing="0.2"
+                      >
+                        {avg30}
+                      </text>
+                    </g>
+                  );
+                })()}
               </svg>
             );
           })()}
