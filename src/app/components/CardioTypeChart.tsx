@@ -145,6 +145,14 @@ export const CardioTypeChart: React.FC = () => {
   const rawMax = Math.max(...displayData, 0.1);
   const total = +(displayData.reduce((s, v) => s + v, 0)).toFixed(1);
 
+  // Monthly peak highlighting (same as 30-day chart)
+  const monthlyNonZero = monthlyData.filter(v => v > 0);
+  const monthlyAvg = monthlyNonZero.length > 0
+    ? monthlyNonZero.reduce((a, b) => a + b, 0) / monthlyNonZero.length
+    : 0;
+  const monthlyMaxVal = Math.max(...monthlyData, 0);
+  const monthlyPeakIdx = monthlyMaxVal > 0 ? monthlyData.findIndex(v => v === monthlyMaxVal) : -1;
+
   const currentWeekNum = availableWeeks[weekIdx] ?? '—';
   const monthBounds = getMonthBounds(monthOffset);
   const navLabel = viewMode === 'weekly' ? `WEEK ${currentWeekNum}` : monthBounds.label;
@@ -337,12 +345,28 @@ export const CardioTypeChart: React.FC = () => {
 
           {displayData.map((val, i) => {
             const pct = val > 0 ? Math.max(val / rawMax, 0.04) : 0;
-            const brightness = val > 0 ? Math.round(80 + (val / rawMax) * 175) : 0;
-            const barColor = val > 0
-              ? `rgb(${brightness},${brightness},${brightness})`
-              : 'rgba(255,255,255,0.05)';
-            const barLabel = val > 0 ? `${+val.toFixed(1)}` : '';
             const isWeekly = viewMode === 'weekly';
+            const isPeak = !isWeekly && i === monthlyPeakIdx && val > 0;
+
+            // Monthly: same opacity scheme as 30-day chart
+            // Weekly: keep existing brightness-scaled rgb approach
+            let barColor: string;
+            let barGlow: string | undefined;
+            if (isWeekly) {
+              const brightness = val > 0 ? Math.round(80 + (val / rawMax) * 175) : 0;
+              barColor = val > 0
+                ? `rgb(${brightness},${brightness},${brightness})`
+                : 'rgba(255,255,255,0.05)';
+            } else {
+              const opacity = val > 0
+                ? (isPeak ? 1 : val >= monthlyAvg ? 0.65 : 0.22)
+                : 0.07;
+              barColor = `rgba(255,255,255,${opacity})`;
+              if (isPeak) barGlow = '0 0 8px rgba(255,255,255,0.55), 0 0 16px rgba(255,255,255,0.25)';
+            }
+
+            const barLabel = val > 0 ? `${+val.toFixed(1)}` : '';
+            const labelOpacity = isWeekly ? 0.7 : (isPeak ? 1 : val >= monthlyAvg ? 0.65 : 0.35);
 
             return (
               <div
@@ -353,8 +377,8 @@ export const CardioTypeChart: React.FC = () => {
                 {/* Data label above bar */}
                 <div style={{
                   fontSize: isWeekly ? '7.5px' : '9px',
-                  fontWeight: 700,
-                  color: val > 0 ? 'rgba(255,255,255,0.7)' : 'transparent',
+                  fontWeight: isPeak ? 800 : 700,
+                  color: val > 0 ? `rgba(255,255,255,${labelOpacity})` : 'transparent',
                   marginBottom: isWeekly ? '4px' : '3px',
                   lineHeight: 1,
                   whiteSpace: 'nowrap',
@@ -367,6 +391,7 @@ export const CardioTypeChart: React.FC = () => {
                     height: `${pct * 100}%`,
                     backgroundColor: barColor,
                     borderRadius: '9999px 9999px 0 0',
+                    boxShadow: barGlow,
                   }}
                 />
                 {isWeekly && (
