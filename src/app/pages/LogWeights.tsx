@@ -907,7 +907,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                     )}
                   </div>
                   {log.weight > 0 && (
-                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px', flexShrink: 0, marginLeft: 'auto' }}>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px', flexShrink: 0, marginLeft: 'auto', alignSelf: 'flex-start' }}>
                       <span style={{ color: '#ffffff', fontWeight: 900, fontSize: '1.15rem', letterSpacing: '-0.02em', lineHeight: 1 }}>{Math.round(log.weight).toLocaleString()}</span>
                       <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 700, fontSize: '0.65rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>KG</span>
                     </div>
