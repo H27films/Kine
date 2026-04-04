@@ -55,7 +55,8 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
         if (tracker) setTrackerExercise(tracker);
         const others = exercises.filter(e => e.exercise_name?.toUpperCase() !== 'TRACKER');
         setNonTrackerExercises(others);
-        if (others.length > 0) setSelectedExercise(others[0]);
+        const running = others.find(e => e.exercise_name?.toLowerCase().includes('run')) ?? others[0] ?? null;
+        setSelectedExercise(running);
       }
     };
     loadExercises();
@@ -308,7 +309,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
         </div>
 
         {/* Distance */}
-        <label style={{ ...labelStyle, display: 'block', marginBottom: 8 }}>
+        <label style={{ ...labelStyle, display: 'block', marginBottom: 8, color: selectedExercise ? '#ffffff' : '#c6c6c6' }}>
           {selectedExercise ? selectedExercise.exercise_name?.toUpperCase() : 'Distance'}
         </label>
         <div className="flex items-baseline gap-4">
