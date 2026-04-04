@@ -269,7 +269,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
             onClick={() => setTrackerInputVisible(v => !v)}
           >TRACKER</h1>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-            <span style={{ fontSize: '1.8rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.04em', lineHeight: 1 }}>
+            <span style={{ fontSize: '1.5rem', fontWeight: 600, color: '#ffffff', letterSpacing: '-0.02em', lineHeight: 1 }}>
               {weeklyTotal.toFixed(1)}
             </span>
             <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.04em' }}>(KM)</span>
