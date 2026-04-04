@@ -251,7 +251,7 @@ export const CardioTypeChart: React.FC = () => {
         {/* Bar chart */}
         <div
           className="flex items-end justify-between"
-          style={{ height: '176px', gap: viewMode === 'weekly' ? '12px' : '2px', position: 'relative' }}
+          style={{ height: '176px', gap: viewMode === 'weekly' ? '12px' : '4px', position: 'relative' }}
         >
           {/* Monthly: vertical week separator lines */}
           {viewMode === 'monthly' && (() => {
@@ -272,6 +272,38 @@ export const CardioTypeChart: React.FC = () => {
             });
           })()}
 
+          {/* Monthly: avg line */}
+          {viewMode === 'monthly' && rawMax > 0 && (() => {
+            const nonZero = monthlyData.filter(v => v > 0);
+            if (nonZero.length === 0) return null;
+            const avg = nonZero.reduce((a, b) => a + b, 0) / nonZero.length;
+            const avgPct = avg / rawMax;
+            return (
+              <div style={{
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                bottom: `${avgPct * 100}%`,
+                height: '1px',
+                backgroundColor: 'rgba(255,255,255,0.3)',
+                pointerEvents: 'none',
+                zIndex: 10,
+              }}>
+                <span style={{
+                  position: 'absolute',
+                  right: 0,
+                  top: '-9px',
+                  fontSize: '7px',
+                  fontWeight: 700,
+                  color: 'rgba(255,255,255,0.4)',
+                  letterSpacing: '0.3px',
+                }}>
+                  avg {+avg.toFixed(1)}
+                </span>
+              </div>
+            );
+          })()}
+
           {displayData.map((val, i) => {
             const pct = val > 0 ? Math.max(val / rawMax, 0.04) : 0;
             const brightness = val > 0 ? Math.round(80 + (val / rawMax) * 175) : 0;
@@ -289,10 +321,10 @@ export const CardioTypeChart: React.FC = () => {
               >
                 {/* Data label above bar */}
                 <div style={{
-                  fontSize: isWeekly ? '7.5px' : '5.5px',
+                  fontSize: isWeekly ? '7.5px' : '7px',
                   fontWeight: 700,
                   color: val > 0 ? 'rgba(255,255,255,0.6)' : 'transparent',
-                  marginBottom: isWeekly ? '4px' : '2px',
+                  marginBottom: isWeekly ? '4px' : '3px',
                   lineHeight: 1,
                   whiteSpace: 'nowrap',
                 }}>
