@@ -27,26 +27,35 @@ const DISPLAY_NAMES: Record<IconKey, string> = {
   crosstrainer: 'CROSS TRAINER',
 };
 
+// Exact SVG paths from uploaded files — color prop applied to all fill/stroke
 const IconSVG: React.FC<{ iconKey: IconKey; color: string }> = ({ iconKey, color: c }) => {
   switch (iconKey) {
     case 'running':
       return (
         <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+          {/* Motion lines */}
+          <rect x="25" y="18" width="35" height="3" rx="1.5" fill={c}/>
+          <rect x="15" y="28" width="25" height="3" rx="1.5" fill={c}/>
+          <rect x="5"  y="38" width="30" height="3" rx="1.5" fill={c}/>
+          <rect x="20" y="48" width="25" height="3" rx="1.5" fill={c}/>
+          <rect x="15" y="58" width="25" height="3" rx="1.5" fill={c}/>
+          {/* Head */}
           <circle cx="72" cy="22" r="6" fill={c}/>
+          {/* Body */}
           <path d="M48 38L65 28L75 35L85 45" stroke={c} strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M65 28L55 45L40 38" stroke={c} strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M55 45L65 65L70 85" stroke={c} strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M55 45L45 55L22 62" stroke={c} strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M65 28L55 45L40 38"        stroke={c} strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M55 45L65 65L70 85"        stroke={c} strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M55 45L45 55L22 62"        stroke={c} strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
       );
     case 'rowing':
       return (
         <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-          <circle cx="50" cy="25" r="6" fill={c}/>
-          <path d="M50 31L45 50L55 55L65 45" stroke={c} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M45 50L40 65H55" stroke={c} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M65 45L78 45V33" stroke={c} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M25 68H80" stroke={c} strokeWidth="5" strokeLinecap="round"/>
+          <circle cx="50" cy="25" r="5" fill={c}/>
+          <path d="M50 30L45 50L55 55L65 45" stroke={c} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M45 50L40 60H55"          stroke={c} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M65 45L75 45V35"          stroke={c} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M30 65H80"                stroke={c} strokeWidth="5" strokeLinecap="round"/>
         </svg>
       );
     case 'walking':
@@ -70,24 +79,33 @@ const IconSVG: React.FC<{ iconKey: IconKey; color: string }> = ({ iconKey, color
           <circle cx="25" cy="70" r="15" stroke={c} strokeWidth="5"/>
           <circle cx="75" cy="70" r="15" stroke={c} strokeWidth="5"/>
           <path d="M25 70L45 45H65L75 70" stroke={c} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M45 45L55 30H65" stroke={c} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
-          <circle cx="55" cy="25" r="5" fill={c}/>
+          <path d="M45 45L55 30H65"       stroke={c} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
+          <circle cx="55" cy="25" r="4" fill={c}/>
         </svg>
       );
     case 'crosstrainer':
       return (
         <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-          <circle cx="47" cy="18" r="6" fill={c}/>
-          <path d="M47 24L40 45" stroke={c} strokeWidth="8" strokeLinecap="round"/>
-          <path d="M47 26L55 36L62 36" stroke={c} strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M47 26L35 33L28 40" stroke={c} strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M40 45L45 56L52 68" stroke={c} strokeWidth="8" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M40 45L34 60L28 72" stroke={c} strokeWidth="8" strokeLinecap="round" strokeLinejoin="round"/>
-          <rect x="20" y="74" width="50" height="7" rx="2" fill={c}/>
+          {/* Steps */}
+          <rect x="20" y="75" width="50" height="8" fill={c}/>
+          <rect x="35" y="70" width="35" height="5" fill={c}/>
+          <rect x="56" y="65" width="14" height="5" fill={c}/>
+          {/* Handle */}
+          <path d="M62 65V45L68 40" stroke={c} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+          {/* Head */}
+          <circle cx="47" cy="23" r="6" fill={c}/>
+          {/* Body */}
+          <path d="M47 28L40 45"    stroke={c} strokeWidth="9" strokeLinecap="round"/>
+          <path d="M47 30L55 38L60 38" stroke={c} strokeWidth="8" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M47 30L35 35L28 42" stroke={c} strokeWidth="8" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M40 45L45 55L52 65" stroke={c} strokeWidth="9" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M40 45L35 60L28 70" stroke={c} strokeWidth="9" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
       );
   }
 };
+
+const ICON_SIZE = 40;
 
 const ExerciseIconBar: React.FC<Props> = ({ exercises, selectedExercise, onSelect }) => {
   const selectedKey = selectedExercise
@@ -97,8 +115,13 @@ const ExerciseIconBar: React.FC<Props> = ({ exercises, selectedExercise, onSelec
     : null;
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div style={{ width: '100%' }}>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: '100%',
+      }}>
         {ICON_KEYS.map(key => {
           const ex = exercises.find(e =>
             e.exercise_name?.toLowerCase().includes(MATCH_KEYWORDS[key])
@@ -109,20 +132,18 @@ const ExerciseIconBar: React.FC<Props> = ({ exercises, selectedExercise, onSelec
           return (
             <button
               key={key}
-              onClick={() => ex ? onSelect(isSelected ? null : ex) : undefined}
+              onClick={() => onSelect(isSelected ? null : (ex ?? null))}
               style={{
-                width: '17vw',
-                height: '17vw',
-                maxWidth: 68,
-                maxHeight: 68,
+                width: ICON_SIZE,
+                height: ICON_SIZE,
                 borderRadius: '50%',
                 backgroundColor: bg,
                 border: 'none',
-                cursor: ex ? 'pointer' : 'default',
+                cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: '20%',
+                padding: '18%',
                 flexShrink: 0,
                 opacity: ex ? 1 : 0.35,
               }}
@@ -132,8 +153,6 @@ const ExerciseIconBar: React.FC<Props> = ({ exercises, selectedExercise, onSelec
           );
         })}
       </div>
-
-
     </div>
   );
 };
