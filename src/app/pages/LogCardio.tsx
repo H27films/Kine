@@ -3,6 +3,8 @@ import { ChevronDown } from 'lucide-react';
 import { Page } from '../../types';
 import { supabase, Exercise, todayStr, getISOWeek, getDayName, currentWeekMonday, recalculateDailyTotals } from '../../lib/supabase';
 import { CardioTypeChart } from '../components/CardioTypeChart';
+import TrackerSparkline from '../components/TrackerSparkline';
+import ExerciseIconBar from '../components/ExerciseIconBar';
 
 interface LogCardioProps {
   onNavigate: (page: Page) => void;
@@ -275,83 +277,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
 
         {/* Row 2: full-width sparkline */}
         <div style={{ width: '100%' }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            {(() => {
-              const sparkData = weekChartData;
-              const sparkDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-              const BASE_KM = 1;
-              const VW = 200;
-              const VH = 90;
-              const padTop = 22;
-              const padBottom = 8;
-              const padLeft = 6;
-              const padRight = 6;
-              const chartW = VW - padLeft - padRight;
-              const chartH = VH - padTop - padBottom;
-              const maxVal = Math.max(...sparkData.filter(v => v > 0), BASE_KM, 0.1);
-              const getY = (val: number) => padTop + (1 - val / maxVal) * chartH;
-              const lineVals: (number | null)[] = sparkData.map((val, i) => {
-                if (val > 0) return val;
-                if (i === 0 || i === 6) return BASE_KM;
-                return null;
-              });
-              const linePts = lineVals
-                .map((val, i) =>
-                  val !== null
-                    ? { x: padLeft + (i / 6) * chartW, y: getY(val), val, i, isAnchor: sparkData[i] === 0 }
-                    : null
-                )
-                .filter((p): p is { x: number; y: number; val: number; i: number; isAnchor: boolean } => p !== null);
-              let pathD = '';
-              if (linePts.length === 1) {
-                pathD = `M ${linePts[0].x} ${linePts[0].y}`;
-              } else if (linePts.length > 1) {
-                pathD = `M ${linePts[0].x} ${linePts[0].y}`;
-                for (let k = 1; k < linePts.length; k++) {
-                  const prev = linePts[k - 1];
-                  const curr = linePts[k];
-                  const cpx = (prev.x + curr.x) / 2;
-                  pathD += ` C ${cpx} ${prev.y}, ${cpx} ${curr.y}, ${curr.x} ${curr.y}`;
-                }
-              }
-              return (
-                <svg width="100%" viewBox={`0 0 ${VW} ${VH + 14}`} style={{ overflow: 'visible', display: 'block' }}>
-                  <defs>
-                    <filter id="lcLineBlur1" x="-50%" y="-100%" width="200%" height="300%">
-                      <feGaussianBlur stdDeviation="6" />
-                    </filter>
-                    <filter id="lcLineBlur2" x="-50%" y="-100%" width="200%" height="300%">
-                      <feGaussianBlur stdDeviation="3" />
-                    </filter>
-                    <filter id="lcDotBlur" x="-100%" y="-100%" width="300%" height="300%">
-                      <feGaussianBlur stdDeviation="2.5" />
-                    </filter>
-                  </defs>
-                  {linePts.length > 0 && pathD && (
-                    <>
-                      <path d={pathD} fill="none" stroke="rgba(255,255,255,0.10)" strokeWidth="14" strokeLinecap="round" filter="url(#lcLineBlur1)" />
-                      <path d={pathD} fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="6" strokeLinecap="round" filter="url(#lcLineBlur2)" />
-                      <path d={pathD} fill="none" stroke="rgba(255,255,255,0.60)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </>
-                  )}
-                  {linePts.filter(p => !p.isAnchor).map((p, k) => (
-                    <g key={k}>
-                      <circle cx={p.x} cy={p.y} r="5" fill="rgba(255,255,255,0.18)" filter="url(#lcDotBlur)" />
-                      <circle cx={p.x} cy={p.y} r="3" fill="white" />
-                      <text x={p.x} y={p.y - 9} textAnchor="middle" fill="rgba(255,255,255,0.70)" fontSize="5" fontWeight="700">
-                        {p.val}
-                      </text>
-                    </g>
-                  ))}
-                  {sparkDays.map((d, k) => (
-                    <text key={k} x={padLeft + (k / 6) * chartW} y={VH + 12} textAnchor="middle" fill="white" fontSize="5" fontWeight="700">
-                      {d}
-                    </text>
-                  ))}
-                </svg>
-              );
-            })()}
-          </div>
+          <TrackerSparkline weekChartData={weekChartData} />
         </div>
 
         {/* Row 3: Full-width distance input — shown when TRACKER tapped */}
@@ -371,54 +297,14 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
         </div>}
       </header>
 
-      {/* EXERCISE section */}
+      {/* EXERCISE section — icon picker */}
       <section className="mb-8" style={{ marginTop: 32 }}>
-        <label style={{ display: 'block', marginBottom: 20, fontSize: '0.9rem', fontWeight: 700, color: '#c6c6c6', letterSpacing: '0.3em', textTransform: 'uppercase', lineHeight: 1 }}>Exercise</label>
-
-        {/* Exercise type dropdown */}
-        <div className="relative mb-6">
-          <button
-            onClick={() => setExerciseOpen(o => !o)}
-            className="flex items-center justify-between w-full"
-            style={{ color: '#ffffff', fontSize: '1rem', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', padding: '4px 0' }}
-          >
-            <span>{selectedExercise?.exercise_name || 'Select type'}</span>
-            <ChevronDown size={16} style={{ transform: exerciseOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', color: 'rgba(255,255,255,0.5)' }} />
-          </button>
-          <div style={separatorStyle} />
-
-          {exerciseOpen && (
-            <div style={{
-              position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0,
-              backgroundColor: '#000000', borderRadius: 0,
-              overflow: 'hidden', zIndex: 50,
-              boxShadow: '0 16px 40px rgba(0,0,0,0.8)',
-            }}>
-              {nonTrackerExercises.map((ex, i, arr) => (
-                <div key={ex.id}
-                  onClick={() => { setSelectedExercise(ex); setExerciseOpen(false); }}
-                  style={{
-                    padding: '14px 16px', cursor: 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    color: '#ffffff',
-                    fontWeight: selectedExercise?.id === ex.id ? 700 : 400,
-                    fontSize: '1rem',
-                    borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.1)' : 'none',
-                    backgroundColor: selectedExercise?.id === ex.id ? 'rgba(255,255,255,0.06)' : 'transparent',
-                  }}>
-                  <span>{ex.exercise_name}</span>
-                  <div style={{
-                    width: 28, height: 28, borderRadius: '50%',
-                    backgroundColor: selectedExercise?.id === ex.id ? '#ffffff' : 'rgba(255,255,255,0.15)',
-                    color: selectedExercise?.id === ex.id ? '#000000' : '#ffffff',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                  }}>
-                    <span style={{ fontSize: '1.1rem', fontWeight: 700, lineHeight: 1 }}>+</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+        <div style={{ marginBottom: 20 }}>
+          <ExerciseIconBar
+            exercises={nonTrackerExercises}
+            selectedExercise={selectedExercise}
+            onSelect={setSelectedExercise}
+          />
         </div>
 
         {/* Distance */}
