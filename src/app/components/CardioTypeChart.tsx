@@ -380,19 +380,37 @@ export const CardioTypeChart: React.FC = () => {
               <div
                 key={i}
                 className="flex flex-col items-center h-full justify-end"
-                style={{ flex: '1', maxWidth: isWeekly ? '28px' : undefined }}
+                style={{ flex: '1', minWidth: 0, maxWidth: isWeekly ? '28px' : undefined, position: 'relative' }}
               >
-                {/* Data label above bar */}
-                <div style={{
-                  fontSize: isWeekly ? '7.5px' : '9px',
-                  fontWeight: isPeak ? 800 : 700,
-                  color: val > 0 ? `rgba(255,255,255,${labelOpacity})` : 'transparent',
-                  marginBottom: isWeekly ? '4px' : '3px',
-                  lineHeight: 1,
-                  whiteSpace: 'nowrap',
-                }}>
-                  {barLabel}
-                </div>
+                {/* Data label above bar — weekly: in-flow; monthly: absolute so it doesn't stretch column */}
+                {isWeekly ? (
+                  <div style={{
+                    fontSize: '7.5px',
+                    fontWeight: 700,
+                    color: val > 0 ? `rgba(255,255,255,${labelOpacity})` : 'transparent',
+                    marginBottom: '4px',
+                    lineHeight: 1,
+                    whiteSpace: 'nowrap',
+                  }}>
+                    {barLabel}
+                  </div>
+                ) : val > 0 ? (
+                  <div style={{
+                    position: 'absolute',
+                    bottom: `calc(${pct * 100}% + 3px)`,
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    fontSize: '9px',
+                    fontWeight: isPeak ? 800 : 700,
+                    color: `rgba(255,255,255,${labelOpacity})`,
+                    lineHeight: 1,
+                    whiteSpace: 'nowrap',
+                    pointerEvents: 'none',
+                    zIndex: 5,
+                  }}>
+                    {barLabel}
+                  </div>
+                ) : null}
                 <div
                   className="w-full min-h-[4px] transition-all"
                   style={{
