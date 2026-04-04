@@ -12,12 +12,6 @@ const formatDate = (dateStr: string): string => {
   return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
 };
 
-const formatExcelDate = (dateStr: string): string => {
-  if (!dateStr) return '';
-  const [y, m, d] = dateStr.split('-');
-  return `${d}/${m}/${y}`;
-};
-
 export const Profile: React.FC<ProfileProps> = ({ onNavigate: _onNavigate }) => {
   const [exportCount, setExportCount] = useState<number | null>(null);
   const [exportDates, setExportDates] = useState<string[]>([]);
