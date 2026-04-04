@@ -271,21 +271,6 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
               <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>km</span>
             </div>
 
-            {/* Tracker distance input */}
-            <div style={{ marginTop: 14 }}>
-              <div className="flex items-baseline gap-3">
-                <input
-                  type="text"
-                  value={trackerDistance}
-                  onChange={e => setTrackerDistance(e.target.value)}
-                  placeholder="0.0"
-                  className="text-[2.5rem] font-black tracking-tighter text-white w-full p-0"
-                  style={{ backgroundColor: 'transparent', border: 'none' }}
-                />
-                <span className="text-[1rem] font-black tracking-tighter" style={{ color: '#c6c6c6' }}>KM</span>
-              </div>
-              <div style={separatorStyle} />
-            </div>
           </div>
 
           {/* Right column — sparkline always visible */}
@@ -367,6 +352,22 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
             })()}
           </div>
 
+        </div>
+
+        {/* Full-width distance input below two-column */}
+        <div style={{ marginTop: 18 }}>
+          <div className="flex items-baseline gap-3">
+            <input
+              type="text"
+              value={trackerDistance}
+              onChange={e => setTrackerDistance(e.target.value)}
+              placeholder="0.0"
+              className="text-[2.5rem] font-black tracking-tighter text-white w-full p-0"
+              style={{ backgroundColor: 'transparent', border: 'none' }}
+            />
+            <span className="text-[1rem] font-black tracking-tighter" style={{ color: '#c6c6c6' }}>KM</span>
+          </div>
+          <div style={separatorStyle} />
         </div>
       </header>
 
