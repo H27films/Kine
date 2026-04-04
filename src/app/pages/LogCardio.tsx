@@ -281,9 +281,9 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
               const sparkDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
               const BASE_KM = 1;
               const VW = 200;
-              const VH = 70;
-              const padTop = 18;
-              const padBottom = 6;
+              const VH = 90;
+              const padTop = 22;
+              const padBottom = 8;
               const padLeft = 6;
               const padRight = 6;
               const chartW = VW - padLeft - padRight;
