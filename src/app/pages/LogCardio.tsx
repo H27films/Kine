@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { Page } from '../../types';
 import { supabase, Exercise, todayStr, getISOWeek, getDayName, currentWeekMonday, recalculateDailyTotals } from '../../lib/supabase';
+import { CardioTypeChart } from '../components/CardioTypeChart';
 
 interface LogCardioProps {
   onNavigate: (page: Page) => void;
@@ -527,6 +528,9 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
           <div className="absolute inset-0 pointer-events-none" style={{ opacity: 0.025, background: 'radial-gradient(circle at top right, white, transparent, transparent)' }} />
         </div>
       </section>
+
+      {/* Per-type cardio chart */}
+      <CardioTypeChart />
 
       {saveError && <p className="text-red-400 text-sm mb-4 text-center">{saveError}</p>}
 
