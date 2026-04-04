@@ -19,13 +19,6 @@ const MATCH_KEYWORDS: Record<IconKey, string> = {
   crosstrainer: 'cross',
 };
 
-const DISPLAY_NAMES: Record<IconKey, string> = {
-  running: 'RUNNING',
-  rowing: 'ROWING',
-  walking: 'WALKING',
-  cycling: 'CYCLING',
-  crosstrainer: 'CROSS TRAINER',
-};
 
 // Exact SVG paths from uploaded files — color prop applied to all fill/stroke
 const IconSVG: React.FC<{ iconKey: IconKey; color: string }> = ({ iconKey, color: c }) => {
