@@ -509,13 +509,15 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
                 {avg30 > 0 && (() => {
                   const pillW = 30;
                   const pillH = 14;
-                  const pillX = 304;
+                  // Centre pill on last bar column (bar 29 starts at x=290, barW≈6.5)
+                  const lastBarCentreX = 29 * (300 / BAR_COUNT) + (300 / BAR_COUNT - 3.5) / 2;
+                  const pillX = lastBarCentreX - pillW / 2;
                   const pillY = avgLineY - pillH / 2;
                   return (
                     <g>
                       <line
                         x1={0} y1={avgLineY}
-                        x2={300} y2={avgLineY}
+                        x2={pillX - 3} y2={avgLineY}
                         stroke="rgba(255,255,255,0.28)"
                         strokeWidth="0.75"
                         strokeDasharray="4 3"
