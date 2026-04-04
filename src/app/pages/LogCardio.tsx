@@ -265,8 +265,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 14 }}>
           <h1
             className="leading-none text-white"
-            style={{ fontSize: '1.6rem', fontWeight: 600, letterSpacing: '0.18em' }}
-            style={{ cursor: 'pointer' }}
+            style={{ fontSize: '1.6rem', fontWeight: 600, letterSpacing: '0.18em', cursor: 'pointer' }}
             onClick={() => setTrackerInputVisible(v => !v)}
           >TRACKER</h1>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
