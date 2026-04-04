@@ -49,7 +49,8 @@ interface RecentLog {
   id: number;
   name: string;
   weight: number;
-  setsData: { w: number; r: number }[];
+  setsData: { w: number; r: number }[]; // non-zero only, for collapsed summary
+  allSets: { w: number; r: number }[];   // all 6 slots for editing
   date: string;
 }
 
@@ -92,6 +93,8 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
   const [recentLogs, setRecentLogs] = useState<RecentLog[]>([]);
   const [expandedLogId, setExpandedLogId] = useState<number | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+  const [editSets, setEditSets] = useState<Record<number, { w: string; r: number }[]>>({});
+  const [savingLogId, setSavingLogId] = useState<number | null>(null);
   const [weeklyData, setWeeklyData] = useState<WeeklyGroupData[]>([]);
   const [thisWeekTotal, setThisWeekTotal] = useState<number>(0);
   const [lastWeekTotal, setLastWeekTotal] = useState<number>(0);
@@ -145,9 +148,11 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
       if (data) {
         setRecentLogs((data as any[]).map(r => {
           const setsData: { w: number; r: number }[] = [];
+          const allSets: { w: number; r: number }[] = [];
           for (let i = 1; i <= 6; i++) {
             const w = Number(r[`w${i}`] || 0);
             const reps = Number(r[`r${i}`] || 0);
+            allSets.push({ w, r: reps });
             if (w > 0) setsData.push({ w, r: reps });
           }
           return {
@@ -155,6 +160,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
             name: r.exercises?.exercise_name || 'Unknown',
             weight: Number(r.total_weight || 0),
             setsData,
+            allSets,
             date: r.date,
           };
         }));
@@ -232,6 +238,67 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     setRecentLogs(prev => prev.filter(l => l.id !== id));
     setDeleteConfirmId(null);
     setExpandedLogId(null);
+  };
+
+  const initEditSets = (log: RecentLog) => {
+    setEditSets(prev => ({
+      ...prev,
+      [log.id]: log.allSets.map(s => ({ w: s.w > 0 ? String(s.w) : '', r: s.r > 0 ? s.r : 10 }))
+    }));
+  };
+
+  const adjustRecentWeight = (logId: number, idx: number, delta: number) => {
+    setEditSets(prev => {
+      const sets = [...(prev[logId] || [])];
+      const cur = parseFloat(sets[idx].w) || 0;
+      sets[idx] = { ...sets[idx], w: String(Math.max(0, cur + delta)) };
+      return { ...prev, [logId]: sets };
+    });
+  };
+
+  const adjustRecentReps = (logId: number, idx: number, delta: number) => {
+    setEditSets(prev => {
+      const sets = [...(prev[logId] || [])];
+      sets[idx] = { ...sets[idx], r: Math.max(1, sets[idx].r + delta) };
+      return { ...prev, [logId]: sets };
+    });
+  };
+
+  const saveRecentLog = async (logId: number) => {
+    const sets = editSets[logId];
+    if (!sets) return;
+    setSavingLogId(logId);
+    const updateData: Record<string, number | null> = {};
+    let totalWeight = 0;
+    sets.forEach((s, i) => {
+      const w = parseFloat(s.w) || 0;
+      updateData[`w${i + 1}`] = w > 0 ? w : null;
+      updateData[`r${i + 1}`] = w > 0 ? s.r : null;
+      totalWeight += w * s.r;
+    });
+    updateData.total_weight = totalWeight;
+    await supabase.from('workouts').update(updateData).eq('id', logId);
+    // Reload recent logs
+    const { data } = await supabase
+      .from('workouts')
+      .select('id, date, total_weight, w1, r1, w2, r2, w3, r3, w4, r4, w5, r5, w6, r6, exercises:exercise_id(exercise_name)')
+      .in('type', WEIGHT_TYPES)
+      .order('date', { ascending: false })
+      .limit(5);
+    if (data) {
+      setRecentLogs((data as any[]).map(r => {
+        const sd: { w: number; r: number }[] = [];
+        const all: { w: number; r: number }[] = [];
+        for (let i = 1; i <= 6; i++) {
+          const w = Number(r[`w${i}`] || 0);
+          const rp = Number(r[`r${i}`] || 0);
+          all.push({ w, r: rp });
+          if (w > 0) sd.push({ w, r: rp });
+        }
+        return { id: r.id, name: r.exercises?.exercise_name || 'Unknown', weight: Number(r.total_weight || 0), setsData: sd, allSets: all, date: r.date };
+      }));
+    }
+    setSavingLogId(null);
   };
 
   const fmtVol = (v: number) =>
@@ -811,71 +878,87 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
           {recentLogs.map((log) => {
             const isExpanded = expandedLogId === log.id;
             const isConfirming = deleteConfirmId === log.id;
+            const lastSet = log.setsData[log.setsData.length - 1];
+            const sets = editSets[log.id] || [];
             return (
               <div key={log.id} className="rounded-lg overflow-hidden" style={{ backgroundColor: '#1b1b1b' }}>
                 {/* Collapsed / header row */}
                 <div
                   className="flex items-center gap-4 p-4 cursor-pointer"
                   onClick={() => {
-                    setExpandedLogId(isExpanded ? null : log.id);
+                    const expanding = !isExpanded;
+                    setExpandedLogId(expanding ? log.id : null);
                     setDeleteConfirmId(null);
+                    if (expanding) initEditSets(log);
                   }}
                 >
                   <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#353535' }}>
                     <Dumbbell size={16} color="white" />
                   </div>
                   <div className="flex-grow min-w-0">
-                    <h4 className="font-bold text-sm uppercase tracking-tight text-white truncate">{log.name}</h4>
-                    <p className="text-[10px] uppercase tracking-widest" style={{ color: '#c6c6c6' }}>
-                      {log.setsData.length} Sets • {log.date}
+                    <p className="font-bold text-sm text-white truncate">
+                      {log.name.charAt(0).toUpperCase() + log.name.slice(1).toLowerCase()}
                     </p>
+                    {lastSet && (
+                      <p className="text-[10px] uppercase tracking-widest mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                        {log.setsData.length} Sets · {lastSet.r} Reps · {lastSet.w} kg
+                      </p>
+                    )}
                   </div>
-                  <div className="flex items-center gap-3 flex-shrink-0">
-                    <div className="text-right">
-                      <div className="text-lg font-black tracking-tighter text-white">{Math.round(log.weight).toLocaleString()}</div>
-                      <div className="text-[8px] font-bold uppercase tracking-widest" style={{ color: '#c6c6c6' }}>Kilos</div>
-                    </div>
-                    <ChevronDown size={14} style={{ color: 'rgba(255,255,255,0.35)', transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
-                  </div>
+                  <ChevronDown size={14} style={{ color: 'rgba(255,255,255,0.35)', flexShrink: 0, transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
                 </div>
 
                 {/* Expanded section */}
                 {isExpanded && (
                   <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', padding: '12px 16px 16px' }}>
-                    {/* Set breakdown */}
-                    <div className="space-y-2 mb-4">
-                      {log.setsData.map((s, idx) => (
-                        <div key={idx} className="flex items-center gap-3">
-                          <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '1.5px', color: 'rgba(255,255,255,0.35)', width: '36px' }}>
-                            SET {idx + 1}
-                          </span>
-                          <span style={{ fontSize: '14px', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.02em' }}>
-                            {s.w} <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 400, fontSize: '12px' }}>kg</span>
-                            <span style={{ color: 'rgba(255,255,255,0.3)', margin: '0 6px' }}>×</span>
-                            {s.r} <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 400, fontSize: '12px' }}>reps</span>
-                          </span>
-                        </div>
+                    {/* Column headers */}
+                    <div className="grid mb-2" style={{ gridTemplateColumns: '1.8rem 1fr 1fr 1fr', gap: '0.5rem' }}>
+                      <div />
+                      {['kg', 'reps', 'total'].map(h => (
+                        <p key={h} className="text-center text-[10px] font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.3)' }}>{h}</p>
                       ))}
                     </div>
 
-                    {/* Delete button / confirm */}
-                    {isConfirming ? (
-                      <div className="flex items-center gap-3">
-                        <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.55)', flex: 1 }}>Delete this entry?</span>
-                        <button
-                          onClick={() => deleteLog(log.id)}
-                          style={{ fontSize: '11px', fontWeight: 700, color: '#ff4444', padding: '6px 14px', border: '1px solid rgba(255,68,68,0.4)', borderRadius: '6px', backgroundColor: 'rgba(255,68,68,0.1)' }}
-                        >
-                          Yes, Delete
-                        </button>
-                        <button
-                          onClick={() => setDeleteConfirmId(null)}
-                          style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.4)', padding: '6px 14px', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px' }}
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    ) : (
+                    {/* Set rows */}
+                    {sets.map((s, idx) => {
+                      const w = parseFloat(s.w) || 0;
+                      const rowTotal = w * s.r;
+                      const hasData = s.w !== '' && w > 0;
+                      const numColor = hasData ? '#ffffff' : 'rgba(255,255,255,0.25)';
+                      return (
+                        <div key={idx} className="grid items-center mb-2" style={{ gridTemplateColumns: '1.8rem 1fr 1fr 1fr', gap: '0.5rem' }}>
+                          <p className="font-black text-center" style={{ fontSize: '1rem', color: numColor, lineHeight: 1 }}>{idx + 1}</p>
+
+                          <div className="flex items-center justify-between rounded-lg py-1 px-2" style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.07)' }}>
+                            <button onClick={() => adjustRecentWeight(log.id, idx, -2.5)} style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>−</button>
+                            <input
+                              type="number"
+                              inputMode="decimal"
+                              value={s.w}
+                              placeholder="—"
+                              onChange={e => setEditSets(prev => {
+                                const updated = [...(prev[log.id] || [])];
+                                updated[idx] = { ...updated[idx], w: e.target.value };
+                                return { ...prev, [log.id]: updated };
+                              })}
+                              style={{ background: 'transparent', border: 'none', outline: 'none', width: '100%', textAlign: 'center', fontSize: '0.875rem', fontWeight: 700, color: hasData ? '#ffffff' : 'rgba(255,255,255,0.3)', MozAppearance: 'textfield' }}
+                            />
+                            <button onClick={() => adjustRecentWeight(log.id, idx, 2.5)} style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>+</button>
+                          </div>
+
+                          <div className="flex items-center justify-between rounded-lg py-2 px-2" style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.07)' }}>
+                            <button onClick={() => adjustRecentReps(log.id, idx, -1)} style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}>−</button>
+                            <span className="font-bold" style={{ fontSize: '0.875rem', color: hasData ? '#ffffff' : 'rgba(255,255,255,0.3)' }}>{s.r}</span>
+                            <button onClick={() => adjustRecentReps(log.id, idx, 1)} style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}>+</button>
+                          </div>
+
+                          <p className="text-center font-bold" style={{ fontSize: '0.875rem', color: '#ffffff' }}>{rowTotal > 0 ? rowTotal : ''}</p>
+                        </div>
+                      );
+                    })}
+
+                    {/* Save + Delete */}
+                    <div className="flex items-center justify-between mt-4">
                       <button
                         onClick={(e) => { e.stopPropagation(); setDeleteConfirmId(log.id); }}
                         style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 700, letterSpacing: '1px', color: 'rgba(255,80,80,0.7)', padding: '6px 0' }}
@@ -883,6 +966,25 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                         <X size={13} strokeWidth={2.5} />
                         DELETE ENTRY
                       </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); saveRecentLog(log.id); }}
+                        style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '1px', color: savingLogId === log.id ? 'rgba(255,255,255,0.3)' : '#ffffff', padding: '6px 14px', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '6px', backgroundColor: 'rgba(255,255,255,0.06)' }}
+                      >
+                        {savingLogId === log.id ? 'SAVING…' : 'SAVE'}
+                      </button>
+                    </div>
+
+                    {/* Delete confirm */}
+                    {isConfirming && (
+                      <div className="flex items-center gap-3 mt-3">
+                        <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.55)', flex: 1 }}>Delete this entry?</span>
+                        <button onClick={() => deleteLog(log.id)} style={{ fontSize: '11px', fontWeight: 700, color: '#ff4444', padding: '6px 14px', border: '1px solid rgba(255,68,68,0.4)', borderRadius: '6px', backgroundColor: 'rgba(255,68,68,0.1)' }}>
+                          Yes, Delete
+                        </button>
+                        <button onClick={() => setDeleteConfirmId(null)} style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.4)', padding: '6px 14px', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px' }}>
+                          Cancel
+                        </button>
+                      </div>
                     )}
                   </div>
                 )}
