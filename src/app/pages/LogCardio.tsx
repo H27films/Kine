@@ -208,6 +208,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
   const avg30 = activeDays.length > 0
     ? +(activeDays.reduce((s, d) => s + d.total, 0) / activeDays.length).toFixed(1)
     : 0;
+  const total30 = +(activeDays.reduce((s, d) => s + d.total, 0)).toFixed(1);
   const max30 = thirtyDayData.length > 0 ? Math.max(...thirtyDayData.map(d => d.total)) : 0;
   const maxIdx30 = thirtyDayData.findIndex(d => d.total === max30 && max30 > 0);
 
@@ -433,9 +434,15 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
 
       {/* 30-day chart */}
       <section className="mb-20">
-        {/* Outside the box: 30 DAYS heading + avg on the left */}
-        <div style={{ marginBottom: 12 }}>
-          <h3 style={{ fontSize: '1.6rem', fontWeight: 900, letterSpacing: '-0.03em', color: '#ffffff', lineHeight: 1, marginBottom: 4 }}>30 DAYS</h3>
+        {/* Outside the box: 30 DAYS heading */}
+        <h3 style={{ fontSize: '1.6rem', fontWeight: 900, letterSpacing: '-0.03em', color: '#ffffff', lineHeight: 1, marginBottom: 8 }}>30 DAYS</h3>
+
+        {/* Total (left) and Avg (right) */}
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+            <span style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-0.05em', color: '#ffffff', lineHeight: 1 }}>{total30}</span>
+            <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>km total</span>
+          </div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
             <span style={{ fontSize: '1.4rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.03em', lineHeight: 1 }}>{avg30}</span>
             <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>km avg</span>
