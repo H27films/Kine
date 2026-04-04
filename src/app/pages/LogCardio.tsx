@@ -434,22 +434,22 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
 
       {/* 30-day chart */}
       <section className="mb-20">
-        {/* Outside the box: 30 DAYS heading */}
-        <h3 style={{ fontSize: '1.6rem', fontWeight: 900, letterSpacing: '-0.03em', color: '#ffffff', lineHeight: 1, marginBottom: 8 }}>30 DAYS</h3>
-
-        {/* Total (left) and Avg (right) */}
-        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-            <span style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-0.05em', color: '#ffffff', lineHeight: 1 }}>{total30}</span>
-            <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>km total</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-            <span style={{ fontSize: '1.4rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.03em', lineHeight: 1 }}>{avg30}</span>
-            <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>km avg</span>
-          </div>
-        </div>
+        {/* Outside the box: 30 DAYS heading — slightly smaller */}
+        <h3 style={{ fontSize: '1.2rem', fontWeight: 900, letterSpacing: '-0.03em', color: '#ffffff', lineHeight: 1, marginBottom: 8 }}>30 DAYS</h3>
 
         <div className="p-6 rounded-xl relative overflow-hidden" style={{ backgroundColor: '#121212' }}>
+          {/* Total (left) and Avg (right) — inside the box */}
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+              <span style={{ fontSize: '2rem', fontWeight: 900, letterSpacing: '-0.05em', color: 'rgba(255,255,255,0.35)', lineHeight: 1 }}>{total30}</span>
+              <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>km total</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+              <span style={{ fontSize: '1.4rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.03em', lineHeight: 1 }}>{avg30}</span>
+              <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>km avg</span>
+            </div>
+          </div>
+
           {/* Bar chart */}
           {thirtyDayData.length > 0 && (() => {
             const BAR_COUNT = thirtyDayData.length;
@@ -457,7 +457,6 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
             const MAX_Y = 23;
             const avgLineY = chartH * (1 - avg30 / MAX_Y);
 
-            // True semicircle-top bar: rectangle body + arc cap
             const semiBar = (x: number, y: number, w: number, h: number) => {
               const r = w / 2;
               if (h <= r) {
@@ -509,7 +508,6 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
                     </g>
                   );
                 })}
-                {/* Average dashed line */}
                 {avg30 > 0 && (
                   <line
                     x1={0} y1={avgLineY}
