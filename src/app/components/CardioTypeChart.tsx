@@ -331,11 +331,17 @@ export const CardioTypeChart: React.FC = () => {
                 <span style={{
                   position: 'absolute',
                   right: 0,
-                  top: '-11px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
                   fontSize: '9px',
-                  fontWeight: 700,
-                  color: 'rgba(255,255,255,0.6)',
+                  fontWeight: 800,
+                  color: '#000000',
+                  backgroundColor: '#ffffff',
+                  borderRadius: '999px',
+                  padding: '2px 6px',
                   letterSpacing: '0.3px',
+                  lineHeight: 1.4,
+                  whiteSpace: 'nowrap',
                 }}>
                   {+avg.toFixed(1)}
                 </span>
