@@ -263,7 +263,7 @@ export const CardioTypeChart: React.FC = () => {
                   position: 'absolute',
                   left: `${pct}%`,
                   top: 0,
-                  bottom: 30,
+                  bottom: 0,
                   width: '1px',
                   backgroundColor: 'rgba(255,255,255,0.08)',
                   pointerEvents: 'none',
