@@ -433,16 +433,16 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
 
       {/* 30-day chart */}
       <section className="mb-20">
-        <div className="p-6 rounded-xl relative overflow-hidden" style={{ backgroundColor: '#121212' }}>
-          {/* Header row */}
-          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 20 }}>
-            <h3 style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#ffffff' }}>30 DAYS</h3>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 3 }}>
-              <span style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.03em' }}>{avg30}</span>
-              <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.05em' }}>km</span>
-            </div>
+        {/* Outside the box: 30 DAYS heading + avg on the left */}
+        <div style={{ marginBottom: 12 }}>
+          <h3 style={{ fontSize: '1.6rem', fontWeight: 900, letterSpacing: '-0.03em', color: '#ffffff', lineHeight: 1, marginBottom: 4 }}>30 DAYS</h3>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+            <span style={{ fontSize: '1.4rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.03em', lineHeight: 1 }}>{avg30}</span>
+            <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>km avg</span>
           </div>
+        </div>
 
+        <div className="p-6 rounded-xl relative overflow-hidden" style={{ backgroundColor: '#121212' }}>
           {/* Bar chart */}
           {thirtyDayData.length > 0 && (() => {
             const BAR_COUNT = thirtyDayData.length;
@@ -454,7 +454,6 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
             const semiBar = (x: number, y: number, w: number, h: number) => {
               const r = w / 2;
               if (h <= r) {
-                // bar too short for full semicircle — just draw a rounded pill
                 return `M${x},${y + h} L${x + w},${y + h} A${r},${r},0,0,1,${x},${y + h} Z`;
               }
               return [
