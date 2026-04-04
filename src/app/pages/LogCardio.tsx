@@ -335,7 +335,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
               className="text-[2.5rem] font-black tracking-tighter text-white w-full p-0"
               style={{ backgroundColor: 'transparent', border: 'none' }}
             />
-            <span style={{ fontSize: '1rem', fontWeight: 700, color: '#c6c6c6', letterSpacing: '0.05em' }}>KM</span>
+            <span className="text-[1rem] font-black tracking-tighter" style={{ color: '#c6c6c6' }}>KM</span>
           </div>
           <div style={separatorStyle} />
         </section>
