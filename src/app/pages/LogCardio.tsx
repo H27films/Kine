@@ -254,26 +254,22 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
         })}
       </nav>
 
-      {/* Header: two-column — TRACKER info left, sparkline right */}
+      {/* Header: TRACKER row, full-width chart, full-width input */}
       <header className="mb-6">
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
 
-          {/* Left column */}
-          <div style={{ display: 'flex', flexDirection: 'column', width: '42%', flexShrink: 0 }}>
-            {/* TRACKER title */}
-            <h1 className="text-[2rem] font-black tracking-tighter leading-none text-white">TRACKER</h1>
-
-            {/* Weekly total */}
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginTop: 8 }}>
-              <span style={{ fontSize: '1.8rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.04em', lineHeight: 1 }}>
-                {weeklyTotal.toFixed(1)}
-              </span>
-              <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>km</span>
-            </div>
-
+        {/* Row 1: TRACKER left, weekly total right */}
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 14 }}>
+          <h1 className="text-[2rem] font-black tracking-tighter leading-none text-white">TRACKER</h1>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+            <span style={{ fontSize: '1.8rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.04em', lineHeight: 1 }}>
+              {weeklyTotal.toFixed(1)}
+            </span>
+            <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>km</span>
           </div>
+        </div>
 
-          {/* Right column — sparkline always visible */}
+        {/* Row 2: full-width sparkline */}
+        <div style={{ width: '100%' }}>
           <div style={{ flex: 1, minWidth: 0 }}>
             {(() => {
               const sparkData = weekChartData;
@@ -351,10 +347,9 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
               );
             })()}
           </div>
-
         </div>
 
-        {/* Full-width distance input below two-column */}
+        {/* Row 3: Full-width distance input */}
         <div style={{ marginTop: 18 }}>
           <div className="flex items-baseline gap-3">
             <input
