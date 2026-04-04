@@ -437,18 +437,18 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
         <div className="p-6 rounded-xl relative overflow-hidden" style={{ backgroundColor: '#121212' }}>
           {/* Inside box header: 30 DAYS left, total+avg stacked on right */}
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
-            {/* 30 DAYS — left */}
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 900, letterSpacing: '0.25em', color: '#ffffff', lineHeight: 1, margin: 0 }}>30 DAYS</h3>
+            {/* 30 DAYS — left, smaller, not bold */}
+            <h3 style={{ fontSize: '0.85rem', fontWeight: 400, letterSpacing: '0.25em', color: '#ffffff', lineHeight: 1, margin: 0, textTransform: 'uppercase' }}>30 DAYS</h3>
 
             {/* Total + Avg stacked — right */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-                <span style={{ fontSize: '1.3rem', fontWeight: 900, letterSpacing: '-0.05em', color: '#ffffff', lineHeight: 1 }}>{total30}</span>
-                <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>km total</span>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 3 }}>
+                <span style={{ fontSize: '1.1rem', fontWeight: 900, letterSpacing: '-0.05em', color: '#ffffff', lineHeight: 1 }}>{total30}</span>
+                <span style={{ fontSize: '0.6rem', fontWeight: 700, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>km</span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-                <span style={{ fontSize: '0.95rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.03em', lineHeight: 1 }}>{avg30}</span>
-                <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>km avg</span>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 3 }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)', letterSpacing: '-0.02em', lineHeight: 1 }}>{avg30}</span>
+                <span style={{ fontSize: '0.6rem', fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>km</span>
               </div>
             </div>
           </div>
