@@ -105,7 +105,7 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
         >
           <span
             className="text-xl font-black tracking-tighter text-white uppercase"
-            style={{ opacity: showWeeklySummary ? 1 : 0.6 }}
+            style={{ opacity: showWeeklySummary ? 0.6 : 1 }}
           >
             Kiné
           </span>
