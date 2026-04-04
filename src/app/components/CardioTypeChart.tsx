@@ -288,10 +288,18 @@ export const CardioTypeChart: React.FC = () => {
         </div>
 
         {/* Bar chart */}
-        <div
-          className="flex items-end justify-between"
-          style={{ height: '176px', gap: viewMode === 'weekly' ? '12px' : '6px', position: 'relative', paddingRight: viewMode === 'monthly' ? '42px' : '0' }}
-        >
+        <div style={{ position: 'relative', height: '176px' }}>
+
+          {/* Bars — inset right in monthly to leave room for pill */}
+          <div
+            className="flex items-end justify-between"
+            style={{
+              height: '176px',
+              gap: viewMode === 'weekly' ? '12px' : '6px',
+              position: 'relative',
+              width: viewMode === 'monthly' ? 'calc(100% - 44px)' : '100%',
+            }}
+          >
           {/* Monthly: vertical week separator lines */}
           {viewMode === 'monthly' && (() => {
             const daysCount = monthlyData.length;
@@ -311,7 +319,7 @@ export const CardioTypeChart: React.FC = () => {
             });
           })()}
 
-          {/* Monthly: avg line */}
+          {/* Monthly: avg line — ends at right edge of last bar */}
           {viewMode === 'monthly' && rawMax > 0 && (() => {
             const nonZero = monthlyData.filter(v => v > 0);
             if (nonZero.length === 0) return null;
@@ -321,32 +329,13 @@ export const CardioTypeChart: React.FC = () => {
               <div style={{
                 position: 'absolute',
                 left: 0,
-                right: 4,
+                right: 0,
                 bottom: `${avgPct * 100}%`,
                 height: '1px',
                 borderTop: '1px dashed rgba(255,255,255,0.35)',
                 pointerEvents: 'none',
                 zIndex: 10,
-                overflow: 'visible',
-              }}>
-                <span style={{
-                  position: 'absolute',
-                  right: 0,
-                  top: '50%',
-                  transform: 'translate(100%, -50%)',
-                  fontSize: '9px',
-                  fontWeight: 800,
-                  color: '#000000',
-                  backgroundColor: '#ffffff',
-                  borderRadius: '999px',
-                  padding: '2px 6px',
-                  letterSpacing: '0.3px',
-                  lineHeight: 1.4,
-                  whiteSpace: 'nowrap',
-                }}>
-                  {+avg.toFixed(1)}
-                </span>
-              </div>
+              }} />
             );
           })()}
 
@@ -416,7 +405,37 @@ export const CardioTypeChart: React.FC = () => {
               </div>
             );
           })}
-        </div>
+          </div>{/* end inner bars div */}
+
+          {/* Monthly: avg pill — sits in the right 44px, vertically aligned to avg */}
+          {viewMode === 'monthly' && rawMax > 0 && (() => {
+            const nonZero = monthlyData.filter(v => v > 0);
+            if (nonZero.length === 0) return null;
+            const avg = nonZero.reduce((a, b) => a + b, 0) / nonZero.length;
+            const avgPct = avg / rawMax;
+            return (
+              <span style={{
+                position: 'absolute',
+                right: 0,
+                bottom: `${avgPct * 100}%`,
+                transform: 'translateY(50%)',
+                fontSize: '9px',
+                fontWeight: 800,
+                color: '#000000',
+                backgroundColor: '#ffffff',
+                borderRadius: '999px',
+                padding: '2px 6px',
+                letterSpacing: '0.3px',
+                lineHeight: 1.4,
+                whiteSpace: 'nowrap',
+                zIndex: 20,
+              }}>
+                {+avg.toFixed(1)}
+              </span>
+            );
+          })()}
+
+        </div>{/* end outer chart wrapper */}
       </div>
     </section>
   );
