@@ -45,6 +45,35 @@ export const CardioTypeChart: React.FC = () => {
   // Monthly
   const [monthOffset, setMonthOffset] = useState(0);
   const [monthlyData, setMonthlyData] = useState<number[]>([]);
+  const [minMonthOffset, setMinMonthOffset] = useState(0);   // most recent month with data (forward limit)
+  const [maxMonthOffset, setMaxMonthOffset] = useState(24);  // oldest month with data (back limit)
+
+  // Load min/max date from supabase to bound month navigation
+  useEffect(() => {
+    const load = async () => {
+      const { data } = await supabase
+        .from('workouts')
+        .select('date')
+        .eq('type', 'CARDIO')
+        .not('date', 'is', null)
+        .order('date', { ascending: true });
+      if (data && data.length > 0) {
+        const dates = (data as any[]).map(r => r.date as string).filter(Boolean);
+        const minDate = new Date(dates[0]);
+        const maxDate = new Date(dates[dates.length - 1]);
+        const now = new Date();
+        // offset = how many months back from now
+        const toOffset = (d: Date) =>
+          (now.getFullYear() - d.getFullYear()) * 12 + (now.getMonth() - d.getMonth());
+        const newMin = Math.max(0, toOffset(maxDate));
+        const newMax = toOffset(minDate);
+        setMinMonthOffset(newMin);
+        setMaxMonthOffset(newMax);
+        setMonthOffset(newMin); // start at most recent month with data
+      }
+    };
+    load();
+  }, []);
 
   // Load all distinct week numbers from supabase (descending)
   useEffect(() => {
@@ -122,15 +151,17 @@ export const CardioTypeChart: React.FC = () => {
 
   const canGoBack = viewMode === 'weekly'
     ? weekIdx < availableWeeks.length - 1
-    : monthOffset < 24;
-  const canGoForward = viewMode === 'weekly' ? weekIdx > 0 : monthOffset > 0;
+    : monthOffset < maxMonthOffset;
+  const canGoForward = viewMode === 'weekly'
+    ? weekIdx > 0
+    : monthOffset > minMonthOffset;
 
   const onBack = () =>
-    viewMode === 'weekly' ? setWeekIdx(i => i + 1) : setMonthOffset(o => o + 1);
+    viewMode === 'weekly' ? setWeekIdx(i => i + 1) : setMonthOffset(o => Math.min(o + 1, maxMonthOffset));
   const onForward = () =>
     viewMode === 'weekly'
       ? setWeekIdx(i => Math.max(0, i - 1))
-      : setMonthOffset(o => Math.max(0, o - 1));
+      : setMonthOffset(o => Math.max(o - 1, minMonthOffset));
 
   return (
     <section className="mb-20">
