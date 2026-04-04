@@ -107,8 +107,10 @@ const ExerciseIconBar: React.FC<Props> = ({ exercises, selectedExercise, onSelec
               key={key}
               onClick={() => ex ? onSelect(isSelected ? null : ex) : undefined}
               style={{
-                width: 52,
-                height: 52,
+                width: '17vw',
+                height: '17vw',
+                maxWidth: 68,
+                maxHeight: 68,
                 borderRadius: '50%',
                 backgroundColor: bg,
                 border: 'none',
@@ -116,7 +118,7 @@ const ExerciseIconBar: React.FC<Props> = ({ exercises, selectedExercise, onSelec
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: 11,
+                padding: '20%',
                 flexShrink: 0,
                 opacity: ex ? 1 : 0.35,
               }}

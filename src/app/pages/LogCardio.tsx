@@ -21,6 +21,7 @@ const TOTAL_CARDIO_IDS = [82, 83, 87];
 
 export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
   const [trackerDistance, setTrackerDistance] = useState('');
+  const [trackerInputVisible, setTrackerInputVisible] = useState(false);
   const [distance, setDistance] = useState('');
   const [minutes, setMinutes] = useState('');
   const [seconds, setSeconds] = useState('');
@@ -263,7 +264,8 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 14 }}>
           <h1
             className="text-[2rem] font-black tracking-tighter leading-none text-white"
-            style={{ cursor: 'default' }}
+            style={{ cursor: 'pointer' }}
+            onClick={() => setTrackerInputVisible(v => !v)}
           >TRACKER</h1>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
             <span style={{ fontSize: '1.8rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.04em', lineHeight: 1 }}>
@@ -273,8 +275,8 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
           </div>
         </div>
 
-        {/* Row 2: Full-width distance input — always visible */}
-        <div style={{ marginBottom: 14 }}>
+        {/* Row 2: Full-width distance input — shown when TRACKER tapped */}
+        {trackerInputVisible && <div style={{ marginBottom: 14 }}>
           <div className="flex items-baseline gap-3">
             <input
               type="text"
@@ -287,7 +289,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
             <span className="text-[1rem] font-black tracking-tighter" style={{ color: '#c6c6c6' }}>KM</span>
           </div>
           <div style={separatorStyle} />
-        </div>
+        </div>}
 
         {/* Row 3: full-width sparkline */}
         <div style={{ width: '100%' }}>
