@@ -278,19 +278,26 @@ export const CardioTypeChart: React.FC = () => {
             const barColor = val > 0
               ? `rgb(${brightness},${brightness},${brightness})`
               : 'rgba(255,255,255,0.05)';
-            const barLabel = viewMode === 'weekly' && val > 0 ? `${+val.toFixed(1)}` : '';
+            const barLabel = val > 0 ? `${+val.toFixed(1)}` : '';
+            const isWeekly = viewMode === 'weekly';
 
             return (
               <div
                 key={i}
                 className="flex flex-col items-center h-full justify-end"
-                style={{ flex: '1', maxWidth: viewMode === 'weekly' ? '28px' : undefined }}
+                style={{ flex: '1', maxWidth: isWeekly ? '28px' : undefined }}
               >
-                {viewMode === 'weekly' && (
-                  <div style={{ fontSize: '7.5px', fontWeight: 700, color: 'rgba(255,255,255,0.6)', marginBottom: '4px' }}>
-                    {barLabel}
-                  </div>
-                )}
+                {/* Data label above bar */}
+                <div style={{
+                  fontSize: isWeekly ? '7.5px' : '5.5px',
+                  fontWeight: 700,
+                  color: val > 0 ? 'rgba(255,255,255,0.6)' : 'transparent',
+                  marginBottom: isWeekly ? '4px' : '2px',
+                  lineHeight: 1,
+                  whiteSpace: 'nowrap',
+                }}>
+                  {barLabel}
+                </div>
                 <div
                   className="w-full min-h-[4px] transition-all"
                   style={{
@@ -299,7 +306,7 @@ export const CardioTypeChart: React.FC = () => {
                     borderRadius: '9999px 9999px 0 0',
                   }}
                 />
-                {viewMode === 'weekly' && (
+                {isWeekly && (
                   <div style={{
                     fontSize: '8px',
                     fontWeight: 700,
@@ -309,17 +316,6 @@ export const CardioTypeChart: React.FC = () => {
                     marginTop: '8px',
                   }}>
                     {DAY_SHORT[i]}
-                  </div>
-                )}
-                {viewMode === 'monthly' && (
-                  <div style={{
-                    fontSize: '6px',
-                    fontWeight: 700,
-                    color: (i + 1) % 5 === 0 || i === 0 ? 'rgba(255,255,255,0.45)' : 'transparent',
-                    marginTop: '6px',
-                    lineHeight: 1,
-                  }}>
-                    {i + 1}
                   </div>
                 )}
               </div>
