@@ -236,7 +236,7 @@ const ExerciseLogDots: React.FC<Props> = ({ exercises, saveSuccess }) => {
               gap: 4,
             }}
           >
-            {entry && entry.sessions.map((session, si) => (
+            {entry && entry.sessions.map((session) => (
               <div
                 key={session.id}
                 onClick={() => setExpandedKey(key)}
