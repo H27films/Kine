@@ -278,7 +278,7 @@ const WeeklyChart: React.FC<{
               if (unit === 'kg') {
                 barLabel = `${Math.round(val / 1000)}k`;
               } else if (unit === 'km') {
-                barLabel = `${+val.toFixed(1)}km`;
+                barLabel = `${+val.toFixed(1)}`;
               } else {
                 barLabel = `${Math.round(val)}`;
               }
