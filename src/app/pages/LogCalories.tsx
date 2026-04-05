@@ -193,13 +193,16 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
 
         {/* Food Rating group: score + circles + buttons together */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {/* Food score number */}
+          {/* FOOD RATING label + score number */}
           {(() => {
             const foodScore = weeklyRatings.reduce((sum, r) => sum + (r === 'good' ? 3 : r === 'ok' ? 2 : r === 'bad' ? 1 : 0), 0);
             return (
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-                <span className="text-7xl font-black tracking-tighter text-white" style={{ lineHeight: 1 }}>{foodScore}</span>
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: 'rgba(161,161,170,1)' }}>/21</span>
+              <div>
+                <label className="block text-[13px] uppercase tracking-[0.2em] font-black mb-4" style={{ color: '#ffffff' }}>Food Rating</label>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+                  <span className="text-7xl font-black tracking-tighter text-white" style={{ lineHeight: 1 }}>{foodScore}</span>
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: 'rgba(161,161,170,1)' }}>/21</span>
+                </div>
               </div>
             );
           })()}
@@ -228,9 +231,8 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
               );
             })}
           </div>
-          {/* Food Rating label + buttons */}
+          {/* Food Rating buttons */}
           <div>
-            <label className="block text-[10px] uppercase tracking-[0.2em] font-bold mb-4" style={{ color: 'rgba(161,161,170,1)' }}>Food Rating</label>
             <div className="flex gap-2">
               {ratingButtons.map(btn => (
                 <button key={btn.value} onClick={() => setFoodRating(btn.value)}
