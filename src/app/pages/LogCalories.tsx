@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Page } from '../../types';
 import { supabase, todayStr, getISOWeek, getDayName, weeksAgoMonday, recalculateDailyTotals } from '../../lib/supabase';
+import CaloriesSparkline from '../components/CaloriesSparkline';
 
 interface LogCaloriesProps {
   onNavigate: (page: Page) => void;
@@ -160,38 +161,16 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
       </nav>
 
       <section className="mb-16 space-y-12">
-        <div className="flex items-stretch gap-4">
-          <div className="flex-1">
+        <div className="flex items-stretch" style={{ gap: 0 }}>
+          <div style={{ flex: '0 0 auto', minWidth: 0 }}>
             <label className="block text-[10px] uppercase tracking-[0.2em] font-bold mb-4" style={{ color: 'rgba(161,161,170,1)' }}>Total Calories</label>
             <input type="number" value={calories} onChange={e => setCalories(e.target.value)} placeholder="0000"
-              className="w-full text-7xl font-black tracking-tighter text-white p-0"
-              style={{ backgroundColor: 'transparent', border: 'none' }} />
+              className="text-7xl font-black tracking-tighter text-white p-0"
+              style={{ backgroundColor: 'transparent', border: 'none', width: '7ch' }} />
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] mt-2 block" style={{ color: 'rgba(161,161,170,1)' }}>kcal today</span>
           </div>
-          <div className="flex flex-col justify-end items-end" style={{ width: 72 }}>
-            <div className="flex items-end gap-[3px]" style={{ height: 48, width: '100%' }}>
-              {weeklyBars.map((h, i) => {
-                const pct = weeklyMax > 0 ? (h / weeklyMax) * 100 : 0;
-                const isToday = i === (new Date().getDay() === 0 ? 6 : new Date().getDay() - 1);
-                return (
-                  <div
-                    key={i}
-                    style={{
-                      flex: 1,
-                      height: `${Math.max(pct, h > 0 ? 12 : 4)}%`,
-                      backgroundColor: isToday ? '#ffffff' : h > 0 ? '#3f3f46' : '#18181b',
-                      borderRadius: 2,
-                      alignSelf: 'flex-end',
-                    }}
-                  />
-                );
-              })}
-            </div>
-            <div className="flex justify-between mt-1" style={{ width: '100%' }}>
-              {['M','T','W','T','F','S','S'].map((d, i) => (
-                <span key={i} style={{ fontSize: 7, color: 'rgba(82,82,91,1)', fontWeight: 700, flex: 1, textAlign: 'center' }}>{d}</span>
-              ))}
-            </div>
+          <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'stretch' }}>
+            <CaloriesSparkline weeklyBars={weeklyBars} />
           </div>
         </div>
         <div>
