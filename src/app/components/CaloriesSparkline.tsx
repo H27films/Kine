@@ -88,7 +88,7 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars }) => {
             y={padTop - 7}
             textAnchor="end"
             fill="rgba(255,255,255,0.85)"
-            fontSize="11"
+            fontSize="9"
             fontWeight="900"
             fontFamily="'Inter', sans-serif"
             letterSpacing="-0.03em"
@@ -100,7 +100,7 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars }) => {
             y={padTop + 1}
             textAnchor="end"
             fill="rgba(255,255,255,0.35)"
-            fontSize="5.5"
+            fontSize="4.5"
             fontWeight="700"
             fontFamily="'Inter', sans-serif"
             letterSpacing="0.1em"
