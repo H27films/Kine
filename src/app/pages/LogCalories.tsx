@@ -279,7 +279,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {/* FOOD RATING label + score number + percentage circle */}
           {(() => {
-            const foodScore = weeklyRatings.reduce((sum, r) => sum + (r === 'good' ? 3 : r === 'ok' ? 2 : r === 'bad' ? 1 : 0), 0);
+            const foodScore = weeklyRatings.reduce((sum, r) => sum + (r === 'GOOD' ? 3 : r === 'OK' ? 2 : r === 'BAD' ? 1 : 0), 0);
             const daysWithRating = weeklyRatings.filter(r => r !== null).length;
             const maxScore = daysWithRating > 0 ? daysWithRating * 3 : 21;
             const pct = daysWithRating > 0 ? foodScore / maxScore : 0;
@@ -319,9 +319,9 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
               let border = '1.5px solid rgba(255,255,255,0.15)';
               let textColor = 'rgba(255,255,255,0.2)';
               let glowShadow = 'none';
-              if (rating === 'good') { border = '2px solid #90c9a0'; textColor = '#90c9a0'; glowShadow = '0 0 8px rgba(144,201,160,0.75), 0 0 18px rgba(144,201,160,0.3)'; }
-              else if (rating === 'bad') { border = '2px solid #ef4444'; textColor = '#ef4444'; glowShadow = '0 0 8px rgba(239,68,68,0.75), 0 0 18px rgba(239,68,68,0.3)'; }
-              else if (rating === 'ok') { border = '2px solid rgba(255,255,255,0.75)'; textColor = 'rgba(255,255,255,0.9)'; glowShadow = '0 0 8px rgba(255,255,255,0.45), 0 0 18px rgba(255,255,255,0.15)'; }
+              if (rating === 'GOOD') { border = '2px solid #90c9a0'; textColor = '#90c9a0'; glowShadow = '0 0 8px rgba(144,201,160,0.75), 0 0 18px rgba(144,201,160,0.3)'; }
+              else if (rating === 'BAD') { border = '2px solid #ef4444'; textColor = '#ef4444'; glowShadow = '0 0 8px rgba(239,68,68,0.75), 0 0 18px rgba(239,68,68,0.3)'; }
+              else if (rating === 'OK') { border = '2px solid rgba(255,255,255,0.75)'; textColor = 'rgba(255,255,255,0.9)'; glowShadow = '0 0 8px rgba(255,255,255,0.45), 0 0 18px rgba(255,255,255,0.15)'; }
               const showLine = i > 0 && rating !== null && prevRating !== null;
               return (
                 <React.Fragment key={i}>
