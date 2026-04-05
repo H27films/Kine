@@ -346,7 +346,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
       </header>
 
       {/* EXERCISE section — icon picker */}
-      <section className="mb-3" style={{ marginTop: 56 }}>
+      <section className="mb-0" style={{ marginTop: 56 }}>
         <div style={{ marginBottom: 20 }}>
           <ExerciseLogDots exercises={nonTrackerExercises} saveSuccess={saveSuccess} />
           <ExerciseIconBar
@@ -376,7 +376,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
 
       {/* Duration — only shown for Running */}
       {isRunning && (
-        <section className="mb-16">
+        <section className="mb-4">
           <label style={{ ...labelStyle, display: 'block', marginBottom: 8 }}>Duration</label>
           <div className="flex items-baseline gap-4">
             <div className="flex items-baseline gap-2">

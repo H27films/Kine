@@ -362,6 +362,32 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
       </section>
 
       <section className="mb-16">
+        <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] mb-6" style={{ color: 'rgba(161,161,170,1)' }}>Body Measurements</h3>
+        <div className="grid grid-cols-1 gap-4">
+          {[
+            { label: 'Body Weight (KG)', value: bodyWeight, onChange: setBodyWeight },
+            { label: 'Body Fat (%)', value: bodyFat, onChange: setBodyFat },
+            { label: 'Muscle Mass (KG)', value: muscleMass, onChange: setMuscleMass },
+          ].map(field => (
+            <div key={field.label} className="flex justify-between items-center p-5 rounded-lg" style={{ backgroundColor: '#121212', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'rgba(161,161,170,0.8)' }}>{field.label}</label>
+              <input type="number" value={field.value} onChange={e => field.onChange(e.target.value)} step="0.1"
+                className="text-right text-lg font-black tracking-tight text-white p-0 w-24"
+                style={{ backgroundColor: 'transparent', border: 'none' }} />
+            </div>
+          ))}
+        </div>
+
+        {saveError && <p className="text-red-400 text-sm mt-4 text-center">{saveError}</p>}
+
+        <button onClick={handleSave} disabled={saving}
+          className="w-full font-black uppercase tracking-widest text-[10px] py-5 rounded-full mt-8 active:scale-[0.98] transition-all"
+          style={{ backgroundColor: saveSuccess ? '#22c55e' : '#ffffff', color: '#000000', opacity: saving ? 0.7 : 1 }}>
+          {saving ? 'Saving...' : saveSuccess ? '✓ Saved!' : 'Update Metrics'}
+        </button>
+      </section>
+
+      <section className="mb-8">
         <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] mb-8" style={{ color: 'rgba(161,161,170,1)' }}>Performance Trends</h3>
         <div className="space-y-10">
           <div>
@@ -391,32 +417,6 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
             </div>
           </div>
         </div>
-      </section>
-
-      <section className="mb-8">
-        <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] mb-6" style={{ color: 'rgba(161,161,170,1)' }}>Body Measurements</h3>
-        <div className="grid grid-cols-1 gap-4">
-          {[
-            { label: 'Body Weight (KG)', value: bodyWeight, onChange: setBodyWeight },
-            { label: 'Body Fat (%)', value: bodyFat, onChange: setBodyFat },
-            { label: 'Muscle Mass (KG)', value: muscleMass, onChange: setMuscleMass },
-          ].map(field => (
-            <div key={field.label} className="flex justify-between items-center p-5 rounded-lg" style={{ backgroundColor: '#121212', border: '1px solid rgba(255,255,255,0.05)' }}>
-              <label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'rgba(161,161,170,0.8)' }}>{field.label}</label>
-              <input type="number" value={field.value} onChange={e => field.onChange(e.target.value)} step="0.1"
-                className="text-right text-lg font-black tracking-tight text-white p-0 w-24"
-                style={{ backgroundColor: 'transparent', border: 'none' }} />
-            </div>
-          ))}
-        </div>
-
-        {saveError && <p className="text-red-400 text-sm mt-4 text-center">{saveError}</p>}
-
-        <button onClick={handleSave} disabled={saving}
-          className="w-full font-black uppercase tracking-widest text-[10px] py-5 rounded-full mt-8 active:scale-[0.98] transition-all"
-          style={{ backgroundColor: saveSuccess ? '#22c55e' : '#ffffff', color: '#000000', opacity: saving ? 0.7 : 1 }}>
-          {saving ? 'Saving...' : saveSuccess ? '✓ Saved!' : 'Update Metrics'}
-        </button>
       </section>
     </div>
   );
