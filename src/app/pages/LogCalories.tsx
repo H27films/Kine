@@ -15,6 +15,7 @@ const tabs: { label: string; page: Page }[] = [
 
 const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
+// ===== FIXED: Changed type to use UPPERCASE strings =====
 type FoodRating = 'BAD' | 'OK' | 'GOOD' | null;
 
 // MEASUREMENT exercise IDs (from the exercises table)
@@ -78,7 +79,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
   // Monthly (last 28 days)
   const [monthlyBars, setMonthlyBars] = useState<number[]>(Array(28).fill(0));
   // Weekly food ratings Mon-Sun (null = no data)
-  const [weeklyRatings, setWeeklyRatings] = useState<(FoodRating | null)[]>(Array(7).fill(null));
+  const [weeklyRatings, setWeeklyRatings] = useState<(FoodRating)[]>(Array(7).fill(null));
 
   // Load calories/measurements (always current week)
   useEffect(() => {
@@ -147,7 +148,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
         .lte('date', fmt(sunday))
         .order('date', { ascending: true });
 
-      const ratings: (FoodRating | null)[] = Array(7).fill(null);
+      const ratings: (FoodRating)[] = Array(7).fill(null);
       let wkNum: number | null = null;
       if (data) {
         for (const row of data as any[]) {
@@ -159,7 +160,8 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
           const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
           if (diffDays >= 0 && diffDays < 7) {
             const dayIdx = d.getDay() === 0 ? 6 : d.getDay() - 1;
-            if (!ratings[dayIdx]) ratings[dayIdx] = (row.food_rating as string).toLowerCase() as FoodRating;
+            // ===== FIXED: Convert to UPPERCASE =====
+            if (!ratings[dayIdx]) ratings[dayIdx] = (row.food_rating as string).toUpperCase() as FoodRating;
           }
         }
       }
@@ -226,10 +228,11 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
     }
   };
 
+  // ===== FIXED: Changed to use UPPERCASE string literals =====
   const ratingButtons: { label: string; value: 'BAD' | 'OK' | 'GOOD' }[] = [
-    { label: 'BAD', value: 'BAD' },
-    { label: 'OK', value: 'OK' },
-    { label: 'GOOD', value: 'GOOD' },
+    { label: 'Bad', value: 'BAD' },
+    { label: 'Ok', value: 'OK' },
+    { label: 'Good', value: 'GOOD' },
   ];
 
   const weeklyMax = Math.max(...weeklyBars, 1);
@@ -279,6 +282,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {/* FOOD RATING label + score number + percentage circle */}
           {(() => {
+            // ===== FIXED: Changed comparisons to use UPPERCASE =====
             const foodScore = weeklyRatings.reduce((sum, r) => sum + (r === 'GOOD' ? 3 : r === 'OK' ? 2 : r === 'BAD' ? 1 : 0), 0);
             const daysWithRating = weeklyRatings.filter(r => r !== null).length;
             const maxScore = daysWithRating > 0 ? daysWithRating * 3 : 21;
@@ -319,6 +323,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
               let border = '1.5px solid rgba(255,255,255,0.15)';
               let textColor = 'rgba(255,255,255,0.2)';
               let glowShadow = 'none';
+              // ===== FIXED: Changed comparisons to use UPPERCASE =====
               if (rating === 'GOOD') { border = '2px solid #90c9a0'; textColor = '#90c9a0'; glowShadow = '0 0 8px rgba(144,201,160,0.75), 0 0 18px rgba(144,201,160,0.3)'; }
               else if (rating === 'BAD') { border = '2px solid #ef4444'; textColor = '#ef4444'; glowShadow = '0 0 8px rgba(239,68,68,0.75), 0 0 18px rgba(239,68,68,0.3)'; }
               else if (rating === 'OK') { border = '2px solid rgba(255,255,255,0.75)'; textColor = 'rgba(255,255,255,0.9)'; glowShadow = '0 0 8px rgba(255,255,255,0.45), 0 0 18px rgba(255,255,255,0.15)'; }
