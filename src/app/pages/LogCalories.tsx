@@ -166,7 +166,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
             <label className="block text-[10px] uppercase tracking-[0.2em] font-bold mb-4" style={{ color: 'rgba(161,161,170,1)' }}>Total Calories</label>
             <input type="number" value={calories} onChange={e => setCalories(e.target.value)} placeholder="0000"
               className="text-7xl font-black tracking-tighter text-white p-0"
-              style={{ backgroundColor: 'transparent', border: 'none', width: '5.5ch' }} />
+              style={{ backgroundColor: 'transparent', border: 'none', width: '4ch' }} />
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] mt-2 block" style={{ color: 'rgba(161,161,170,1)' }}>kcal today</span>
           </div>
           <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center' }}>
