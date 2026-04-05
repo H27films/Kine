@@ -11,8 +11,8 @@ interface HeaderProps {
   showWeeklySummary?: boolean;
 }
 
-const RunningManIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+const RunningManIcon = ({ size = 16 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
     <path d="M13.49 5.48c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-3.6 13.9l1-4.4 2.1 2v6h2v-7.5l-2.1-2 .6-3c1.3 1.5 3.3 2.5 5.5 2.5v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1l-5.2 2.2v4.7h2v-3.4l1.8-.7-1.6 8.1-4.9-1-.4 2 7 1.4z"/>
   </svg>
 );
@@ -31,17 +31,18 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [menuOpen]);
 
-  const menuItems = [
-    { label: 'Log', icon: Dumbbell, page: 'weights' as Page },
-    { label: 'Summary', icon: FileText, page: 'summary' as Page },
-    { label: 'Data+', icon: BarChart3, page: 'analytics' as Page },
+  const menuItems: { label: string; icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }> | React.FC<{ size?: number; style?: React.CSSProperties }>; page: Page }[] = [
+    { label: 'Weights', icon: Dumbbell, page: 'weights' },
+    { label: 'Cardio',  icon: ({ size, style }) => <RunningManIcon size={size} />, page: 'cardio' },
+    { label: 'Calories', icon: Flame, page: 'calories' },
+    { label: 'Data+',  icon: BarChart3, page: 'analytics' },
   ];
 
   const isDashboard = !title;
 
   const getLogIcon = () => {
     if (currentPage === 'weights') return <Dumbbell size={20} color="white" />;
-    if (currentPage === 'cardio') return <RunningManIcon />;
+    if (currentPage === 'cardio') return <RunningManIcon size={20} />;
     if (currentPage === 'calories') return <Flame size={20} color="white" />;
     return null;
   };
@@ -89,7 +90,9 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
                   borderBottom: index < menuItems.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none',
                 }}
               >
-                <item.icon size={16} style={{ color: 'rgba(255,255,255,0.5)' }} />
+                <span style={{ color: 'rgba(255,255,255,0.5)', display: 'flex', alignItems: 'center' }}>
+                  <item.icon size={16} />
+                </span>
                 <span className="text-sm font-semibold text-white tracking-wide">{item.label}</span>
               </button>
             ))}
