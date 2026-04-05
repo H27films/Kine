@@ -352,6 +352,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
   const [dayWeights, setDayWeights] = useState<DayWeight[]>([]);
   const [dayWeightsTotal, setDayWeightsTotal] = useState<number>(0);
 
+  const [todayCalories, setTodayCalories] = useState<number>(0);
   const [cardioWeeks, setCardioWeeks] = useState<WeekData[]>([]);
   const [weightsWeeks, setWeightsWeeks] = useState<WeekData[]>([]);
   const [weightsExerciseCounts, setWeightsExerciseCounts] = useState<Record<number, number[]>>({});
@@ -405,6 +406,21 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
       setYesterdayMovement(+yestTotal.toFixed(1));
     };
     loadCardio();
+
+    // Today's calories for progress bar
+    const loadTodayCalories = async () => {
+      const d = selectedDate;
+      const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      const { data } = await supabase
+        .from('workouts')
+        .select('calories')
+        .eq('type', 'MEASUREMENT')
+        .eq('date', dateStr)
+        .not('calories', 'is', null)
+        .limit(1);
+      setTodayCalories(data && data.length > 0 ? Number(data[0].calories) : 0);
+    };
+    loadTodayCalories();
   }, [selectedDate]);
 
   useEffect(() => {
@@ -646,6 +662,30 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
               </div>
             );
           })}
+        </div>
+
+        {/* Calories progress bar */}
+        <div style={{ marginTop: '14px' }}>
+          <div style={{ height: '32px', width: '100%', backgroundColor: '#1a1a1a', borderRadius: '999px', overflow: 'hidden', padding: '4px' }}>
+            <div style={{
+              height: '100%',
+              width: `${Math.min((todayCalories / 1500) * 100, 100)}%`,
+              background: 'linear-gradient(90deg, #c6c6c7 0%, #ffffff 100%)',
+              borderRadius: '999px',
+              boxShadow: '0 0 14px rgba(255,255,255,0.25)',
+              transition: 'width 0.6s cubic-bezier(0.4,0,0.2,1)',
+              display: 'flex',
+              alignItems: 'center',
+              paddingLeft: '10px',
+              minWidth: todayCalories > 0 ? '72px' : '0px',
+            }}>
+              {todayCalories > 0 && (
+                <span style={{ fontSize: '10px', fontWeight: 800, color: '#1a1a1a', whiteSpace: 'nowrap', letterSpacing: '0.5px' }}>
+                  {todayCalories.toLocaleString()} kcal
+                </span>
+              )}
+            </div>
+          </div>
         </div>
 
         {selectedActivity && activityWeeklyData[selectedActivity] && (() => {
