@@ -177,44 +177,45 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
       </nav>
 
       <section className="mb-16 space-y-12">
+        {/* Calories input row + sparkline aligned top-to-bottom */}
         <div style={{ display: 'flex', alignItems: 'stretch', width: '100%', gap: 0 }}>
-          <div style={{ flex: '0 0 auto' }}>
+          <div style={{ flex: '0 0 auto', display: 'flex', flexDirection: 'column' }}>
             <label className="block text-[10px] uppercase tracking-[0.2em] font-bold mb-4" style={{ color: 'rgba(161,161,170,1)' }}>Total Calories</label>
             <input type="number" value={calories} onChange={e => setCalories(e.target.value)} placeholder="0000"
               className="text-7xl font-black tracking-tighter text-white p-0"
-              style={{ backgroundColor: 'transparent', border: 'none', width: '4ch' }} />
+              style={{ backgroundColor: 'transparent', border: 'none', width: '4ch', flex: 1 }} />
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] mt-2 block" style={{ color: 'rgba(161,161,170,1)' }}>kcal today</span>
-
-            {/* Weekly food rating circles */}
-            <div style={{ display: 'flex', gap: '6px', marginTop: '10px' }}>
-              {['M','T','W','T','F','S','S'].map((day, i) => {
-                const rating = weeklyRatings[i];
-                const today = new Date();
-                const todayIdx = today.getDay() === 0 ? 6 : today.getDay() - 1;
-                const isFuture = i > todayIdx;
-                let border = '1.5px solid rgba(255,255,255,0.15)';
-                let textColor = 'rgba(255,255,255,0.2)';
-                let label = day;
-                if (rating === 'good') { border = '2px solid #16a34a'; textColor = '#16a34a'; label = day; }
-                else if (rating === 'bad') { border = '2px solid #dc2626'; textColor = '#dc2626'; label = day; }
-                else if (rating === 'ok') { border = '2px solid rgba(255,255,255,0.6)'; textColor = 'rgba(255,255,255,0.85)'; label = day; }
-                return (
-                  <div key={i} style={{
-                    width: 28, height: 28, borderRadius: '50%',
-                    backgroundColor: 'transparent', border,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    opacity: isFuture && !rating ? 0.3 : 1,
-                    flexShrink: 0,
-                  }}>
-                    <span style={{ fontSize: '8px', fontWeight: 800, color: textColor, letterSpacing: '0.05em' }}>{label}</span>
-                  </div>
-                );
-              })}
-            </div>
           </div>
-          <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center' }}>
+          <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'stretch' }}>
             <CaloriesSparkline weeklyBars={weeklyBars} />
           </div>
+        </div>
+
+        {/* Weekly food rating circles — below the row */}
+        <div style={{ display: 'flex', justifyContent: 'space-evenly', width: '100%', marginTop: '24px' }}>
+          {['M','T','W','T','F','S','S'].map((day, i) => {
+            const rating = weeklyRatings[i];
+            const today = new Date();
+            const todayIdx = today.getDay() === 0 ? 6 : today.getDay() - 1;
+            const isFuture = i > todayIdx;
+            let border = '1.5px solid rgba(255,255,255,0.15)';
+            let textColor = 'rgba(255,255,255,0.2)';
+            let label = day;
+            if (rating === 'good') { border = '2px solid #16a34a'; textColor = '#16a34a'; label = day; }
+            else if (rating === 'bad') { border = '2px solid #dc2626'; textColor = '#dc2626'; label = day; }
+            else if (rating === 'ok') { border = '2px solid rgba(255,255,255,0.6)'; textColor = 'rgba(255,255,255,0.85)'; label = day; }
+            return (
+              <div key={i} style={{
+                width: 28, height: 28, borderRadius: '50%',
+                backgroundColor: 'transparent', border,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                opacity: isFuture && !rating ? 0.3 : 1,
+                flexShrink: 0,
+              }}>
+                <span style={{ fontSize: '8px', fontWeight: 800, color: textColor, letterSpacing: '0.05em' }}>{label}</span>
+              </div>
+            );
+          })}
         </div>
         <div>
           <label className="block text-[10px] uppercase tracking-[0.2em] font-bold mb-4" style={{ color: 'rgba(161,161,170,1)' }}>Food Rating</label>

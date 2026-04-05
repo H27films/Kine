@@ -54,7 +54,7 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars }) => {
   }
 
   return (
-    <svg width="100%" viewBox={`0 0 ${VW} ${VH}`} style={{ overflow: 'visible', display: 'block' }}>
+    <svg width="100%" height="100%" viewBox={`0 0 ${VW} ${VH}`} preserveAspectRatio="none" style={{ overflow: 'visible', display: 'block' }}>
       <defs>
         <filter id="calLineBlur1" x="-50%" y="-100%" width="200%" height="300%">
           <feGaussianBlur stdDeviation="6" />
