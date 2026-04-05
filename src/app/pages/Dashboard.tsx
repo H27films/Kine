@@ -139,6 +139,20 @@ function groupByWeek(rows: { week: number; day: string; value: number }[]): Week
     .sort((a, b) => b.weekNumber - a.weekNumber);
 }
 
+/**
+ * Convert a Date to YYYY-MM-DD in Malaysia local time (UTC+8).
+ * Used for calendar and date filtering.
+ */
+function malaysiaDateStr(d: Date): string {
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: 'Asia/Kuala_Lumpur',
+  });
+  return formatter.format(d);
+}
+
 const WeeklyChart: React.FC<{
   cardioWeeks: WeekData[];
   weightsWeeks: WeekData[];
@@ -342,7 +356,8 @@ const WeeklyChart: React.FC<{
 };
 
 export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeeklySummary = false }) => {
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  // ===== FIXED: Use Malaysia timezone for selected date =====
+  const [selectedDate, setSelectedDate] = useState(() => malaysiaDateStr(new Date()));
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
 
   const [todayActivities, setTodayActivities] = useState<DayActivity[]>([]);
@@ -363,10 +378,11 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
 
   useEffect(() => {
     const loadCardio = async () => {
-      const activeDateStr = selectedDate.toISOString().split('T')[0];
-      const yesterday = new Date(selectedDate);
+      // ===== FIXED: Use Malaysia timezone =====
+      const activeDateStr = selectedDate;
+      const yesterday = new Date(selectedDate + 'T00:00:00Z');
       yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayDateStr = yesterday.toISOString().split('T')[0];
+      const yesterdayDateStr = malaysiaDateStr(yesterday);
 
       const { data } = await supabase
         .from('workouts')
@@ -409,13 +425,11 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
 
     // Today's calories for progress bar
     const loadTodayCalories = async () => {
-      const d = selectedDate;
-      const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
       const { data } = await supabase
         .from('workouts')
         .select('calories')
         .eq('type', 'MEASUREMENT')
-        .eq('date', dateStr)
+        .eq('date', selectedDate)
         .not('calories', 'is', null)
         .limit(1);
       setTodayCalories(data && data.length > 0 ? Number(data[0].calories) : 0);
@@ -438,7 +452,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
       for (const row of data as any[]) {
         const name: string = row.exercises?.exercise_name || 'Unknown';
         if (!result[name]) result[name] = Array(7).fill(0);
-        const d = new Date(row.date + 'T12:00:00');
+        const d = new Date(row.date + 'T12:00:00Z');
         const dow = d.getDay() === 0 ? 6 : d.getDay() - 1;
         result[name][dow] = +(result[name][dow] + Number(row.km || 0)).toFixed(2);
       }
@@ -449,12 +463,11 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
 
   useEffect(() => {
     const loadWeights = async () => {
-      const activeDateStr = selectedDate.toISOString().split('T')[0];
       const { data } = await supabase
         .from('workouts')
         .select('total_weight, exercises:exercise_id(exercise_name)')
         .in('type', ['CHEST', 'BACK', 'LEGS'])
-        .eq('date', activeDateStr);
+        .eq('date', selectedDate);
 
       if (!data) return;
       const exercises = (data as any[]).map(r => ({
@@ -556,6 +569,29 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
     : null;
   const displayMovement = weeklyActivityTotal !== null ? weeklyActivityTotal : totalMovement;
 
+  // ===== FIXED: Calendar generation using Malaysia timezone =====
+  const getCalendarDates = () => {
+    const today = new Date();
+    const todayMalaysia = malaysiaDateStr(today);
+    const todayDate = new Date(todayMalaysia + 'T00:00:00Z');
+    const todayDay = todayDate.getDay();
+    const mondayDate = new Date(todayDate);
+    mondayDate.setDate(todayDate.getDate() - (todayDay === 0 ? 6 : todayDay - 1));
+
+    const dates: { dateStr: string; dayOfWeek: number; isSelected: boolean; isToday: boolean }[] = [];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(mondayDate);
+      date.setDate(mondayDate.getDate() + i);
+      const dateStr = malaysiaDateStr(date);
+      const isSelected = dateStr === selectedDate;
+      const isToday = dateStr === todayMalaysia;
+      dates.push({ dateStr, dayOfWeek: date.getDate(), isSelected, isToday });
+    }
+    return dates;
+  };
+
+  const calendarDates = getCalendarDates();
+
   return (
     <div className="-mt-2">
       {showWeeklySummary && (
@@ -564,33 +600,41 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
         </div>
       )}
 
-      {!showWeeklySummary && <div className="flex justify-between items-center py-1 mb-1">
-        {Array.from({ length: 7 }, (_, i) => {
-          const now = new Date();
-          const d = new Date();
-          const day = d.getDay();
-          const diff = d.getDate() - day + (day === 0 ? -6 : 1) + i;
-          const date = new Date(d.setDate(diff));
-          const isSelected = date.toDateString() === selectedDate.toDateString();
-          const isToday = date.toDateString() === now.toDateString();
-          return (
-            <div key={i} onClick={() => setSelectedDate(date)} className="flex flex-col items-center cursor-pointer">
-              <span style={{
-                fontSize: '9px',
-                fontWeight: 700,
-                letterSpacing: '1.5px',
-                marginBottom: '8px',
-                color: showWeeklySummary ? 'rgba(255,255,255,0.3)' : '#ffffff',
-              }}>
-                {date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()}
+      {/* ===== FIXED: Calendar section with Malaysia timezone ===== */}
+      {!showWeeklySummary && (
+        <div className="flex justify-between items-center py-1 mb-1">
+          {calendarDates.map((day, i) => (
+            <div
+              key={i}
+              onClick={() => setSelectedDate(day.dateStr)}
+              className="flex flex-col items-center cursor-pointer"
+            >
+              <span
+                style={{
+                  fontSize: '9px',
+                  fontWeight: 700,
+                  letterSpacing: '1.5px',
+                  marginBottom: '8px',
+                  color: showWeeklySummary ? 'rgba(255,255,255,0.3)' : '#ffffff',
+                }}
+              >
+                {['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'][i]}
               </span>
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all ${isSelected ? 'bg-white text-black' : isToday ? 'border-2 border-white/40 text-white' : 'text-white/40'}`}>
-                {date.getDate()}
+              <div
+                className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
+                  day.isSelected
+                    ? 'bg-white text-black'
+                    : day.isToday
+                    ? 'border-2 border-white/40 text-white'
+                    : 'text-white/40'
+                }`}
+              >
+                {day.dayOfWeek}
               </div>
             </div>
-          );
-        })}
-      </div>}
+          ))}
+        </div>
+      )}
 
       <section className="pt-1 mb-4">
         <div className="flex items-start">
@@ -598,13 +642,15 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
             {displayMovement > 0 ? displayMovement.toFixed(1) : '0.0'}
           </div>
           <div className="flex flex-col justify-center ml-4 pt-3 flex-1 min-w-0">
-            <div style={{
-              fontSize: '12px',
-              fontWeight: 800,
-              textTransform: 'uppercase',
-              letterSpacing: '2.5px',
-              color: '#ffffff',
-            }}>
+            <div
+              style={{
+                fontSize: '12px',
+                fontWeight: 800,
+                textTransform: 'uppercase',
+                letterSpacing: '2.5px',
+                color: '#ffffff',
+              }}
+            >
               {selectedActivity
                 ? `${CARDIO_DISPLAY[selectedActivity]?.label || selectedActivity} (KM)`
                 : 'MOVEMENT (KM)'}
@@ -650,13 +696,15 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
                 onClick={() => setSelectedActivity(isSelected ? null : key)}
               >
                 <div style={{ color: 'rgba(255,255,255,0.85)' }}>{display.icon}</div>
-                <div style={{
-                  fontSize: '11px',
-                  fontWeight: 700,
-                  letterSpacing: '0.5px',
-                  color: '#ffffff',
-                  whiteSpace: 'nowrap',
-                }}>
+                <div
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    letterSpacing: '0.5px',
+                    color: '#ffffff',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
                   {display.label}{hasData ? ` ${totalKm}km` : ''}
                 </div>
               </div>
@@ -667,18 +715,20 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
         {/* Calories progress bar */}
         <div style={{ marginTop: '14px' }}>
           <div style={{ height: '32px', width: '100%', backgroundColor: '#1a1a1a', borderRadius: '999px', overflow: 'hidden', padding: '4px' }}>
-            <div style={{
-              height: '100%',
-              width: `${Math.min((todayCalories / 1500) * 100, 100)}%`,
-              background: 'linear-gradient(90deg, #c6c6c7 0%, #ffffff 100%)',
-              borderRadius: '999px',
-              boxShadow: '0 0 14px rgba(255,255,255,0.25)',
-              transition: 'width 0.6s cubic-bezier(0.4,0,0.2,1)',
-              display: 'flex',
-              alignItems: 'center',
-              paddingLeft: '10px',
-              minWidth: todayCalories > 0 ? '72px' : '0px',
-            }}>
+            <div
+              style={{
+                height: '100%',
+                width: `${Math.min((todayCalories / 1500) * 100, 100)}%`,
+                background: 'linear-gradient(90deg, #c6c6c7 0%, #ffffff 100%)',
+                borderRadius: '999px',
+                boxShadow: '0 0 14px rgba(255,255,255,0.25)',
+                transition: 'width 0.6s cubic-bezier(0.4,0,0.2,1)',
+                display: 'flex',
+                alignItems: 'center',
+                paddingLeft: '10px',
+                minWidth: todayCalories > 0 ? '72px' : '0px',
+              }}
+            >
               {todayCalories > 0 && (
                 <span style={{ fontSize: '10px', fontWeight: 800, color: '#1a1a1a', whiteSpace: 'nowrap', letterSpacing: '0.5px' }}>
                   {todayCalories.toLocaleString()} kcal
@@ -780,13 +830,17 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
           <div className={`flex items-center justify-between ${dayWeights.length > 0 ? 'mb-4' : 'mb-0'}`}>
             <div className="flex items-center gap-2">
               <Dumbbell size={16} color="white" />
-              <span style={{
-                fontSize: '10px',
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: '2px',
-                color: 'rgba(255,255,255,0.4)',
-              }}>Weights</span>
+              <span
+                style={{
+                  fontSize: '10px',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '2px',
+                  color: 'rgba(255,255,255,0.4)',
+                }}
+              >
+                Weights
+              </span>
             </div>
           </div>
           {dayWeights.length > 0 ? (
