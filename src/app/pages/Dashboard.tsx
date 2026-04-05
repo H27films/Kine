@@ -112,6 +112,21 @@ interface WeekData {
   days: number[];
 }
 
+// Returns Record<weekNumber, number[7]> — count of unique exercise_ids per day
+function groupWeightExerciseCounts(rows: { week: number; day: string; exercise_id: number }[]): Record<number, number[]> {
+  const map: Record<number, Set<number>[]> = {};
+  for (const r of rows) {
+    if (!map[r.week]) map[r.week] = Array.from({ length: 7 }, () => new Set<number>());
+    const idx = DAY_ORDER.indexOf(r.day);
+    if (idx >= 0) map[r.week][idx].add(r.exercise_id);
+  }
+  const result: Record<number, number[]> = {};
+  for (const [w, sets] of Object.entries(map)) {
+    result[Number(w)] = sets.map(s => s.size);
+  }
+  return result;
+}
+
 function groupByWeek(rows: { week: number; day: string; value: number }[]): WeekData[] {
   const map: Record<number, number[]> = {};
   for (const r of rows) {
@@ -128,7 +143,8 @@ const WeeklyChart: React.FC<{
   cardioWeeks: WeekData[];
   weightsWeeks: WeekData[];
   calorieWeeks: WeekData[];
-}> = ({ cardioWeeks, weightsWeeks, calorieWeeks }) => {
+  weightsExerciseCounts: Record<number, number[]>;
+}> = ({ cardioWeeks, weightsWeeks, calorieWeeks, weightsExerciseCounts }) => {
   const [activeTab, setActiveTab] = useState<ChartTab>('Cardio');
   const [selectedWeekNumber, setSelectedWeekNumber] = useState<number | null>(null);
 
@@ -267,10 +283,29 @@ const WeeklyChart: React.FC<{
                 barLabel = `${Math.round(val)}`;
               }
             }
+            const exerciseCount = activeTab === 'Weights' && effectiveWeekNumber !== null
+              ? (weightsExerciseCounts[effectiveWeekNumber]?.[i] ?? 0)
+              : 0;
             return (
               <div key={i} className="flex flex-col items-center h-full justify-end" style={{ flex: '1', maxWidth: '28px' }}>
                 <div style={{ fontSize: '7.5px', fontWeight: 700, color: 'rgba(255,255,255,0.6)', marginBottom: '4px' }}>{barLabel}</div>
-                <div className="w-full min-h-[4px] transition-all" style={{ height: `${pct * 100}%`, backgroundColor: barColor, borderRadius: '9999px 9999px 0 0' }} />
+                <div className="w-full relative transition-all" style={{ height: `${pct * 100}%`, backgroundColor: barColor, borderRadius: '9999px 9999px 0 0', minHeight: val > 0 ? '4px' : 0 }}>
+                  {activeTab === 'Weights' && exerciseCount > 0 && (
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '4px',
+                      left: 0,
+                      right: 0,
+                      textAlign: 'center',
+                      fontSize: '7px',
+                      fontWeight: 700,
+                      color: 'rgba(0,0,0,0.7)',
+                      lineHeight: 1,
+                    }}>
+                      {exerciseCount}
+                    </div>
+                  )}
+                </div>
                 <div style={{ fontSize: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#ffffff', marginTop: '8px' }}>{days[i]}</div>
               </div>
             );
@@ -294,6 +329,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
 
   const [cardioWeeks, setCardioWeeks] = useState<WeekData[]>([]);
   const [weightsWeeks, setWeightsWeeks] = useState<WeekData[]>([]);
+  const [weightsExerciseCounts, setWeightsExerciseCounts] = useState<Record<number, number[]>>({});
   const [calorieWeeks, setCalorieWeeks] = useState<WeekData[]>([]);
 
   const [activityWeeklyData, setActivityWeeklyData] = useState<Record<string, number[]>>({});
@@ -409,7 +445,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
 
       const { data: weightsData } = await supabase
         .from('workouts')
-        .select('week, day, total_weight')
+        .select('week, day, total_weight, exercise_id')
         .in('type', ['CHEST', 'BACK', 'LEGS'])
         .not('week', 'is', null)
         .not('day', 'is', null)
@@ -419,6 +455,9 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
       if (weightsData) {
         setWeightsWeeks(groupByWeek(
           (weightsData as any[]).map(r => ({ week: Number(r.week), day: r.day, value: Number(r.total_weight || 0) }))
+        ));
+        setWeightsExerciseCounts(groupWeightExerciseCounts(
+          (weightsData as any[]).map(r => ({ week: Number(r.week), day: r.day, exercise_id: Number(r.exercise_id) }))
         ));
       }
 
@@ -688,7 +727,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
       </section>
 
       <section className="mb-4 mt-8">
-        <WeeklyChart cardioWeeks={cardioWeeks} weightsWeeks={weightsWeeks} calorieWeeks={calorieWeeks} />
+        <WeeklyChart cardioWeeks={cardioWeeks} weightsWeeks={weightsWeeks} calorieWeeks={calorieWeeks} weightsExerciseCounts={weightsExerciseCounts} />
       </section>
 
       <section className="mt-8">
