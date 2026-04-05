@@ -80,6 +80,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [weekOffset, setWeekOffset] = useState(0);
+  const [weekNumber, setWeekNumber] = useState<number | null>(null);
 
   // Weekly calories chart data (7 days Mon-Sun current week)
   const [weeklyBars, setWeeklyBars] = useState<number[]>(Array(7).fill(0));
@@ -149,15 +150,18 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
 
       const { data } = await supabase
         .from('workouts')
-        .select('date, food_rating')
+        .select('date, food_rating, week')
         .eq('type', 'MEASUREMENT')
         .gte('date', fmt(monday))
         .lte('date', fmt(sunday))
         .order('date', { ascending: true });
 
       const ratings: (FoodRating | null)[] = Array(7).fill(null);
+      let wkNum: number | null = null;
       if (data) {
         for (const row of data as any[]) {
+          // Grab week number from first row that has it
+          if (wkNum === null && row.week) wkNum = Number(row.week);
           if (!row.food_rating) continue;
           const d = new Date(row.date + 'T12:00:00');
           const diffMs = d.getTime() - monday.getTime();
@@ -169,6 +173,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
         }
       }
       setWeeklyRatings(ratings);
+      setWeekNumber(wkNum);
     };
     loadRatings();
   }, [weekOffset]);
@@ -273,14 +278,16 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
               <div>
                 {/* FOOD RATING header: label + chevrons on left, week number on right */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <span className="text-[13px] uppercase tracking-[0.2em] font-black" style={{ color: '#ffffff' }}>Food Rating</span>
-                    <button onClick={() => setWeekOffset(o => o - 1)} style={{ background: 'none', border: 'none', padding: '0 2px', cursor: 'pointer', color: 'rgba(255,255,255,0.5)', fontSize: 16, lineHeight: 1 }}>‹</button>
-                    <button onClick={() => setWeekOffset(o => Math.min(o + 1, 0))} style={{ background: 'none', border: 'none', padding: '0 2px', cursor: 'pointer', color: weekOffset < 0 ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.2)', fontSize: 16, lineHeight: 1 }}>›</button>
+                    <button onClick={() => setWeekOffset(o => o - 1)} style={{ background: 'none', border: 'none', padding: '4px 4px', cursor: 'pointer', color: 'rgba(255,255,255,0.6)', fontSize: 22, lineHeight: 1 }}>‹</button>
+                    <button onClick={() => setWeekOffset(o => Math.min(o + 1, 0))} style={{ background: 'none', border: 'none', padding: '4px 4px', cursor: 'pointer', color: weekOffset < 0 ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.18)', fontSize: 22, lineHeight: 1 }}>›</button>
                   </div>
-                  <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#ffffff' }}>
-                    {getISOWeekNumber(getMondayAtOffset(weekOffset))}
-                  </span>
+                  {weekOffset < 0 && weekNumber !== null && (
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                      WEEK {weekNumber}
+                    </span>
+                  )}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
