@@ -204,19 +204,34 @@ const WeeklyChart: React.FC<{
 
   return (
     <div>
-      <div style={{
-        fontSize: '1.1rem',
-        fontWeight: 800,
-        letterSpacing: '0.18em',
-        textTransform: 'uppercase',
-        color: '#ffffff',
-        marginBottom: '0.85rem',
-      }}>
-        Weekly
+      {/* WEEKLY heading with chevrons + week number */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{
+            fontSize: '1.1rem',
+            fontWeight: 800,
+            letterSpacing: '0.18em',
+            textTransform: 'uppercase',
+            color: '#ffffff',
+          }}>Weekly</span>
+          <button onClick={onPrev} disabled={!canPrev} style={{ opacity: !canPrev ? 0.2 : 0.55, background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}>
+            <ChevronLeft size={18} color="white" />
+          </button>
+          <button onClick={onNext} disabled={!canNext} style={{ opacity: !canNext ? 0.2 : 0.55, background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}>
+            <ChevronRight size={18} color="white" />
+          </button>
+        </div>
+        <span style={{
+          fontSize: '1.1rem',
+          fontWeight: 900,
+          letterSpacing: '-0.02em',
+          color: '#ffffff',
+        }}>Wk {weekLabel}</span>
       </div>
 
       <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff' }}>
-        <div className="flex items-center justify-between mb-3">
+        {/* Tabs only — chevrons moved above */}
+        <div className="flex items-center mb-3">
           <div className="flex gap-4">
             {(['Cardio', 'Weights', 'Calories', 'Score'] as ChartTab[]).map(tab => (
               <button
@@ -239,15 +254,6 @@ const WeeklyChart: React.FC<{
                 {tab}
               </button>
             ))}
-          </div>
-          <div className="flex items-center gap-3">
-            <button onClick={onPrev} disabled={!canPrev} className="transition-opacity" style={{ opacity: !canPrev ? 0.2 : 0.6 }}>
-              <ChevronLeft size={16} color="white" />
-            </button>
-            <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '1.5px', color: 'rgba(255,255,255,0.5)', minWidth: '24px', textAlign: 'center' }}>{weekLabel}</span>
-            <button onClick={onNext} disabled={!canNext} className="transition-opacity" style={{ opacity: !canNext ? 0.2 : 0.6 }}>
-              <ChevronRight size={16} color="white" />
-            </button>
           </div>
         </div>
 
@@ -506,7 +512,6 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
         .limit(1000);
 
       if (scoreData) {
-        // Deduplicate by (week, day) — total_score is the same for all rows on a day
         const seen = new Set<string>();
         const deduped = (scoreData as any[]).filter(r => {
           const key = `${r.week}_${r.day}`;
@@ -529,7 +534,6 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
     ),
   ];
 
-  // When a pill is selected, show that activity's weekly km total instead of today's movement
   const weeklyActivityTotal = selectedActivity && activityWeeklyData[selectedActivity]
     ? +activityWeeklyData[selectedActivity].reduce((s, v) => s + v, 0).toFixed(1)
     : null;
@@ -537,14 +541,12 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
 
   return (
     <div className="-mt-2">
-      {/* WEEKLY SUMMARY BAR — toggled by tapping KINÉ in header */}
       {showWeeklySummary && (
         <div className="mb-6">
           <WeeklySummaryBar />
         </div>
       )}
 
-      {/* DATE SELECTOR */}
       <div className="flex justify-between items-center py-1 mb-1">
         {Array.from({ length: 7 }, (_, i) => {
           const now = new Date();
@@ -574,7 +576,6 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
       </div>
 
       <section className="pt-1 mb-4">
-        {/* Movement */}
         <div className="flex items-start">
           <div className="text-[4rem] font-black leading-none tracking-tighter text-white flex-shrink-0">
             {displayMovement > 0 ? displayMovement.toFixed(1) : '0.0'}
@@ -604,7 +605,6 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
           </div>
         </div>
 
-        {/* Cardio type pills — horizontal scroll on mobile */}
         <div
           style={{
             display: 'flex',
