@@ -113,8 +113,8 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
       {isDashboard ? (
         <button
           onClick={onToggleWeeklySummary}
-          className="absolute left-1/2 -translate-x-1/2 bottom-3 hover:opacity-70 transition-opacity"
-          style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+          className="absolute left-1/2 -translate-x-1/2 bottom-3"
+          style={{ background: 'none', border: 'none', cursor: 'pointer', WebkitTapHighlightColor: 'transparent' }}
         >
           <span
             className="text-xl font-black tracking-tighter text-white uppercase"
@@ -135,8 +135,8 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
           <div className="flex items-center justify-end w-12 pb-3">
             <button
               onClick={onToggleWeeklySummary}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-              className="hover:opacity-70 transition-opacity"
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, WebkitTapHighlightColor: 'transparent' }}
+              className=""
             >
               <span className="text-xl font-black tracking-tighter text-white uppercase">Kiné</span>
             </button>
