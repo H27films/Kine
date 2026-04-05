@@ -6,7 +6,8 @@ import { supabase, weeksAgoMonday } from '../../lib/supabase';
 
 type ChartTab = 'Cardio' | 'Weights' | 'Calories';
 
-const TOTAL_CARDIO_IDS = [82, 83, 87];
+const TOTAL_CARDIO_IDS = [82, 83, 87];          // Tracker + Row + Cycle
+const NO_TRACKER_CARDIO_IDS = [83, 84, 85, 86, 87]; // Row + Running + Walking + Cross Trainer + Cycle
 const DAY_ORDER = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
 const toTitleCase = (str: string) =>
@@ -273,15 +274,17 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
       setTodayActivities(activities);
 
       const hasTrackerToday = activities.some(a => a.exercise_name?.toUpperCase() === 'TRACKER');
+      const todayIds = hasTrackerToday ? TOTAL_CARDIO_IDS : NO_TRACKER_CARDIO_IDS;
       const totalCardio = activities
-        .filter(a => TOTAL_CARDIO_IDS.includes(a.exercise_id))
-        .reduce((s, a) => s + (hasTrackerToday ? a.total_cardio : a.km), 0);
+        .filter(a => todayIds.includes(a.exercise_id))
+        .reduce((s, a) => s + a.total_cardio, 0);
       setTotalMovement(+totalCardio.toFixed(1));
 
       const hasTrackerYesterday = yesterdayRows.some((r: any) => (r.exercises?.exercise_name || '').toUpperCase() === 'TRACKER');
+      const yestIds = hasTrackerYesterday ? TOTAL_CARDIO_IDS : NO_TRACKER_CARDIO_IDS;
       const yestTotal = yesterdayRows
-        .filter((r: any) => TOTAL_CARDIO_IDS.includes(r.exercise_id))
-        .reduce((s: number, r: any) => s + Number(hasTrackerYesterday ? (r.total_cardio || 0) : (r.km || 0)), 0);
+        .filter((r: any) => yestIds.includes(r.exercise_id))
+        .reduce((s: number, r: any) => s + Number(r.total_cardio || 0), 0);
       setYesterdayMovement(+yestTotal.toFixed(1));
     };
     loadCardio();
