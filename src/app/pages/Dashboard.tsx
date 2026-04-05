@@ -303,7 +303,7 @@ const WeeklyChart: React.FC<{
                         width: '16px',
                         height: '16px',
                         borderRadius: '50%',
-                        border: '1px solid rgba(0,0,0,0.25)',
+                        border: '1px solid rgba(0,0,0,0.65)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
