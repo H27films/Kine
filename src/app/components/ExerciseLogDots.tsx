@@ -218,8 +218,8 @@ const ExerciseLogDots: React.FC<Props> = ({ exercises, saveSuccess }) => {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'flex-end',
-        marginBottom: 6,
-        minHeight: 18,
+        marginBottom: 14,
+        minHeight: 24,
       }}
     >
       {ICON_KEYS.map(key => {

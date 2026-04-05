@@ -396,8 +396,18 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
         </section>
       )}
 
+      {saveError && <p className="text-red-400 text-sm mb-4 text-center">{saveError}</p>}
+
+      <button
+        onClick={handleCommit}
+        disabled={saving || !hasAnyInput}
+        className="w-full rounded-full py-5 text-[0.75rem] uppercase tracking-[0.4em] font-black active:scale-95 transition-all"
+        style={{ backgroundColor: saveSuccess ? '#22c55e' : '#ffffff', color: '#000000', boxShadow: '0 12px 32px rgba(0,0,0,0.4)', opacity: saving || !hasAnyInput ? 0.6 : 1, marginBottom: 48 }}>
+        {saving ? 'Saving...' : saveSuccess ? '✓ Session Saved!' : 'Log Session'}
+      </button>
+
       {/* 30-day chart */}
-      <section className="mb-12" style={{ marginTop: isRunning ? 0 : 48 }}>
+      <section className="mb-12" style={{ marginTop: isRunning ? 0 : 0 }}>
         <div style={{ paddingLeft: '2px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: 4 }}>
           <span style={{ fontSize: '14px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', color: '#ffffff' }}>Movement</span>
           <button
@@ -530,15 +540,6 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
       {/* Per-type cardio chart */}
       <CardioTypeChart />
 
-      {saveError && <p className="text-red-400 text-sm mb-4 text-center">{saveError}</p>}
-
-      <button
-        onClick={handleCommit}
-        disabled={saving || !hasAnyInput}
-        className="w-full rounded-full py-5 text-[0.75rem] uppercase tracking-[0.4em] font-black active:scale-95 transition-all"
-        style={{ backgroundColor: saveSuccess ? '#22c55e' : '#ffffff', color: '#000000', boxShadow: '0 12px 32px rgba(0,0,0,0.4)', opacity: saving || !hasAnyInput ? 0.6 : 1 }}>
-        {saving ? 'Saving...' : saveSuccess ? '✓ Session Saved!' : 'Log Session'}
-      </button>
     </div>
   );
 };
