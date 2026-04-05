@@ -15,6 +15,11 @@ const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>('dashboard');
   const [showWeeklySummary, setShowWeeklySummary] = useState(false);
 
+  // Reset summary whenever user navigates to a different page
+  React.useEffect(() => {
+    setShowWeeklySummary(false);
+  }, [currentPage]);
+
   const getHeaderTitle = (): string => {
     switch (currentPage) {
       case 'dashboard': return '';
@@ -63,7 +68,11 @@ const App: React.FC = () => {
         className="pb-32 px-4 max-w-lg mx-auto"
         style={{ paddingTop: 'calc(5rem + env(safe-area-inset-top))' }}
       >
-        {showWeeklySummary && currentPage !== 'dashboard' && <WeeklySummaryBar />}
+        {showWeeklySummary && currentPage !== 'dashboard' && (
+          <div style={{ marginBottom: 20 }}>
+            <WeeklySummaryBar />
+          </div>
+        )}
         {renderPage()}
       </main>
       <BottomNav currentPage={currentPage} onNavigate={setCurrentPage} />

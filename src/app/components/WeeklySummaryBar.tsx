@@ -26,14 +26,20 @@ interface ProgressRingProps {
 }
 
 const ProgressRing: React.FC<ProgressRingProps> = ({ label, value, pct }) => {
-  const size = 60;
+  const size = 72;
   const strokeWidth = 4;
-  const radius = 24;
+  const radius = 29;
   const circumference = 2 * Math.PI * radius;
   const clampedPct = Math.min(Math.max(pct, 0), 1);
   const pctDisplay = Math.round(clampedPct * 100);
   const offset = circumference * (1 - clampedPct);
   const filterId = `arc-glow-${label.toLowerCase().replace(/\s+/g, '-')}`;
+
+  // Split value into number part + unit (last word)
+  const valueParts = value.trim().split(' ');
+  const hasUnit = valueParts.length > 1;
+  const numericPart = hasUnit ? valueParts.slice(0, -1).join(' ') : value;
+  const unitPart = hasUnit ? valueParts[valueParts.length - 1] : '';
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
@@ -116,20 +122,21 @@ const ProgressRing: React.FC<ProgressRingProps> = ({ label, value, pct }) => {
         </div>
       </div>
 
-      {/* Total value below ring */}
+      {/* Total value below ring — number bright white, unit grey */}
       <div
         style={{
           fontFamily: "'Space Grotesk', sans-serif",
           fontSize: '13px',
           fontWeight: 700,
-          color: 'rgba(255,255,255,0.95)',
           letterSpacing: '0.5px',
           textAlign: 'center',
           lineHeight: 1,
-          textTransform: 'uppercase',
         }}
       >
-        {value}
+        <span style={{ color: 'rgba(255,255,255,0.95)' }}>{numericPart}</span>
+        {hasUnit && (
+          <span style={{ color: 'rgba(255,255,255,0.4)', marginLeft: 2 }}>{unitPart}</span>
+        )}
       </div>
     </div>
   );
