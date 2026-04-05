@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 import { Page } from '../../types';
-import { supabase, Exercise, todayStr, getISOWeek, getDayName, currentWeekMonday, recalculateDailyTotals } from '../../lib/supabase';
+import { supabase, Exercise, todayStr, getISOWeek, getDayName, currentWeekMonday, weeksAgoMonday, recalculateDailyTotals } from '../../lib/supabase';
 import { CardioTypeChart } from '../components/CardioTypeChart';
 import TrackerSparkline from '../components/TrackerSparkline';
 import ExerciseIconBar from '../components/ExerciseIconBar';
@@ -33,6 +33,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [weeklyTotal, setWeeklyTotal] = useState<number>(0);
+  const [lastWeekTotal, setLastWeekTotal] = useState<number>(0);
 
   const [weekChartData, setWeekChartData] = useState<number[]>(Array(7).fill(0));
   const [thirtyDayData, setThirtyDayData] = useState<{ date: string; total: number }[]>([]);
@@ -77,6 +78,25 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
       }
     };
     loadWeeklyTotal();
+  }, [saveSuccess]);
+
+  useEffect(() => {
+    const loadLastWeekTotal = async () => {
+      const lastMonday = weeksAgoMonday(1);
+      const thisMonday = currentWeekMonday();
+      const { data } = await supabase
+        .from('workouts')
+        .select('total_cardio')
+        .eq('type', 'CARDIO')
+        .in('exercise_id', TOTAL_CARDIO_IDS)
+        .gte('date', lastMonday)
+        .lt('date', thisMonday);
+      if (data) {
+        const total = (data as any[]).reduce((sum, r) => sum + Number(r.total_cardio || 0), 0);
+        setLastWeekTotal(+total.toFixed(2));
+      }
+    };
+    loadLastWeekTotal();
   }, [saveSuccess]);
 
   const DAY_ORDER = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
@@ -258,25 +278,30 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
         })}
       </nav>
 
-      {/* Header: TRACKER row, full-width chart, full-width input */}
+      {/* Header: big number + MOVEMENT label, full-width chart, full-width input */}
       <header className="mb-6">
 
-        {/* Row 1: TRACKER left (tappable), weekly total right */}
-        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 14 }}>
-          <h1
-            className="leading-none text-white"
-            style={{ fontSize: '1.6rem', fontWeight: 600, letterSpacing: '0.18em', cursor: 'pointer' }}
-            onClick={() => setTrackerInputVisible(v => !v)}
-          >TRACKER</h1>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-            <span style={{ fontSize: '1.5rem', fontWeight: 600, color: '#ffffff', letterSpacing: '-0.02em', lineHeight: 1 }}>
-              {weeklyTotal.toFixed(1)}
-            </span>
-            <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.04em' }}>(KM)</span>
+        {/* Row 1: Big number left, MOVEMENT (KM) label right (tappable to toggle input) */}
+        <div className="flex items-start" style={{ marginBottom: 14 }}>
+          <div className="text-[3.25rem] font-black leading-none tracking-tighter text-white flex-shrink-0">
+            {weeklyTotal.toFixed(1)}
+          </div>
+          <div className="flex flex-col justify-center ml-4 pt-3 flex-1 min-w-0">
+            <div
+              style={{ fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2.5px', color: '#ffffff', cursor: 'pointer' }}
+              onClick={() => setTrackerInputVisible(v => !v)}
+            >
+              MOVEMENT (KM)
+            </div>
+            {lastWeekTotal > 0 && (
+              <div className="text-[11px] font-medium mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                Last week {lastWeekTotal.toFixed(1)} km
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Row 2: Full-width distance input — shown when TRACKER tapped */}
+        {/* Row 2: Full-width distance input — shown when MOVEMENT tapped */}
         {trackerInputVisible && <div style={{ marginBottom: 14 }}>
           <div className="flex items-baseline gap-3">
             <input
