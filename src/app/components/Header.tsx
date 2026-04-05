@@ -55,10 +55,17 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
 
   return (
     <header
-      className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-5 h-16"
-      style={{ backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)' }}
+      className="fixed top-0 left-0 right-0 z-50 flex justify-between items-end px-5"
+      style={{
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        backdropFilter: 'blur(24px)',
+        WebkitBackdropFilter: 'blur(24px)',
+        paddingTop: 'env(safe-area-inset-top)',
+        height: 'calc(4rem + env(safe-area-inset-top))',
+        paddingBottom: '0',
+      }}
     >
-      <div className="relative flex items-center w-12" ref={menuRef}>
+      <div className="relative flex items-center w-12 pb-3" ref={menuRef}>
         {onBack ? (
           <button onClick={onBack} className="hover:opacity-80 transition-opacity">
             <ArrowLeft size={22} color="white" />
@@ -106,7 +113,7 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
       {isDashboard ? (
         <button
           onClick={onToggleWeeklySummary}
-          className="absolute left-1/2 -translate-x-1/2 hover:opacity-70 transition-opacity"
+          className="absolute left-1/2 -translate-x-1/2 bottom-3 hover:opacity-70 transition-opacity"
           style={{ background: 'none', border: 'none', cursor: 'pointer' }}
         >
           <span
@@ -118,14 +125,14 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
         </button>
       ) : (
         <>
-          <div className="absolute left-1/2 -translate-x-1/2">
+          <div className="absolute left-1/2 -translate-x-1/2 bottom-3">
             {isLogPage && logIcon ? (
               logIcon
             ) : (
               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white">{title}</span>
             )}
           </div>
-          <div className="flex items-center justify-end w-12">
+          <div className="flex items-center justify-end w-12 pb-3">
             <span className="text-xl font-black tracking-tighter text-white uppercase">Kiné</span>
           </div>
         </>

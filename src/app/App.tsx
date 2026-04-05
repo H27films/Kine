@@ -58,7 +58,10 @@ const App: React.FC = () => {
         onToggleWeeklySummary={() => setShowWeeklySummary(v => !v)}
         showWeeklySummary={showWeeklySummary}
       />
-      <main className="pt-20 pb-32 px-4 max-w-lg mx-auto">
+      <main
+        className="pb-32 px-4 max-w-lg mx-auto"
+        style={{ paddingTop: 'calc(5rem + env(safe-area-inset-top))' }}
+      >
         {renderPage()}
       </main>
       <BottomNav currentPage={currentPage} onNavigate={setCurrentPage} />
