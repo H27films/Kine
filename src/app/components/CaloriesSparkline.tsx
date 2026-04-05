@@ -28,7 +28,7 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars, expanded = false, onCl
           cursor: 'pointer',
         }}
       >
-        {/* Avg label top right */}
+        {/* Header: TOTAL CALORIES left, avg right */}
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
@@ -36,12 +36,12 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars, expanded = false, onCl
           marginBottom: 4,
         }}>
           <span style={{
-            fontSize: '10px',
-            fontWeight: 700,
-            letterSpacing: '0.15em',
-            color: 'rgba(255,255,255,0.3)',
+            fontSize: '13px',
+            fontWeight: 900,
+            letterSpacing: '0.2em',
+            color: '#ffffff',
             textTransform: 'uppercase',
-          }}>Tap to collapse</span>
+          }}>Total Calories</span>
           <div style={{
             fontFamily: "'Inter', sans-serif",
             fontSize: '17px',
@@ -55,38 +55,27 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars, expanded = false, onCl
           </div>
         </div>
 
-        {/* Expanded bars with day labels + value labels */}
+        {/* Expanded bars — only days with data */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {weeklyBars.map((val, i) => {
+            if (val <= 0) return null; // skip days with no data
             const rawPct = rawMax > 0 ? val / rawMax : 0;
-            const brightness = val > 0 ? Math.round(80 + rawPct * 175) : 0;
-            const barColor = val > 0 ? `rgb(${brightness},${brightness},${brightness})` : 'rgba(255,255,255,0.05)';
-            const fillPct = val > 0 ? Math.max(rawPct * 100, 4) : 0;
+            const brightness = Math.round(80 + rawPct * 175);
+            const barColor = `rgb(${brightness},${brightness},${brightness})`;
+            const fillPct = Math.max(rawPct * 100, 8);
 
             return (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                {/* Day label */}
-                <span style={{
-                  width: 12,
-                  fontSize: '11px',
-                  fontWeight: 700,
-                  letterSpacing: '0.05em',
-                  color: 'rgba(255,255,255,0.35)',
-                  flexShrink: 0,
-                  textAlign: 'center',
-                }}>
-                  {DAY_LABELS[i]}
-                </span>
-
-                {/* Bar track */}
+                {/* Bar track — grows right to left */}
                 <div style={{
                   flex: 1,
-                  height: 18,
+                  height: 20,
                   backgroundColor: 'rgba(255,255,255,0.05)',
                   borderRadius: '9999px 0 0 9999px',
                   overflow: 'hidden',
                   position: 'relative',
                 }}>
+                  {/* Fill */}
                   <div style={{
                     position: 'absolute',
                     right: 0,
@@ -97,19 +86,34 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars, expanded = false, onCl
                     borderRadius: '9999px 0 0 9999px',
                     transition: 'width 0.3s ease',
                   }} />
+                  {/* Value label inside bar at rounded left end */}
+                  <span style={{
+                    position: 'absolute',
+                    left: `calc(${100 - fillPct}% + 8px)`,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    fontSize: '10px',
+                    fontWeight: 800,
+                    letterSpacing: '-0.02em',
+                    color: brightness > 160 ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.85)',
+                    whiteSpace: 'nowrap',
+                    pointerEvents: 'none',
+                  }}>
+                    {val.toLocaleString()}
+                  </span>
                 </div>
 
-                {/* Value label */}
+                {/* Day label — right, bright white */}
                 <span style={{
-                  width: 38,
-                  fontSize: '11px',
+                  width: 14,
+                  fontSize: '12px',
                   fontWeight: 700,
-                  letterSpacing: '-0.02em',
-                  color: val > 0 ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.15)',
+                  letterSpacing: '0.05em',
+                  color: '#ffffff',
                   flexShrink: 0,
                   textAlign: 'right',
                 }}>
-                  {val > 0 ? val.toLocaleString() : '—'}
+                  {DAY_LABELS[i]}
                 </span>
               </div>
             );
