@@ -262,7 +262,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
               let border = '1.5px solid rgba(255,255,255,0.15)';
               let textColor = 'rgba(255,255,255,0.2)';
               let glowShadow = 'none';
-              if (rating === 'good') { border = '2px solid #4ade80'; textColor = '#4ade80'; glowShadow = '0 0 8px rgba(74,222,128,0.75), 0 0 18px rgba(74,222,128,0.3)'; }
+              if (rating === 'good') { border = '2px solid #7fead8'; textColor = '#7fead8'; glowShadow = '0 0 8px rgba(127,234,216,0.75), 0 0 18px rgba(127,234,216,0.3)'; }
               else if (rating === 'bad') { border = '2px solid #ef4444'; textColor = '#ef4444'; glowShadow = '0 0 8px rgba(239,68,68,0.75), 0 0 18px rgba(239,68,68,0.3)'; }
               else if (rating === 'ok') { border = '2px solid rgba(255,255,255,0.75)'; textColor = 'rgba(255,255,255,0.9)'; glowShadow = '0 0 8px rgba(255,255,255,0.45), 0 0 18px rgba(255,255,255,0.15)'; }
               const showLine = i > 0 && rating !== null && prevRating !== null;
