@@ -218,7 +218,7 @@ export const WeeklySummaryBar: React.FC = () => {
         label="Cal"
         value={
           stats.avgCalories !== null
-            ? `${stats.avgCalories.toLocaleString()} CAL`
+            ? `${stats.avgCalories.toLocaleString()} KCAL`
             : '\u2014'
         }
         pct={stats.avgCalories !== null ? stats.avgCalories / TARGETS.cal : 0}
