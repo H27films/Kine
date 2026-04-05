@@ -293,16 +293,27 @@ const WeeklyChart: React.FC<{
                   {activeTab === 'Weights' && exerciseCount > 0 && (
                     <div style={{
                       position: 'absolute',
-                      bottom: '4px',
+                      bottom: '5px',
                       left: 0,
                       right: 0,
-                      textAlign: 'center',
-                      fontSize: '9px',
-                      fontWeight: 700,
-                      color: 'rgba(0,0,0,0.7)',
-                      lineHeight: 1,
+                      display: 'flex',
+                      justifyContent: 'center',
                     }}>
-                      {exerciseCount}
+                      <div style={{
+                        width: '16px',
+                        height: '16px',
+                        borderRadius: '50%',
+                        border: '1px solid rgba(0,0,0,0.25)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        color: 'rgba(0,0,0,0.75)',
+                        lineHeight: 1,
+                      }}>
+                        {exerciseCount}
+                      </div>
                     </div>
                   )}
                 </div>
