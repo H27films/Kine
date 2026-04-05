@@ -226,10 +226,10 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
     }
   };
 
-  const ratingButtons: { label: string; value: 'bad' | 'ok' | 'good' }[] = [
-    { label: 'Bad', value: 'bad' },
-    { label: 'Ok', value: 'ok' },
-    { label: 'Good', value: 'good' },
+  const ratingButtons: { label: string; value: 'BAD' | 'OK' | 'GOOD' }[] = [
+    { label: 'BAD', value: 'BAD' },
+    { label: 'OK', value: 'OK' },
+    { label: 'GOOD', value: 'GOOD' },
   ];
 
   const weeklyMax = Math.max(...weeklyBars, 1);
