@@ -776,8 +776,8 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
       </section>
 
       <section className="mb-4">
-        <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff' }}>
-          <div className="flex items-center justify-between mb-4">
+        <div className={`rounded-lg ${dayWeights.length > 0 ? 'p-5' : 'p-3'}`} style={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff' }}>
+          <div className={`flex items-center justify-between ${dayWeights.length > 0 ? 'mb-4' : 'mb-0'}`}>
             <div className="flex items-center gap-2">
               <Dumbbell size={16} color="white" />
               <span style={{
@@ -804,7 +804,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
               </div>
             </>
           ) : (
-            <div className="text-[13px] text-white/30 font-medium py-4">No weights logged</div>
+            <div className="text-[13px] text-white/30 font-medium py-1">No weights logged</div>
           )}
         </div>
       </section>
