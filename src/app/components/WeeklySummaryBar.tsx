@@ -27,45 +27,65 @@ interface ProgressRingProps {
 
 const ProgressRing: React.FC<ProgressRingProps> = ({ label, value, pct }) => {
   const size = 60;
-  const strokeWidth = 5;
-  const radius = (size - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
+  const dotCount = 20;
+  const ringRadius = 24;
+  const dotRadius = 2.2;
   const clampedPct = Math.min(Math.max(pct, 0), 1);
-  const offset = circumference * (1 - clampedPct);
+  const filledCount = Math.round(clampedPct * dotCount);
   const pctDisplay = Math.round(clampedPct * 100);
+  const filterId = `dot-glow-${label.toLowerCase().replace(/\s+/g, '-')}`;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
       <div style={{ position: 'relative', width: size, height: size }}>
-        <svg
-          width={size}
-          height={size}
-          style={{ transform: 'rotate(-90deg)', display: 'block' }}
-        >
-          {/* Background track */}
-          <circle
-            cx={size / 2}
-            cy={size / 2}
-            r={radius}
-            fill="none"
-            stroke="rgba(255,255,255,0.07)"
-            strokeWidth={strokeWidth}
-          />
-          {/* Progress arc */}
-          {clampedPct > 0 && (
-            <circle
-              cx={size / 2}
-              cy={size / 2}
-              r={radius}
-              fill="none"
-              stroke="rgba(200, 220, 255, 0.95)"
-              strokeWidth={strokeWidth}
-              strokeLinecap="round"
-              strokeDasharray={circumference}
-              strokeDashoffset={offset}
-            />
-          )}
+        <svg width={size} height={size} style={{ display: 'block' }}>
+          <defs>
+            <filter id={filterId} x="-80%" y="-80%" width="260%" height="260%">
+              <feGaussianBlur stdDeviation="1.8" result="coloredBlur" />
+              <feMerge>
+                <feMergeNode in="coloredBlur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+
+          {/* Empty dots */}
+          {Array.from({ length: dotCount }, (_, i) => {
+            if (i < filledCount) return null;
+            const angle = (i / dotCount) * 2 * Math.PI - Math.PI / 2;
+            const cx = size / 2 + ringRadius * Math.cos(angle);
+            const cy = size / 2 + ringRadius * Math.sin(angle);
+            return (
+              <circle
+                key={i}
+                cx={cx}
+                cy={cy}
+                r={dotRadius}
+                fill="rgba(255,255,255,0.08)"
+              />
+            );
+          })}
+
+          {/* Filled dots with glow */}
+          <g filter={`url(#${filterId})`}>
+            {Array.from({ length: dotCount }, (_, i) => {
+              if (i >= filledCount) return null;
+              const angle = (i / dotCount) * 2 * Math.PI - Math.PI / 2;
+              const cx = size / 2 + ringRadius * Math.cos(angle);
+              const cy = size / 2 + ringRadius * Math.sin(angle);
+              return (
+                <circle
+                  key={i}
+                  cx={cx}
+                  cy={cy}
+                  r={dotRadius}
+                  fill="rgba(200,220,255,0.95)"
+                />
+              );
+            })}
+          </g>
         </svg>
+
         {/* Centre label + % */}
         <div
           style={{
@@ -104,6 +124,7 @@ const ProgressRing: React.FC<ProgressRingProps> = ({ label, value, pct }) => {
           </div>
         </div>
       </div>
+
       {/* Total value below ring */}
       <div
         style={{

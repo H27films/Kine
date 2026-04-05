@@ -548,7 +548,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
         </div>
       )}
 
-      <div className="flex justify-between items-center py-1 mb-1">
+      {!showWeeklySummary && <div className="flex justify-between items-center py-1 mb-1">
         {Array.from({ length: 7 }, (_, i) => {
           const now = new Date();
           const d = new Date();
@@ -574,7 +574,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
             </div>
           );
         })}
-      </div>
+      </div>}
 
       <section className="pt-1 mb-4">
         <div className="flex items-start">
