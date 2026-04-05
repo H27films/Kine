@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Dumbbell, ChevronLeft, ChevronRight, Bike, Footprints, Waves } from 'lucide-react';
+import { Dumbbell, ChevronLeft, ChevronRight, Footprints } from 'lucide-react';
 import { DailyActivityCards } from '../components/DailyActivityCards';
 import { WeeklySummaryBar } from '../components/WeeklySummaryBar';
 import { supabase, weeksAgoMonday } from '../../lib/supabase';
@@ -17,20 +17,75 @@ const CARDIO_DISPLAY: Record<string, { label: string; icon: React.ReactNode }> =
   RUNNING: {
     label: 'Run',
     icon: (
-      <svg width="20" height="20" viewBox="0 0 512 512" fill="currentColor">
-        <path d="M393.1 144.1c11.3 7.8 26.8 5.1 34.6-6.2 7.8-11.3 5.1-26.8-6.2-34.6-21.7-15-46.7-22.1-72-20.5-24.8 1.6-48.4 11.2-66.5 27.2-4 3.5-7.7 7.4-11.1 11.5l-33.8 41.2c-5.9 7.2-15.5 10.4-24.6 8.3L153 158.2c-12.8-2.9-25.5 5.2-28.4 17.9s5.2 25.5 17.9 28.4l60.5 13.9c18.3 4.2 37.5-2.2 49.3-16.6l31.5-38.4c5.1-4.5 11-8 17.3-10.3 22.4-8 47.9-5.1 68.3 9l23.7 12zM154.5 281.3c-1.8-1.4-3.5-2.8-5.2-4.3l-55.7-49c-10.1-8.9-25.3-7.8-34.1 2.3s-7.8 25.3 2.3 34.1l55.7 49c8.2 7.2 16.9 13.6 26.2 19.1l80.5 47.8c11.9 7.1 27.1 3 34.2-8.9s3-27.1-8.9-34.2l-80.5-47.8c-4.9-2.9-9.7-6.2-14.5-8.1zM404.1 364.2l-123-146.1c-9.1-10.8-25.2-12.2-36-3.1s-12.2 25.2-3.1 36l123 146.1c5.9 7.1 13.1 13 21.2 17.4l83.6 45.4c11.7 6.3 26.4 1.9 32.7-9.8s1.9-26.4-9.8-32.7l-83.6-45.4c-1.7-.9-3.4-1.6-5-2.8z" />
+      <svg width="18" height="18" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="25" y="18" width="35" height="3" rx="1.5" fill="white"/>
+        <rect x="15" y="28" width="25" height="3" rx="1.5" fill="white"/>
+        <rect x="5" y="38" width="30" height="3" rx="1.5" fill="white"/>
+        <rect x="20" y="48" width="25" height="3" rx="1.5" fill="white"/>
+        <rect x="15" y="58" width="25" height="3" rx="1.5" fill="white"/>
+        <circle cx="72" cy="22" r="6" fill="white"/>
+        <path d="M48 38L65 28L75 35L85 45" stroke="white" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M65 28L55 45L40 38" stroke="white" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M55 45L65 65L70 85" stroke="white" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M55 45L45 55L22 62" stroke="white" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
     ),
   },
-  ROW: { label: 'Row', icon: <Waves size={18} /> },
-  CYCLE: { label: 'Cycle', icon: <Bike size={18} /> },
-  WALKING: { label: 'Walk', icon: <Footprints size={18} /> },
+  ROW: {
+    label: 'Row',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="25" r="5" fill="white"/>
+        <path d="M50 30L45 50L55 55L65 45" stroke="white" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M45 50L40 60H55" stroke="white" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M65 45L75 45V35" stroke="white" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M30 65H80" stroke="white" strokeWidth="5" strokeLinecap="round"/>
+      </svg>
+    ),
+  },
+  CYCLE: {
+    label: 'Cycle',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="25" cy="70" r="15" stroke="white" strokeWidth="5"/>
+        <circle cx="75" cy="70" r="15" stroke="white" strokeWidth="5"/>
+        <path d="M25 70L45 45H65L75 70" stroke="white" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M45 45L55 30H65" stroke="white" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
+        <circle cx="55" cy="25" r="4" fill="white"/>
+      </svg>
+    ),
+  },
+  WALKING: {
+    label: 'Walk',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M40 70C40 80 30 85 25 80C20 75 25 60 30 50C35 40 45 40 45 50C45 60 40 60 40 70Z" fill="white"/>
+        <circle cx="25" cy="40" r="3" fill="white"/>
+        <circle cx="32" cy="35" r="3" fill="white"/>
+        <circle cx="40" cy="35" r="3" fill="white"/>
+        <circle cx="48" cy="40" r="3" fill="white"/>
+        <path d="M60 70C60 80 70 85 75 80C80 75 75 60 70 50C65 40 55 40 55 50C55 60 60 60 60 70Z" fill="white"/>
+        <circle cx="75" cy="40" r="3" fill="white"/>
+        <circle cx="68" cy="35" r="3" fill="white"/>
+        <circle cx="60" cy="35" r="3" fill="white"/>
+        <circle cx="52" cy="40" r="3" fill="white"/>
+      </svg>
+    ),
+  },
   'CROSS TRAINER': {
     label: 'Cross-Trainer',
     icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M5 12h14" />
-        <path d="M12 5l7 7-7 7" />
+      <svg width="18" height="18" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="20" y="75" width="50" height="8" fill="white"/>
+        <rect x="35" y="70" width="35" height="5" fill="white"/>
+        <rect x="56" y="65" width="14" height="5" fill="white"/>
+        <path d="M62 65V45L68 40" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+        <circle cx="47" cy="23" r="6" fill="white"/>
+        <path d="M47 28L40 45" stroke="white" strokeWidth="9" strokeLinecap="round"/>
+        <path d="M47 30L55 38L60 38" stroke="white" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M47 30L35 35L28 42" stroke="white" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M40 45L45 55L52 65" stroke="white" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M40 45L35 60L28 70" stroke="white" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
     ),
   },
@@ -485,8 +540,9 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
           {visibleCardioKeys.map(key => {
             const display = CARDIO_DISPLAY[key];
             if (!display) return null;
-            const activity = todayActivities.find(a => a.exercise_name === key);
-            const hasData = !!(activity && activity.km > 0);
+            const matching = todayActivities.filter(a => a.exercise_name === key);
+            const totalKm = +matching.reduce((s, a) => s + a.km, 0).toFixed(1);
+            const hasData = totalKm > 0;
             const isSelected = selectedActivity === key;
             return (
               <div
@@ -503,7 +559,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
                   color: '#ffffff',
                   whiteSpace: 'nowrap',
                 }}>
-                  {display.label}{hasData ? ` ${activity!.km}km` : ''}
+                  {display.label}{hasData ? ` ${totalKm}km` : ''}
                 </div>
               </div>
             );
