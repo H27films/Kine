@@ -50,15 +50,6 @@ const FoodScoreCircle: React.FC<{ pct: number; size?: number }> = ({ pct, size =
   );
 };
 
-// Get ISO week number for a given date
-const getISOWeekNumber = (d: Date): number => {
-  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-  const day = date.getUTCDay() || 7;
-  date.setUTCDate(date.getUTCDate() + 4 - day);
-  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
-  return Math.ceil((((date.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
-};
-
 // Get Monday of week at offset (0 = current, -1 = last week, etc.)
 const getMondayAtOffset = (offset: number): Date => {
   const today = new Date();
@@ -146,7 +137,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
       const monday = getMondayAtOffset(weekOffset);
       const sunday = new Date(monday);
       sunday.setDate(monday.getDate() + 6);
-      const fmt = (d: Date) => d.toISOString().split('T')[0];
+      const fmt = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
       const { data } = await supabase
         .from('workouts')
