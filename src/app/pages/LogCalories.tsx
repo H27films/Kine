@@ -20,6 +20,36 @@ type FoodRating = 'bad' | 'ok' | 'good' | null;
 // MEASUREMENT exercise IDs (from the exercises table)
 const CALORIES_EXERCISE_ID = 90;
 
+// Dotted percentage ring — matches the dark minimal design
+const FoodScoreCircle: React.FC<{ pct: number; size?: number }> = ({ pct, size = 54 }) => {
+  const N = 20;
+  const cx = size / 2;
+  const cy = size / 2;
+  const r = size / 2 - 5.5;
+  const dotR = 2.8;
+  const filled = Math.round(pct * N);
+  const pctDisplay = Math.round(pct * 100);
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      {Array.from({ length: N }, (_, i) => {
+        const angle = (i / N) * 2 * Math.PI - Math.PI / 2;
+        const x = cx + r * Math.cos(angle);
+        const y = cy + r * Math.sin(angle);
+        return (
+          <circle
+            key={i}
+            cx={x} cy={y} r={dotR}
+            fill={i < filled ? 'rgba(255,255,255,0.90)' : 'rgba(255,255,255,0.10)'}
+          />
+        );
+      })}
+      <text x={cx} y={cy + 4} textAnchor="middle" fill="rgba(255,255,255,0.80)" fontSize="11" fontWeight="700">
+        {pctDisplay}%
+      </text>
+    </svg>
+  );
+};
+
 export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
   const [calories, setCalories] = useState('');
   const [chartExpanded, setChartExpanded] = useState(false);
@@ -202,23 +232,30 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
 
         {/* Food Rating group: score + circles + buttons together */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {/* FOOD RATING label + score number */}
+          {/* FOOD RATING label + score number + percentage circle */}
           {(() => {
             const foodScore = weeklyRatings.reduce((sum, r) => sum + (r === 'good' ? 3 : r === 'ok' ? 2 : r === 'bad' ? 1 : 0), 0);
+            const daysWithRating = weeklyRatings.filter(r => r !== null).length;
+            const maxScore = daysWithRating > 0 ? daysWithRating * 3 : 21;
+            const pct = daysWithRating > 0 ? foodScore / maxScore : 0;
             return (
               <div>
                 <label className="block text-[13px] uppercase tracking-[0.2em] font-black mb-4" style={{ color: '#ffffff' }}>Food Rating</label>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-                  <span className="text-7xl font-black tracking-tighter text-white" style={{ lineHeight: 1 }}>{foodScore}</span>
-                  <span className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: 'rgba(161,161,170,1)' }}>/21</span>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+                    <span className="text-7xl font-black tracking-tighter text-white" style={{ lineHeight: 1 }}>{foodScore}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: 'rgba(161,161,170,1)' }}>/{maxScore}</span>
+                  </div>
+                  {daysWithRating > 0 && <FoodScoreCircle pct={pct} />}
                 </div>
               </div>
             );
           })()}
-          {/* Weekly food rating circles — edge-to-edge */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+          {/* Weekly food rating circles — with connecting lines between days that have data */}
+          <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
             {['M','T','W','T','F','S','S'].map((day, i) => {
               const rating = weeklyRatings[i];
+              const prevRating = i > 0 ? weeklyRatings[i - 1] : null;
               const today = new Date();
               const todayIdx = today.getDay() === 0 ? 6 : today.getDay() - 1;
               const isFuture = i > todayIdx;
@@ -227,16 +264,26 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
               if (rating === 'good') { border = '2px solid #16a34a'; textColor = '#16a34a'; }
               else if (rating === 'bad') { border = '2px solid #dc2626'; textColor = '#dc2626'; }
               else if (rating === 'ok') { border = '2px solid rgba(255,255,255,0.6)'; textColor = 'rgba(255,255,255,0.85)'; }
+              const showLine = i > 0 && rating !== null && prevRating !== null;
               return (
-                <div key={i} style={{
-                  width: 28, height: 28, borderRadius: '50%',
-                  backgroundColor: 'transparent', border,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  opacity: isFuture && !rating ? 0.3 : 1,
-                  flexShrink: 0,
-                }}>
-                  <span style={{ fontSize: '8px', fontWeight: 800, color: textColor, letterSpacing: '0.05em' }}>{day}</span>
-                </div>
+                <React.Fragment key={i}>
+                  {i > 0 && (
+                    <div style={{
+                      flex: 1,
+                      height: 1.5,
+                      backgroundColor: showLine ? 'rgba(255,255,255,0.28)' : 'transparent',
+                    }} />
+                  )}
+                  <div style={{
+                    width: 28, height: 28, borderRadius: '50%',
+                    backgroundColor: 'transparent', border,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    opacity: isFuture && !rating ? 0.3 : 1,
+                    flexShrink: 0,
+                  }}>
+                    <span style={{ fontSize: '8px', fontWeight: 800, color: textColor, letterSpacing: '0.05em' }}>{day}</span>
+                  </div>
+                </React.Fragment>
               );
             })}
           </div>
