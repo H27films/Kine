@@ -1,115 +1,63 @@
 import React from 'react';
 
 interface Props {
-  weeklyBars: number[];
+  weeklyBars: number[]; // 7 values Mon–Sun
 }
 
 const CaloriesSparkline: React.FC<Props> = ({ weeklyBars }) => {
-  const BASE_CAL = 500;
-  const VW = 200;
-  const VH = 90;
-  const padTop = 22;
-  const padBottom = 8;
-  const padLeft = 6;
-  const padRight = 6;
-  const chartW = VW - padLeft - padRight;
-  const chartH = VH - padTop - padBottom;
-  const maxVal = Math.max(...weeklyBars.filter(v => v > 0), BASE_CAL, 0.1);
-  const getY = (val: number) => padTop + (1 - val / maxVal) * chartH;
+  const maxVal = Math.max(...weeklyBars, 1);
+  const todayIdx = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
 
-  // Average of days that have data
   const daysWithData = weeklyBars.filter(v => v > 0);
   const avgKcal = daysWithData.length > 0
     ? Math.round(daysWithData.reduce((a, b) => a + b, 0) / daysWithData.length)
     : null;
-  const avgValue = avgKcal !== null ? `${avgKcal}` : null;
 
-  const lineVals: (number | null)[] = weeklyBars.map((val, i) => {
-    if (val > 0) return val;
-    if (i === 0 || i === 6) return BASE_CAL;
-    return null;
-  });
-
-  const linePts = lineVals
-    .map((val, i) =>
-      val !== null
-        ? { x: padLeft + (i / 6) * chartW, y: getY(val), val, i, isAnchor: weeklyBars[i] === 0 }
-        : null
-    )
-    .filter((p): p is { x: number; y: number; val: number; i: number; isAnchor: boolean } => p !== null);
-
-  let pathD = '';
-  if (linePts.length === 1) {
-    pathD = `M ${linePts[0].x} ${linePts[0].y}`;
-  } else if (linePts.length > 1) {
-    pathD = `M ${linePts[0].x} ${linePts[0].y}`;
-    for (let k = 1; k < linePts.length; k++) {
-      const prev = linePts[k - 1];
-      const curr = linePts[k];
-      const cpx = (prev.x + curr.x) / 2;
-      pathD += ` C ${cpx} ${prev.y}, ${cpx} ${curr.y}, ${curr.x} ${curr.y}`;
-    }
-  }
+  const BAR_HEIGHT = 4;
+  const GAP = 3;
+  const ROWS = 7;
+  const totalH = ROWS * BAR_HEIGHT + (ROWS - 1) * GAP;
 
   return (
-    <svg width="100%" height="100%" viewBox={`0 0 ${VW} ${VH}`} preserveAspectRatio="none" style={{ overflow: 'visible', display: 'block' }}>
-      <defs>
-        <filter id="calLineBlur1" x="-50%" y="-100%" width="200%" height="300%">
-          <feGaussianBlur stdDeviation="6" />
-        </filter>
-        <filter id="calLineBlur2" x="-50%" y="-100%" width="200%" height="300%">
-          <feGaussianBlur stdDeviation="3" />
-        </filter>
-        <filter id="calDotBlur" x="-100%" y="-100%" width="300%" height="300%">
-          <feGaussianBlur stdDeviation="2" />
-        </filter>
-      </defs>
-      {linePts.length > 0 && pathD && (
-        <>
-          <path d={pathD} fill="none" stroke="rgba(255,255,255,0.10)" strokeWidth="14" strokeLinecap="round" filter="url(#calLineBlur1)" />
-          <path d={pathD} fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="6" strokeLinecap="round" filter="url(#calLineBlur2)" />
-          <path d={pathD} fill="none" stroke="rgba(255,255,255,0.60)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        </>
+    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+      {/* Avg label */}
+      {avgKcal !== null && (
+        <div style={{
+          textAlign: 'right',
+          fontFamily: "'Inter', sans-serif",
+          fontSize: '9px',
+          fontWeight: 900,
+          letterSpacing: '-0.03em',
+          color: 'rgba(255,255,255,0.75)',
+          lineHeight: 1,
+          marginBottom: 4,
+        }}>
+          {avgKcal.toLocaleString()}
+          <span style={{ fontSize: '6px', fontWeight: 700, letterSpacing: '0.08em', color: 'rgba(255,255,255,0.35)', marginLeft: 2 }}>KCAL</span>
+        </div>
       )}
-      {linePts.filter(p => !p.isAnchor).map((p, k) => (
-        <g key={k}>
-          <circle cx={p.x} cy={p.y} r="3.5" fill="rgba(255,255,255,0.18)" filter="url(#calDotBlur)" />
-          <circle cx={p.x} cy={p.y} r="2" fill="white" />
-          <text x={p.x} y={p.y - 6} textAnchor="middle" fill="rgba(255,255,255,0.70)" fontSize="5" fontWeight="700">
-            {p.val > 0 ? p.val : ''}
-          </text>
-        </g>
-      ))}
-      {/* Average label — top right, matching Dashboard weekly chart style */}
-      {avgValue && (
-        <g>
-          <text
-            x={VW - padRight}
-            y={padTop - 7}
-            textAnchor="end"
-            fill="rgba(255,255,255,0.85)"
-            fontSize="9"
-            fontWeight="900"
-            fontFamily="'Inter', sans-serif"
-            letterSpacing="-0.03em"
-          >
-            {avgValue}
-          </text>
-          <text
-            x={VW - padRight}
-            y={padTop + 1}
-            textAnchor="end"
-            fill="rgba(255,255,255,0.35)"
-            fontSize="4.5"
-            fontWeight="700"
-            fontFamily="'Inter', sans-serif"
-            letterSpacing="0.1em"
-          >
-            KCAL
-          </text>
-        </g>
-      )}
-    </svg>
+
+      {/* Horizontal bars */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly' }}>
+        {weeklyBars.map((val, i) => {
+          const pct = val > 0 ? (val / maxVal) * 100 : 0;
+          const isToday = i === todayIdx;
+          const hasData = val > 0;
+          const barColor = isToday ? '#ffffff' : hasData ? '#3f3f46' : '#18181b';
+          return (
+            <div key={i} style={{ width: '100%', height: BAR_HEIGHT, backgroundColor: '#18181b', borderRadius: 2, overflow: 'hidden' }}>
+              <div style={{
+                height: '100%',
+                width: `${Math.max(pct, hasData ? 6 : 0)}%`,
+                backgroundColor: barColor,
+                borderRadius: 2,
+                transition: 'width 0.3s ease',
+              }} />
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 };
 
