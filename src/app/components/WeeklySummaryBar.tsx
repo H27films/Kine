@@ -80,7 +80,7 @@ const ProgressRing: React.FC<ProgressRingProps> = ({ label, value, pct }) => {
         >
           <div
             style={{
-              fontFamily: "'Space Grotesk', sans-serif",
+              fontFamily: "'Manrope', sans-serif",
               fontSize: '9px',
               fontWeight: 800,
               letterSpacing: '1.5px',
@@ -93,7 +93,7 @@ const ProgressRing: React.FC<ProgressRingProps> = ({ label, value, pct }) => {
           </div>
           <div
             style={{
-              fontFamily: "'Space Grotesk', sans-serif",
+              fontFamily: "'Manrope', sans-serif",
               fontSize: '11px',
               fontWeight: 700,
               color: 'rgba(255,255,255,0.5)',
@@ -107,7 +107,7 @@ const ProgressRing: React.FC<ProgressRingProps> = ({ label, value, pct }) => {
       {/* Total value below ring */}
       <div
         style={{
-          fontFamily: "'Space Grotesk', sans-serif",
+          fontFamily: "'Manrope', sans-serif",
           fontSize: '11px',
           fontWeight: 700,
           color: 'rgba(255,255,255,0.75)',
