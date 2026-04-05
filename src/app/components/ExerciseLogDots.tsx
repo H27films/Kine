@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase, Exercise, todayStr } from '../../lib/supabase';
 
 interface Props {
@@ -18,6 +18,7 @@ const MATCH_KEYWORDS: Record<IconKey, string> = {
 };
 
 interface Session {
+  id: number;
   exercise_id: number;
   km: number;
 }
@@ -25,37 +26,67 @@ interface Session {
 const ExerciseLogDots: React.FC<Props> = ({ exercises, saveSuccess }) => {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [expandedKey, setExpandedKey] = useState<IconKey | null>(null);
+  const [editValues, setEditValues] = useState<Record<number, string>>({});
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const fetchSessions = async () => {
+    if (!exercises.length) return;
+    const ids = exercises.map(e => e.id).filter(Boolean);
+    const { data } = await supabase
+      .from('workouts')
+      .select('id, exercise_id, km')
+      .eq('date', todayStr())
+      .eq('type', 'CARDIO')
+      .in('exercise_id', ids);
+    if (data) setSessions(data as Session[]);
+  };
 
   useEffect(() => {
-    const fetch = async () => {
-      if (!exercises.length) return;
-      const ids = exercises.map(e => e.id).filter(Boolean);
-      const { data } = await supabase
-        .from('workouts')
-        .select('exercise_id, km')
-        .eq('date', todayStr())
-        .eq('type', 'CARDIO')
-        .in('exercise_id', ids);
-      if (data) setSessions(data as Session[]);
-    };
-    fetch();
+    fetchSessions();
   }, [exercises, saveSuccess]);
 
-  // Map exercise_id → km list
-  const kmByExId: Record<number, number[]> = {};
+  // Click outside to collapse
+  useEffect(() => {
+    if (!expandedKey) return;
+    const handler = (e: MouseEvent | TouchEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setExpandedKey(null);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    document.addEventListener('touchstart', handler);
+    return () => {
+      document.removeEventListener('mousedown', handler);
+      document.removeEventListener('touchstart', handler);
+    };
+  }, [expandedKey]);
+
+  // Save edited KM to Supabase
+  const saveKm = async (sessionId: number, newKmStr: string) => {
+    const newKm = parseFloat(newKmStr);
+    if (isNaN(newKm) || newKm <= 0) return;
+    await supabase
+      .from('workouts')
+      .update({ km: newKm, total_cardio: newKm })
+      .eq('id', sessionId);
+    await fetchSessions();
+  };
+
+  // Map exercise_id → sessions
+  const sessionsByExId: Record<number, Session[]> = {};
   sessions.forEach(s => {
-    if (!kmByExId[s.exercise_id]) kmByExId[s.exercise_id] = [];
-    kmByExId[s.exercise_id].push(Number(s.km));
+    if (!sessionsByExId[s.exercise_id]) sessionsByExId[s.exercise_id] = [];
+    sessionsByExId[s.exercise_id].push(s);
   });
 
   // Map icon key → exercise + sessions
-  const dataByKey: Partial<Record<IconKey, { ex: Exercise; kms: number[] }>> = {};
+  const dataByKey: Partial<Record<IconKey, { ex: Exercise; sessions: Session[] }>> = {};
   ICON_KEYS.forEach(key => {
     const ex = exercises.find(e =>
       e.exercise_name?.toLowerCase().includes(MATCH_KEYWORDS[key])
     );
-    if (ex && ex.id && kmByExId[ex.id]?.length) {
-      dataByKey[key] = { ex, kms: kmByExId[ex.id] };
+    if (ex && ex.id && sessionsByExId[ex.id]?.length) {
+      dataByKey[key] = { ex, sessions: sessionsByExId[ex.id] };
     }
   });
 
@@ -64,10 +95,12 @@ const ExerciseLogDots: React.FC<Props> = ({ exercises, saveSuccess }) => {
 
   // ── Expanded view ──
   if (expandedKey && dataByKey[expandedKey]) {
-    const { ex, kms } = dataByKey[expandedKey]!;
-    const total = kms.reduce((s, k) => s + k, 0);
+    const { ex, sessions: kSessions } = dataByKey[expandedKey]!;
+    const total = kSessions.reduce((s, k) => s + Number(k.km), 0);
+
     return (
       <div
+        ref={containerRef}
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -75,7 +108,7 @@ const ExerciseLogDots: React.FC<Props> = ({ exercises, saveSuccess }) => {
           gap: 14,
         }}
       >
-        {/* Collapse button — larger filled circle */}
+        {/* Collapse dot */}
         <div
           onClick={() => setExpandedKey(null)}
           style={{
@@ -85,7 +118,7 @@ const ExerciseLogDots: React.FC<Props> = ({ exercises, saveSuccess }) => {
             backgroundColor: 'white',
             flexShrink: 0,
             cursor: 'pointer',
-            boxShadow: '0 0 10px rgba(255,255,255,0.5)',
+            boxShadow: '0 0 12px rgba(255,255,255,0.5)',
           }}
         />
 
@@ -98,51 +131,73 @@ const ExerciseLogDots: React.FC<Props> = ({ exercises, saveSuccess }) => {
               color: 'rgba(255,255,255,0.45)',
               letterSpacing: '0.25em',
               textTransform: 'uppercase',
-              marginBottom: 3,
+              marginBottom: 4,
             }}
           >
             {ex.exercise_name?.toUpperCase()}
           </div>
 
-          {kms.map((km, i) => (
-            <div
-              key={i}
-              style={{
-                display: 'flex',
-                alignItems: 'baseline',
-                gap: 4,
-                lineHeight: 1.15,
-              }}
-            >
-              <span
+          {kSessions.map((session) => {
+            const editVal = editValues[session.id] ?? String(session.km);
+            return (
+              <div
+                key={session.id}
                 style={{
-                  fontSize: 24,
-                  fontWeight: 900,
-                  color: '#ffffff',
-                  letterSpacing: '-0.04em',
+                  display: 'flex',
+                  alignItems: 'baseline',
+                  gap: 4,
+                  lineHeight: 1.15,
+                  marginBottom: 2,
                 }}
               >
-                {km.toFixed(1)}
-              </span>
-              <span
-                style={{
-                  fontSize: 11,
-                  fontWeight: 700,
-                  color: 'rgba(255,255,255,0.45)',
-                  letterSpacing: '0.15em',
-                }}
-              >
-                KM
-              </span>
-            </div>
-          ))}
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  value={editVal}
+                  onChange={e =>
+                    setEditValues(prev => ({ ...prev, [session.id]: e.target.value }))
+                  }
+                  onBlur={e => saveKm(session.id, e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                      (e.target as HTMLInputElement).blur();
+                    }
+                  }}
+                  style={{
+                    fontSize: 24,
+                    fontWeight: 900,
+                    color: '#ffffff',
+                    letterSpacing: '-0.04em',
+                    background: 'transparent',
+                    border: 'none',
+                    borderBottom: '1px solid rgba(255,255,255,0.25)',
+                    outline: 'none',
+                    width: '5ch',
+                    padding: 0,
+                    WebkitAppearance: 'none',
+                    MozAppearance: 'textfield',
+                  }}
+                />
+                <span
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: 'rgba(255,255,255,0.45)',
+                    letterSpacing: '0.15em',
+                  }}
+                >
+                  KM
+                </span>
+              </div>
+            );
+          })}
 
-          {kms.length > 1 && (
+          {kSessions.length > 1 && (
             <div
               style={{
                 fontSize: 10,
                 color: 'rgba(255,255,255,0.35)',
-                marginTop: 2,
+                marginTop: 3,
                 letterSpacing: '0.1em',
               }}
             >
@@ -154,16 +209,17 @@ const ExerciseLogDots: React.FC<Props> = ({ exercises, saveSuccess }) => {
     );
   }
 
-  // ── Compact dots row — matches ExerciseIconBar layout exactly ──
+  // ── Compact dots row — matches ExerciseIconBar space-between layout ──
   return (
     <div
+      ref={containerRef}
       style={{
         width: '100%',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: 6,
-        height: 14,
+        height: 18,
       }}
     >
       {ICON_KEYS.map(key => {
@@ -183,12 +239,12 @@ const ExerciseLogDots: React.FC<Props> = ({ exercises, saveSuccess }) => {
               <div
                 onClick={() => setExpandedKey(key)}
                 style={{
-                  width: 8,
-                  height: 8,
+                  width: 12,
+                  height: 12,
                   borderRadius: '50%',
                   backgroundColor: 'white',
                   cursor: 'pointer',
-                  boxShadow: '0 0 6px rgba(255,255,255,0.75)',
+                  boxShadow: '0 0 8px rgba(255,255,255,0.8)',
                 }}
               />
             )}
