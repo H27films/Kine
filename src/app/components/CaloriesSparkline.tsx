@@ -51,7 +51,7 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars, expanded = false, onCl
             lineHeight: 1,
           }}>
             {avgKcal !== null ? avgKcal.toLocaleString() : '—'}
-            <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.08em', color: 'rgba(255,255,255,0.35)', marginLeft: 4 }}>KCAL AVG</span>
+            <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.08em', color: 'rgba(255,255,255,0.35)', marginLeft: 4 }}>KCAL</span>
           </div>
         </div>
 
