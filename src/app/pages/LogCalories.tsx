@@ -302,7 +302,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
               let textColor = 'rgba(255,255,255,0.2)';
               let glowShadow = 'none';
               if (rating === 'good') { border = '2px solid #90c9a0'; textColor = '#90c9a0'; glowShadow = '0 0 8px rgba(144,201,160,0.75), 0 0 18px rgba(144,201,160,0.3)'; }
-              else if (rating === 'bad') { border = '2px solid #9c6660'; textColor = '#9c6660'; glowShadow = '0 0 8px rgba(156,102,96,0.75), 0 0 18px rgba(156,102,96,0.3)'; }
+              else if (rating === 'bad') { border = '2px solid #ef4444'; textColor = '#ef4444'; glowShadow = '0 0 8px rgba(239,68,68,0.75), 0 0 18px rgba(239,68,68,0.3)'; }
               else if (rating === 'ok') { border = '2px solid rgba(255,255,255,0.75)'; textColor = 'rgba(255,255,255,0.9)'; glowShadow = '0 0 8px rgba(255,255,255,0.45), 0 0 18px rgba(255,255,255,0.15)'; }
               const showLine = i > 0 && rating !== null && prevRating !== null;
               return (
@@ -329,7 +329,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
             })}
           </div>
           {/* Food Rating buttons */}
-          <div>
+          <div style={{ marginTop: 16 }}>
             <div className="flex gap-2">
               {ratingButtons.map(btn => (
                 <button key={btn.value} onClick={() => setFoodRating(btn.value)}
