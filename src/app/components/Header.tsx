@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, ArrowLeft, Dumbbell, BarChart3, FileText, Flame } from 'lucide-react';
+import { Menu, ArrowLeft, Dumbbell, BarChart3, Flame } from 'lucide-react';
 import { Page } from '../../types';
 
 interface HeaderProps {
@@ -17,6 +17,9 @@ const RunningManIcon = ({ size = 16 }: { size?: number }) => (
   </svg>
 );
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type IconComponent = React.ComponentType<any>;
+
 export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNavigate, onToggleWeeklySummary }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -31,11 +34,11 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [menuOpen]);
 
-  const menuItems: { label: string; icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }> | React.FC<{ size?: number; style?: React.CSSProperties }>; page: Page }[] = [
-    { label: 'Weights', icon: Dumbbell, page: 'weights' },
-    { label: 'Cardio',  icon: ({ size, style }) => <RunningManIcon size={size} />, page: 'cardio' },
-    { label: 'Calories', icon: Flame, page: 'calories' },
-    { label: 'Data+',  icon: BarChart3, page: 'analytics' },
+  const menuItems: { label: string; icon: IconComponent; page: Page }[] = [
+    { label: 'Weights',  icon: Dumbbell,                                                page: 'weights'   },
+    { label: 'Cardio',   icon: ({ size }: { size?: number }) => <RunningManIcon size={size} />, page: 'cardio'    },
+    { label: 'Calories', icon: Flame,                                                  page: 'calories'  },
+    { label: 'Data+',    icon: BarChart3,                                               page: 'analytics' },
   ];
 
   const isDashboard = !title;
