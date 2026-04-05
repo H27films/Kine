@@ -26,9 +26,9 @@ interface ProgressRingProps {
 }
 
 const ProgressRing: React.FC<ProgressRingProps> = ({ label, value, pct }) => {
-  const size = 72;
-  const strokeWidth = 4;
-  const radius = 29;
+  const size = 62;
+  const strokeWidth = 3.5;
+  const radius = 25;
   const circumference = 2 * Math.PI * radius;
   const clampedPct = Math.min(Math.max(pct, 0), 1);
   const pctDisplay = Math.round(clampedPct * 100);
@@ -133,9 +133,9 @@ const ProgressRing: React.FC<ProgressRingProps> = ({ label, value, pct }) => {
           lineHeight: 1,
         }}
       >
-        <span style={{ color: 'rgba(255,255,255,0.95)' }}>{numericPart}</span>
+        <span style={{ color: 'rgba(255,255,255,0.95)', fontSize: '13px' }}>{numericPart}</span>
         {hasUnit && (
-          <span style={{ color: 'rgba(255,255,255,0.4)', marginLeft: 2 }}>{unitPart}</span>
+          <span style={{ color: 'rgba(255,255,255,0.4)', marginLeft: 2, fontSize: '9px' }}>{unitPart}</span>
         )}
       </div>
     </div>
@@ -212,8 +212,12 @@ export const WeeklySummaryBar: React.FC = () => {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'flex-start',
+        width: '100%',
+        boxSizing: 'border-box',
         paddingTop: '10px',
         paddingBottom: '10px',
+        paddingLeft: 0,
+        paddingRight: 0,
       }}
     >
       <ProgressRing
