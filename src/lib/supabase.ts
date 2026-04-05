@@ -44,42 +44,74 @@ export interface Workout {
   tracker_daily: number | null;
 }
 
-/** Today as YYYY-MM-DD */
-/** Returns YYYY-MM-DD in local time (not UTC) */
-function localDateStr(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-}
-
-export function todayStr(): string {
-  return localDateStr(new Date());
-}
-
-/** Date N days offset from today as YYYY-MM-DD */
-export function dateOffsetStr(offset: number): string {
-  const d = new Date();
-  d.setDate(d.getDate() + offset);
-  return localDateStr(d);
+/**
+ * Convert a Date to YYYY-MM-DD in Malaysia local time (UTC+8).
+ * This ensures the date string matches the actual Malaysia calendar date,
+ * not the UTC date that JavaScript would give by default.
+ */
+function malaysiaDateStr(d: Date): string {
+  // Create a date formatter for Malaysia timezone
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: 'Asia/Kuala_Lumpur',
+  });
+  return formatter.format(d); // Returns YYYY-MM-DD
 }
 
 /**
- * Custom sequential week number based on app start date (2025-01-06).
- * Week 1 = 2025-01-06, Week 2 = 2025-01-13, etc.
+ * Today's date as YYYY-MM-DD in Malaysia local time.
+ * Critical: Use this for all logging to ensure correct date in Supabase.
+ */
+export function todayStr(): string {
+  return malaysiaDateStr(new Date());
+}
+
+/**
+ * Date N days offset from today as YYYY-MM-DD in Malaysia local time.
+ */
+export function dateOffsetStr(offset: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  return malaysiaDateStr(d);
+}
+
+/**
+ * Custom sequential week number based on app start date (2025-01-06 Malaysia time).
+ * Week 1 = Jan 6–12, 2025 (Malaysia timezone)
+ * Week 66 = April 1–7, 2026 (Malaysia timezone)
  */
 export function getISOWeek(): number {
   const APP_START = new Date('2025-01-06T00:00:00Z');
   const today = new Date();
-  today.setUTCHours(0, 0, 0, 0);
-  const diffDays = Math.floor((today.getTime() - APP_START.getTime()) / (1000 * 60 * 60 * 24));
+  
+  // Get today's date in Malaysia timezone
+  const todayMalaysia = malaysiaDateStr(today);
+  const todayDate = new Date(todayMalaysia + 'T00:00:00Z');
+  
+  // Calculate days since start
+  const diffDays = Math.floor((todayDate.getTime() - APP_START.getTime()) / (1000 * 60 * 60 * 24));
   return Math.max(1, Math.floor(diffDays / 7) + 1);
 }
 
-/** Day abbreviation matching DB format e.g. "MON", "TUE", "WED" */
+/**
+ * Day abbreviation in Malaysia timezone: "MON", "TUE", "WED", etc.
+ * Critical: Must match the day in Malaysia local time, not UTC.
+ */
 export function getDayName(): string {
-  const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-  return days[new Date().getDay()];
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    weekday: 'short',
+    timeZone: 'Asia/Kuala_Lumpur',
+  });
+  const dayName = formatter.format(new Date()).toUpperCase();
+  
+  // Map to 3-letter format
+  const dayMap: Record<string, string> = {
+    'MON': 'MON', 'TUE': 'TUE', 'WED': 'WED', 'THU': 'THU',
+    'FRI': 'FRI', 'SAT': 'SAT', 'SUN': 'SUN',
+  };
+  return dayMap[dayName] || dayName;
 }
 
 /**
@@ -133,21 +165,25 @@ export async function recalculateDailyTotals(date: string): Promise<void> {
  * Maps an array of {date, value} into a [numWeeks][7] 2D array.
  * Index [0] = current week, [1] = last week, ...
  * Day index 0 = Monday, 6 = Sunday
+ * Uses Malaysia timezone for all date calculations.
  */
 export function mapToWeeklyChart(
   workouts: Array<{ date: string; value: number }>,
   numWeeks = 7
 ): number[][] {
+  // Get Monday of current week in Malaysia timezone
   const today = new Date();
-  const dow = today.getDay();
-  const monday = new Date(today);
-  monday.setDate(today.getDate() - (dow === 0 ? 6 : dow - 1));
-  monday.setHours(0, 0, 0, 0);
+  const todayMalaysia = malaysiaDateStr(today);
+  const todayDate = new Date(todayMalaysia + 'T00:00:00Z');
+  const dow = todayDate.getDay();
+  
+  const monday = new Date(todayDate);
+  monday.setDate(todayDate.getDate() - (dow === 0 ? 6 : dow - 1));
 
   const weeks: number[][] = Array.from({ length: numWeeks }, () => Array(7).fill(0));
 
   for (const w of workouts) {
-    const d = new Date(w.date + 'T12:00:00');
+    const d = new Date(w.date + 'T12:00:00Z');
     const diffMs = monday.getTime() - d.getTime();
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
     if (diffDays < 0 || diffDays >= numWeeks * 7) continue;
@@ -159,20 +195,32 @@ export function mapToWeeklyChart(
   return weeks;
 }
 
-/** Monday of the current ISO week as YYYY-MM-DD (local time) */
+/**
+ * Monday of the current week as YYYY-MM-DD in Malaysia timezone.
+ */
 export function currentWeekMonday(): string {
   const today = new Date();
-  const dow = today.getDay();
-  const monday = new Date(today);
-  monday.setDate(today.getDate() - (dow === 0 ? 6 : dow - 1));
-  return localDateStr(monday);
+  const todayMalaysia = malaysiaDateStr(today);
+  const todayDate = new Date(todayMalaysia + 'T00:00:00Z');
+  const dow = todayDate.getDay();
+  
+  const monday = new Date(todayDate);
+  monday.setDate(todayDate.getDate() - (dow === 0 ? 6 : dow - 1));
+  
+  return malaysiaDateStr(monday);
 }
 
-/** Monday of N weeks ago as YYYY-MM-DD (local time) */
+/**
+ * Monday of N weeks ago as YYYY-MM-DD in Malaysia timezone.
+ */
 export function weeksAgoMonday(n: number): string {
   const today = new Date();
-  const dow = today.getDay();
-  const monday = new Date(today);
-  monday.setDate(today.getDate() - (dow === 0 ? 6 : dow - 1) - n * 7);
-  return localDateStr(monday);
+  const todayMalaysia = malaysiaDateStr(today);
+  const todayDate = new Date(todayMalaysia + 'T00:00:00Z');
+  const dow = todayDate.getDay();
+  
+  const monday = new Date(todayDate);
+  monday.setDate(todayDate.getDate() - (dow === 0 ? 6 : dow - 1) - n * 7);
+  
+  return malaysiaDateStr(monday);
 }
