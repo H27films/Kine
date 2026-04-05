@@ -283,7 +283,11 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
 
         {/* Row 1: Big number left, MOVEMENT (KM) label right (tappable to toggle input) */}
         <div className="flex items-start" style={{ marginBottom: 14 }}>
-          <div className="text-[3.25rem] font-black leading-none tracking-tighter text-white flex-shrink-0">
+          <div
+            className="text-[3.25rem] font-black leading-none tracking-tighter text-white flex-shrink-0"
+            style={{ cursor: 'pointer' }}
+            onClick={() => setTrackerInputVisible(v => !v)}
+          >
             {weeklyTotal.toFixed(1)}
           </div>
           <div className="flex flex-col justify-center ml-4 pt-3 flex-1 min-w-0">
@@ -303,6 +307,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
 
         {/* Row 2: Full-width distance input — shown when MOVEMENT tapped */}
         {trackerInputVisible && <div style={{ marginBottom: 14 }}>
+          <label style={{ ...labelStyle, display: 'block', marginBottom: 8 }}>TRACKER</label>
           <div className="flex items-baseline gap-3">
             <input
               type="text"
