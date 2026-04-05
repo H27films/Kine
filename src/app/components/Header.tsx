@@ -133,7 +133,13 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
             )}
           </div>
           <div className="flex items-center justify-end w-12 pb-3">
-            <span className="text-xl font-black tracking-tighter text-white uppercase">Kiné</span>
+            <button
+              onClick={onToggleWeeklySummary}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+              className="hover:opacity-70 transition-opacity"
+            >
+              <span className="text-xl font-black tracking-tighter text-white uppercase">Kiné</span>
+            </button>
           </div>
         </>
       )}

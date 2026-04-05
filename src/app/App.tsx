@@ -9,6 +9,7 @@ import { LogCalories } from './pages/LogCalories';
 import { Analytics } from './pages/Analytics';
 import { Profile } from './pages/Profile';
 import { Summary } from './pages/Summary';
+import { WeeklySummaryBar } from './components/WeeklySummaryBar';
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>('dashboard');
@@ -62,6 +63,7 @@ const App: React.FC = () => {
         className="pb-32 px-4 max-w-lg mx-auto"
         style={{ paddingTop: 'calc(5rem + env(safe-area-inset-top))' }}
       >
+        {showWeeklySummary && currentPage !== 'dashboard' && <WeeklySummaryBar />}
         {renderPage()}
       </main>
       <BottomNav currentPage={currentPage} onNavigate={setCurrentPage} />
