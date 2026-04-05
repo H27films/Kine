@@ -288,7 +288,7 @@ const WeeklyChart: React.FC<{
               : 0;
             return (
               <div key={i} className="flex flex-col items-center h-full justify-end" style={{ flex: '1', maxWidth: '28px' }}>
-                <div style={{ fontSize: '7.5px', fontWeight: 700, color: 'rgba(255,255,255,0.6)', marginBottom: '4px' }}>{barLabel}</div>
+                <div style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.6)', marginBottom: '4px' }}>{barLabel}</div>
                 <div className="w-full relative transition-all" style={{ height: `${pct * 100}%`, backgroundColor: barColor, borderRadius: '9999px 9999px 0 0', minHeight: val > 0 ? '4px' : 0 }}>
                   {activeTab === 'Weights' && exerciseCount > 0 && (
                     <div style={{
@@ -297,7 +297,7 @@ const WeeklyChart: React.FC<{
                       left: 0,
                       right: 0,
                       textAlign: 'center',
-                      fontSize: '7px',
+                      fontSize: '9px',
                       fontWeight: 700,
                       color: 'rgba(0,0,0,0.7)',
                       lineHeight: 1,
