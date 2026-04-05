@@ -222,13 +222,11 @@ const WeeklyChart: React.FC<{
           </button>
         </div>
         <span style={{
-          fontSize: '1.35rem',
-          fontWeight: 300,
-          letterSpacing: '0.04em',
-          background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.40) 100%)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text',
+          fontSize: '0.95rem',
+          fontWeight: 700,
+          letterSpacing: '0.06em',
+          color: '#ffffff',
+          marginRight: '6px',
         }}>{weekLabel}</span>
       </div>
 
