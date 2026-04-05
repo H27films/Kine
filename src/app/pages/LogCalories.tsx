@@ -178,22 +178,40 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
       const day = getDayName();
 
       if (calories) {
-        await supabase.from('workouts').insert({
-          date: today,
-          week,
-          day,
-          type: 'MEASUREMENT',
-          exercise_id: CALORIES_EXERCISE_ID,
-          calories: parseInt(calories) || null,
-          food_rating: foodRating,
-          bodyweight: bodyWeight ? parseFloat(bodyWeight) : null,
-          body_fat_percent: bodyFat ? parseFloat(bodyFat) : null,
-          muscle_mass: muscleMass ? parseFloat(muscleMass) : null,
-          // total_score_k is null for measurement rows
-          total_score_k: null,
-          new_entry: 'New',
-          source: 'app',
-        });
+        // Check if a MEASUREMENT row already exists for today
+        const { data: existing } = await supabase
+          .from('workouts')
+          .select('id')
+          .eq('date', today)
+          .eq('type', 'MEASUREMENT')
+          .maybeSingle();
+
+        if (existing) {
+          // Overwrite the existing row
+          await supabase.from('workouts').update({
+            calories: parseInt(calories) || null,
+            food_rating: foodRating,
+            bodyweight: bodyWeight ? parseFloat(bodyWeight) : null,
+            body_fat_percent: bodyFat ? parseFloat(bodyFat) : null,
+            muscle_mass: muscleMass ? parseFloat(muscleMass) : null,
+          }).eq('id', existing.id);
+        } else {
+          await supabase.from('workouts').insert({
+            date: today,
+            week,
+            day,
+            type: 'MEASUREMENT',
+            exercise_id: CALORIES_EXERCISE_ID,
+            calories: parseInt(calories) || null,
+            food_rating: foodRating,
+            bodyweight: bodyWeight ? parseFloat(bodyWeight) : null,
+            body_fat_percent: bodyFat ? parseFloat(bodyFat) : null,
+            muscle_mass: muscleMass ? parseFloat(muscleMass) : null,
+            total_score_k: null,
+            new_entry: 'New',
+            source: 'app',
+          });
+        }
 
         // Recalculate daily total_score and tracker_daily for all rows today
         await recalculateDailyTotals(today);
