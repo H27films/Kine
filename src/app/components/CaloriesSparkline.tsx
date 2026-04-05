@@ -22,7 +22,7 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars }) => {
   const avgKcal = daysWithData.length > 0
     ? Math.round(daysWithData.reduce((a, b) => a + b, 0) / daysWithData.length)
     : null;
-  const avgLabel = avgKcal !== null ? `${avgKcal}Kcal` : null;
+  const avgValue = avgKcal !== null ? `${avgKcal}` : null;
 
   const lineVals: (number | null)[] = weeklyBars.map((val, i) => {
     if (val > 0) return val;
@@ -80,20 +80,34 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars }) => {
           </text>
         </g>
       ))}
-      {/* Average label — top right, big */}
-      {avgLabel && (
-        <text
-          x={VW - padRight}
-          y={padTop - 6}
-          textAnchor="end"
-          fill="rgba(255,255,255,0.75)"
-          fontSize="14"
-          fontWeight="700"
-          fontFamily="'Space Grotesk', 'Inter', sans-serif"
-          letterSpacing="-0.02em"
-        >
-          {avgLabel}
-        </text>
+      {/* Average label — top right, matching Dashboard weekly chart style */}
+      {avgValue && (
+        <g>
+          <text
+            x={VW - padRight}
+            y={padTop - 7}
+            textAnchor="end"
+            fill="rgba(255,255,255,0.85)"
+            fontSize="11"
+            fontWeight="900"
+            fontFamily="'Inter', sans-serif"
+            letterSpacing="-0.03em"
+          >
+            {avgValue}
+          </text>
+          <text
+            x={VW - padRight}
+            y={padTop + 1}
+            textAnchor="end"
+            fill="rgba(255,255,255,0.35)"
+            fontSize="5.5"
+            fontWeight="700"
+            fontFamily="'Inter', sans-serif"
+            letterSpacing="0.1em"
+          >
+            KCAL
+          </text>
+        </g>
       )}
     </svg>
   );
