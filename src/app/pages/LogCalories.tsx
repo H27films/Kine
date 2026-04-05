@@ -88,7 +88,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
         const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
         if (diffDays >= 0 && diffDays < 7) {
           const dayIdx = d.getDay() === 0 ? 6 : d.getDay() - 1;
-          if (!ratings[dayIdx]) ratings[dayIdx] = row.food_rating as FoodRating;
+          if (!ratings[dayIdx]) ratings[dayIdx] = (row.food_rating as string).toLowerCase() as FoodRating;
         }
       }
       setWeeklyRatings(ratings);
@@ -192,17 +192,16 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
                 const today = new Date();
                 const todayIdx = today.getDay() === 0 ? 6 : today.getDay() - 1;
                 const isFuture = i > todayIdx;
-                let bg = 'transparent';
                 let border = '1.5px solid rgba(255,255,255,0.15)';
                 let textColor = 'rgba(255,255,255,0.2)';
                 let label = day;
-                if (rating === 'good') { bg = '#16a34a'; border = '1.5px solid #16a34a'; textColor = '#ffffff'; label = 'G'; }
-                else if (rating === 'bad') { bg = '#dc2626'; border = '1.5px solid #dc2626'; textColor = '#ffffff'; label = 'B'; }
-                else if (rating === 'ok') { bg = 'transparent'; border = '1.5px solid rgba(255,255,255,0.6)'; textColor = 'rgba(255,255,255,0.85)'; label = 'O'; }
+                if (rating === 'good') { border = '2px solid #16a34a'; textColor = '#16a34a'; label = day; }
+                else if (rating === 'bad') { border = '2px solid #dc2626'; textColor = '#dc2626'; label = day; }
+                else if (rating === 'ok') { border = '2px solid rgba(255,255,255,0.6)'; textColor = 'rgba(255,255,255,0.85)'; label = day; }
                 return (
                   <div key={i} style={{
                     width: 28, height: 28, borderRadius: '50%',
-                    backgroundColor: bg, border,
+                    backgroundColor: 'transparent', border,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     opacity: isFuture && !rating ? 0.3 : 1,
                     flexShrink: 0,
