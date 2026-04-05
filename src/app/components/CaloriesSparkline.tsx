@@ -5,7 +5,6 @@ interface Props {
 }
 
 const CaloriesSparkline: React.FC<Props> = ({ weeklyBars }) => {
-  const sparkDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
   const BASE_CAL = 500;
   const VW = 200;
   const VH = 90;
@@ -17,6 +16,15 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars }) => {
   const chartH = VH - padTop - padBottom;
   const maxVal = Math.max(...weeklyBars.filter(v => v > 0), BASE_CAL, 0.1);
   const getY = (val: number) => padTop + (1 - val / maxVal) * chartH;
+
+  // Average of days that have data
+  const daysWithData = weeklyBars.filter(v => v > 0);
+  const avgKcal = daysWithData.length > 0
+    ? Math.round(daysWithData.reduce((a, b) => a + b, 0) / daysWithData.length)
+    : null;
+  const avgLabel = avgKcal !== null
+    ? avgKcal >= 1000 ? `avg ${(avgKcal / 1000).toFixed(1)}k` : `avg ${avgKcal}`
+    : null;
 
   const lineVals: (number | null)[] = weeklyBars.map((val, i) => {
     if (val > 0) return val;
@@ -46,7 +54,7 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars }) => {
   }
 
   return (
-    <svg width="100%" viewBox={`0 0 ${VW} ${VH + 14}`} style={{ overflow: 'visible', display: 'block' }}>
+    <svg width="100%" viewBox={`0 0 ${VW} ${VH}`} style={{ overflow: 'visible', display: 'block' }}>
       <defs>
         <filter id="calLineBlur1" x="-50%" y="-100%" width="200%" height="300%">
           <feGaussianBlur stdDeviation="6" />
@@ -74,11 +82,21 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars }) => {
           </text>
         </g>
       ))}
-      {sparkDays.map((d, k) => (
-        <text key={k} x={padLeft + (k / 6) * chartW} y={VH + 12} textAnchor="middle" fill="white" fontSize="5" fontWeight="700">
-          {d}
+      {/* Average label — bottom right, Space Grotesk style */}
+      {avgLabel && (
+        <text
+          x={VW - padRight}
+          y={VH - 2}
+          textAnchor="end"
+          fill="rgba(255,255,255,0.45)"
+          fontSize="7"
+          fontWeight="600"
+          fontFamily="'Space Grotesk', 'Inter', sans-serif"
+          letterSpacing="0.04em"
+        >
+          {avgLabel}
         </text>
-      ))}
+      )}
     </svg>
   );
 };
