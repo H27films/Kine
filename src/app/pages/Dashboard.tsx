@@ -272,14 +272,16 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
 
       setTodayActivities(activities);
 
+      const hasTrackerToday = activities.some(a => a.exercise_name?.toUpperCase() === 'TRACKER');
       const totalCardio = activities
         .filter(a => TOTAL_CARDIO_IDS.includes(a.exercise_id))
-        .reduce((s, a) => s + a.total_cardio, 0);
+        .reduce((s, a) => s + (hasTrackerToday ? a.total_cardio : a.km), 0);
       setTotalMovement(+totalCardio.toFixed(1));
 
+      const hasTrackerYesterday = yesterdayRows.some((r: any) => (r.exercises?.exercise_name || '').toUpperCase() === 'TRACKER');
       const yestTotal = yesterdayRows
         .filter((r: any) => TOTAL_CARDIO_IDS.includes(r.exercise_id))
-        .reduce((s: number, r: any) => s + Number(r.total_cardio || 0), 0);
+        .reduce((s: number, r: any) => s + Number(hasTrackerYesterday ? (r.total_cardio || 0) : (r.km || 0)), 0);
       setYesterdayMovement(+yestTotal.toFixed(1));
     };
     loadCardio();
