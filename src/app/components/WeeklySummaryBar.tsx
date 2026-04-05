@@ -58,7 +58,7 @@ const ProgressRing: React.FC<ProgressRingProps> = ({ label, value, pct }) => {
               cy={size / 2}
               r={radius}
               fill="none"
-              stroke="rgba(235, 220, 160, 0.92)"
+              stroke="rgba(200, 220, 255, 0.95)"
               strokeWidth={strokeWidth}
               strokeLinecap="round"
               strokeDasharray={circumference}
@@ -80,10 +80,10 @@ const ProgressRing: React.FC<ProgressRingProps> = ({ label, value, pct }) => {
         >
           <div
             style={{
-              fontSize: '6.5px',
-              fontWeight: 700,
+              fontSize: '9px',
+              fontWeight: 800,
               letterSpacing: '1.5px',
-              color: 'rgba(255,255,255,0.45)',
+              color: 'rgba(255,255,255,0.75)',
               textTransform: 'uppercase',
               lineHeight: 1,
             }}
@@ -92,9 +92,9 @@ const ProgressRing: React.FC<ProgressRingProps> = ({ label, value, pct }) => {
           </div>
           <div
             style={{
-              fontSize: '14px',
-              fontWeight: 800,
-              color: '#ffffff',
+              fontSize: '11px',
+              fontWeight: 700,
+              color: 'rgba(255,255,255,0.5)',
               lineHeight: 1,
             }}
           >
@@ -105,12 +105,13 @@ const ProgressRing: React.FC<ProgressRingProps> = ({ label, value, pct }) => {
       {/* Total value below ring */}
       <div
         style={{
-          fontSize: '9px',
-          fontWeight: 600,
-          color: 'rgba(255,255,255,0.5)',
-          letterSpacing: '0.3px',
+          fontSize: '11px',
+          fontWeight: 700,
+          color: 'rgba(255,255,255,0.75)',
+          letterSpacing: '0.5px',
           textAlign: 'center',
           lineHeight: 1,
+          textTransform: 'uppercase',
         }}
       >
         {value}
@@ -180,7 +181,7 @@ export const WeeklySummaryBar: React.FC = () => {
   }, []);
 
   const fmtWeight = (v: number) =>
-    v >= 1000 ? `${(v / 1000).toFixed(1)}k kg` : `${Math.round(v)} kg`;
+    v >= 1000 ? `${(v / 1000).toFixed(1)}k KG` : `${Math.round(v)} KG`;
 
   return (
     <div
@@ -210,14 +211,14 @@ export const WeeklySummaryBar: React.FC = () => {
       />
       <ProgressRing
         label="Cardio"
-        value={`${stats.cardio} km`}
+        value={`${stats.cardio} KM`}
         pct={stats.cardio / TARGETS.cardio}
       />
       <ProgressRing
         label="Cal"
         value={
           stats.avgCalories !== null
-            ? `${stats.avgCalories.toLocaleString()} avg`
+            ? `${stats.avgCalories.toLocaleString()} CAL`
             : '\u2014'
         }
         pct={stats.avgCalories !== null ? stats.avgCalories / TARGETS.cal : 0}
