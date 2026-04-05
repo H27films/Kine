@@ -50,6 +50,25 @@ const FoodScoreCircle: React.FC<{ pct: number; size?: number }> = ({ pct, size =
   );
 };
 
+// Get ISO week number for a given date
+const getISOWeekNumber = (d: Date): number => {
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const day = date.getUTCDay() || 7;
+  date.setUTCDate(date.getUTCDate() + 4 - day);
+  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+  return Math.ceil((((date.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+};
+
+// Get Monday of week at offset (0 = current, -1 = last week, etc.)
+const getMondayAtOffset = (offset: number): Date => {
+  const today = new Date();
+  const dow = today.getDay();
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - (dow === 0 ? 6 : dow - 1) + offset * 7);
+  monday.setHours(0, 0, 0, 0);
+  return monday;
+};
+
 export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
   const [calories, setCalories] = useState('');
   const [chartExpanded, setChartExpanded] = useState(false);
@@ -60,6 +79,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState('');
+  const [weekOffset, setWeekOffset] = useState(0);
 
   // Weekly calories chart data (7 days Mon-Sun current week)
   const [weeklyBars, setWeeklyBars] = useState<number[]>(Array(7).fill(0));
@@ -68,11 +88,10 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
   // Weekly food ratings Mon-Sun (null = no data)
   const [weeklyRatings, setWeeklyRatings] = useState<(FoodRating | null)[]>(Array(7).fill(null));
 
-  // Load recent calories for charts + pre-fill last known body measurements
+  // Load calories/measurements (always current week)
   useEffect(() => {
     const loadData = async () => {
-      const cutoff = weeksAgoMonday(3); // ~4 weeks back
-
+      const cutoff = weeksAgoMonday(3);
       const { data } = await supabase
         .from('workouts')
         .select('date, calories, food_rating, bodyweight, body_fat_percent, muscle_mass')
@@ -82,7 +101,6 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
 
       if (!data) return;
 
-      // Pre-fill body measurements from most recent entry
       const latest = (data as any[]).find(r => r.bodyweight);
       if (latest) {
         if (latest.bodyweight) setBodyWeight(String(latest.bodyweight));
@@ -90,13 +108,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
         if (latest.muscle_mass) setMuscleMass(String(latest.muscle_mass));
       }
 
-      // Build weekly bars (current week Mon-Sun)
-      const today = new Date();
-      const dow = today.getDay();
-      const monday = new Date(today);
-      monday.setDate(today.getDate() - (dow === 0 ? 6 : dow - 1));
-      monday.setHours(0, 0, 0, 0);
-
+      const monday = getMondayAtOffset(0);
       const weekly = Array(7).fill(0);
       for (const row of data as any[]) {
         if (!row.calories) continue;
@@ -110,21 +122,6 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
       }
       setWeeklyBars(weekly);
 
-      // Build weekly ratings (current week Mon-Sun) — take latest entry per day
-      const ratings: (FoodRating | null)[] = Array(7).fill(null);
-      for (const row of data as any[]) {
-        if (!row.food_rating) continue;
-        const d = new Date(row.date + 'T12:00:00');
-        const diffMs = d.getTime() - monday.getTime();
-        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-        if (diffDays >= 0 && diffDays < 7) {
-          const dayIdx = d.getDay() === 0 ? 6 : d.getDay() - 1;
-          if (!ratings[dayIdx]) ratings[dayIdx] = (row.food_rating as string).toLowerCase() as FoodRating;
-        }
-      }
-      setWeeklyRatings(ratings);
-
-      // Build monthly bars (last 28 days)
       const monthly = Array(28).fill(0);
       const todayStart = new Date();
       todayStart.setHours(0, 0, 0, 0);
@@ -141,6 +138,40 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
     };
     loadData();
   }, []);
+
+  // Load food ratings for the selected week (re-runs when weekOffset changes)
+  useEffect(() => {
+    const loadRatings = async () => {
+      const monday = getMondayAtOffset(weekOffset);
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+      const fmt = (d: Date) => d.toISOString().split('T')[0];
+
+      const { data } = await supabase
+        .from('workouts')
+        .select('date, food_rating')
+        .eq('type', 'MEASUREMENT')
+        .gte('date', fmt(monday))
+        .lte('date', fmt(sunday))
+        .order('date', { ascending: true });
+
+      const ratings: (FoodRating | null)[] = Array(7).fill(null);
+      if (data) {
+        for (const row of data as any[]) {
+          if (!row.food_rating) continue;
+          const d = new Date(row.date + 'T12:00:00');
+          const diffMs = d.getTime() - monday.getTime();
+          const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+          if (diffDays >= 0 && diffDays < 7) {
+            const dayIdx = d.getDay() === 0 ? 6 : d.getDay() - 1;
+            if (!ratings[dayIdx]) ratings[dayIdx] = (row.food_rating as string).toLowerCase() as FoodRating;
+          }
+        }
+      }
+      setWeeklyRatings(ratings);
+    };
+    loadRatings();
+  }, [weekOffset]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -240,7 +271,17 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
             const pct = daysWithRating > 0 ? foodScore / maxScore : 0;
             return (
               <div>
-                <label className="block text-[13px] uppercase tracking-[0.2em] font-black mb-4" style={{ color: '#ffffff' }}>Food Rating</label>
+                {/* FOOD RATING header: label + chevrons on left, week number on right */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span className="text-[13px] uppercase tracking-[0.2em] font-black" style={{ color: '#ffffff' }}>Food Rating</span>
+                    <button onClick={() => setWeekOffset(o => o - 1)} style={{ background: 'none', border: 'none', padding: '0 2px', cursor: 'pointer', color: 'rgba(255,255,255,0.5)', fontSize: 16, lineHeight: 1 }}>‹</button>
+                    <button onClick={() => setWeekOffset(o => Math.min(o + 1, 0))} style={{ background: 'none', border: 'none', padding: '0 2px', cursor: 'pointer', color: weekOffset < 0 ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.2)', fontSize: 16, lineHeight: 1 }}>›</button>
+                  </div>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#ffffff' }}>
+                    {getISOWeekNumber(getMondayAtOffset(weekOffset))}
+                  </span>
+                </div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
                     <span className="text-7xl font-black tracking-tighter text-white" style={{ lineHeight: 1 }}>{foodScore}</span>
@@ -258,7 +299,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
               const prevRating = i > 0 ? weeklyRatings[i - 1] : null;
               const today = new Date();
               const todayIdx = today.getDay() === 0 ? 6 : today.getDay() - 1;
-              const isFuture = i > todayIdx;
+              const isFuture = weekOffset === 0 && i > todayIdx;
               let border = '1.5px solid rgba(255,255,255,0.15)';
               let textColor = 'rgba(255,255,255,0.2)';
               let glowShadow = 'none';
