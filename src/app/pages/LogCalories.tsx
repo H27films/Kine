@@ -15,14 +15,14 @@ const tabs: { label: string; page: Page }[] = [
 
 const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-type FoodRating = 'bad' | 'ok' | 'good';
+type FoodRating = 'bad' | 'ok' | 'good' | null;
 
 // MEASUREMENT exercise IDs (from the exercises table)
 const CALORIES_EXERCISE_ID = 90;
 
 export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
   const [calories, setCalories] = useState('');
-  const [foodRating, setFoodRating] = useState<FoodRating>('ok');
+  const [foodRating, setFoodRating] = useState<FoodRating>(null);
   const [bodyWeight, setBodyWeight] = useState('');
   const [bodyFat, setBodyFat] = useState('');
   const [muscleMass, setMuscleMass] = useState('');
@@ -150,7 +150,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
     }
   };
 
-  const ratingButtons: { label: string; value: FoodRating }[] = [
+  const ratingButtons: { label: string; value: 'bad' | 'ok' | 'good' }[] = [
     { label: 'Bad', value: 'bad' },
     { label: 'Ok', value: 'ok' },
     { label: 'Good', value: 'good' },
@@ -237,7 +237,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
               {ratingButtons.map(btn => (
                 <button key={btn.value} onClick={() => setFoodRating(btn.value)}
                   className="flex-1 py-4 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95"
-                  style={{ backgroundColor: '#121212', border: foodRating === btn.value ? '1px solid rgba(255,255,255,0.4)' : '1px solid rgba(255,255,255,0.05)', color: foodRating === btn.value ? '#ffffff' : 'rgba(161,161,170,1)' }}>
+                  style={{ backgroundColor: foodRating === btn.value ? '#ffffff' : '#121212', border: foodRating === btn.value ? '1px solid #ffffff' : '1px solid rgba(255,255,255,0.05)', color: foodRating === btn.value ? '#000000' : 'rgba(161,161,170,1)' }}>
                   {btn.label}
                 </button>
               ))}
