@@ -170,13 +170,12 @@ const ExerciseLogDots: React.FC<Props> = ({ exercises, saveSuccess }) => {
                     letterSpacing: '-0.04em',
                     background: 'transparent',
                     border: 'none',
-                    borderBottom: '1px solid rgba(255,255,255,0.25)',
                     outline: 'none',
                     width: '5ch',
                     padding: 0,
                     WebkitAppearance: 'none',
                     MozAppearance: 'textfield',
-                  }}
+                  } as React.CSSProperties}
                 />
                 <span
                   style={{
@@ -210,6 +209,7 @@ const ExerciseLogDots: React.FC<Props> = ({ exercises, saveSuccess }) => {
   }
 
   // ── Compact dots row — matches ExerciseIconBar space-between layout ──
+  // Each slot can have multiple dots (one per session) stacked vertically
   return (
     <div
       ref={containerRef}
@@ -217,13 +217,13 @@ const ExerciseLogDots: React.FC<Props> = ({ exercises, saveSuccess }) => {
         width: '100%',
         display: 'flex',
         justifyContent: 'space-between',
-        alignItems: 'center',
+        alignItems: 'flex-end',
         marginBottom: 6,
-        height: 18,
+        minHeight: 18,
       }}
     >
       {ICON_KEYS.map(key => {
-        const hasData = !!dataByKey[key];
+        const entry = dataByKey[key];
         return (
           <div
             key={key}
@@ -231,12 +231,14 @@ const ExerciseLogDots: React.FC<Props> = ({ exercises, saveSuccess }) => {
               flex: '0 0 44px',
               width: 44,
               display: 'flex',
-              justifyContent: 'center',
+              flexDirection: 'column',
               alignItems: 'center',
+              gap: 4,
             }}
           >
-            {hasData && (
+            {entry && entry.sessions.map((session, si) => (
               <div
+                key={session.id}
                 onClick={() => setExpandedKey(key)}
                 style={{
                   width: 12,
@@ -247,7 +249,7 @@ const ExerciseLogDots: React.FC<Props> = ({ exercises, saveSuccess }) => {
                   boxShadow: '0 0 8px rgba(255,255,255,0.8)',
                 }}
               />
-            )}
+            ))}
           </div>
         );
       })}

@@ -184,15 +184,31 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
       if (hasTracker && trackerExercise) {
         const km = parseFloat(trackerDistance);
         const totalCardio = +(km * Number(trackerExercise.multiplier)).toFixed(2);
-        const { error } = await supabase.from('workouts').insert({
-          date: today, week, day, type: 'CARDIO',
-          exercise_id: trackerExercise.id,
-          km, total_cardio: totalCardio,
-          multiplier: trackerExercise.multiplier,
-          total_score_k: Math.round(totalCardio * 1000),
-          new_entry: 'New', source: 'app',
-        });
-        if (error) throw error;
+        // Only ever one TRACKER row per day — upsert by checking first
+        const { data: existing } = await supabase
+          .from('workouts')
+          .select('id')
+          .eq('date', today)
+          .eq('type', 'CARDIO')
+          .eq('exercise_id', trackerExercise.id)
+          .maybeSingle();
+        if (existing) {
+          const { error } = await supabase
+            .from('workouts')
+            .update({ km, total_cardio: totalCardio, total_score_k: Math.round(totalCardio * 1000) })
+            .eq('id', existing.id);
+          if (error) throw error;
+        } else {
+          const { error } = await supabase.from('workouts').insert({
+            date: today, week, day, type: 'CARDIO',
+            exercise_id: trackerExercise.id,
+            km, total_cardio: totalCardio,
+            multiplier: trackerExercise.multiplier,
+            total_score_k: Math.round(totalCardio * 1000),
+            new_entry: 'New', source: 'app',
+          });
+          if (error) throw error;
+        }
       }
 
       if (hasExercise && selectedExercise) {
