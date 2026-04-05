@@ -191,42 +191,45 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
           </div>
         </div>
 
-        {/* Weekly food rating circles — below the row */}
-        <div style={{ display: 'flex', justifyContent: 'space-evenly', width: '100%', marginTop: '24px' }}>
-          {['M','T','W','T','F','S','S'].map((day, i) => {
-            const rating = weeklyRatings[i];
-            const today = new Date();
-            const todayIdx = today.getDay() === 0 ? 6 : today.getDay() - 1;
-            const isFuture = i > todayIdx;
-            let border = '1.5px solid rgba(255,255,255,0.15)';
-            let textColor = 'rgba(255,255,255,0.2)';
-            let label = day;
-            if (rating === 'good') { border = '2px solid #16a34a'; textColor = '#16a34a'; label = day; }
-            else if (rating === 'bad') { border = '2px solid #dc2626'; textColor = '#dc2626'; label = day; }
-            else if (rating === 'ok') { border = '2px solid rgba(255,255,255,0.6)'; textColor = 'rgba(255,255,255,0.85)'; label = day; }
-            return (
-              <div key={i} style={{
-                width: 28, height: 28, borderRadius: '50%',
-                backgroundColor: 'transparent', border,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                opacity: isFuture && !rating ? 0.3 : 1,
-                flexShrink: 0,
-              }}>
-                <span style={{ fontSize: '8px', fontWeight: 800, color: textColor, letterSpacing: '0.05em' }}>{label}</span>
-              </div>
-            );
-          })}
-        </div>
-        <div>
-          <label className="block text-[10px] uppercase tracking-[0.2em] font-bold mb-4" style={{ color: 'rgba(161,161,170,1)' }}>Food Rating</label>
-          <div className="flex gap-2">
-            {ratingButtons.map(btn => (
-              <button key={btn.value} onClick={() => setFoodRating(btn.value)}
-                className="flex-1 py-4 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95"
-                style={{ backgroundColor: '#121212', border: foodRating === btn.value ? '1px solid rgba(255,255,255,0.4)' : '1px solid rgba(255,255,255,0.05)', color: foodRating === btn.value ? '#ffffff' : 'rgba(161,161,170,1)' }}>
-                {btn.label}
-              </button>
-            ))}
+        {/* Food Rating group: circles + buttons together */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {/* Weekly food rating circles — edge-to-edge */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+            {['M','T','W','T','F','S','S'].map((day, i) => {
+              const rating = weeklyRatings[i];
+              const today = new Date();
+              const todayIdx = today.getDay() === 0 ? 6 : today.getDay() - 1;
+              const isFuture = i > todayIdx;
+              let border = '1.5px solid rgba(255,255,255,0.15)';
+              let textColor = 'rgba(255,255,255,0.2)';
+              if (rating === 'good') { border = '2px solid #16a34a'; textColor = '#16a34a'; }
+              else if (rating === 'bad') { border = '2px solid #dc2626'; textColor = '#dc2626'; }
+              else if (rating === 'ok') { border = '2px solid rgba(255,255,255,0.6)'; textColor = 'rgba(255,255,255,0.85)'; }
+              return (
+                <div key={i} style={{
+                  width: 28, height: 28, borderRadius: '50%',
+                  backgroundColor: 'transparent', border,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  opacity: isFuture && !rating ? 0.3 : 1,
+                  flexShrink: 0,
+                }}>
+                  <span style={{ fontSize: '8px', fontWeight: 800, color: textColor, letterSpacing: '0.05em' }}>{day}</span>
+                </div>
+              );
+            })}
+          </div>
+          {/* Food Rating label + buttons */}
+          <div>
+            <label className="block text-[10px] uppercase tracking-[0.2em] font-bold mb-4" style={{ color: 'rgba(161,161,170,1)' }}>Food Rating</label>
+            <div className="flex gap-2">
+              {ratingButtons.map(btn => (
+                <button key={btn.value} onClick={() => setFoodRating(btn.value)}
+                  className="flex-1 py-4 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95"
+                  style={{ backgroundColor: '#121212', border: foodRating === btn.value ? '1px solid rgba(255,255,255,0.4)' : '1px solid rgba(255,255,255,0.05)', color: foodRating === btn.value ? '#ffffff' : 'rgba(161,161,170,1)' }}>
+                  {btn.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </section>

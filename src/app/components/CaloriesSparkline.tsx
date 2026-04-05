@@ -78,7 +78,7 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars }) => {
           <circle cx={p.x} cy={p.y} r="3.5" fill="rgba(255,255,255,0.18)" filter="url(#calDotBlur)" />
           <circle cx={p.x} cy={p.y} r="2" fill="white" />
           <text x={p.x} y={p.y - 6} textAnchor="middle" fill="rgba(255,255,255,0.70)" fontSize="5" fontWeight="700">
-            {p.val > 0 ? (p.val >= 1000 ? `${(p.val / 1000).toFixed(1)}k` : p.val) : ''}
+            {p.val > 0 ? p.val : ''}
           </text>
         </g>
       ))}
