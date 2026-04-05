@@ -18,16 +18,16 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars }) => {
       <div style={{
         textAlign: 'right',
         fontFamily: "'Inter', sans-serif",
-        fontSize: '9px',
+        fontSize: '15px',
         fontWeight: 900,
-        letterSpacing: '-0.03em',
-        color: 'rgba(255,255,255,0.75)',
+        letterSpacing: '-0.04em',
+        color: 'rgba(255,255,255,0.9)',
         lineHeight: 1,
         flexShrink: 0,
-        marginBottom: 3,
+        marginBottom: 4,
       }}>
         {avgKcal !== null ? avgKcal.toLocaleString() : '—'}
-        <span style={{ fontSize: '6px', fontWeight: 700, letterSpacing: '0.08em', color: 'rgba(255,255,255,0.35)', marginLeft: 2 }}>KCAL</span>
+        <span style={{ fontSize: '8px', fontWeight: 700, letterSpacing: '0.08em', color: 'rgba(255,255,255,0.35)', marginLeft: 3 }}>KCAL</span>
       </div>
 
       {/* Horizontal bars — grow right to left */}

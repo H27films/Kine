@@ -180,7 +180,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
         {/* Calories input row + sparkline aligned top-to-bottom */}
         <div style={{ display: 'flex', alignItems: 'stretch', width: '100%', gap: 0 }}>
           <div style={{ flex: '0 0 auto', display: 'flex', flexDirection: 'column' }}>
-            <label className="block text-[10px] uppercase tracking-[0.2em] font-bold mb-4" style={{ color: 'rgba(161,161,170,1)' }}>Total Calories</label>
+            <label className="block text-[13px] uppercase tracking-[0.2em] font-black mb-4" style={{ color: '#ffffff' }}>Total Calories</label>
             <input type="number" value={calories} onChange={e => setCalories(e.target.value)} placeholder="0000"
               className="text-7xl font-black tracking-tighter text-white p-0"
               style={{ backgroundColor: 'transparent', border: 'none', width: '4ch', flex: 1 }} />
@@ -191,8 +191,18 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
           </div>
         </div>
 
-        {/* Food Rating group: circles + buttons together */}
+        {/* Food Rating group: score + circles + buttons together */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {/* Food score number */}
+          {(() => {
+            const foodScore = weeklyRatings.reduce((sum, r) => sum + (r === 'good' ? 3 : r === 'ok' ? 2 : r === 'bad' ? 1 : 0), 0);
+            return (
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+                <span className="text-7xl font-black tracking-tighter text-white" style={{ lineHeight: 1 }}>{foodScore}</span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: 'rgba(161,161,170,1)' }}>/21</span>
+              </div>
+            );
+          })()}
           {/* Weekly food rating circles — edge-to-edge */}
           <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
             {['M','T','W','T','F','S','S'].map((day, i) => {
