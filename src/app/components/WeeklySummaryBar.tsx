@@ -27,21 +27,21 @@ interface ProgressRingProps {
 
 const ProgressRing: React.FC<ProgressRingProps> = ({ label, value, pct }) => {
   const size = 60;
-  const dotCount = 20;
-  const ringRadius = 24;
-  const dotRadius = 2.2;
+  const strokeWidth = 4;
+  const radius = 24;
+  const circumference = 2 * Math.PI * radius;
   const clampedPct = Math.min(Math.max(pct, 0), 1);
-  const filledCount = Math.round(clampedPct * dotCount);
   const pctDisplay = Math.round(clampedPct * 100);
-  const filterId = `dot-glow-${label.toLowerCase().replace(/\s+/g, '-')}`;
+  const offset = circumference * (1 - clampedPct);
+  const filterId = `arc-glow-${label.toLowerCase().replace(/\s+/g, '-')}`;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
       <div style={{ position: 'relative', width: size, height: size }}>
         <svg width={size} height={size} style={{ display: 'block' }}>
           <defs>
-            <filter id={filterId} x="-80%" y="-80%" width="260%" height="260%">
-              <feGaussianBlur stdDeviation="1.8" result="coloredBlur" />
+            <filter id={filterId} x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
               <feMerge>
                 <feMergeNode in="coloredBlur" />
                 <feMergeNode in="SourceGraphic" />
@@ -49,41 +49,32 @@ const ProgressRing: React.FC<ProgressRingProps> = ({ label, value, pct }) => {
             </filter>
           </defs>
 
-          {/* Empty dots */}
-          {Array.from({ length: dotCount }, (_, i) => {
-            if (i < filledCount) return null;
-            const angle = (i / dotCount) * 2 * Math.PI - Math.PI / 2;
-            const cx = size / 2 + ringRadius * Math.cos(angle);
-            const cy = size / 2 + ringRadius * Math.sin(angle);
-            return (
-              <circle
-                key={i}
-                cx={cx}
-                cy={cy}
-                r={dotRadius}
-                fill="rgba(255,255,255,0.08)"
-              />
-            );
-          })}
+          {/* Track arc */}
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            stroke="rgba(255,255,255,0.08)"
+            strokeWidth={strokeWidth}
+          />
 
-          {/* Filled dots with glow */}
-          <g filter={`url(#${filterId})`}>
-            {Array.from({ length: dotCount }, (_, i) => {
-              if (i >= filledCount) return null;
-              const angle = (i / dotCount) * 2 * Math.PI - Math.PI / 2;
-              const cx = size / 2 + ringRadius * Math.cos(angle);
-              const cy = size / 2 + ringRadius * Math.sin(angle);
-              return (
-                <circle
-                  key={i}
-                  cx={cx}
-                  cy={cy}
-                  r={dotRadius}
-                  fill="rgba(200,220,255,0.95)"
-                />
-              );
-            })}
-          </g>
+          {/* Filled arc with glow */}
+          {clampedPct > 0 && (
+            <circle
+              cx={size / 2}
+              cy={size / 2}
+              r={radius}
+              fill="none"
+              stroke="rgba(200,220,255,0.95)"
+              strokeWidth={strokeWidth}
+              strokeDasharray={circumference}
+              strokeDashoffset={offset}
+              strokeLinecap="round"
+              transform={`rotate(-90 ${size / 2} ${size / 2})`}
+              filter={`url(#${filterId})`}
+            />
+          )}
         </svg>
 
         {/* Centre label + % */}
@@ -116,7 +107,7 @@ const ProgressRing: React.FC<ProgressRingProps> = ({ label, value, pct }) => {
               fontFamily: "'Space Grotesk', sans-serif",
               fontSize: '11px',
               fontWeight: 700,
-              color: 'rgba(255,255,255,0.5)',
+              color: 'rgba(255,255,255,0.6)',
               lineHeight: 1,
             }}
           >
@@ -129,9 +120,9 @@ const ProgressRing: React.FC<ProgressRingProps> = ({ label, value, pct }) => {
       <div
         style={{
           fontFamily: "'Space Grotesk', sans-serif",
-          fontSize: '11px',
-          fontWeight: 400,
-          color: 'rgba(255,255,255,0.75)',
+          fontSize: '13px',
+          fontWeight: 700,
+          color: 'rgba(255,255,255,0.95)',
           letterSpacing: '0.5px',
           textAlign: 'center',
           lineHeight: 1,
