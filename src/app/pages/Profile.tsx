@@ -134,7 +134,14 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate: _onNavigate }) => 
           <User size={40} color="#666" />
         </div>
         <h2 className="text-2xl font-black tracking-tight">ATHLETE</h2>
-        <p className="text-sm" style={{ color: '#666' }}>Member since 2024</p>
+        <p className="text-sm" style={{ color: '#666' }}>Member since 2026</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-4 px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest active:scale-[0.97] transition-all"
+          style={{ backgroundColor: '#1a1a1a', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.1)' }}
+        >
+          ↻ Refresh
+        </button>
       </div>
 
       {/* Export Data */}
