@@ -307,7 +307,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
 
         {/* Row 2: Full-width distance input — shown when MOVEMENT tapped */}
         {trackerInputVisible && <div style={{ marginBottom: 14 }}>
-          <label style={{ ...labelStyle, display: 'block', marginBottom: 8 }}>TRACKER</label>
+          <label style={{ ...labelStyle, display: 'block', marginBottom: 8, color: '#ffffff' }}>TRACKER</label>
           <div className="flex items-baseline gap-3">
             <input
               type="text"
