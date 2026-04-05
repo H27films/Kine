@@ -34,6 +34,8 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
   const [weeklyBars, setWeeklyBars] = useState<number[]>(Array(7).fill(0));
   // Monthly (last 28 days)
   const [monthlyBars, setMonthlyBars] = useState<number[]>(Array(28).fill(0));
+  // Weekly food ratings Mon-Sun (null = no data)
+  const [weeklyRatings, setWeeklyRatings] = useState<(FoodRating | null)[]>(Array(7).fill(null));
 
   // Load recent calories for charts + pre-fill last known body measurements
   useEffect(() => {
@@ -42,7 +44,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
 
       const { data } = await supabase
         .from('workouts')
-        .select('date, calories, bodyweight, body_fat_percent, muscle_mass')
+        .select('date, calories, food_rating, bodyweight, body_fat_percent, muscle_mass')
         .eq('type', 'MEASUREMENT')
         .gte('date', cutoff)
         .order('date', { ascending: false });
@@ -76,6 +78,20 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
         }
       }
       setWeeklyBars(weekly);
+
+      // Build weekly ratings (current week Mon-Sun) — take latest entry per day
+      const ratings: (FoodRating | null)[] = Array(7).fill(null);
+      for (const row of data as any[]) {
+        if (!row.food_rating) continue;
+        const d = new Date(row.date + 'T12:00:00');
+        const diffMs = d.getTime() - monday.getTime();
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        if (diffDays >= 0 && diffDays < 7) {
+          const dayIdx = d.getDay() === 0 ? 6 : d.getDay() - 1;
+          if (!ratings[dayIdx]) ratings[dayIdx] = row.food_rating as FoodRating;
+        }
+      }
+      setWeeklyRatings(ratings);
 
       // Build monthly bars (last 28 days)
       const monthly = Array(28).fill(0);
@@ -168,6 +184,34 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
               className="text-7xl font-black tracking-tighter text-white p-0"
               style={{ backgroundColor: 'transparent', border: 'none', width: '4ch' }} />
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] mt-2 block" style={{ color: 'rgba(161,161,170,1)' }}>kcal today</span>
+
+            {/* Weekly food rating circles */}
+            <div style={{ display: 'flex', gap: '6px', marginTop: '10px' }}>
+              {['M','T','W','T','F','S','S'].map((day, i) => {
+                const rating = weeklyRatings[i];
+                const today = new Date();
+                const todayIdx = today.getDay() === 0 ? 6 : today.getDay() - 1;
+                const isFuture = i > todayIdx;
+                let bg = 'transparent';
+                let border = '1.5px solid rgba(255,255,255,0.15)';
+                let textColor = 'rgba(255,255,255,0.2)';
+                let label = day;
+                if (rating === 'good') { bg = '#16a34a'; border = '1.5px solid #16a34a'; textColor = '#ffffff'; label = 'G'; }
+                else if (rating === 'bad') { bg = '#dc2626'; border = '1.5px solid #dc2626'; textColor = '#ffffff'; label = 'B'; }
+                else if (rating === 'ok') { bg = 'transparent'; border = '1.5px solid rgba(255,255,255,0.6)'; textColor = 'rgba(255,255,255,0.85)'; label = 'O'; }
+                return (
+                  <div key={i} style={{
+                    width: 28, height: 28, borderRadius: '50%',
+                    backgroundColor: bg, border,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    opacity: isFuture && !rating ? 0.3 : 1,
+                    flexShrink: 0,
+                  }}>
+                    <span style={{ fontSize: '8px', fontWeight: 800, color: textColor, letterSpacing: '0.05em' }}>{label}</span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
           <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center' }}>
             <CaloriesSparkline weeklyBars={weeklyBars} />
