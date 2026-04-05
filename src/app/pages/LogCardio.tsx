@@ -5,6 +5,7 @@ import { supabase, Exercise, todayStr, getISOWeek, getDayName, currentWeekMonday
 import { CardioTypeChart } from '../components/CardioTypeChart';
 import TrackerSparkline from '../components/TrackerSparkline';
 import ExerciseIconBar from '../components/ExerciseIconBar';
+import ExerciseLogDots from '../components/ExerciseLogDots';
 
 interface LogCardioProps {
   onNavigate: (page: Page) => void;
@@ -331,6 +332,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
       {/* EXERCISE section — icon picker */}
       <section className="mb-3" style={{ marginTop: 56 }}>
         <div style={{ marginBottom: 20 }}>
+          <ExerciseLogDots exercises={nonTrackerExercises} saveSuccess={saveSuccess} />
           <ExerciseIconBar
             exercises={nonTrackerExercises}
             selectedExercise={selectedExercise}
