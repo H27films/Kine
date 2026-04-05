@@ -22,9 +22,7 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars }) => {
   const avgKcal = daysWithData.length > 0
     ? Math.round(daysWithData.reduce((a, b) => a + b, 0) / daysWithData.length)
     : null;
-  const avgLabel = avgKcal !== null
-    ? avgKcal >= 1000 ? `avg ${(avgKcal / 1000).toFixed(1)}k` : `avg ${avgKcal}`
-    : null;
+  const avgLabel = avgKcal !== null ? `${avgKcal}Kcal` : null;
 
   const lineVals: (number | null)[] = weeklyBars.map((val, i) => {
     if (val > 0) return val;
@@ -82,17 +80,17 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars }) => {
           </text>
         </g>
       ))}
-      {/* Average label — bottom right, Space Grotesk style */}
+      {/* Average label — top right, big */}
       {avgLabel && (
         <text
           x={VW - padRight}
-          y={VH - 2}
+          y={padTop - 6}
           textAnchor="end"
-          fill="rgba(255,255,255,0.45)"
-          fontSize="7"
-          fontWeight="600"
+          fill="rgba(255,255,255,0.75)"
+          fontSize="14"
+          fontWeight="700"
           fontFamily="'Space Grotesk', 'Inter', sans-serif"
-          letterSpacing="0.04em"
+          letterSpacing="-0.02em"
         >
           {avgLabel}
         </text>
