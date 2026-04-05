@@ -261,9 +261,10 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
               const isFuture = i > todayIdx;
               let border = '1.5px solid rgba(255,255,255,0.15)';
               let textColor = 'rgba(255,255,255,0.2)';
-              if (rating === 'good') { border = '2px solid #16a34a'; textColor = '#16a34a'; }
-              else if (rating === 'bad') { border = '2px solid #dc2626'; textColor = '#dc2626'; }
-              else if (rating === 'ok') { border = '2px solid rgba(255,255,255,0.6)'; textColor = 'rgba(255,255,255,0.85)'; }
+              let glowShadow = 'none';
+              if (rating === 'good') { border = '2px solid #4ade80'; textColor = '#4ade80'; glowShadow = '0 0 8px rgba(74,222,128,0.75), 0 0 18px rgba(74,222,128,0.3)'; }
+              else if (rating === 'bad') { border = '2px solid #ef4444'; textColor = '#ef4444'; glowShadow = '0 0 8px rgba(239,68,68,0.75), 0 0 18px rgba(239,68,68,0.3)'; }
+              else if (rating === 'ok') { border = '2px solid rgba(255,255,255,0.75)'; textColor = 'rgba(255,255,255,0.9)'; glowShadow = '0 0 8px rgba(255,255,255,0.45), 0 0 18px rgba(255,255,255,0.15)'; }
               const showLine = i > 0 && rating !== null && prevRating !== null;
               return (
                 <React.Fragment key={i}>
@@ -271,7 +272,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
                     <div style={{
                       flex: 1,
                       height: 1.5,
-                      backgroundColor: showLine ? 'rgba(255,255,255,0.28)' : 'transparent',
+                      backgroundColor: showLine ? 'rgba(255,255,255,0.75)' : 'transparent',
                     }} />
                   )}
                   <div style={{
@@ -280,6 +281,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     opacity: isFuture && !rating ? 0.3 : 1,
                     flexShrink: 0,
+                    boxShadow: rating ? glowShadow : 'none',
                   }}>
                     <span style={{ fontSize: '8px', fontWeight: 800, color: textColor, letterSpacing: '0.05em' }}>{day}</span>
                   </div>
