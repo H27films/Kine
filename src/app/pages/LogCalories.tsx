@@ -22,6 +22,7 @@ const CALORIES_EXERCISE_ID = 90;
 
 export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
   const [calories, setCalories] = useState('');
+  const [chartExpanded, setChartExpanded] = useState(false);
   const [foodRating, setFoodRating] = useState<FoodRating>(null);
   const [bodyWeight, setBodyWeight] = useState('');
   const [bodyFat, setBodyFat] = useState('');
@@ -177,19 +178,27 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
       </nav>
 
       <section className="mb-16 space-y-12">
-        {/* Calories input row + sparkline aligned top-to-bottom */}
-        <div style={{ display: 'flex', alignItems: 'stretch', width: '100%', gap: 0 }}>
-          <div style={{ flex: '0 0 auto', display: 'flex', flexDirection: 'column' }}>
-            <label className="block text-[13px] uppercase tracking-[0.2em] font-black mb-4" style={{ color: '#ffffff' }}>Total Calories</label>
-            <input type="number" value={calories} onChange={e => setCalories(e.target.value)} placeholder="0000"
-              className="text-7xl font-black tracking-tighter text-white p-0"
-              style={{ backgroundColor: 'transparent', border: 'none', width: '4ch', flex: 1 }} />
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] mt-2 block" style={{ color: 'rgba(161,161,170,1)' }}>kcal today</span>
+        {/* Calories input row + sparkline — or expanded chart */}
+        {chartExpanded ? (
+          <CaloriesSparkline
+            weeklyBars={weeklyBars}
+            expanded
+            onClick={() => setChartExpanded(false)}
+          />
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'stretch', width: '100%', gap: 0 }}>
+            <div style={{ flex: '0 0 auto', display: 'flex', flexDirection: 'column' }}>
+              <label className="block text-[13px] uppercase tracking-[0.2em] font-black mb-4" style={{ color: '#ffffff' }}>Total Calories</label>
+              <input type="number" value={calories} onChange={e => setCalories(e.target.value)} placeholder="0000"
+                className="text-7xl font-black tracking-tighter text-white p-0"
+                style={{ backgroundColor: 'transparent', border: 'none', width: '4ch', flex: 1 }} />
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] mt-2 block" style={{ color: 'rgba(161,161,170,1)' }}>kcal today</span>
+            </div>
+            <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'stretch' }}>
+              <CaloriesSparkline weeklyBars={weeklyBars} onClick={() => setChartExpanded(true)} />
+            </div>
           </div>
-          <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'stretch' }}>
-            <CaloriesSparkline weeklyBars={weeklyBars} />
-          </div>
-        </div>
+        )}
 
         {/* Food Rating group: score + circles + buttons together */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
