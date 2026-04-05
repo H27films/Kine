@@ -4,7 +4,7 @@ import { DailyActivityCards } from '../components/DailyActivityCards';
 import { WeeklySummaryBar } from '../components/WeeklySummaryBar';
 import { supabase, weeksAgoMonday } from '../../lib/supabase';
 
-type ChartTab = 'Cardio' | 'Weights' | 'Calories';
+type ChartTab = 'Cardio' | 'Weights' | 'Calories' | 'Score';
 
 const TOTAL_CARDIO_IDS = [82, 83, 87];          // Tracker + Row + Cycle
 const NO_TRACKER_CARDIO_IDS = [83, 84, 85, 86, 87]; // Row + Running + Walking + Cross Trainer + Cycle
@@ -143,8 +143,9 @@ const WeeklyChart: React.FC<{
   cardioWeeks: WeekData[];
   weightsWeeks: WeekData[];
   calorieWeeks: WeekData[];
+  scoreWeeks: WeekData[];
   weightsExerciseCounts: Record<number, number[]>;
-}> = ({ cardioWeeks, weightsWeeks, calorieWeeks, weightsExerciseCounts }) => {
+}> = ({ cardioWeeks, weightsWeeks, calorieWeeks, scoreWeeks, weightsExerciseCounts }) => {
   const [activeTab, setActiveTab] = useState<ChartTab>('Cardio');
   const [selectedWeekNumber, setSelectedWeekNumber] = useState<number | null>(null);
 
@@ -152,6 +153,7 @@ const WeeklyChart: React.FC<{
     Cardio:   { weeks: cardioWeeks,  unit: 'km' },
     Weights:  { weeks: weightsWeeks, unit: 'kg' },
     Calories: { weeks: calorieWeeks, unit: '' },
+    Score:    { weeks: scoreWeeks,   unit: '' },
   };
 
   const { weeks, unit } = chartConfig[activeTab];
@@ -161,6 +163,7 @@ const WeeklyChart: React.FC<{
       ...cardioWeeks.map(w => w.weekNumber),
       ...weightsWeeks.map(w => w.weekNumber),
       ...calorieWeeks.map(w => w.weekNumber),
+      ...scoreWeeks.map(w => w.weekNumber),
     ])
   ).sort((a, b) => b - a);
 
@@ -178,7 +181,7 @@ const WeeklyChart: React.FC<{
   const onNext = () => { if (canNext) setSelectedWeekNumber(allWeekNumbers[currentGlobalIdx - 1]); };
 
   const yMin = activeTab === 'Cardio' ? 5 : activeTab === 'Calories' ? 500 : 0;
-  const yMax = activeTab === 'Cardio' ? 20 : rawMax;
+  const yMax = activeTab === 'Cardio' ? 20 : activeTab === 'Score' ? Math.max(rawMax, 100) : rawMax;
 
   const summaryParts = (() => {
     const nonZero = data.filter(v => v > 0);
@@ -188,10 +191,14 @@ const WeeklyChart: React.FC<{
     } else if (activeTab === 'Weights') {
       const k = total / 1000;
       return { value: total > 0 ? (k >= 10 ? `${Math.round(k)}K` : `${k.toFixed(1)}K`) : '0K', unit: '' };
-    } else {
+    } else if (activeTab === 'Calories') {
       if (nonZero.length === 0) return { value: '\u2014', unit: 'Kcal' };
       const avg = Math.round(total / nonZero.length);
       return { value: avg.toLocaleString(), unit: 'Kcal' };
+    } else {
+      if (nonZero.length === 0) return { value: '\u2014', unit: '' };
+      const avg = Math.round(total / nonZero.length);
+      return { value: avg.toLocaleString(), unit: 'pts' };
     }
   })();
 
@@ -211,7 +218,7 @@ const WeeklyChart: React.FC<{
       <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff' }}>
         <div className="flex items-center justify-between mb-3">
           <div className="flex gap-4">
-            {(['Cardio', 'Weights', 'Calories'] as ChartTab[]).map(tab => (
+            {(['Cardio', 'Weights', 'Calories', 'Score'] as ChartTab[]).map(tab => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -342,6 +349,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
   const [weightsWeeks, setWeightsWeeks] = useState<WeekData[]>([]);
   const [weightsExerciseCounts, setWeightsExerciseCounts] = useState<Record<number, number[]>>({});
   const [calorieWeeks, setCalorieWeeks] = useState<WeekData[]>([]);
+  const [scoreWeeks, setScoreWeeks] = useState<WeekData[]>([]);
 
   const [activityWeeklyData, setActivityWeeklyData] = useState<Record<string, number[]>>({});
 
@@ -485,6 +493,29 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
       if (calData) {
         setCalorieWeeks(groupByWeek(
           (calData as any[]).map(r => ({ week: Number(r.week), day: r.day, value: Number(r.calories || 0) }))
+        ));
+      }
+
+      const { data: scoreData } = await supabase
+        .from('workouts')
+        .select('week, day, total_score')
+        .not('total_score', 'is', null)
+        .not('week', 'is', null)
+        .not('day', 'is', null)
+        .order('week', { ascending: false })
+        .limit(1000);
+
+      if (scoreData) {
+        // Deduplicate by (week, day) — total_score is the same for all rows on a day
+        const seen = new Set<string>();
+        const deduped = (scoreData as any[]).filter(r => {
+          const key = `${r.week}_${r.day}`;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+        setScoreWeeks(groupByWeek(
+          deduped.map(r => ({ week: Number(r.week), day: r.day, value: Number(r.total_score || 0) }))
         ));
       }
     };
@@ -738,7 +769,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
       </section>
 
       <section className="mb-4 mt-8">
-        <WeeklyChart cardioWeeks={cardioWeeks} weightsWeeks={weightsWeeks} calorieWeeks={calorieWeeks} weightsExerciseCounts={weightsExerciseCounts} />
+        <WeeklyChart cardioWeeks={cardioWeeks} weightsWeeks={weightsWeeks} calorieWeeks={calorieWeeks} scoreWeeks={scoreWeeks} weightsExerciseCounts={weightsExerciseCounts} />
       </section>
 
       <section className="mt-8">
