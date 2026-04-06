@@ -115,7 +115,7 @@ const CaloriesTrends: React.FC = () => {
   const weeklyAvg = daysWithCals > 0
     ? Math.round(weeklyBars.reduce((a, b) => a + b, 0) / daysWithCals)
     : 0;
-  const maxBarIndex = weeklyBars.indexOf(Math.max(...weeklyBars));
+  const weeklyMaxBarIndex = weeklyBars.indexOf(Math.max(...weeklyBars));
 
   // Monthly computed values
   const monthlyMax = Math.max(...monthlyBars, 1);
@@ -123,6 +123,7 @@ const CaloriesTrends: React.FC = () => {
   const monthlyAvg = monthDaysWithCals > 0
     ? Math.round(monthlyBars.reduce((a, b) => a + b, 0) / monthDaysWithCals)
     : 0;
+  const monthlyPeakIdx = monthlyBars.indexOf(Math.max(...monthlyBars));
 
   const todayDayIdx = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
 
@@ -167,7 +168,7 @@ const CaloriesTrends: React.FC = () => {
               const barPct = Math.max(pct, h > 0 ? 4 : 0);
               const isCurrentWeek = calWeekOffset === 0;
               const isToday = isCurrentWeek && i === todayDayIdx;
-              const isPeakBar = !isCurrentWeek && h > 0 && i === maxBarIndex;
+              const isPeakBar = !isCurrentWeek && h > 0 && i === weeklyMaxBarIndex;
 
               let bgColor = h > 0 ? '#3f3f46' : '#18181b';
               if (isToday) bgColor = '#ffffff';
@@ -219,8 +220,8 @@ const CaloriesTrends: React.FC = () => {
 
         {/* === Monthly Calories Chart === */}
         <div>
-          {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+          {/* Header — extra bottom margin to give room for peak label above bars */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <span style={trendLabelStyle}>Calories:&nbsp;</span>
               <span style={trendLabelStyle}>
@@ -242,29 +243,51 @@ const CaloriesTrends: React.FC = () => {
             <span style={trendLabelStyle}>{monthName}</span>
           </div>
 
-          {/* Bars */}
-          <div className="flex items-end justify-between gap-[2px]" style={{ height: '100px' }}>
-            {monthlyBars.map((h, i) => {
-              const pct = monthlyMax > 0 ? (h / monthlyMax) * 100 : 0;
-              const isToday = monthOffset === 0 && i === new Date().getDate() - 1;
-              const isPeakBar = !isToday && h > 0 && h === Math.max(...monthlyBars);
+          {/* Bars — wrapped in relative container so label can float above peak bar */}
+          <div style={{ position: 'relative' }}>
+            <div className="flex items-end justify-between" style={{ height: '120px', gap: '3px' }}>
+              {monthlyBars.map((h, i) => {
+                const pct = monthlyMax > 0 ? (h / monthlyMax) * 100 : 0;
+                const isToday = monthOffset === 0 && i === new Date().getDate() - 1;
+                const isPeakBar = monthlyBars.length > 0 && h > 0 && h === Math.max(...monthlyBars);
 
-              let bgColor = h > 0 ? (h >= monthlyMax * 0.7 ? '#3f3f46' : 'rgba(24,24,27,0.7)') : 'rgba(24,24,27,0.3)';
-              if (isToday) bgColor = '#ffffff';
-              if (isPeakBar) bgColor = '#ffffff';
+                let bgColor = h > 0 ? (h >= monthlyMax * 0.7 ? '#3f3f46' : 'rgba(24,24,27,0.7)') : 'rgba(24,24,27,0.3)';
+                if (isToday) bgColor = '#ffffff';
+                if (isPeakBar) bgColor = '#ffffff';
 
-              return (
-                <div
-                  key={i}
-                  className="flex-1 rounded-t-sm"
-                  style={{
-                    height: `${Math.max(pct, h > 0 ? 3 : 0)}%`,
-                    backgroundColor: bgColor,
-                    boxShadow: isPeakBar ? '0 0 6px rgba(255,255,255,0.5), 0 0 16px rgba(255,255,255,0.2)' : 'none',
-                  }}
-                />
-              );
-            })}
+                return (
+                  <div
+                    key={i}
+                    className="flex-1 rounded-t-sm"
+                    style={{
+                      height: `${Math.max(pct, h > 0 ? 3 : 0)}%`,
+                      backgroundColor: bgColor,
+                      boxShadow: isPeakBar ? '0 0 6px rgba(255,255,255,0.5), 0 0 16px rgba(255,255,255,0.2)' : 'none',
+                      position: 'relative',
+                    }}
+                  >
+                    {/* Peak bar label — floats above the bar */}
+                    {isPeakBar && i === monthlyPeakIdx && h > 0 && (
+                      <span style={{
+                        position: 'absolute',
+                        bottom: '100%',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        marginBottom: '4px',
+                        fontSize: '9px',
+                        fontWeight: 700,
+                        color: 'rgba(255,255,255,0.9)',
+                        whiteSpace: 'nowrap',
+                        letterSpacing: '0.01em',
+                        lineHeight: 1,
+                      }}>
+                        {h}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
 
