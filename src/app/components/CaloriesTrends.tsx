@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
@@ -67,6 +67,7 @@ const CaloriesTrends: React.FC = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editRowValues, setEditRowValues] = useState<string[]>(Array(7).fill(''));
   const [editSaving, setEditSaving] = useState(false);
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
     const fetchEarliest = async () => {
@@ -455,9 +456,9 @@ const CaloriesTrends: React.FC = () => {
         >
           <div
             style={{
-              position: 'absolute', bottom: 0, left: 0, right: 0,
+              position: 'absolute', bottom: '10px', left: '10px', right: '10px',
               backgroundColor: '#F2F2ED',
-              borderRadius: '20px 20px 0 0',
+              borderRadius: '20px',
               padding: '28px 24px 40px',
             }}
             onClick={e => e.stopPropagation()}
@@ -476,10 +477,14 @@ const CaloriesTrends: React.FC = () => {
             <div style={{ display: 'flex', flexDirection: 'column', marginBottom: 28 }}>
               {editableDays.map((day, i) => (
                 <div key={i}>
-                  <div style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    paddingTop: 14, paddingBottom: 14,
-                  }}>
+                  <div
+                    onClick={() => inputRefs.current[i]?.focus()}
+                    style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      paddingTop: 14, paddingBottom: 14,
+                      cursor: 'text',
+                    }}
+                  >
                     {/* Date label */}
                     <span style={{
                       fontSize: '11px', fontWeight: 700,
@@ -490,8 +495,9 @@ const CaloriesTrends: React.FC = () => {
                       {fmtEditLabel(day)}
                     </span>
 
-                    {/* Inline input — no box, right-aligned */}
+                    {/* Inline input — no box, right-aligned, Manrope */}
                     <input
+                      ref={el => { inputRefs.current[i] = el; }}
                       type="number"
                       value={editRowValues[i]}
                       onChange={e => {
@@ -504,10 +510,11 @@ const CaloriesTrends: React.FC = () => {
                         background: 'none',
                         border: 'none',
                         outline: 'none',
-                        fontSize: '15px', fontWeight: 800,
+                        fontFamily: "'Manrope', sans-serif",
+                        fontSize: '16px',
+                        fontWeight: 400,
                         color: editRowValues[i] ? '#000000' : 'rgba(0,0,0,0.3)',
                         textAlign: 'right',
-                        letterSpacing: '-0.01em',
                         width: 90,
                         padding: 0,
                       }}
