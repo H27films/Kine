@@ -19,12 +19,12 @@ const MATCH_KEYWORDS: Record<IconKey, string> = {
   crosstrainer: 'cross',
 };
 
-// SVG icon — explicit 24×24 pixels, paths from uploaded files
+// SVG icon — explicit 28×28 pixels, paths from uploaded files
 const IconSVG: React.FC<{ iconKey: IconKey; color: string }> = ({ iconKey, color: c }) => {
   switch (iconKey) {
     case 'running':
       return (
-        <svg width={24} height={24} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg width={28} height={28} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect x="25" y="18" width="35" height="3" rx="1.5" fill={c}/>
           <rect x="15" y="28" width="25" height="3" rx="1.5" fill={c}/>
           <rect x="5"  y="38" width="30" height="3" rx="1.5" fill={c}/>
@@ -39,7 +39,7 @@ const IconSVG: React.FC<{ iconKey: IconKey; color: string }> = ({ iconKey, color
       );
     case 'rowing':
       return (
-        <svg width={24} height={24} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg width={28} height={28} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
           <circle cx="50" cy="25" r="5" fill={c}/>
           <path d="M50 30L45 50L55 55L65 45" stroke={c} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
           <path d="M45 50L40 60H55"          stroke={c} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -49,7 +49,7 @@ const IconSVG: React.FC<{ iconKey: IconKey; color: string }> = ({ iconKey, color
       );
     case 'walking':
       return (
-        <svg width={24} height={24} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg width={28} height={28} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M40 70C40 80 30 85 25 80C20 75 25 60 30 50C35 40 45 40 45 50C45 60 40 60 40 70Z" fill={c}/>
           <circle cx="25" cy="40" r="3" fill={c}/>
           <circle cx="32" cy="35" r="3" fill={c}/>
@@ -64,7 +64,7 @@ const IconSVG: React.FC<{ iconKey: IconKey; color: string }> = ({ iconKey, color
       );
     case 'cycling':
       return (
-        <svg width={24} height={24} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg width={28} height={28} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
           <circle cx="25" cy="70" r="15" stroke={c} strokeWidth="5"/>
           <circle cx="75" cy="70" r="15" stroke={c} strokeWidth="5"/>
           <path d="M25 70L45 45H65L75 70" stroke={c} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -74,7 +74,7 @@ const IconSVG: React.FC<{ iconKey: IconKey; color: string }> = ({ iconKey, color
       );
     case 'crosstrainer':
       return (
-        <svg width={24} height={24} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg width={28} height={28} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect x="20" y="75" width="50" height="8" fill={c}/>
           <rect x="35" y="70" width="35" height="5" fill={c}/>
           <rect x="56" y="65" width="14" height="5" fill={c}/>
@@ -111,9 +111,9 @@ const ExerciseIconBar: React.FC<Props> = ({ exercises, selectedExercise, onSelec
             key={key}
             onClick={() => onSelect(isSelected ? null : (ex ?? null))}
             style={{
-              flex: '0 0 44px',
-              width: 44,
-              height: 44,
+              flex: '0 0 50px',
+              width: 50,
+              height: 50,
               borderRadius: '50%',
               backgroundColor: bg,
               border: 'none',
