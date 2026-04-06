@@ -347,8 +347,8 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
                     </button>
                   </div>
                   {weekNumber !== null && (
-                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-                      Week {weekNumber}
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.1em' }}>
+                      {weekNumber}
                     </span>
                   )}
                 </div>
@@ -441,67 +441,78 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
 
           {/* === CALORIES CHART with week toggle === */}
           <div>
-            {/* Header row: label + chevrons | week number */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'rgba(161,161,170,0.8)' }}>Calories</span>
+            {/* Header row: CALORIES: avg kcal + chevrons | week number only */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <span style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(161,161,170,0.8)', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
+                  Calories:
+                </span>
+                <span style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.85)', letterSpacing: '0.1em' }}>
+                  {weeklyAvg > 0 ? `${weeklyAvg.toLocaleString()} KCAL` : '— KCAL'}
+                </span>
                 <button
                   onClick={() => setCalWeekOffset(o => o - 1)}
-                  style={{ background: 'none', border: 'none', padding: '2px', cursor: 'pointer', color: 'rgba(255,255,255,0.55)', display: 'flex', alignItems: 'center' }}
+                  style={{ background: 'none', border: 'none', padding: '2px 1px', cursor: 'pointer', color: 'rgba(255,255,255,0.55)', display: 'flex', alignItems: 'center' }}
                 >
                   <ChevronLeft size={14} />
                 </button>
                 <button
                   onClick={() => setCalWeekOffset(o => Math.min(o + 1, 0))}
-                  style={{ background: 'none', border: 'none', padding: '2px', cursor: 'pointer', color: calWeekOffset < 0 ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.18)', display: 'flex', alignItems: 'center' }}
+                  style={{ background: 'none', border: 'none', padding: '2px 1px', cursor: 'pointer', color: calWeekOffset < 0 ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.18)', display: 'flex', alignItems: 'center' }}
                 >
                   <ChevronRight size={14} />
                 </button>
               </div>
               {calWeekNumber !== null && (
-                <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-                  Week {calWeekNumber}
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)', letterSpacing: '0.05em' }}>
+                  {calWeekNumber}
                 </span>
               )}
             </div>
 
-            {/* Avg kcal stat */}
-            <div style={{ marginBottom: 12 }}>
-              {weeklyAvg > 0 ? (
-                <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'rgba(161,161,170,0.7)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-                  {weeklyAvg.toLocaleString()} <span style={{ fontSize: '0.6rem' }}>KCAL</span>
-                </span>
-              ) : (
-                <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'rgba(161,161,170,0.3)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>— KCAL</span>
-              )}
-            </div>
-
-            {/* Bars */}
+            {/* Bars with calorie values inside at base */}
             <div className="flex items-end justify-between gap-1" style={{ height: '112px' }}>
               {weeklyBars.map((h, i) => {
                 const pct = weeklyMax > 0 ? (h / weeklyMax) * 100 : 0;
+                const barPct = Math.max(pct, h > 0 ? 4 : 0);
                 const isToday = calWeekOffset === 0 && i === (new Date().getDay() === 0 ? 6 : new Date().getDay() - 1);
+                const label = h >= 1000 ? `${(h / 1000).toFixed(1)}k` : h > 0 ? String(h) : '';
                 return (
-                  <div key={i} className="flex-1 rounded-sm" style={{
-                    height: `${Math.max(pct, h > 0 ? 4 : 0)}%`,
-                    backgroundColor: isToday ? '#ffffff' : h > 0 ? '#3f3f46' : '#18181b',
-                  }} />
+                  <div
+                    key={i}
+                    className="flex-1 rounded-sm"
+                    style={{
+                      height: `${barPct}%`,
+                      backgroundColor: isToday ? '#ffffff' : h > 0 ? '#3f3f46' : '#18181b',
+                      position: 'relative',
+                      display: 'flex',
+                      alignItems: 'flex-end',
+                      justifyContent: 'center',
+                      paddingBottom: '3px',
+                    }}
+                  >
+                    {h > 0 && (
+                      <span style={{
+                        fontSize: '8px',
+                        fontWeight: 700,
+                        color: isToday ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.55)',
+                        letterSpacing: '0.01em',
+                        lineHeight: 1,
+                        whiteSpace: 'nowrap',
+                      }}>
+                        {label}
+                      </span>
+                    )}
+                  </div>
                 );
               })}
             </div>
 
-            {/* Day labels + calorie values */}
+            {/* Day labels */}
             <div className="flex justify-between mt-2" style={{ gap: 4 }}>
               {weekDays.map((d, i) => (
-                <div key={i} className="flex-1 flex flex-col items-center" style={{ gap: 2 }}>
+                <div key={i} className="flex-1 flex flex-col items-center">
                   <span style={{ fontSize: '8px', fontWeight: 700, color: 'rgba(82,82,91,1)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{d}</span>
-                  {weeklyBars[i] > 0 && (
-                    <span style={{ fontSize: '7px', fontWeight: 600, color: 'rgba(161,161,170,0.6)', letterSpacing: '0.02em' }}>
-                      {weeklyBars[i] >= 1000
-                        ? `${(weeklyBars[i] / 1000).toFixed(1)}k`
-                        : weeklyBars[i]}
-                    </span>
-                  )}
                 </div>
               ))}
             </div>
