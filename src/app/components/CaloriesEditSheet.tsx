@@ -41,6 +41,7 @@ const CaloriesEditSheet: React.FC<Props> = ({ onClose, onSaved }) => {
   const editableDays = getEditableDays();
   const [editRowValues, setEditRowValues] = useState<string[]>(Array(7).fill(''));
   const [editSaving, setEditSaving] = useState(false);
+  const [focusedRow, setFocusedRow] = useState<number | null>(null);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
@@ -150,22 +151,28 @@ const CaloriesEditSheet: React.FC<Props> = ({ onClose, onSaved }) => {
 
         {/* Rows */}
         <div style={{ display: 'flex', flexDirection: 'column', marginBottom: 28 }}>
-          {editableDays.map((day, i) => (
+          {editableDays.map((day, i) => {
+            const isFocused = focusedRow === i;
+            return (
             <div key={i}>
               <div
                 onClick={() => inputRefs.current[i]?.focus()}
                 style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  paddingTop: 11, paddingBottom: 11,
+                  paddingTop: isFocused ? 16 : 11,
+                  paddingBottom: isFocused ? 16 : 11,
                   cursor: 'text',
+                  transition: 'padding 0.15s ease',
                 }}
               >
                 {/* Date label */}
                 <span style={{
-                  fontSize: '11px', fontWeight: 700,
+                  fontSize: isFocused ? '13px' : '11px',
+                  fontWeight: 700,
                   color: '#000000',
                   letterSpacing: '0.2em', textTransform: 'uppercase',
                   flexShrink: 0,
+                  transition: 'font-size 0.15s ease',
                 }}>
                   {fmtEditLabel(day)}
                 </span>
@@ -180,19 +187,22 @@ const CaloriesEditSheet: React.FC<Props> = ({ onClose, onSaved }) => {
                     newVals[i] = e.target.value;
                     setEditRowValues(newVals);
                   }}
+                  onFocus={() => setFocusedRow(i)}
+                  onBlur={() => setFocusedRow(null)}
                   placeholder="—"
                   style={{
                     background: 'none',
                     border: 'none',
                     outline: 'none',
                     fontFamily: 'inherit',
-                    fontSize: '13px',
+                    fontSize: isFocused ? '16px' : '13px',
                     fontWeight: 400,
                     letterSpacing: '0.15em',
                     color: editRowValues[i] ? '#000000' : 'rgba(0,0,0,0.3)',
                     textAlign: 'right',
                     width: 90,
                     padding: 0,
+                    transition: 'font-size 0.15s ease',
                   }}
                 />
               </div>
@@ -201,7 +211,8 @@ const CaloriesEditSheet: React.FC<Props> = ({ onClose, onSaved }) => {
                 <div style={{ height: '1px', backgroundColor: 'rgba(0,0,0,0.08)' }} />
               )}
             </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Update button */}
