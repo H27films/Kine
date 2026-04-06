@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar } from 'lucide-react';
-import { supabase, currentWeekMonday, weeksAgoMonday } from '../../lib/supabase';
+import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
 
 const WEIGHT_TYPES = ['CHEST', 'BACK', 'LEGS'];
 const WEEKLY_MAX = 30000;
@@ -18,35 +18,89 @@ const sectionLabelStyle: React.CSSProperties = {
 
 const WeeklyVolumeSection: React.FC = () => {
   const [weeklyData, setWeeklyData] = useState<WeeklyGroupData[]>([]);
+  const [availableWeeks, setAvailableWeeks] = useState<number[]>([]);
+  const [weekIdx, setWeekIdx] = useState(0);
+  const [showWeekPicker, setShowWeekPicker] = useState(false);
 
   useEffect(() => {
-    const loadWeekly = async () => {
-      const thisMonday = currentWeekMonday();
-      const lastMonday = weeksAgoMonday(1);
+    const loadWeeks = async () => {
+      const { data } = await supabase
+        .from('workouts')
+        .select('week')
+        .in('type', WEIGHT_TYPES)
+        .not('week', 'is', null);
+      if (data) {
+        const weeks = [...new Set((data as any[]).map(r => Number(r.week)))]
+          .filter(w => !isNaN(w))
+          .sort((a, b) => b - a);
+        setAvailableWeeks(weeks);
+      }
+    };
+    loadWeeks();
+  }, []);
 
-      const [{ data: thisWeek }, { data: lastWeek }] = await Promise.all([
-        supabase.from('workouts').select('type, total_weight').in('type', WEIGHT_TYPES).gte('date', thisMonday),
-        supabase.from('workouts').select('type, total_weight').in('type', WEIGHT_TYPES).gte('date', lastMonday).lt('date', thisMonday),
-      ]);
+  const loadWeekly = async () => {
+    if (availableWeeks.length === 0) return;
+    const currentWeek = availableWeeks[weekIdx] ?? 0;
+    const lastWeek = availableWeeks[weekIdx + 1] ?? 0;
 
-      const sumByType = (rows: any[] | null, type: string) =>
-        (rows || []).filter(r => r.type === type).reduce((s, r) => s + Number(r.total_weight || 0), 0);
+    const [{ data: thisWeek }, { data: lastWeekData }] = await Promise.all([
+      supabase.from('workouts').select('type, total_weight').in('type', WEIGHT_TYPES).eq('week', currentWeek),
+      supabase.from('workouts').select('type, total_weight').in('type', WEIGHT_TYPES).eq('week', lastWeek),
+    ]);
 
-      const groups = ['CHEST', 'BACK', 'LEGS'].map(t => ({
+    const sumByType = (rows: any[] | null, type: string) =>
+      (rows || []).filter(r => r.type === type).reduce((s, r) => s + Number(r.total_weight || 0), 0);
+
+const groups = ['CHEST', 'BACK', 'LEGS'].map(t => ({
         group: t.charAt(0) + t.slice(1).toLowerCase(),
         total: sumByType(thisWeek, t),
-        lastWeek: sumByType(lastWeek, t),
+        lastWeek: sumByType(lastWeekData, t),
       }));
-      setWeeklyData(groups);
-    };
+    setWeeklyData(groups);
+  };
+
+  useEffect(() => {
     loadWeekly();
-  }, []);
+  }, [weekIdx, availableWeeks]);
+
+  const canGoBack = weekIdx < availableWeeks.length - 1;
+  const canGoForward = weekIdx > 0;
 
   return (
     <section className="mb-10">
       <div className="flex items-center justify-between mb-5">
-        <p style={{ ...sectionLabelStyle, marginBottom: 0 }}>Weekly</p>
-        <Calendar size={15} style={{ color: 'rgba(255,255,255,0.4)' }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <p style={{ ...sectionLabelStyle, marginBottom: 0 }}>Weekly</p>
+          {showWeekPicker && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <button
+                onClick={() => setWeekIdx(i => i + 1)}
+                disabled={!canGoBack}
+                style={{ opacity: canGoBack ? 0.6 : 0.2, background: 'none', border: 'none', cursor: canGoBack ? 'pointer' : 'default', padding: 0 }}
+              >
+                <ChevronLeft size={18} color="white" />
+              </button>
+              <button
+                onClick={() => setWeekIdx(i => i - 1)}
+                disabled={!canGoForward}
+                style={{ opacity: canGoForward ? 0.6 : 0.2, background: 'none', border: 'none', cursor: canGoForward ? 'pointer' : 'default', padding: 0 }}
+              >
+                <ChevronRight size={18} color="white" />
+              </button>
+            </div>
+          )}
+        </div>
+        <button
+          onClick={() => { setShowWeekPicker(!showWeekPicker); setWeekIdx(0); }}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
+        >
+          {showWeekPicker ? (
+            <span style={{ color: '#ffffff', fontWeight: 800, fontSize: '0.85rem' }}>{availableWeeks[weekIdx]}</span>
+          ) : (
+            <Calendar size={18} style={{ color: 'rgba(255,255,255,0.4)' }} />
+          )}
+        </button>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         {weeklyData.map(({ group, total, lastWeek }) => {
@@ -57,7 +111,7 @@ const WeeklyVolumeSection: React.FC = () => {
                 <div>
                   <span style={{ color: '#ffffff', fontWeight: 700, fontSize: '1rem', letterSpacing: '-0.01em', display: 'block' }}>{group}</span>
                   <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.7rem', fontWeight: 400, marginTop: '1px', display: 'block' }}>
-                    Last week: {Math.round(lastWeek).toLocaleString()}kg
+                    {weekIdx === 0 ? 'Last week' : 'Previous'}: {Math.round(lastWeek).toLocaleString()}kg
                   </span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
