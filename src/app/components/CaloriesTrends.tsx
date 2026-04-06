@@ -37,6 +37,33 @@ const CaloriesTrends: React.FC = () => {
   const [monthlyBars, setMonthlyBars] = useState<number[]>([]);
   const [monthName, setMonthName] = useState('');
 
+  // Earliest data month offset (to clamp back-navigation)
+  const [minMonthOffset, setMinMonthOffset] = useState(-24); // fallback
+
+  // Find earliest data month on mount
+  useEffect(() => {
+    const fetchEarliest = async () => {
+      const { data } = await supabase
+        .from('workouts')
+        .select('date')
+        .eq('type', 'MEASUREMENT')
+        .eq('exercise_id', CALORIES_EXERCISE_ID)
+        .order('date', { ascending: true })
+        .limit(1);
+
+      if (data && data.length > 0) {
+        const earliest = new Date(data[0].date + 'T12:00:00');
+        const now = new Date();
+        // Calculate how many months back from now
+        const diffMonths =
+          (earliest.getFullYear() - now.getFullYear()) * 12 +
+          (earliest.getMonth() - now.getMonth());
+        setMinMonthOffset(diffMonths); // will be negative or 0
+      }
+    };
+    fetchEarliest();
+  }, []);
+
   // Load weekly calories
   useEffect(() => {
     const loadWeekly = async () => {
@@ -136,8 +163,8 @@ const CaloriesTrends: React.FC = () => {
 
         {/* === Weekly Calories Chart === */}
         <div>
-          {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+          {/* Header — increased bottom margin for breathing room */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <span style={trendLabelStyle}>Calories:&nbsp;</span>
               <span style={trendLabelStyle}>
@@ -174,6 +201,9 @@ const CaloriesTrends: React.FC = () => {
               if (isToday) bgColor = '#ffffff';
               if (isPeakBar) bgColor = '#ffffff';
 
+              // Pure black on white bars, pure white on grey bars
+              const labelColor = (isToday || isPeakBar) ? '#000000' : '#ffffff';
+
               return (
                 <div
                   key={i}
@@ -186,14 +216,14 @@ const CaloriesTrends: React.FC = () => {
                     display: 'flex',
                     alignItems: 'flex-end',
                     justifyContent: 'center',
-                    paddingBottom: '5px',
+                    paddingBottom: '9px',
                   }}
                 >
                   {h > 0 && (
                     <span style={{
                       fontSize: '9px',
                       fontWeight: 700,
-                      color: (isToday || isPeakBar) ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.6)',
+                      color: labelColor,
                       letterSpacing: '0.01em',
                       lineHeight: 1,
                       whiteSpace: 'nowrap',
@@ -220,7 +250,7 @@ const CaloriesTrends: React.FC = () => {
 
         {/* === Monthly Calories Chart === */}
         <div>
-          {/* Header — extra bottom margin to give room for peak label above bars */}
+          {/* Header */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <span style={trendLabelStyle}>Calories:&nbsp;</span>
@@ -228,14 +258,22 @@ const CaloriesTrends: React.FC = () => {
                 {monthlyAvg > 0 ? `${monthlyAvg.toLocaleString()} KCAL` : '— KCAL'}
               </span>
               <button
-                onClick={() => setMonthOffset(o => o - 1)}
-                style={{ background: 'none', border: 'none', padding: '2px 1px', cursor: 'pointer', color: 'rgba(161,161,170,1)', display: 'flex', alignItems: 'center' }}
+                onClick={() => setMonthOffset(o => Math.max(o - 1, minMonthOffset))}
+                style={{
+                  background: 'none', border: 'none', padding: '2px 1px', cursor: 'pointer',
+                  color: monthOffset > minMonthOffset ? 'rgba(161,161,170,1)' : 'rgba(161,161,170,0.25)',
+                  display: 'flex', alignItems: 'center'
+                }}
               >
                 <ChevronLeft size={13} />
               </button>
               <button
                 onClick={() => setMonthOffset(o => Math.min(o + 1, 0))}
-                style={{ background: 'none', border: 'none', padding: '2px 1px', cursor: 'pointer', color: monthOffset < 0 ? 'rgba(161,161,170,1)' : 'rgba(161,161,170,0.25)', display: 'flex', alignItems: 'center' }}
+                style={{
+                  background: 'none', border: 'none', padding: '2px 1px', cursor: 'pointer',
+                  color: monthOffset < 0 ? 'rgba(161,161,170,1)' : 'rgba(161,161,170,0.25)',
+                  display: 'flex', alignItems: 'center'
+                }}
               >
                 <ChevronRight size={13} />
               </button>
@@ -243,13 +281,13 @@ const CaloriesTrends: React.FC = () => {
             <span style={trendLabelStyle}>{monthName}</span>
           </div>
 
-          {/* Bars — wrapped in relative container so label can float above peak bar */}
+          {/* Bars */}
           <div style={{ position: 'relative' }}>
             <div className="flex items-end justify-between" style={{ height: '120px', gap: '3px' }}>
               {monthlyBars.map((h, i) => {
                 const pct = monthlyMax > 0 ? (h / monthlyMax) * 100 : 0;
                 const isToday = monthOffset === 0 && i === new Date().getDate() - 1;
-                const isPeakBar = monthlyBars.length > 0 && h > 0 && h === Math.max(...monthlyBars);
+                const isPeakBar = monthlyBars.length > 0 && h > 0 && i === monthlyPeakIdx;
 
                 let bgColor = h > 0 ? (h >= monthlyMax * 0.7 ? '#3f3f46' : 'rgba(24,24,27,0.7)') : 'rgba(24,24,27,0.3)';
                 if (isToday) bgColor = '#ffffff';
@@ -267,7 +305,7 @@ const CaloriesTrends: React.FC = () => {
                     }}
                   >
                     {/* Peak bar label — floats above the bar */}
-                    {isPeakBar && i === monthlyPeakIdx && h > 0 && (
+                    {isPeakBar && h > 0 && (
                       <span style={{
                         position: 'absolute',
                         bottom: '100%',
@@ -276,7 +314,7 @@ const CaloriesTrends: React.FC = () => {
                         marginBottom: '4px',
                         fontSize: '9px',
                         fontWeight: 700,
-                        color: 'rgba(255,255,255,0.9)',
+                        color: '#ffffff',
                         whiteSpace: 'nowrap',
                         letterSpacing: '0.01em',
                         lineHeight: 1,
