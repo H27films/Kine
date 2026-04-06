@@ -483,16 +483,19 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                   width: '52px',
                   height: '52px',
                   borderRadius: '50%',
-                  backgroundColor: selectedGroup === group ? '#ffffff' : 'transparent',
+                  backgroundColor: selectedGroup === group ? '#ffffff' : '#000000',
                   border: '2px solid #ffffff',
                   boxShadow: selectedGroup === group ? '0 0 16px rgba(255,255,255,0.5)' : 'none',
                   transition: 'all 0.2s',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  overflow: 'hidden',
                 }}>
-                  {selectedGroup && (
+                  {selectedGroup === group ? (
                     <Check size={24} color="#000000" strokeWidth={3} />
+                  ) : (
+                    <img src={`/icons/${group}.svg`} alt={group} style={{ width: '38px', height: '38px', objectFit: 'contain' }} />
                   )}
                 </div>
                 <span style={{
