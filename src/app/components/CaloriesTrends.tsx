@@ -147,7 +147,7 @@ const CaloriesTrends: React.FC = () => {
 
   return (
     <section className="mb-8">
-      <h3 className="text-[12px] font-bold uppercase tracking-[0.3em] mb-6" style={{ color: 'rgba(161,161,170,1)' }}>
+      <h3 className="text-[13px] font-black uppercase tracking-[0.2em] mb-6" style={{ color: '#ffffff' }}>
         Performance Trends
       </h3>
       <div className="space-y-10">
