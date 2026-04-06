@@ -444,82 +444,79 @@ const CaloriesTrends: React.FC = () => {
 
       </div>
 
-      {/* === 7-Day Bulk Edit Modal === */}
+      {/* === 7-Day Bulk Edit Bottom Sheet === */}
       {showEditModal && (
         <div
           style={{
             position: 'fixed', inset: 0, zIndex: 100,
-            backgroundColor: 'rgba(0,0,0,0.75)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            padding: '24px',
+            backgroundColor: 'rgba(0,0,0,0.55)',
           }}
-          onClick={(e) => { if (e.target === e.currentTarget) setShowEditModal(false); }}
+          onClick={() => setShowEditModal(false)}
         >
-          <div style={{
-            width: '100%', maxWidth: 360,
-            backgroundColor: '#111111',
-            borderRadius: '16px',
-            border: '1px solid rgba(255,255,255,0.08)',
-            padding: '28px 24px 24px',
-          }}>
-            {/* Modal header */}
+          <div
+            style={{
+              position: 'absolute', bottom: 0, left: 0, right: 0,
+              backgroundColor: '#F2F2ED',
+              borderRadius: '20px 20px 0 0',
+              padding: '28px 24px 40px',
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Header */}
             <p style={{
-              fontSize: '10px', fontWeight: 900,
-              color: 'rgba(161,161,170,0.7)',
-              letterSpacing: '0.25em', textTransform: 'uppercase',
-              marginBottom: 20,
+              fontSize: '14px', fontWeight: 900,
+              color: '#000000',
+              letterSpacing: '0.2em', textTransform: 'uppercase',
+              marginBottom: 24,
             }}>
               Edit Calories
             </p>
 
             {/* Rows */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', marginBottom: 28 }}>
               {editableDays.map((day, i) => (
-                <div key={i} style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  gap: 12,
-                }}>
-                  {/* Date label */}
-                  <span style={{
-                    fontSize: '11px', fontWeight: 700,
-                    color: 'rgba(161,161,170,0.85)',
-                    letterSpacing: '0.2em', textTransform: 'uppercase',
-                    flexShrink: 0, width: 90,
+                <div key={i}>
+                  <div style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    paddingTop: 14, paddingBottom: 14,
                   }}>
-                    {fmtEditLabel(day)}
-                  </span>
+                    {/* Date label */}
+                    <span style={{
+                      fontSize: '11px', fontWeight: 700,
+                      color: '#000000',
+                      letterSpacing: '0.2em', textTransform: 'uppercase',
+                      flexShrink: 0,
+                    }}>
+                      {fmtEditLabel(day)}
+                    </span>
 
-                  {/* Input */}
-                  <input
-                    type="number"
-                    value={editRowValues[i]}
-                    onChange={e => {
-                      const newVals = [...editRowValues];
-                      newVals[i] = e.target.value;
-                      setEditRowValues(newVals);
-                    }}
-                    placeholder="—"
-                    style={{
-                      flex: 1,
-                      background: 'rgba(255,255,255,0.05)',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: 8,
-                      padding: '10px 14px',
-                      fontSize: '15px', fontWeight: 800,
-                      color: '#ffffff',
-                      textAlign: 'right',
-                      outline: 'none',
-                      letterSpacing: '-0.01em',
-                    }}
-                    onFocus={e => {
-                      e.currentTarget.style.border = '1px solid rgba(255,255,255,0.35)';
-                      e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
-                    }}
-                    onBlur={e => {
-                      e.currentTarget.style.border = '1px solid rgba(255,255,255,0.1)';
-                      e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-                    }}
-                  />
+                    {/* Inline input — no box, right-aligned */}
+                    <input
+                      type="number"
+                      value={editRowValues[i]}
+                      onChange={e => {
+                        const newVals = [...editRowValues];
+                        newVals[i] = e.target.value;
+                        setEditRowValues(newVals);
+                      }}
+                      placeholder="—"
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        outline: 'none',
+                        fontSize: '15px', fontWeight: 800,
+                        color: editRowValues[i] ? '#000000' : 'rgba(0,0,0,0.3)',
+                        textAlign: 'right',
+                        letterSpacing: '-0.01em',
+                        width: 90,
+                        padding: 0,
+                      }}
+                    />
+                  </div>
+                  {/* Divider — not after last row */}
+                  {i < editableDays.length - 1 && (
+                    <div style={{ height: '1px', backgroundColor: 'rgba(0,0,0,0.08)' }} />
+                  )}
                 </div>
               ))}
             </div>
@@ -529,10 +526,10 @@ const CaloriesTrends: React.FC = () => {
               onClick={handleEditSave}
               disabled={editSaving}
               style={{
-                width: '100%', padding: '14px',
-                backgroundColor: '#ffffff', color: '#000000',
+                width: '100%', padding: '16px',
+                backgroundColor: '#000000', color: '#ffffff',
                 borderRadius: 999, border: 'none',
-                fontSize: '10px', fontWeight: 900,
+                fontSize: '11px', fontWeight: 900,
                 letterSpacing: '0.2em', textTransform: 'uppercase',
                 cursor: 'pointer', opacity: editSaving ? 0.6 : 1,
               }}
