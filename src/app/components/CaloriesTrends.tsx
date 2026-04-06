@@ -451,6 +451,8 @@ const CaloriesTrends: React.FC = () => {
           style={{
             position: 'fixed', inset: 0, zIndex: 100,
             backgroundColor: 'rgba(0,0,0,0.55)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
           }}
           onClick={() => setShowEditModal(false)}
         >
@@ -494,7 +496,7 @@ const CaloriesTrends: React.FC = () => {
                     onClick={() => inputRefs.current[i]?.focus()}
                     style={{
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      paddingTop: 9, paddingBottom: 9,
+                      paddingTop: 11, paddingBottom: 11,
                       cursor: 'text',
                     }}
                   >
@@ -547,7 +549,7 @@ const CaloriesTrends: React.FC = () => {
               onClick={handleEditSave}
               disabled={editSaving}
               style={{
-                width: '100%', padding: '16px',
+                width: '100%', padding: '11px',
                 backgroundColor: '#000000', color: '#ffffff',
                 borderRadius: 999, border: 'none',
                 fontSize: '11px', fontWeight: 900,
