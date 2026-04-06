@@ -239,7 +239,7 @@ const CaloriesTrends: React.FC = () => {
 
         {/* === Monthly Calories Chart === */}
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 30 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 42 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <span style={trendLabelStyle}>Calories:&nbsp;</span>
               <span style={trendLabelStyle}>
