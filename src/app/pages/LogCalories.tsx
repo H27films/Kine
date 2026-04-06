@@ -288,6 +288,9 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
   const daysWithCals = weeklyBars.filter(v => v > 0).length;
   const weeklyAvg = daysWithCals > 0 ? Math.round(weeklyBars.reduce((a, b) => a + b, 0) / daysWithCals) : 0;
 
+  // Index of highest bar (for previous weeks highlight)
+  const maxBarIndex = weeklyBars.indexOf(Math.max(...weeklyBars));
+
   return (
     <div>
       <nav className="flex gap-8 mb-12 items-end">
@@ -475,15 +478,25 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
               {weeklyBars.map((h, i) => {
                 const pct = weeklyMax > 0 ? (h / weeklyMax) * 100 : 0;
                 const barPct = Math.max(pct, h > 0 ? 4 : 0);
-                const isToday = calWeekOffset === 0 && i === (new Date().getDay() === 0 ? 6 : new Date().getDay() - 1);
+                const isCurrentWeek = calWeekOffset === 0;
+                const todayIdx = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
+                const isToday = isCurrentWeek && i === todayIdx;
+                // For previous weeks: highlight the highest bar in bright white with glow
+                const isPeakBar = !isCurrentWeek && h > 0 && i === maxBarIndex;
                 const label = h >= 1000 ? `${(h / 1000).toFixed(1)}k` : h > 0 ? String(h) : '';
+
+                let bgColor = h > 0 ? '#3f3f46' : '#18181b';
+                if (isToday) bgColor = '#ffffff';
+                if (isPeakBar) bgColor = '#ffffff';
+
                 return (
                   <div
                     key={i}
                     className="flex-1 rounded-sm"
                     style={{
                       height: `${barPct}%`,
-                      backgroundColor: isToday ? '#ffffff' : h > 0 ? '#3f3f46' : '#18181b',
+                      backgroundColor: bgColor,
+                      boxShadow: isPeakBar ? '0 0 8px rgba(255,255,255,0.6), 0 0 20px rgba(255,255,255,0.25)' : 'none',
                       position: 'relative',
                       display: 'flex',
                       alignItems: 'flex-end',
@@ -495,7 +508,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
                       <span style={{
                         fontSize: '8px',
                         fontWeight: 700,
-                        color: isToday ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.55)',
+                        color: (isToday || isPeakBar) ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.55)',
                         letterSpacing: '0.01em',
                         lineHeight: 1,
                         whiteSpace: 'nowrap',
