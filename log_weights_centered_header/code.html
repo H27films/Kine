@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kiné | Log Weights</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "tertiary-container": "#919090",
+              "error": "#ffb4ab",
+              "on-tertiary-container": "#000000",
+              "on-tertiary-fixed-variant": "#e4e2e1",
+              "on-primary-fixed": "#ffffff",
+              "on-tertiary": "#1b1c1c",
+              "background": "#000000",
+              "on-surface-variant": "#c6c6c6",
+              "secondary-container": "#474746",
+              "inverse-on-surface": "#303030",
+              "tertiary-fixed": "#5f5e5e",
+              "tertiary-fixed-dim": "#474747",
+              "surface-container-highest": "#353535",
+              "on-primary-container": "#000000",
+              "on-secondary": "#1b1c1c",
+              "tertiary": "#e4e2e1",
+              "surface-variant": "#353535",
+              "on-surface": "#e2e2e2",
+              "secondary-fixed": "#c8c6c5",
+              "inverse-surface": "#e2e2e2",
+              "secondary": "#c8c6c5",
+              "on-background": "#e2e2e2",
+              "surface-tint": "#c6c6c7",
+              "surface": "#000000",
+              "error-container": "#93000a",
+              "on-error": "#690005",
+              "surface-dim": "#131313",
+              "on-secondary-fixed": "#1b1c1c",
+              "on-secondary-fixed-variant": "#3c3b3b",
+              "on-secondary-container": "#e5e2e1",
+              "outline": "#919191",
+              "inverse-primary": "#5d5f5f",
+              "surface-bright": "#393939",
+              "on-primary-fixed-variant": "#e2e2e2",
+              "surface-container-low": "#1b1b1b",
+              "primary-fixed-dim": "#454747",
+              "on-primary": "#1a1c1c",
+              "surface-container-high": "#2a2a2a",
+              "on-tertiary-fixed": "#ffffff",
+              "primary": "#ffffff",
+              "on-error-container": "#ffdad6",
+              "primary-fixed": "#5d5f5f",
+              "secondary-fixed-dim": "#adabaa",
+              "outline-variant": "#474747",
+              "surface-container": "#1f1f1f",
+              "surface-container-lowest": "#0e0e0e"
+            },
+            fontFamily: {
+              "headline": ["Inter"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      body {
+        background-color: #000000;
+        color: #e2e2e2;
+        font-family: 'Inter', sans-serif;
+      }
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen pb-32">
+<!-- Top Navigation Anchor -->
+<header class="fixed top-0 left-0 right-0 z-50 flex items-center w-full px-4 h-16 bg-black/80 backdrop-blur-md">
+<div class="flex-shrink-0">
+<span class="material-symbols-outlined text-white hover:opacity-80 transition-opacity cursor-pointer">menu</span>
+</div>
+<div class="flex-grow flex justify-center">
+<div class="font-['Inter'] font-black tracking-[0.2em] uppercase text-white text-xl">Kiné</div>
+</div>
+<div class="w-6 flex-shrink-0"></div> <!-- Spacer for symmetry -->
+</header>
+<main class="pt-24 px-4 max-w-lg mx-auto">
+<!-- Tab Navigation -->
+<nav class="flex justify-between items-center mb-10 gap-2">
+<button class="flex-1 py-3 text-center border-b-2 border-primary text-primary font-bold transition-all">Weights</button>
+<button class="flex-1 py-3 text-center border-b-2 border-transparent text-on-surface-variant/40 hover:text-on-surface transition-all">Cardio</button>
+<button class="flex-1 py-3 text-center border-b-2 border-transparent text-on-surface-variant/40 hover:text-on-surface transition-all">Calories</button>
+</nav>
+<!-- Muscle Group Selection (Editorial Bento) -->
+<section class="mb-12">
+<div class="flex justify-between items-end mb-6">
+<h2 class="text-3xl font-black tracking-tighter uppercase italic">Target</h2>
+<span class="text-[10px] uppercase tracking-widest text-on-surface-variant">Select Muscle Group</span>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div class="bg-surface-container-high p-6 rounded-lg border border-white/5 flex flex-col justify-between aspect-square group active:scale-95 duration-200 cursor-pointer">
+<span class="material-symbols-outlined text-primary text-4xl">fitness_center</span>
+<span class="font-black uppercase tracking-tight text-xl">Chest</span>
+</div>
+<div class="grid grid-rows-2 gap-3">
+<div class="bg-surface-container-low p-4 rounded-lg flex items-center justify-between group active:scale-95 duration-200 cursor-pointer">
+<span class="font-bold uppercase tracking-widest text-xs">Back</span>
+<span class="material-symbols-outlined text-on-surface-variant">keyboard_arrow_right</span>
+</div>
+<div class="bg-surface-container-low p-4 rounded-lg flex items-center justify-between group active:scale-95 duration-200 cursor-pointer">
+<span class="font-bold uppercase tracking-widest text-xs">Legs</span>
+<span class="material-symbols-outlined text-on-surface-variant">keyboard_arrow_right</span>
+</div>
+</div>
+<div class="col-span-2 bg-surface-container-low p-4 rounded-lg flex items-center justify-between active:scale-95 duration-200 cursor-pointer">
+<span class="font-bold uppercase tracking-widest text-xs">Shoulders &amp; Arms</span>
+<span class="material-symbols-outlined text-on-surface-variant">keyboard_arrow_right</span>
+</div>
+</div>
+</section>
+<!-- Technical Entry Point -->
+<section class="mb-12 bg-surface-container-lowest p-8 rounded-xl border border-outline-variant/10 shadow-2xl">
+<div class="mb-8">
+<h3 class="text-xs font-bold uppercase tracking-[0.3em] text-on-surface-variant mb-4">New Entry: Bench Press</h3>
+<div class="flex items-baseline gap-2">
+<input class="bg-transparent text-6xl md:text-7xl font-black tracking-tighter text-primary w-32 border-none focus:ring-0 p-0 placeholder:text-surface-container-highest" placeholder="00" type="number"/>
+<span class="text-xl font-bold uppercase tracking-widest text-on-surface-variant">KG</span>
+</div>
+</div>
+<div class="flex items-center justify-between gap-6">
+<div class="flex-1">
+<label class="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">Repetitions</label>
+<div class="flex items-center bg-surface-container-low rounded-full px-4 py-2 justify-between">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-white">remove</button>
+<span class="text-xl font-black">12</span>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-white">add</button>
+</div>
+</div>
+<button class="bg-primary text-on-primary font-black uppercase tracking-widest text-xs px-8 py-4 rounded-full mt-6 shadow-[0_12px_32px_rgba(0,0,0,0.4)] active:scale-90 duration-150">
+                    Log Set
+                </button>
+</div>
+</section>
+<!-- Recent Logs (Editorial List) -->
+<section>
+<div class="flex justify-between items-center mb-6">
+<h2 class="text-xl font-black tracking-tight uppercase">Recent Logs</h2>
+<span class="material-symbols-outlined text-on-surface-variant">history</span>
+</div>
+<div class="space-y-4">
+<!-- Log Card -->
+<div class="group flex items-center gap-4 bg-surface-container-low p-4 rounded-lg hover:bg-surface-container-high transition-colors">
+<div class="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">fitness_center</span>
+</div>
+<div class="flex-grow">
+<h4 class="font-bold text-sm uppercase tracking-tight">Dumbbell Flyes</h4>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-widest">3 Sets • 12 Reps</p>
+</div>
+<div class="text-right">
+<div class="text-lg font-black tracking-tighter">24.5</div>
+<div class="text-[8px] font-bold uppercase tracking-widest text-on-surface-variant">Kilos</div>
+</div>
+</div>
+<!-- Log Card -->
+<div class="group flex items-center gap-4 bg-surface-container-low p-4 rounded-lg hover:bg-surface-container-high transition-colors">
+<div class="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">fitness_center</span>
+</div>
+<div class="flex-grow">
+<h4 class="font-bold text-sm uppercase tracking-tight">Incline Press</h4>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-widest">4 Sets • 10 Reps</p>
+</div>
+<div class="text-right">
+<div class="text-lg font-black tracking-tighter">80.0</div>
+<div class="text-[8px] font-bold uppercase tracking-widest text-on-surface-variant">Kilos</div>
+</div>
+</div>
+<!-- Log Card -->
+<div class="group flex items-center gap-4 bg-surface-container-low p-4 rounded-lg hover:bg-surface-container-high transition-colors">
+<div class="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">fitness_center</span>
+</div>
+<div class="flex-grow">
+<h4 class="font-bold text-sm uppercase tracking-tight">Cable Crossover</h4>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-widest">3 Sets • 15 Reps</p>
+</div>
+<div class="text-right">
+<div class="text-lg font-black tracking-tighter">15.0</div>
+<div class="text-[8px] font-bold uppercase tracking-widest text-on-surface-variant">Kilos</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Shell -->
+<nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] rounded-full bg-[#353535]/60 backdrop-blur-xl z-50 flex justify-around items-center px-6 py-2 shadow-[0_12px_32px_rgba(0,0,0,0.4)]">
+<button class="text-[#e2e2e2] p-3 hover:text-white transition-all active:scale-90 duration-150">
+<span class="material-symbols-outlined">camping</span>
+</button>
+<button class="bg-white text-[#1a1c1c] rounded-full p-3 scale-110 active:scale-90 duration-150">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">fitness_center</span>
+</button>
+<button class="text-[#e2e2e2] p-3 hover:text-white transition-all active:scale-90 duration-150">
+<span class="material-symbols-outlined">history</span>
+</button>
+<button class="text-[#e2e2e2] p-3 hover:text-white transition-all active:scale-90 duration-150">
+<span class="material-symbols-outlined">person</span>
+</button>
+</nav>
+</body></html>
