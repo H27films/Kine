@@ -456,15 +456,15 @@ const CaloriesTrends: React.FC = () => {
         >
           <div
             style={{
-              position: 'absolute', bottom: '10px', left: '10px', right: '10px',
+              position: 'absolute', bottom: '0px', left: '10px', right: '10px',
               backgroundColor: '#F2F2ED',
-              borderRadius: '20px',
-              padding: '28px 24px 40px',
+              borderRadius: '20px 20px 0 0',
+              padding: '24px 24px 32px',
             }}
             onClick={e => e.stopPropagation()}
           >
             {/* Header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
               <p style={{
                 fontSize: '14px', fontWeight: 900,
                 color: '#000000',
@@ -494,7 +494,7 @@ const CaloriesTrends: React.FC = () => {
                     onClick={() => inputRefs.current[i]?.focus()}
                     style={{
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      paddingTop: 14, paddingBottom: 14,
+                      paddingTop: 9, paddingBottom: 9,
                       cursor: 'text',
                     }}
                   >
