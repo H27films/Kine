@@ -4,11 +4,12 @@ interface Props {
   weeklyBars: number[]; // 7 values Mon–Sun
   expanded?: boolean;
   onClick?: () => void;
+  onEditClick?: () => void;
 }
 
 const DAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
-const CaloriesSparkline: React.FC<Props> = ({ weeklyBars, expanded = false, onClick }) => {
+const CaloriesSparkline: React.FC<Props> = ({ weeklyBars, expanded = false, onClick, onEditClick }) => {
   const rawMax = Math.max(...weeklyBars, 1);
 
   const daysWithData = weeklyBars.filter(v => v > 0);
@@ -28,20 +29,43 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars, expanded = false, onCl
           cursor: 'pointer',
         }}
       >
-        {/* Header: TOTAL CALORIES left, avg right */}
+        {/* Header: TOTAL CALORIES + pencil icon left, avg right */}
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'baseline',
           marginBottom: 4,
         }}>
-          <span style={{
-            fontSize: '13px',
-            fontWeight: 900,
-            letterSpacing: '0.2em',
-            color: '#ffffff',
-            textTransform: 'uppercase',
-          }}>Total Calories</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{
+              fontSize: '13px',
+              fontWeight: 900,
+              letterSpacing: '0.2em',
+              color: '#ffffff',
+              textTransform: 'uppercase',
+            }}>Total Calories</span>
+            {/* Pencil icon — opens edit sheet */}
+            {onEditClick && (
+              <button
+                onClick={e => { e.stopPropagation(); onEditClick(); }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: '2px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  opacity: 0.55,
+                  color: '#ffffff',
+                }}
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                </svg>
+              </button>
+            )}
+          </div>
           <div style={{
             fontFamily: "'Inter', sans-serif",
             fontSize: '17px',
@@ -148,15 +172,13 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars, expanded = false, onCl
           const barColor = val > 0
             ? `rgb(${brightness},${brightness},${brightness})`
             : 'rgba(255,255,255,0.05)';
-          // Empty days: tiny stump only (no background trail)
           const fillPct = val > 0 ? Math.max(rawPct * 100, 6) : 8;
 
           return (
             <div key={i} style={{
               width: '100%',
               height: 5,
-              // No background on empty rows — avoids the faint trail
-              backgroundColor: val > 0 ? 'transparent' : 'transparent',
+              backgroundColor: 'transparent',
               borderRadius: '9999px 0 0 9999px',
               overflow: 'hidden',
               position: 'relative',

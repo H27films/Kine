@@ -1,0 +1,227 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { supabase } from '../../lib/supabase';
+
+const CALORIES_EXERCISE_ID = 90;
+const MONTH_NAMES = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+const DAY_ABBREVS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+const getWeekNum = (d: Date): number => {
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dayNum = date.getUTCDay() || 7;
+  date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+  return Math.ceil((((date.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+};
+
+const getEditableDays = (): Date[] => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const days: Date[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    days.push(d);
+  }
+  return days;
+};
+
+const fmtDate = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+const fmtEditLabel = (d: Date): string =>
+  `${DAY_ABBREVS[d.getDay()]} ${d.getDate()} ${MONTH_NAMES[d.getMonth()]}`;
+
+interface Props {
+  onClose: () => void;
+  onSaved: () => void;
+}
+
+const CaloriesEditSheet: React.FC<Props> = ({ onClose, onSaved }) => {
+  const editableDays = getEditableDays();
+  const [editRowValues, setEditRowValues] = useState<string[]>(Array(7).fill(''));
+  const [editSaving, setEditSaving] = useState(false);
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  useEffect(() => {
+    const loadValues = async () => {
+      const dateStrings = editableDays.map(d => fmtDate(d));
+      const { data } = await supabase
+        .from('workouts')
+        .select('date, calories')
+        .eq('type', 'MEASUREMENT')
+        .eq('exercise_id', CALORIES_EXERCISE_ID)
+        .in('date', dateStrings);
+
+      const valMap: Record<string, string> = {};
+      if (data) {
+        for (const row of data as any[]) {
+          if (row.calories) valMap[row.date] = String(row.calories);
+        }
+      }
+      setEditRowValues(dateStrings.map(ds => valMap[ds] || ''));
+    };
+    loadValues();
+  }, []);
+
+  const handleSave = async () => {
+    setEditSaving(true);
+    for (let i = 0; i < 7; i++) {
+      const raw = editRowValues[i].trim();
+      if (raw === '') continue;
+      const val = parseInt(raw);
+      if (isNaN(val) || val < 0) continue;
+
+      const dateStr = fmtDate(editableDays[i]);
+      const barDate = editableDays[i];
+      const weekNum = getWeekNum(barDate);
+      const dayName = DAY_NAMES[barDate.getDay()];
+
+      const { data: existing } = await supabase
+        .from('workouts')
+        .select('id')
+        .eq('date', dateStr)
+        .eq('type', 'MEASUREMENT')
+        .eq('exercise_id', CALORIES_EXERCISE_ID)
+        .maybeSingle();
+
+      if (existing) {
+        await supabase.from('workouts').update({ calories: val }).eq('id', existing.id);
+      } else if (val > 0) {
+        await supabase.from('workouts').insert({
+          date: dateStr,
+          week: weekNum,
+          day: dayName,
+          type: 'MEASUREMENT',
+          exercise_id: CALORIES_EXERCISE_ID,
+          calories: val,
+          total_score_k: null,
+          new_entry: 'New',
+          source: 'app',
+        });
+      }
+    }
+    setEditSaving(false);
+    onSaved();
+    onClose();
+  };
+
+  return (
+    <div
+      style={{
+        position: 'fixed', inset: 0, zIndex: 100,
+        backgroundColor: 'rgba(0,0,0,0.55)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          position: 'absolute', bottom: '0px', left: '10px', right: '10px',
+          backgroundColor: '#F2F2ED',
+          borderRadius: '20px 20px 0 0',
+          padding: '24px 24px 32px',
+        }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+          <p style={{
+            fontSize: '14px', fontWeight: 900,
+            color: '#000000',
+            letterSpacing: '0.2em', textTransform: 'uppercase',
+            margin: 0,
+          }}>
+            Edit Calories
+          </p>
+          {/* Heartbeat / pulse icon */}
+          <svg width="38" height="22" viewBox="0 0 100 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <polyline
+              points="0,25 18,25 26,8 34,42 44,18 52,32 60,25 100,25"
+              stroke="#000000"
+              strokeWidth="4.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+            />
+          </svg>
+        </div>
+
+        {/* Rows */}
+        <div style={{ display: 'flex', flexDirection: 'column', marginBottom: 28 }}>
+          {editableDays.map((day, i) => (
+            <div key={i}>
+              <div
+                onClick={() => inputRefs.current[i]?.focus()}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  paddingTop: 11, paddingBottom: 11,
+                  cursor: 'text',
+                }}
+              >
+                {/* Date label */}
+                <span style={{
+                  fontSize: '11px', fontWeight: 700,
+                  color: '#000000',
+                  letterSpacing: '0.2em', textTransform: 'uppercase',
+                  flexShrink: 0,
+                }}>
+                  {fmtEditLabel(day)}
+                </span>
+
+                {/* Inline input — no box */}
+                <input
+                  ref={el => { inputRefs.current[i] = el; }}
+                  type="number"
+                  value={editRowValues[i]}
+                  onChange={e => {
+                    const newVals = [...editRowValues];
+                    newVals[i] = e.target.value;
+                    setEditRowValues(newVals);
+                  }}
+                  placeholder="—"
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    outline: 'none',
+                    fontFamily: 'inherit',
+                    fontSize: '13px',
+                    fontWeight: 400,
+                    letterSpacing: '0.15em',
+                    color: editRowValues[i] ? '#000000' : 'rgba(0,0,0,0.3)',
+                    textAlign: 'right',
+                    width: 90,
+                    padding: 0,
+                  }}
+                />
+              </div>
+              {/* Divider — not after last row */}
+              {i < editableDays.length - 1 && (
+                <div style={{ height: '1px', backgroundColor: 'rgba(0,0,0,0.08)' }} />
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Update button */}
+        <button
+          onClick={handleSave}
+          disabled={editSaving}
+          style={{
+            width: '100%', padding: '11px',
+            backgroundColor: '#000000', color: '#ffffff',
+            borderRadius: 999, border: 'none',
+            fontSize: '11px', fontWeight: 900,
+            letterSpacing: '0.2em', textTransform: 'uppercase',
+            cursor: 'pointer', opacity: editSaving ? 0.6 : 1,
+          }}
+        >
+          {editSaving ? 'Saving...' : 'Update'}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default CaloriesEditSheet;

@@ -4,6 +4,7 @@ import { Page } from '../../types';
 import { supabase, todayStr, getISOWeek, getDayName, recalculateDailyTotals } from '../../lib/supabase';
 import CaloriesSparkline from '../components/CaloriesSparkline';
 import CaloriesTrends from '../components/CaloriesTrends';
+import CaloriesEditSheet from '../components/CaloriesEditSheet';
 
 interface LogCaloriesProps {
   onNavigate: (page: Page) => void;
@@ -65,6 +66,7 @@ const fmtDate = (d: Date) =>
 export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
   const [calories, setCalories] = useState('');
   const [chartExpanded, setChartExpanded] = useState(false);
+  const [showEditSheet, setShowEditSheet] = useState(false);
   const [foodRating, setFoodRating] = useState<FoodRating>(null);
   const [bodyWeight, setBodyWeight] = useState('');
   const [bodyFat, setBodyFat] = useState('');
@@ -273,6 +275,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
             weeklyBars={weeklyBars}
             expanded
             onClick={() => setChartExpanded(false)}
+            onEditClick={() => setShowEditSheet(true)}
           />
         ) : (
           <div style={{ display: 'flex', alignItems: 'stretch', width: '100%', gap: 0 }}>
@@ -428,6 +431,14 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
       </section>
 
       <CaloriesTrends />
+
+      {/* Edit sheet triggered from sparkline pencil icon */}
+      {showEditSheet && (
+        <CaloriesEditSheet
+          onClose={() => setShowEditSheet(false)}
+          onSaved={() => setShowEditSheet(false)}
+        />
+      )}
     </div>
   );
 };
