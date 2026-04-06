@@ -69,6 +69,9 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
   const [bodyWeight, setBodyWeight] = useState('');
   const [bodyFat, setBodyFat] = useState('');
   const [muscleMass, setMuscleMass] = useState('');
+  const [lastBodyWeight, setLastBodyWeight] = useState<string | null>(null);
+  const [lastBodyFat, setLastBodyFat] = useState<string | null>(null);
+  const [lastMuscleMass, setLastMuscleMass] = useState<string | null>(null);
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -89,14 +92,14 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
         .select('date, bodyweight, body_fat_percent, muscle_mass')
         .eq('type', 'MEASUREMENT')
         .eq('exercise_id', BODY_COMP_EXERCISE_ID)
-        .gte('date', cutoff)
-        .order('date', { ascending: false });
+        .order('date', { ascending: false })
+        .limit(1);
 
       if (bodyData && bodyData.length > 0) {
         const latest = bodyData[0];
-        if (latest.bodyweight) setBodyWeight(String(latest.bodyweight));
-        if (latest.body_fat_percent) setBodyFat(String(latest.body_fat_percent));
-        if (latest.muscle_mass) setMuscleMass(String(latest.muscle_mass));
+        if (latest.bodyweight) setLastBodyWeight(String(latest.bodyweight));
+        if (latest.body_fat_percent) setLastBodyFat(String(latest.body_fat_percent));
+        if (latest.muscle_mass) setLastMuscleMass(String(latest.muscle_mass));
       }
 
       // Also load this week's calories for the sparkline
@@ -365,11 +368,12 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
         <span className="text-[13px] uppercase tracking-[0.2em] font-black block mb-6" style={{ color: '#ffffff' }}>Body Measurements</span>
         <div className="grid grid-cols-1 gap-4">
           {[
-            { label: 'Body Weight (KG)', value: bodyWeight, onChange: setBodyWeight, id: 'field-bodyweight' },
-            { label: 'Body Fat (%)', value: bodyFat, onChange: setBodyFat, id: 'field-bodyfat' },
-            { label: 'Muscle Mass (KG)', value: muscleMass, onChange: setMuscleMass, id: 'field-musclemass' },
+            { label: 'Body Weight (KG)', value: bodyWeight, onChange: setBodyWeight, id: 'field-bodyweight', last: lastBodyWeight },
+            { label: 'Body Fat (%)', value: bodyFat, onChange: setBodyFat, id: 'field-bodyfat', last: lastBodyFat },
+            { label: 'Muscle Mass (KG)', value: muscleMass, onChange: setMuscleMass, id: 'field-musclemass', last: lastMuscleMass },
           ].map(field => {
             const isFocused = focusedField === field.id;
+            const showHint = !isFocused && !field.value && field.last;
             return (
               <label key={field.label} htmlFor={field.id} className="flex justify-between items-center p-5 rounded-lg cursor-text"
                 style={{
@@ -378,17 +382,30 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
                   transition: 'background-color 0.15s, border-color 0.15s',
                 }}>
                 <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: isFocused ? '#000000' : '#ffffff' }}>{field.label}</span>
-                <input
-                  id={field.id}
-                  type="number"
-                  value={field.value}
-                  onChange={e => field.onChange(e.target.value)}
-                  onFocus={() => setFocusedField(field.id)}
-                  onBlur={() => setFocusedField(null)}
-                  step="0.1"
-                  className="text-right text-lg font-black tracking-tight p-0 w-24"
-                  style={{ backgroundColor: 'transparent', border: 'none', color: isFocused ? '#000000' : '#ffffff', outline: 'none' }}
-                />
+                <div style={{ position: 'relative', width: '6rem', textAlign: 'right' }}>
+                  {showHint && (
+                    <span className="text-lg font-black tracking-tight" style={{ color: 'rgba(255,255,255,0.28)', pointerEvents: 'none', userSelect: 'none' }}>
+                      {field.last}
+                    </span>
+                  )}
+                  <input
+                    id={field.id}
+                    type="number"
+                    value={field.value}
+                    onChange={e => field.onChange(e.target.value)}
+                    onFocus={() => setFocusedField(field.id)}
+                    onBlur={() => setFocusedField(null)}
+                    step="0.1"
+                    className="text-right text-lg font-black tracking-tight p-0"
+                    style={{
+                      backgroundColor: 'transparent', border: 'none', outline: 'none',
+                      color: isFocused ? '#000000' : '#ffffff',
+                      width: showHint ? '0' : '100%',
+                      opacity: showHint ? 0 : 1,
+                      position: showHint ? 'absolute' : 'relative',
+                    }}
+                  />
+                </div>
               </label>
             );
           })}
