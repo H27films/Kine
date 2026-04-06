@@ -233,7 +233,7 @@ const ExerciseLogDots: React.FC<Props> = ({ exercises, saveSuccess }) => {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: 4,
+              gap: 8,
             }}
           >
             {entry && entry.sessions.map((session) => (
