@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Page } from '../../types';
 import { supabase, todayStr, getISOWeek, getDayName, weeksAgoMonday, recalculateDailyTotals } from '../../lib/supabase';
 import CaloriesSparkline from '../components/CaloriesSparkline';
+import CaloriesTrends from '../components/CaloriesTrends';
 
 interface LogCaloriesProps {
   onNavigate: (page: Page) => void;
@@ -77,20 +78,13 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
   // Food rating week navigation
   const [weekOffset, setWeekOffset] = useState(0);
   const [weekNumber, setWeekNumber] = useState<number | null>(null);
-
-  // Calories chart week navigation (independent)
-  const [calWeekOffset, setCalWeekOffset] = useState(0);
-  const [calWeekNumber, setCalWeekNumber] = useState<number | null>(null);
-
   const [weeklyBars, setWeeklyBars] = useState<number[]>(Array(7).fill(0));
-  const [monthlyBars, setMonthlyBars] = useState<number[]>(Array(28).fill(0));
   const [weeklyRatings, setWeeklyRatings] = useState<(FoodRating)[]>(Array(7).fill(null));
 
-  // Load body measurements + monthly bars (static, no week offset)
+  // Load body measurements
   useEffect(() => {
     const loadData = async () => {
       const cutoff = weeksAgoMonday(3);
-
       const { data: bodyData } = await supabase
         .from('workouts')
         .select('date, bodyweight, body_fat_percent, muscle_mass')
@@ -106,44 +100,13 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
         if (latest.muscle_mass) setMuscleMass(String(latest.muscle_mass));
       }
 
-      // Monthly bars (last 28 days, always)
+      // Also load this week's calories for the sparkline
+      const monday = getMondayAtOffset(0);
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
       const { data: calData } = await supabase
         .from('workouts')
         .select('date, calories')
-        .eq('type', 'MEASUREMENT')
-        .eq('exercise_id', CALORIES_EXERCISE_ID)
-        .gte('date', cutoff)
-        .order('date', { ascending: false });
-
-      const monthly = Array(28).fill(0);
-      const todayStart = new Date();
-      todayStart.setHours(0, 0, 0, 0);
-      if (calData) {
-        for (const row of calData as any[]) {
-          if (!row.calories) continue;
-          const d = new Date(row.date + 'T12:00:00');
-          const diffMs = todayStart.getTime() - d.getTime();
-          const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-          if (diffDays >= 0 && diffDays < 28) {
-            monthly[27 - diffDays] += Number(row.calories);
-          }
-        }
-      }
-      setMonthlyBars(monthly);
-    };
-    loadData();
-  }, []);
-
-  // Load calories chart for selected week
-  useEffect(() => {
-    const loadCalChart = async () => {
-      const monday = getMondayAtOffset(calWeekOffset);
-      const sunday = new Date(monday);
-      sunday.setDate(monday.getDate() + 6);
-
-      const { data: calData } = await supabase
-        .from('workouts')
-        .select('date, calories, week')
         .eq('type', 'MEASUREMENT')
         .eq('exercise_id', CALORIES_EXERCISE_ID)
         .gte('date', fmtDate(monday))
@@ -151,10 +114,8 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
         .order('date', { ascending: true });
 
       const weekly = Array(7).fill(0);
-      let wkNum: number | null = null;
       if (calData) {
         for (const row of calData as any[]) {
-          if (wkNum === null && row.week) wkNum = Number(row.week);
           if (!row.calories) continue;
           const d = new Date(row.date + 'T12:00:00');
           const dayIdx = d.getDay() === 0 ? 6 : d.getDay() - 1;
@@ -162,10 +123,9 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
         }
       }
       setWeeklyBars(weekly);
-      setCalWeekNumber(wkNum);
     };
-    loadCalChart();
-  }, [calWeekOffset]);
+    loadData();
+  }, []);
 
   // Load food ratings for selected week
   useEffect(() => {
@@ -280,25 +240,6 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
     { label: 'Ok', value: 'OK' },
     { label: 'Good', value: 'GOOD' },
   ];
-
-  const weeklyMax = Math.max(...weeklyBars, 1);
-  const monthlyMax = Math.max(...monthlyBars, 1);
-
-  // Avg kcal for the displayed week (non-zero days only)
-  const daysWithCals = weeklyBars.filter(v => v > 0).length;
-  const weeklyAvg = daysWithCals > 0 ? Math.round(weeklyBars.reduce((a, b) => a + b, 0) / daysWithCals) : 0;
-
-  // Index of highest bar (for previous weeks highlight)
-  const maxBarIndex = weeklyBars.indexOf(Math.max(...weeklyBars));
-
-  // Shared style matching "Performance Trends" label
-  const trendLabelStyle: React.CSSProperties = {
-    fontSize: '10px',
-    fontWeight: 700,
-    color: 'rgba(161,161,170,1)',
-    letterSpacing: '0.3em',
-    textTransform: 'uppercase',
-  };
 
   return (
     <div>
@@ -447,112 +388,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
         </button>
       </section>
 
-      <section className="mb-8">
-        <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] mb-8" style={{ color: 'rgba(161,161,170,1)' }}>Performance Trends</h3>
-        <div className="space-y-10">
-
-          {/* === CALORIES CHART with week toggle === */}
-          <div>
-            {/* Header row: CALORIES: avg kcal + chevrons | week number only */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <span style={trendLabelStyle}>Calories:&nbsp;</span>
-                <span style={trendLabelStyle}>
-                  {weeklyAvg > 0 ? `${weeklyAvg.toLocaleString()} KCAL` : '— KCAL'}
-                </span>
-                <button
-                  onClick={() => setCalWeekOffset(o => o - 1)}
-                  style={{ background: 'none', border: 'none', padding: '2px 1px', cursor: 'pointer', color: 'rgba(161,161,170,1)', display: 'flex', alignItems: 'center' }}
-                >
-                  <ChevronLeft size={13} />
-                </button>
-                <button
-                  onClick={() => setCalWeekOffset(o => Math.min(o + 1, 0))}
-                  style={{ background: 'none', border: 'none', padding: '2px 1px', cursor: 'pointer', color: calWeekOffset < 0 ? 'rgba(161,161,170,1)' : 'rgba(161,161,170,0.25)', display: 'flex', alignItems: 'center' }}
-                >
-                  <ChevronRight size={13} />
-                </button>
-              </div>
-              {calWeekNumber !== null && (
-                <span style={trendLabelStyle}>
-                  {calWeekNumber}
-                </span>
-              )}
-            </div>
-
-            {/* Bars with calorie values inside at base */}
-            <div className="flex items-end justify-between gap-1" style={{ height: '112px' }}>
-              {weeklyBars.map((h, i) => {
-                const pct = weeklyMax > 0 ? (h / weeklyMax) * 100 : 0;
-                const barPct = Math.max(pct, h > 0 ? 4 : 0);
-                const isCurrentWeek = calWeekOffset === 0;
-                const todayIdx = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
-                const isToday = isCurrentWeek && i === todayIdx;
-                // For previous weeks: highlight the highest bar in bright white with glow
-                const isPeakBar = !isCurrentWeek && h > 0 && i === maxBarIndex;
-                // Always show full number, never shorten
-                const label = h > 0 ? String(h) : '';
-
-                let bgColor = h > 0 ? '#3f3f46' : '#18181b';
-                if (isToday) bgColor = '#ffffff';
-                if (isPeakBar) bgColor = '#ffffff';
-
-                return (
-                  <div
-                    key={i}
-                    className="flex-1 rounded-sm"
-                    style={{
-                      height: `${barPct}%`,
-                      backgroundColor: bgColor,
-                      boxShadow: isPeakBar ? '0 0 8px rgba(255,255,255,0.6), 0 0 20px rgba(255,255,255,0.25)' : 'none',
-                      position: 'relative',
-                      display: 'flex',
-                      alignItems: 'flex-end',
-                      justifyContent: 'center',
-                      paddingBottom: '3px',
-                    }}
-                  >
-                    {h > 0 && (
-                      <span style={{
-                        fontSize: '8px',
-                        fontWeight: 700,
-                        color: (isToday || isPeakBar) ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.55)',
-                        letterSpacing: '0.01em',
-                        lineHeight: 1,
-                        whiteSpace: 'nowrap',
-                      }}>
-                        {label}
-                      </span>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Day labels */}
-            <div className="flex justify-between mt-2" style={{ gap: 4 }}>
-              {weekDays.map((d, i) => (
-                <div key={i} className="flex-1 flex flex-col items-center">
-                  <span style={{ fontSize: '8px', fontWeight: 700, color: 'rgba(82,82,91,1)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{d}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Last 28 days */}
-          <div>
-            <span className="text-[10px] font-bold uppercase tracking-widest mb-4 block" style={{ color: 'rgba(161,161,170,0.8)' }}>Calories: Last 28 Days</span>
-            <div className="flex items-end justify-between h-16 gap-1">
-              {monthlyBars.map((h, i) => {
-                const pct = monthlyMax > 0 ? (h / monthlyMax) * 100 : 0;
-                return (
-                  <div key={i} className="flex-1 rounded-t-sm" style={{ height: `${Math.max(pct, h > 0 ? 4 : 0)}%`, backgroundColor: i === monthlyBars.length - 1 ? '#ffffff' : h >= monthlyMax * 0.7 ? '#3f3f46' : 'rgba(24,24,27,0.5)' }} />
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </section>
+      <CaloriesTrends />
     </div>
   );
 };
