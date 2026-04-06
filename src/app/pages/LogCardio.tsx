@@ -19,6 +19,7 @@ const tabs: { label: string; page: Page }[] = [
 
 // Same IDs as Dashboard TOTAL_CARDIO_IDS: Tracker=82, Row=83, Cycle=87
 const TOTAL_CARDIO_IDS = [82, 83, 87];
+const NO_TRACKER_CARDIO_IDS = [83, 84, 85, 86, 87]; // Row + Running + Walking + Cross Trainer + Cycle
 
 export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
   const [trackerDistance, setTrackerDistance] = useState('');
@@ -67,11 +68,22 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
   useEffect(() => {
     const loadWeeklyTotal = async () => {
       const thisMonday = currentWeekMonday();
+      // Check if any TRACKER entry exists this week
+      const { data: trackerCheck } = await supabase
+        .from('workouts')
+        .select('id')
+        .eq('type', 'CARDIO')
+        .eq('exercise_id', 82) // TRACKER
+        .gte('date', thisMonday)
+        .limit(1);
+      const useTrackerIds = trackerCheck && trackerCheck.length > 0;
+      const ids = useTrackerIds ? TOTAL_CARDIO_IDS : NO_TRACKER_CARDIO_IDS;
+      
       const { data } = await supabase
         .from('workouts')
         .select('total_cardio')
         .eq('type', 'CARDIO')
-        .in('exercise_id', TOTAL_CARDIO_IDS)
+        .in('exercise_id', ids)
         .gte('date', thisMonday);
       if (data) {
         const total = (data as any[]).reduce((sum, r) => sum + Number(r.total_cardio || 0), 0);
@@ -85,11 +97,23 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
     const loadLastWeekTotal = async () => {
       const lastMonday = weeksAgoMonday(1);
       const thisMonday = currentWeekMonday();
+      // Check if any TRACKER entry exists last week
+      const { data: trackerCheck } = await supabase
+        .from('workouts')
+        .select('id')
+        .eq('type', 'CARDIO')
+        .eq('exercise_id', 82) // TRACKER
+        .gte('date', lastMonday)
+        .lt('date', thisMonday)
+        .limit(1);
+      const useTrackerIds = trackerCheck && trackerCheck.length > 0;
+      const ids = useTrackerIds ? TOTAL_CARDIO_IDS : NO_TRACKER_CARDIO_IDS;
+      
       const { data } = await supabase
         .from('workouts')
         .select('total_cardio')
         .eq('type', 'CARDIO')
-        .in('exercise_id', TOTAL_CARDIO_IDS)
+        .in('exercise_id', ids)
         .gte('date', lastMonday)
         .lt('date', thisMonday);
       if (data) {
@@ -105,11 +129,22 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
   useEffect(() => {
     const loadWeekChart = async () => {
       const thisMonday = currentWeekMonday();
+      // Check if any TRACKER entry exists this week
+      const { data: trackerCheck } = await supabase
+        .from('workouts')
+        .select('id')
+        .eq('type', 'CARDIO')
+        .eq('exercise_id', 82) // TRACKER
+        .gte('date', thisMonday)
+        .limit(1);
+      const useTrackerIds = trackerCheck && trackerCheck.length > 0;
+      const ids = useTrackerIds ? TOTAL_CARDIO_IDS : NO_TRACKER_CARDIO_IDS;
+      
       const { data } = await supabase
         .from('workouts')
         .select('day, total_cardio')
         .eq('type', 'CARDIO')
-        .in('exercise_id', TOTAL_CARDIO_IDS)
+        .in('exercise_id', ids)
         .gte('date', thisMonday)
         .not('day', 'is', null);
       if (data) {
