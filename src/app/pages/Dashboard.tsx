@@ -331,13 +331,13 @@ const WeeklyChart: React.FC<{
                         width: '16px',
                         height: '16px',
                         borderRadius: '50%',
-                        border: '1px solid rgba(0,0,0,0.65)',
+                        backgroundColor: '#000000',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: '11px',
+                        fontSize: '10px',
                         fontWeight: 700,
-                        color: 'rgba(0,0,0,0.75)',
+                        color: '#ffffff',
                         lineHeight: 1,
                       }}>
                         {exerciseCount}

@@ -5,6 +5,9 @@ interface Props {
 }
 
 const TrackerSparkline: React.FC<Props> = ({ weekChartData }) => {
+  const hasData = weekChartData.some(v => v > 0);
+  if (!hasData) return null;
+
   const sparkDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
   const BASE_KM = 1;
   const VW = 200;

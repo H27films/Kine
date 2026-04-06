@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Dumbbell, BarChart3, User } from 'lucide-react';
+import { Home, Dumbbell, User, Flame } from 'lucide-react';
 import { Page, NavigationProps } from '../../types';
 
 interface NavItem {
@@ -32,9 +32,9 @@ export const BottomNav: React.FC<NavigationProps> = ({ currentPage, onNavigate }
       page: 'cardio',
     },
     {
-      icon: <BarChart3 size={22} />,
-      activeIcon: <BarChart3 size={22} strokeWidth={2.5} />,
-      page: 'analytics',
+      icon: <Flame size={22} />,
+      activeIcon: <Flame size={22} />,
+      page: 'calories',
     },
     {
       icon: <User size={22} />,

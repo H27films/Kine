@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Download, RefreshCw } from 'lucide-react';
+import { User, Download, RefreshCw, BarChart3 } from 'lucide-react';
 import { Page } from '../../types';
 import { supabase } from '../../lib/supabase';
 
@@ -12,7 +12,7 @@ const formatDate = (dateStr: string): string => {
   return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
 };
 
-export const Profile: React.FC<ProfileProps> = ({ onNavigate: _onNavigate }) => {
+export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
   const [exportCount, setExportCount] = useState<number | null>(null);
   const [exportDates, setExportDates] = useState<string[]>([]);
   const [exporting, setExporting] = useState(false);
@@ -215,6 +215,27 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate: _onNavigate }) => 
           <p className="mt-3" style={{ color: '#ff5050', fontSize: '0.75rem' }}>{exportError}</p>
         )}
       </div>
+
+      {/* Data+ Analytics */}
+      <button
+        onClick={() => onNavigate('analytics')}
+        className="w-full rounded-2xl p-5 flex items-center justify-between active:scale-[0.98] transition-all"
+        style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.07)' }}
+      >
+        <div className="flex items-center gap-4">
+          <BarChart3 size={22} color="#ffffff" />
+          <span style={{
+            fontSize: '1.1rem',
+            fontWeight: 800,
+            letterSpacing: '-0.02em',
+            color: '#ffffff',
+            textTransform: 'uppercase',
+          }}>
+            Data+
+          </span>
+        </div>
+        <div style={{ color: 'rgba(255,255,255,0.3)' }}>›</div>
+      </button>
     </div>
   );
 };

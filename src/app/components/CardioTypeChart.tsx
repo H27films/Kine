@@ -41,6 +41,7 @@ export const CardioTypeChart: React.FC = () => {
   const [availableWeeks, setAvailableWeeks] = useState<number[]>([]);
   const [weekIdx, setWeekIdx] = useState(0); // 0 = most recent
   const [weeklyData, setWeeklyData] = useState<number[]>(Array(7).fill(0));
+  const [weeklyCount, setWeeklyCount] = useState(0);
 
   // Monthly
   const [monthOffset, setMonthOffset] = useState(0);
@@ -105,14 +106,17 @@ export const CardioTypeChart: React.FC = () => {
         .eq('type', 'CARDIO')
         .eq('week', currentWeek);
       const days = Array(7).fill(0);
+      let count = 0;
       if (data) {
         (data as any[]).forEach(r => {
           if ((r.exercises?.exercise_name || '').toUpperCase() !== selectedType) return;
+          count++;
           const idx = DAY_ORDER.indexOf((r.day || '').toUpperCase());
           if (idx >= 0) days[idx] = +(days[idx] + Number(r.km || 0)).toFixed(2);
         });
       }
       setWeeklyData(days);
+      setWeeklyCount(count);
     };
     load();
   }, [selectedType, viewMode, weekIdx, availableWeeks]);
@@ -155,7 +159,6 @@ export const CardioTypeChart: React.FC = () => {
 
   const currentWeekNum = availableWeeks[weekIdx] ?? '—';
   const monthBounds = getMonthBounds(monthOffset);
-  const navLabel = viewMode === 'weekly' ? `WEEK ${currentWeekNum}` : monthBounds.label;
 
   const canGoBack = viewMode === 'weekly'
     ? weekIdx < availableWeeks.length - 1
@@ -174,34 +177,55 @@ export const CardioTypeChart: React.FC = () => {
   return (
     <section className="mb-20">
 
-      {/* WEEK / MONTH tabs — above the box */}
-      <div style={{ display: 'flex', gap: '14px', marginBottom: '10px', paddingLeft: '2px', alignItems: 'baseline' }}>
-        {(['weekly', 'monthly'] as ViewMode[]).map(mode => (
-          <button
-            key={mode}
-            onClick={() => setViewMode(mode)}
-            style={{
-              fontSize: viewMode === mode ? '14px' : '10px',
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              letterSpacing: '1.5px',
-              color: viewMode === mode ? '#ffffff' : 'rgba(255,255,255,0.28)',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              transition: 'all 0.15s',
-              padding: 0,
-            }}
-          >
-            {mode === 'weekly' ? 'Week' : 'Month'}
-          </button>
-        ))}
+      {/* WEEK / MONTH tabs + navigation + week number — above the box */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', paddingLeft: '2px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          {(['weekly', 'monthly'] as ViewMode[]).map(mode => (
+            <button
+              key={mode}
+              onClick={() => setViewMode(mode)}
+              style={{
+                fontSize: viewMode === mode ? '14px' : '10px',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '1.5px',
+                color: viewMode === mode ? '#ffffff' : 'rgba(255,255,255,0.28)',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.15s',
+                padding: 0,
+              }}
+            >
+              {mode === 'weekly' ? 'Week' : 'Month'}
+            </button>
+          ))}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '2px', marginLeft: '4px' }}>
+            <button
+              onClick={onBack}
+              disabled={!canGoBack}
+              style={{ opacity: canGoBack ? 0.55 : 0.2, background: 'none', border: 'none', cursor: canGoBack ? 'pointer' : 'default', padding: 0, display: 'flex', alignItems: 'center' }}
+            >
+              <ChevronLeft size={18} color="white" />
+            </button>
+            <button
+              onClick={onForward}
+              disabled={!canGoForward}
+              style={{ opacity: canGoForward ? 0.55 : 0.2, background: 'none', border: 'none', cursor: canGoForward ? 'pointer' : 'default', padding: 0, display: 'flex', alignItems: 'center' }}
+            >
+              <ChevronRight size={18} color="white" />
+            </button>
+          </div>
+        </div>
+        <span style={{ fontSize: '0.95rem', fontWeight: 700, letterSpacing: '0.06em', color: '#ffffff', marginRight: '6px' }}>
+          {viewMode === 'weekly' ? currentWeekNum : monthBounds.label}
+        </span>
       </div>
 
       {/* Chart box */}
       <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff' }}>
 
-        {/* Top row: type selector + navigation */}
+        {/* Top row: type selector + count */}
         <div className="flex items-center justify-between mb-3">
 
           {/* Type selector — no underline, larger */}
@@ -257,26 +281,22 @@ export const CardioTypeChart: React.FC = () => {
             )}
           </div>
 
-          {/* Navigation */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <button
-              onClick={onBack}
-              disabled={!canGoBack}
-              style={{ opacity: canGoBack ? 0.6 : 0.18, background: 'none', border: 'none', cursor: canGoBack ? 'pointer' : 'default', padding: 0 }}
-            >
-              <ChevronLeft size={14} color="white" />
-            </button>
-            <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.6px', color: 'rgba(255,255,255,0.4)', minWidth: '72px', textAlign: 'center' }}>
-              {navLabel}
-            </span>
-            <button
-              onClick={onForward}
-              disabled={!canGoForward}
-              style={{ opacity: canGoForward ? 0.6 : 0.18, background: 'none', border: 'none', cursor: canGoForward ? 'pointer' : 'default', padding: 0 }}
-            >
-              <ChevronRight size={14} color="white" />
-            </button>
-          </div>
+          {/* Count circle on the right */}
+          {viewMode === 'weekly' && weeklyCount > 0 && (
+            <div style={{
+              width: '20px',
+              height: '20px',
+              borderRadius: '50%',
+              backgroundColor: '#ffffff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <span style={{ fontSize: '10px', fontWeight: 800, color: '#000000', lineHeight: 1 }}>
+                {weeklyCount}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Total only */}
