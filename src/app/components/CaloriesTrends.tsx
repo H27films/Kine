@@ -508,7 +508,7 @@ const CaloriesTrends: React.FC = () => {
                       {fmtEditLabel(day)}
                     </span>
 
-                    {/* Inline input — no box, right-aligned, Manrope */}
+                    {/* Inline input — no box, right-aligned */}
                     <input
                       ref={el => { inputRefs.current[i] = el; }}
                       type="number"
@@ -523,9 +523,10 @@ const CaloriesTrends: React.FC = () => {
                         background: 'none',
                         border: 'none',
                         outline: 'none',
-                        fontFamily: "'Manrope', sans-serif",
-                        fontSize: '16px',
-                        fontWeight: 400,
+                        fontFamily: 'inherit',
+                        fontSize: '13px',
+                        fontWeight: 300,
+                        letterSpacing: '0.15em',
                         color: editRowValues[i] ? '#000000' : 'rgba(0,0,0,0.3)',
                         textAlign: 'right',
                         width: 90,
