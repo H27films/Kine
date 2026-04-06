@@ -19,7 +19,9 @@ const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 type FoodRating = 'BAD' | 'OK' | 'GOOD' | null;
 
 // MEASUREMENT exercise IDs (from the exercises table)
-const CALORIES_EXERCISE_ID = 90;
+const CALORIES_EXERCISE_ID = 90;   // CALORIES
+const FOOD_EXERCISE_ID = 89;       // FOOD
+const BODY_COMP_EXERCISE_ID = 88;  // BODY COMPOSITION
 
 // Dotted percentage ring — matches the dark minimal design
 const FoodScoreCircle: React.FC<{ pct: number; size?: number }> = ({ pct, size = 54 }) => {
@@ -85,32 +87,44 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
   useEffect(() => {
     const loadData = async () => {
       const cutoff = weeksAgoMonday(3);
-      const { data } = await supabase
+
+      // Load body measurements from exercise_id 88
+      const { data: bodyData } = await supabase
         .from('workouts')
-        .select('date, calories, food_rating, bodyweight, body_fat_percent, muscle_mass')
+        .select('date, bodyweight, body_fat_percent, muscle_mass')
         .eq('type', 'MEASUREMENT')
+        .eq('exercise_id', BODY_COMP_EXERCISE_ID)
         .gte('date', cutoff)
         .order('date', { ascending: false });
 
-      if (!data) return;
-
-      const latest = (data as any[]).find(r => r.bodyweight);
-      if (latest) {
+      if (bodyData && bodyData.length > 0) {
+        const latest = bodyData[0];
         if (latest.bodyweight) setBodyWeight(String(latest.bodyweight));
         if (latest.body_fat_percent) setBodyFat(String(latest.body_fat_percent));
         if (latest.muscle_mass) setMuscleMass(String(latest.muscle_mass));
       }
 
+      // Load calories from exercise_id 90
+      const { data: calData } = await supabase
+        .from('workouts')
+        .select('date, calories')
+        .eq('type', 'MEASUREMENT')
+        .eq('exercise_id', CALORIES_EXERCISE_ID)
+        .gte('date', cutoff)
+        .order('date', { ascending: false });
+
       const monday = getMondayAtOffset(0);
       const weekly = Array(7).fill(0);
-      for (const row of data as any[]) {
-        if (!row.calories) continue;
-        const d = new Date(row.date + 'T12:00:00');
-        const diffMs = d.getTime() - monday.getTime();
-        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-        if (diffDays >= 0 && diffDays < 7) {
-          const dayIdx = d.getDay() === 0 ? 6 : d.getDay() - 1;
-          weekly[dayIdx] += Number(row.calories);
+      if (calData) {
+        for (const row of calData as any[]) {
+          if (!row.calories) continue;
+          const d = new Date(row.date + 'T12:00:00');
+          const diffMs = d.getTime() - monday.getTime();
+          const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+          if (diffDays >= 0 && diffDays < 7) {
+            const dayIdx = d.getDay() === 0 ? 6 : d.getDay() - 1;
+            weekly[dayIdx] += Number(row.calories);
+          }
         }
       }
       setWeeklyBars(weekly);
@@ -118,13 +132,15 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
       const monthly = Array(28).fill(0);
       const todayStart = new Date();
       todayStart.setHours(0, 0, 0, 0);
-      for (const row of data as any[]) {
-        if (!row.calories) continue;
-        const d = new Date(row.date + 'T12:00:00');
-        const diffMs = todayStart.getTime() - d.getTime();
-        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-        if (diffDays >= 0 && diffDays < 28) {
-          monthly[27 - diffDays] += Number(row.calories);
+      if (calData) {
+        for (const row of calData as any[]) {
+          if (!row.calories) continue;
+          const d = new Date(row.date + 'T12:00:00');
+          const diffMs = todayStart.getTime() - d.getTime();
+          const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+          if (diffDays >= 0 && diffDays < 28) {
+            monthly[27 - diffDays] += Number(row.calories);
+          }
         }
       }
       setMonthlyBars(monthly);
@@ -144,6 +160,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
         .from('workouts')
         .select('date, food_rating, week')
         .eq('type', 'MEASUREMENT')
+        .eq('exercise_id', FOOD_EXERCISE_ID)
         .gte('date', fmt(monday))
         .lte('date', fmt(sunday))
         .order('date', { ascending: true });
@@ -171,51 +188,78 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
     loadRatings();
   }, [weekOffset]);
 
+  // Helper: upsert a row for a given exercise_id on today's date.
+  // Returns the inserted/updated row id, or null if no data was saved.
+  const upsertMeasurementRow = async (
+    exerciseId: number,
+    payload: Record<string, unknown>
+  ): Promise<number | null> => {
+    const today = todayStr();
+    const week = getISOWeek();
+    const day = getDayName();
+
+    const { data: existing } = await supabase
+      .from('workouts')
+      .select('id')
+      .eq('date', today)
+      .eq('type', 'MEASUREMENT')
+      .eq('exercise_id', exerciseId)
+      .maybeSingle();
+
+    if (existing) {
+      await supabase.from('workouts').update(payload).eq('id', existing.id);
+      return existing.id;
+    } else {
+      const { data: inserted } = await supabase.from('workouts').insert({
+        date: today,
+        week,
+        day,
+        type: 'MEASUREMENT',
+        exercise_id: exerciseId,
+        total_score_k: null,
+        new_entry: 'New',
+        source: 'app',
+        ...payload,
+      }).select('id').single();
+      return inserted?.id ?? null;
+    }
+  };
+
   const handleSave = async () => {
     setSaving(true);
     setSaveError('');
     try {
       const today = todayStr();
-      const week = getISOWeek();
-      const day = getDayName();
+      let anySaved = false;
 
+      // 1) Calories row (exercise_id 90)
       if (calories) {
-        // Check if a MEASUREMENT row already exists for today
-        const { data: existing } = await supabase
-          .from('workouts')
-          .select('id')
-          .eq('date', today)
-          .eq('type', 'MEASUREMENT')
-          .maybeSingle();
+        await upsertMeasurementRow(CALORIES_EXERCISE_ID, {
+          calories: parseInt(calories) || null,
+        });
+        anySaved = true;
+      }
 
-        if (existing) {
-          // Overwrite the existing row
-          await supabase.from('workouts').update({
-            calories: parseInt(calories) || null,
-            food_rating: foodRating,
-            bodyweight: bodyWeight ? parseFloat(bodyWeight) : null,
-            body_fat_percent: bodyFat ? parseFloat(bodyFat) : null,
-            muscle_mass: muscleMass ? parseFloat(muscleMass) : null,
-          }).eq('id', existing.id);
-        } else {
-          await supabase.from('workouts').insert({
-            date: today,
-            week,
-            day,
-            type: 'MEASUREMENT',
-            exercise_id: CALORIES_EXERCISE_ID,
-            calories: parseInt(calories) || null,
-            food_rating: foodRating,
-            bodyweight: bodyWeight ? parseFloat(bodyWeight) : null,
-            body_fat_percent: bodyFat ? parseFloat(bodyFat) : null,
-            muscle_mass: muscleMass ? parseFloat(muscleMass) : null,
-            total_score_k: null,
-            new_entry: 'New',
-            source: 'app',
-          });
-        }
+      // 2) Food Rating row (exercise_id 89)
+      if (foodRating) {
+        await upsertMeasurementRow(FOOD_EXERCISE_ID, {
+          food_rating: foodRating,
+        });
+        anySaved = true;
+      }
 
-        // Recalculate daily total_score and tracker_daily for all rows today
+      // 3) Body Composition row (exercise_id 88) — all 3 together
+      const hasBodyData = bodyWeight || bodyFat || muscleMass;
+      if (hasBodyData) {
+        await upsertMeasurementRow(BODY_COMP_EXERCISE_ID, {
+          bodyweight: bodyWeight ? parseFloat(bodyWeight) : null,
+          body_fat_percent: bodyFat ? parseFloat(bodyFat) : null,
+          muscle_mass: muscleMass ? parseFloat(muscleMass) : null,
+        });
+        anySaved = true;
+      }
+
+      if (anySaved) {
         await recalculateDailyTotals(today);
       }
 

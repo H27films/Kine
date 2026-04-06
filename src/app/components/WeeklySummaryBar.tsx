@@ -171,6 +171,7 @@ export const WeeklySummaryBar: React.FC = () => {
             .from('workouts')
             .select('calories')
             .eq('type', 'MEASUREMENT')
+            .eq('exercise_id', 90)
             .gte('date', monday)
             .not('calories', 'is', null),
         ]);

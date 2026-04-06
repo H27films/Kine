@@ -273,6 +273,7 @@ export const DailyActivityCards: React.FC = () => {
         .from('workouts')
         .select('date, calories')
         .eq('type', 'MEASUREMENT')
+        .eq('exercise_id', 90)
         .not('calories', 'is', null)
         .gte('date', oldest)
         .order('date', { ascending: false });

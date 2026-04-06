@@ -429,6 +429,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
         .from('workouts')
         .select('calories')
         .eq('type', 'MEASUREMENT')
+        .eq('exercise_id', 90)
         .eq('date', selectedDate)
         .not('calories', 'is', null)
         .limit(1);
@@ -520,6 +521,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
         .from('workouts')
         .select('week, day, calories')
         .eq('type', 'MEASUREMENT')
+        .eq('exercise_id', 90)
         .not('calories', 'is', null)
         .not('week', 'is', null)
         .not('day', 'is', null)
