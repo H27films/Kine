@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 const weekDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 const MONTH_NAMES = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
 const CALORIES_EXERCISE_ID = 90;
+const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 const getMondayAtOffset = (offset: number): Date => {
   const today = new Date();
@@ -18,6 +19,14 @@ const getMondayAtOffset = (offset: number): Date => {
 const fmtDate = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
+const getWeekNum = (d: Date): number => {
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dayNum = date.getUTCDay() || 7;
+  date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+  return Math.ceil((((date.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+};
+
 const trendLabelStyle: React.CSSProperties = {
   fontSize: '11px',
   fontWeight: 700,
@@ -25,6 +34,13 @@ const trendLabelStyle: React.CSSProperties = {
   letterSpacing: '0.3em',
   textTransform: 'uppercase',
 };
+
+interface EditState {
+  barIndex: number;
+  date: string;
+  dateLabel: string;
+  currentValue: number;
+}
 
 const CaloriesTrends: React.FC = () => {
   const [calWeekOffset, setCalWeekOffset] = useState(0);
@@ -36,6 +52,12 @@ const CaloriesTrends: React.FC = () => {
   const [monthName, setMonthName] = useState('');
 
   const [minMonthOffset, setMinMonthOffset] = useState(-24);
+
+  // Edit state
+  const [editingDay, setEditingDay] = useState<EditState | null>(null);
+  const [editValue, setEditValue] = useState('');
+  const [editSaving, setEditSaving] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const fetchEarliest = async () => {
@@ -129,6 +151,86 @@ const CaloriesTrends: React.FC = () => {
     loadMonthly();
   }, [monthOffset]);
 
+  // Determine which bars are editable (today and up to 7 days prior)
+  const getBarDate = (barIndex: number): Date => {
+    const monday = getMondayAtOffset(calWeekOffset);
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + barIndex);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  };
+
+  const isBarEditable = (barIndex: number): boolean => {
+    const todayD = new Date();
+    todayD.setHours(0, 0, 0, 0);
+    const sevenAgo = new Date(todayD);
+    sevenAgo.setDate(todayD.getDate() - 7);
+    const barDate = getBarDate(barIndex);
+    return barDate >= sevenAgo && barDate <= todayD;
+  };
+
+  const handleBarClick = (barIndex: number) => {
+    if (!isBarEditable(barIndex)) return;
+    const barDate = getBarDate(barIndex);
+    const dayName = DAY_NAMES[barDate.getDay()];
+    const monthStr = MONTH_NAMES[barDate.getMonth()];
+    const dateLabel = `${dayName}, ${barDate.getDate()} ${monthStr}`;
+    setEditingDay({
+      barIndex,
+      date: fmtDate(barDate),
+      dateLabel,
+      currentValue: weeklyBars[barIndex],
+    });
+    setEditValue(weeklyBars[barIndex] > 0 ? String(weeklyBars[barIndex]) : '');
+    setTimeout(() => inputRef.current?.focus(), 100);
+  };
+
+  const handleEditSave = async () => {
+    if (!editingDay) return;
+    const val = parseInt(editValue);
+    if (isNaN(val) || val < 0) {
+      setEditingDay(null);
+      return;
+    }
+    setEditSaving(true);
+
+    const barDate = new Date(editingDay.date + 'T12:00:00');
+    const weekNum = getWeekNum(barDate);
+    const dayName = DAY_NAMES[barDate.getDay()];
+
+    const { data: existing } = await supabase
+      .from('workouts')
+      .select('id')
+      .eq('date', editingDay.date)
+      .eq('type', 'MEASUREMENT')
+      .eq('exercise_id', CALORIES_EXERCISE_ID)
+      .maybeSingle();
+
+    if (existing) {
+      await supabase.from('workouts').update({ calories: val }).eq('id', existing.id);
+    } else {
+      await supabase.from('workouts').insert({
+        date: editingDay.date,
+        week: weekNum,
+        day: dayName,
+        type: 'MEASUREMENT',
+        exercise_id: CALORIES_EXERCISE_ID,
+        calories: val,
+        total_score_k: null,
+        new_entry: 'New',
+        source: 'app',
+      });
+    }
+
+    // Update local bar
+    const newBars = [...weeklyBars];
+    newBars[editingDay.barIndex] = val;
+    setWeeklyBars(newBars);
+
+    setEditSaving(false);
+    setEditingDay(null);
+  };
+
   const weeklyMax = Math.max(...weeklyBars, 1);
   const daysWithCals = weeklyBars.filter(v => v > 0).length;
   const weeklyAvg = daysWithCals > 0
@@ -186,6 +288,7 @@ const CaloriesTrends: React.FC = () => {
               const isCurrentWeek = calWeekOffset === 0;
               const isToday = isCurrentWeek && i === todayDayIdx;
               const isPeakBar = !isCurrentWeek && h > 0 && i === weeklyMaxBarIndex;
+              const editable = isBarEditable(i);
 
               let bgColor = h > 0 ? '#3f3f46' : '#18181b';
               if (isToday) bgColor = '#ffffff';
@@ -197,6 +300,7 @@ const CaloriesTrends: React.FC = () => {
                 <div
                   key={i}
                   className="flex-1 rounded-sm"
+                  onClick={() => handleBarClick(i)}
                   style={{
                     height: `${barPct}%`,
                     backgroundColor: bgColor,
@@ -206,6 +310,8 @@ const CaloriesTrends: React.FC = () => {
                     alignItems: 'flex-end',
                     justifyContent: 'center',
                     paddingBottom: '9px',
+                    cursor: editable ? 'pointer' : 'default',
+                    outline: editingDay?.barIndex === i ? '1.5px solid rgba(255,255,255,0.5)' : 'none',
                   }}
                 >
                   {h > 0 && (
@@ -317,6 +423,68 @@ const CaloriesTrends: React.FC = () => {
         </div>
 
       </div>
+
+      {/* === Edit Bottom Sheet === */}
+      {editingDay && (
+        <div
+          style={{
+            position: 'fixed', inset: 0, zIndex: 100,
+            backgroundColor: 'rgba(0,0,0,0.6)',
+            display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+          }}
+          onClick={(e) => { if (e.target === e.currentTarget) setEditingDay(null); }}
+        >
+          <div style={{
+            width: '100%', maxWidth: 480,
+            backgroundColor: '#1a1a1a',
+            borderTop: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: '16px 16px 0 0',
+            padding: '28px 24px 40px',
+          }}>
+            <p style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(161,161,170,1)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 6 }}>
+              Edit Calories
+            </p>
+            <p style={{ fontSize: '13px', fontWeight: 800, color: '#ffffff', letterSpacing: '0.05em', marginBottom: 24 }}>
+              {editingDay.dateLabel}
+            </p>
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              backgroundColor: '#121212', borderRadius: 12,
+              border: '1px solid rgba(255,255,255,0.1)',
+              padding: '16px 20px', marginBottom: 20,
+            }}>
+              <span style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(161,161,170,1)', letterSpacing: '0.2em', textTransform: 'uppercase' }}>KCAL</span>
+              <input
+                ref={inputRef}
+                type="number"
+                value={editValue}
+                onChange={e => setEditValue(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') handleEditSave(); if (e.key === 'Escape') setEditingDay(null); }}
+                placeholder={editingDay.currentValue > 0 ? String(editingDay.currentValue) : '0'}
+                style={{
+                  background: 'transparent', border: 'none', outline: 'none',
+                  fontSize: '32px', fontWeight: 900, color: '#ffffff',
+                  textAlign: 'right', width: '60%', letterSpacing: '-0.02em',
+                }}
+              />
+            </div>
+            <button
+              onClick={handleEditSave}
+              disabled={editSaving}
+              style={{
+                width: '100%', padding: '16px',
+                backgroundColor: '#ffffff', color: '#000000',
+                borderRadius: 999, border: 'none',
+                fontSize: '10px', fontWeight: 900,
+                letterSpacing: '0.2em', textTransform: 'uppercase',
+                cursor: 'pointer', opacity: editSaving ? 0.7 : 1,
+              }}
+            >
+              {editSaving ? 'Saving...' : 'Update'}
+            </button>
+          </div>
+        </div>
+      )}
     </section>
   );
 };
