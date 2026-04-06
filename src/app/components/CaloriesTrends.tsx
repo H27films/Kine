@@ -27,20 +27,16 @@ const trendLabelStyle: React.CSSProperties = {
 };
 
 const CaloriesTrends: React.FC = () => {
-  // Weekly chart state
   const [calWeekOffset, setCalWeekOffset] = useState(0);
   const [calWeekNumber, setCalWeekNumber] = useState<number | null>(null);
   const [weeklyBars, setWeeklyBars] = useState<number[]>(Array(7).fill(0));
 
-  // Monthly chart state
   const [monthOffset, setMonthOffset] = useState(0);
   const [monthlyBars, setMonthlyBars] = useState<number[]>([]);
   const [monthName, setMonthName] = useState('');
 
-  // Earliest data month offset (to clamp back-navigation)
-  const [minMonthOffset, setMinMonthOffset] = useState(-24); // fallback
+  const [minMonthOffset, setMinMonthOffset] = useState(-24);
 
-  // Find earliest data month on mount
   useEffect(() => {
     const fetchEarliest = async () => {
       const { data } = await supabase
@@ -63,7 +59,6 @@ const CaloriesTrends: React.FC = () => {
     fetchEarliest();
   }, []);
 
-  // Load weekly calories
   useEffect(() => {
     const loadWeekly = async () => {
       const monday = getMondayAtOffset(calWeekOffset);
@@ -96,7 +91,6 @@ const CaloriesTrends: React.FC = () => {
     loadWeekly();
   }, [calWeekOffset]);
 
-  // Load monthly calories
   useEffect(() => {
     const loadMonthly = async () => {
       const now = new Date();
@@ -135,7 +129,6 @@ const CaloriesTrends: React.FC = () => {
     loadMonthly();
   }, [monthOffset]);
 
-  // Weekly computed values
   const weeklyMax = Math.max(...weeklyBars, 1);
   const daysWithCals = weeklyBars.filter(v => v > 0).length;
   const weeklyAvg = daysWithCals > 0
@@ -143,7 +136,6 @@ const CaloriesTrends: React.FC = () => {
     : 0;
   const weeklyMaxBarIndex = weeklyBars.indexOf(Math.max(...weeklyBars));
 
-  // Monthly computed values
   const monthlyMax = Math.max(...monthlyBars, 1);
   const monthDaysWithCals = monthlyBars.filter(v => v > 0).length;
   const monthlyAvg = monthDaysWithCals > 0
@@ -166,7 +158,7 @@ const CaloriesTrends: React.FC = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <span style={trendLabelStyle}>Calories:&nbsp;</span>
               <span style={trendLabelStyle}>
-                {weeklyAvg > 0 ? `${weeklyAvg.toLocaleString()} KCAL` : '— KCAL'}
+                {weeklyAvg > 0 ? `${weeklyAvg.toLocaleString()} KCAL` : '\u2014 KCAL'}
               </span>
               <button
                 onClick={() => setCalWeekOffset(o => o - 1)}
@@ -233,7 +225,7 @@ const CaloriesTrends: React.FC = () => {
             })}
           </div>
 
-          {/* Day labels - single letters */}
+          {/* Day labels */}
           <div className="flex justify-between mt-3" style={{ gap: 4 }}>
             {weekDays.map((d, i) => (
               <div key={i} className="flex-1 flex flex-col items-center">
@@ -251,7 +243,7 @@ const CaloriesTrends: React.FC = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <span style={trendLabelStyle}>Calories:&nbsp;</span>
               <span style={trendLabelStyle}>
-                {monthlyAvg > 0 ? `${monthlyAvg.toLocaleString()} KCAL` : '— KCAL'}
+                {monthlyAvg > 0 ? `${monthlyAvg.toLocaleString()} KCAL` : '\u2014 KCAL'}
               </span>
               <button
                 onClick={() => setMonthOffset(o => Math.max(o - 1, minMonthOffset))}
@@ -306,7 +298,7 @@ const CaloriesTrends: React.FC = () => {
                         bottom: '100%',
                         left: '50%',
                         transform: 'translateX(-50%)',
-                        marginBottom: '4px',
+                        marginBottom: '12px',
                         fontSize: '9px',
                         fontWeight: 700,
                         color: '#ffffff',

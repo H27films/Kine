@@ -50,7 +50,7 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars, expanded = false, onCl
             color: 'rgba(255,255,255,0.9)',
             lineHeight: 1,
           }}>
-            {avgKcal !== null ? avgKcal.toLocaleString() : '—'}
+            {avgKcal !== null ? avgKcal.toLocaleString() : '\u2014'}
             <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.08em', color: 'rgba(255,255,255,0.35)', marginLeft: 4 }}>KCAL</span>
           </div>
         </div>
@@ -58,7 +58,7 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars, expanded = false, onCl
         {/* Expanded bars — only days with data */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {weeklyBars.map((val, i) => {
-            if (val <= 0) return null; // skip days with no data
+            if (val <= 0) return null;
             const rawPct = rawMax > 0 ? val / rawMax : 0;
             const brightness = Math.round(80 + rawPct * 175);
             const barColor = `rgb(${brightness},${brightness},${brightness})`;
@@ -66,7 +66,6 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars, expanded = false, onCl
 
             return (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                {/* Bar track — grows right to left */}
                 <div style={{
                   flex: 1,
                   height: 20,
@@ -75,7 +74,6 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars, expanded = false, onCl
                   overflow: 'hidden',
                   position: 'relative',
                 }}>
-                  {/* Fill */}
                   <div style={{
                     position: 'absolute',
                     right: 0,
@@ -86,7 +84,6 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars, expanded = false, onCl
                     borderRadius: '9999px 0 0 9999px',
                     transition: 'width 0.3s ease',
                   }} />
-                  {/* Value label inside bar at rounded left end */}
                   <span style={{
                     position: 'absolute',
                     left: `calc(${100 - fillPct}% + 8px)`,
@@ -102,8 +99,6 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars, expanded = false, onCl
                     {val.toLocaleString()}
                   </span>
                 </div>
-
-                {/* Day label — right, bright white */}
                 <span style={{
                   width: 14,
                   fontSize: '12px',
@@ -141,7 +136,7 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars, expanded = false, onCl
         flexShrink: 0,
         marginBottom: 4,
       }}>
-        {avgKcal !== null ? avgKcal.toLocaleString() : '—'}
+        {avgKcal !== null ? avgKcal.toLocaleString() : '\u2014'}
         <span style={{ fontSize: '8px', fontWeight: 700, letterSpacing: '0.08em', color: 'rgba(255,255,255,0.35)', marginLeft: 3 }}>KCAL</span>
       </div>
 
@@ -150,14 +145,17 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars, expanded = false, onCl
         {weeklyBars.map((val, i) => {
           const rawPct = rawMax > 0 ? val / rawMax : 0;
           const brightness = val > 0 ? Math.round(80 + rawPct * 175) : 0;
-          const barColor = val > 0 ? `rgb(${brightness},${brightness},${brightness})` : 'rgba(255,255,255,0.05)';
-          const fillPct = val > 0 ? Math.max(rawPct * 100, 6) : 100;
+          const barColor = val > 0
+            ? `rgb(${brightness},${brightness},${brightness})`
+            : 'rgba(255,255,255,0.08)';
+          // Empty days: small stump (15%), data days: proportional fill (min 6%)
+          const fillPct = val > 0 ? Math.max(rawPct * 100, 6) : 15;
 
           return (
             <div key={i} style={{
               width: '100%',
               height: 5,
-              backgroundColor: 'rgba(255,255,255,0.05)',
+              backgroundColor: 'rgba(255,255,255,0.04)',
               borderRadius: '9999px 0 0 9999px',
               overflow: 'hidden',
               position: 'relative',
@@ -167,7 +165,7 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars, expanded = false, onCl
                 right: 0,
                 top: 0,
                 bottom: 0,
-                width: val > 0 ? `${fillPct}%` : '100%',
+                width: `${fillPct}%`,
                 backgroundColor: barColor,
                 borderRadius: '9999px 0 0 9999px',
                 transition: 'width 0.3s ease',
