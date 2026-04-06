@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Dumbbell, User, Flame } from 'lucide-react';
+import { Home, User, Flame } from 'lucide-react';
 import { Page, NavigationProps } from '../../types';
 
 interface NavItem {
@@ -22,8 +22,8 @@ export const BottomNav: React.FC<NavigationProps> = ({ currentPage, onNavigate }
       page: 'dashboard',
     },
     {
-      icon: <Dumbbell size={22} />,
-      activeIcon: <Dumbbell size={22} strokeWidth={2.5} />,
+      icon: <img src="/icons/dumbbell.svg" style={{ width: 22, height: 22, filter: 'brightness(0) invert(1)' }} alt="weights" />,
+      activeIcon: <img src="/icons/dumbbell.svg" style={{ width: 22, height: 22, filter: 'brightness(0)' }} alt="weights" />,
       page: 'weights',
     },
     {

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, ArrowLeft, Dumbbell, BarChart3, Flame } from 'lucide-react';
+import { Menu, ArrowLeft, BarChart3, Flame } from 'lucide-react';
 import { Page } from '../../types';
 
 interface HeaderProps {
@@ -15,6 +15,10 @@ const RunningManIcon = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
     <path d="M13.49 5.48c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-3.6 13.9l1-4.4 2.1 2v6h2v-7.5l-2.1-2 .6-3c1.3 1.5 3.3 2.5 5.5 2.5v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1l-5.2 2.2v4.7h2v-3.4l1.8-.7-1.6 8.1-4.9-1-.4 2 7 1.4z"/>
   </svg>
+);
+
+const DumbbellIcon = ({ size = 16 }: { size?: number }) => (
+  <img src="/icons/dumbbell.svg" style={{ width: size, height: size, filter: 'brightness(0) invert(1)' }} alt="weights" />
 );
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -35,16 +39,16 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
   }, [menuOpen]);
 
   const menuItems: { label: string; icon: IconComponent; page: Page }[] = [
-    { label: 'Weights',  icon: Dumbbell,                                                page: 'weights'   },
+    { label: 'Weights',  icon: DumbbellIcon,                                                    page: 'weights'   },
     { label: 'Cardio',   icon: ({ size }: { size?: number }) => <RunningManIcon size={size} />, page: 'cardio'    },
-    { label: 'Calories', icon: Flame,                                                  page: 'calories'  },
-    { label: 'Data+',    icon: BarChart3,                                               page: 'analytics' },
+    { label: 'Calories', icon: Flame,                                                           page: 'calories'  },
+    { label: 'Data+',    icon: BarChart3,                                                       page: 'analytics' },
   ];
 
   const isDashboard = !title;
 
   const getLogIcon = () => {
-    if (currentPage === 'weights') return <Dumbbell size={20} color="white" />;
+    if (currentPage === 'weights') return <img src="/icons/dumbbell.svg" style={{ width: 20, height: 20, filter: 'brightness(0) invert(1)' }} alt="weights" />;
     if (currentPage === 'cardio') return <RunningManIcon size={20} />;
     if (currentPage === 'calories') return <Flame size={20} color="white" />;
     return null;
@@ -136,7 +140,6 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
             <button
               onClick={onToggleWeeklySummary}
               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, WebkitTapHighlightColor: 'transparent' }}
-              className=""
             >
               <span className="text-xl font-black tracking-tighter text-white uppercase">Kiné</span>
             </button>
