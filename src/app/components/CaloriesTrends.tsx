@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 const weekDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 const MONTH_NAMES = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-const CALORIES_EXERCISE_ID = 90;
+const DAY_ABBREVS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const CALORIES_EXERCISE_ID = 90;
 
 const getMondayAtOffset = (offset: number): Date => {
   const today = new Date();
@@ -27,6 +28,22 @@ const getWeekNum = (d: Date): number => {
   return Math.ceil((((date.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
 };
 
+// Returns the 7 editable days: today-6 (oldest) → today (newest)
+const getEditableDays = (): Date[] => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const days: Date[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    days.push(d);
+  }
+  return days;
+};
+
+const fmtEditLabel = (d: Date): string =>
+  `${DAY_ABBREVS[d.getDay()]} ${d.getDate()} ${MONTH_NAMES[d.getMonth()]}`;
+
 const trendLabelStyle: React.CSSProperties = {
   fontSize: '11px',
   fontWeight: 700,
@@ -35,29 +52,21 @@ const trendLabelStyle: React.CSSProperties = {
   textTransform: 'uppercase',
 };
 
-interface EditState {
-  barIndex: number;
-  date: string;
-  dateLabel: string;
-  currentValue: number;
-}
-
 const CaloriesTrends: React.FC = () => {
   const [calWeekOffset, setCalWeekOffset] = useState(0);
   const [calWeekNumber, setCalWeekNumber] = useState<number | null>(null);
   const [weeklyBars, setWeeklyBars] = useState<number[]>(Array(7).fill(0));
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const [monthOffset, setMonthOffset] = useState(0);
   const [monthlyBars, setMonthlyBars] = useState<number[]>([]);
   const [monthName, setMonthName] = useState('');
-
   const [minMonthOffset, setMinMonthOffset] = useState(-24);
 
-  // Edit state
-  const [editingDay, setEditingDay] = useState<EditState | null>(null);
-  const [editValue, setEditValue] = useState('');
+  // Edit modal state
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editRowValues, setEditRowValues] = useState<string[]>(Array(7).fill(''));
   const [editSaving, setEditSaving] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const fetchEarliest = async () => {
@@ -111,7 +120,7 @@ const CaloriesTrends: React.FC = () => {
       setCalWeekNumber(wkNum);
     };
     loadWeekly();
-  }, [calWeekOffset]);
+  }, [calWeekOffset, refreshKey]);
 
   useEffect(() => {
     const loadMonthly = async () => {
@@ -149,9 +158,9 @@ const CaloriesTrends: React.FC = () => {
       setMonthlyBars(bars);
     };
     loadMonthly();
-  }, [monthOffset]);
+  }, [monthOffset, refreshKey]);
 
-  // Determine which bars are editable (today and up to 7 days prior)
+  // Check if a bar (by chart index) falls within editable range
   const getBarDate = (barIndex: number): Date => {
     const monday = getMondayAtOffset(calWeekOffset);
     const d = new Date(monday);
@@ -163,72 +172,83 @@ const CaloriesTrends: React.FC = () => {
   const isBarEditable = (barIndex: number): boolean => {
     const todayD = new Date();
     todayD.setHours(0, 0, 0, 0);
-    const sevenAgo = new Date(todayD);
-    sevenAgo.setDate(todayD.getDate() - 7);
+    const sixAgo = new Date(todayD);
+    sixAgo.setDate(todayD.getDate() - 6);
     const barDate = getBarDate(barIndex);
-    return barDate >= sevenAgo && barDate <= todayD;
+    return barDate >= sixAgo && barDate <= todayD;
+  };
+
+  const openEditModal = async () => {
+    const days = getEditableDays();
+    const dateStrings = days.map(d => fmtDate(d));
+
+    const { data } = await supabase
+      .from('workouts')
+      .select('date, calories')
+      .eq('type', 'MEASUREMENT')
+      .eq('exercise_id', CALORIES_EXERCISE_ID)
+      .in('date', dateStrings);
+
+    const valMap: Record<string, string> = {};
+    if (data) {
+      for (const row of data as any[]) {
+        if (row.calories) valMap[row.date] = String(row.calories);
+      }
+    }
+
+    const values = dateStrings.map(ds => valMap[ds] || '');
+    setEditRowValues(values);
+    setShowEditModal(true);
   };
 
   const handleBarClick = (barIndex: number) => {
     if (!isBarEditable(barIndex)) return;
-    const barDate = getBarDate(barIndex);
-    const dayName = DAY_NAMES[barDate.getDay()];
-    const monthStr = MONTH_NAMES[barDate.getMonth()];
-    const dateLabel = `${dayName}, ${barDate.getDate()} ${monthStr}`;
-    setEditingDay({
-      barIndex,
-      date: fmtDate(barDate),
-      dateLabel,
-      currentValue: weeklyBars[barIndex],
-    });
-    setEditValue(weeklyBars[barIndex] > 0 ? String(weeklyBars[barIndex]) : '');
-    setTimeout(() => inputRef.current?.focus(), 100);
+    openEditModal();
   };
 
   const handleEditSave = async () => {
-    if (!editingDay) return;
-    const val = parseInt(editValue);
-    if (isNaN(val) || val < 0) {
-      setEditingDay(null);
-      return;
-    }
     setEditSaving(true);
+    const days = getEditableDays();
 
-    const barDate = new Date(editingDay.date + 'T12:00:00');
-    const weekNum = getWeekNum(barDate);
-    const dayName = DAY_NAMES[barDate.getDay()];
+    for (let i = 0; i < 7; i++) {
+      const raw = editRowValues[i].trim();
+      if (raw === '') continue;
+      const val = parseInt(raw);
+      if (isNaN(val) || val < 0) continue;
 
-    const { data: existing } = await supabase
-      .from('workouts')
-      .select('id')
-      .eq('date', editingDay.date)
-      .eq('type', 'MEASUREMENT')
-      .eq('exercise_id', CALORIES_EXERCISE_ID)
-      .maybeSingle();
+      const dateStr = fmtDate(days[i]);
+      const barDate = days[i];
+      const weekNum = getWeekNum(barDate);
+      const dayName = DAY_NAMES[barDate.getDay()];
 
-    if (existing) {
-      await supabase.from('workouts').update({ calories: val }).eq('id', existing.id);
-    } else {
-      await supabase.from('workouts').insert({
-        date: editingDay.date,
-        week: weekNum,
-        day: dayName,
-        type: 'MEASUREMENT',
-        exercise_id: CALORIES_EXERCISE_ID,
-        calories: val,
-        total_score_k: null,
-        new_entry: 'New',
-        source: 'app',
-      });
+      const { data: existing } = await supabase
+        .from('workouts')
+        .select('id')
+        .eq('date', dateStr)
+        .eq('type', 'MEASUREMENT')
+        .eq('exercise_id', CALORIES_EXERCISE_ID)
+        .maybeSingle();
+
+      if (existing) {
+        await supabase.from('workouts').update({ calories: val }).eq('id', existing.id);
+      } else if (val > 0) {
+        await supabase.from('workouts').insert({
+          date: dateStr,
+          week: weekNum,
+          day: dayName,
+          type: 'MEASUREMENT',
+          exercise_id: CALORIES_EXERCISE_ID,
+          calories: val,
+          total_score_k: null,
+          new_entry: 'New',
+          source: 'app',
+        });
+      }
     }
-
-    // Update local bar
-    const newBars = [...weeklyBars];
-    newBars[editingDay.barIndex] = val;
-    setWeeklyBars(newBars);
 
     setEditSaving(false);
-    setEditingDay(null);
+    setShowEditModal(false);
+    setRefreshKey(k => k + 1); // re-fetch charts
   };
 
   const weeklyMax = Math.max(...weeklyBars, 1);
@@ -246,6 +266,7 @@ const CaloriesTrends: React.FC = () => {
   const monthlyPeakIdx = monthlyBars.indexOf(Math.max(...monthlyBars));
 
   const todayDayIdx = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
+  const editableDays = getEditableDays();
 
   return (
     <section className="mb-8">
@@ -311,7 +332,6 @@ const CaloriesTrends: React.FC = () => {
                     justifyContent: 'center',
                     paddingBottom: '9px',
                     cursor: editable ? 'pointer' : 'default',
-                    outline: editingDay?.barIndex === i ? '1.5px solid rgba(255,255,255,0.5)' : 'none',
                   }}
                 >
                   {h > 0 && (
@@ -424,60 +444,97 @@ const CaloriesTrends: React.FC = () => {
 
       </div>
 
-      {/* === Edit Bottom Sheet === */}
-      {editingDay && (
+      {/* === 7-Day Bulk Edit Modal === */}
+      {showEditModal && (
         <div
           style={{
             position: 'fixed', inset: 0, zIndex: 100,
-            backgroundColor: 'rgba(0,0,0,0.6)',
-            display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+            backgroundColor: 'rgba(0,0,0,0.75)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '24px',
           }}
-          onClick={(e) => { if (e.target === e.currentTarget) setEditingDay(null); }}
+          onClick={(e) => { if (e.target === e.currentTarget) setShowEditModal(false); }}
         >
           <div style={{
-            width: '100%', maxWidth: 480,
-            backgroundColor: '#1a1a1a',
-            borderTop: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: '16px 16px 0 0',
-            padding: '28px 24px 40px',
+            width: '100%', maxWidth: 360,
+            backgroundColor: '#111111',
+            borderRadius: '16px',
+            border: '1px solid rgba(255,255,255,0.08)',
+            padding: '28px 24px 24px',
           }}>
-            <p style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(161,161,170,1)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 6 }}>
+            {/* Modal header */}
+            <p style={{
+              fontSize: '10px', fontWeight: 900,
+              color: 'rgba(161,161,170,0.7)',
+              letterSpacing: '0.25em', textTransform: 'uppercase',
+              marginBottom: 20,
+            }}>
               Edit Calories
             </p>
-            <p style={{ fontSize: '13px', fontWeight: 800, color: '#ffffff', letterSpacing: '0.05em', marginBottom: 24 }}>
-              {editingDay.dateLabel}
-            </p>
-            <div style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              backgroundColor: '#121212', borderRadius: 12,
-              border: '1px solid rgba(255,255,255,0.1)',
-              padding: '16px 20px', marginBottom: 20,
-            }}>
-              <span style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(161,161,170,1)', letterSpacing: '0.2em', textTransform: 'uppercase' }}>KCAL</span>
-              <input
-                ref={inputRef}
-                type="number"
-                value={editValue}
-                onChange={e => setEditValue(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') handleEditSave(); if (e.key === 'Escape') setEditingDay(null); }}
-                placeholder={editingDay.currentValue > 0 ? String(editingDay.currentValue) : '0'}
-                style={{
-                  background: 'transparent', border: 'none', outline: 'none',
-                  fontSize: '32px', fontWeight: 900, color: '#ffffff',
-                  textAlign: 'right', width: '60%', letterSpacing: '-0.02em',
-                }}
-              />
+
+            {/* Rows */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
+              {editableDays.map((day, i) => (
+                <div key={i} style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  gap: 12,
+                }}>
+                  {/* Date label */}
+                  <span style={{
+                    fontSize: '11px', fontWeight: 700,
+                    color: 'rgba(161,161,170,0.85)',
+                    letterSpacing: '0.2em', textTransform: 'uppercase',
+                    flexShrink: 0, width: 90,
+                  }}>
+                    {fmtEditLabel(day)}
+                  </span>
+
+                  {/* Input */}
+                  <input
+                    type="number"
+                    value={editRowValues[i]}
+                    onChange={e => {
+                      const newVals = [...editRowValues];
+                      newVals[i] = e.target.value;
+                      setEditRowValues(newVals);
+                    }}
+                    placeholder="—"
+                    style={{
+                      flex: 1,
+                      background: 'rgba(255,255,255,0.05)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      borderRadius: 8,
+                      padding: '10px 14px',
+                      fontSize: '15px', fontWeight: 800,
+                      color: '#ffffff',
+                      textAlign: 'right',
+                      outline: 'none',
+                      letterSpacing: '-0.01em',
+                    }}
+                    onFocus={e => {
+                      e.currentTarget.style.border = '1px solid rgba(255,255,255,0.35)';
+                      e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
+                    }}
+                    onBlur={e => {
+                      e.currentTarget.style.border = '1px solid rgba(255,255,255,0.1)';
+                      e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+                    }}
+                  />
+                </div>
+              ))}
             </div>
+
+            {/* Update button */}
             <button
               onClick={handleEditSave}
               disabled={editSaving}
               style={{
-                width: '100%', padding: '16px',
+                width: '100%', padding: '14px',
                 backgroundColor: '#ffffff', color: '#000000',
                 borderRadius: 999, border: 'none',
                 fontSize: '10px', fontWeight: 900,
                 letterSpacing: '0.2em', textTransform: 'uppercase',
-                cursor: 'pointer', opacity: editSaving ? 0.7 : 1,
+                cursor: 'pointer', opacity: editSaving ? 0.6 : 1,
               }}
             >
               {editSaving ? 'Saving...' : 'Update'}
