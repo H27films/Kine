@@ -464,14 +464,27 @@ const CaloriesTrends: React.FC = () => {
             onClick={e => e.stopPropagation()}
           >
             {/* Header */}
-            <p style={{
-              fontSize: '14px', fontWeight: 900,
-              color: '#000000',
-              letterSpacing: '0.2em', textTransform: 'uppercase',
-              marginBottom: 24,
-            }}>
-              Edit Calories
-            </p>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+              <p style={{
+                fontSize: '14px', fontWeight: 900,
+                color: '#000000',
+                letterSpacing: '0.2em', textTransform: 'uppercase',
+                margin: 0,
+              }}>
+                Edit Calories
+              </p>
+              {/* Heartbeat / pulse icon */}
+              <svg width="38" height="22" viewBox="0 0 100 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <polyline
+                  points="0,25 18,25 26,8 34,42 44,18 52,32 60,25 100,25"
+                  stroke="#000000"
+                  strokeWidth="4.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  fill="none"
+                />
+              </svg>
+            </div>
 
             {/* Rows */}
             <div style={{ display: 'flex', flexDirection: 'column', marginBottom: 28 }}>
