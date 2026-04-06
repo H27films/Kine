@@ -42,6 +42,7 @@ export const CardioTypeChart: React.FC = () => {
   const [weekIdx, setWeekIdx] = useState(0); // 0 = most recent
   const [weeklyData, setWeeklyData] = useState<number[]>(Array(7).fill(0));
   const [weeklyCount, setWeeklyCount] = useState(0);
+  const [monthlyCount, setMonthlyCount] = useState(0);
 
   // Monthly
   const [monthOffset, setMonthOffset] = useState(0);
@@ -133,14 +134,17 @@ export const CardioTypeChart: React.FC = () => {
         .gte('date', firstDay)
         .lte('date', lastDay);
       const byDay: Record<number, number> = {};
+      let count = 0;
       if (data) {
         (data as any[]).forEach(r => {
           if ((r.exercises?.exercise_name || '').toUpperCase() !== selectedType) return;
+          count++;
           const d = parseInt(r.date.split('-')[2], 10);
           byDay[d] = +((byDay[d] || 0) + Number(r.km || 0)).toFixed(2);
         });
       }
       setMonthlyData(Array.from({ length: daysInMonth }, (_, i) => byDay[i + 1] || 0));
+      setMonthlyCount(count);
     };
     load();
   }, [selectedType, viewMode, monthOffset]);
@@ -282,7 +286,7 @@ export const CardioTypeChart: React.FC = () => {
           </div>
 
           {/* Count circle on the right */}
-          {viewMode === 'weekly' && weeklyCount > 0 && (
+          {((viewMode === 'weekly' && weeklyCount > 0) || (viewMode === 'monthly' && monthlyCount > 0)) && (
             <div style={{
               width: '20px',
               height: '20px',
@@ -293,7 +297,7 @@ export const CardioTypeChart: React.FC = () => {
               justifyContent: 'center',
             }}>
               <span style={{ fontSize: '10px', fontWeight: 800, color: '#000000', lineHeight: 1 }}>
-                {weeklyCount}
+                {viewMode === 'weekly' ? weeklyCount : monthlyCount}
               </span>
             </div>
           )}
@@ -400,7 +404,7 @@ export const CardioTypeChart: React.FC = () => {
               <div
                 key={i}
                 className="flex flex-col items-center h-full justify-end"
-                style={{ flex: '1', minWidth: 0, maxWidth: isWeekly ? '28px' : undefined, position: 'relative' }}
+                style={{ flex: 1, minWidth: 0, maxWidth: isWeekly ? 28 : 24, position: 'relative' }}
               >
                 {/* Data label above bar — weekly: in-flow; monthly: absolute so it doesn't stretch column */}
                 {isWeekly ? (
