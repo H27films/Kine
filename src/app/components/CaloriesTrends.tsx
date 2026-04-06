@@ -19,7 +19,7 @@ const fmtDate = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
 const trendLabelStyle: React.CSSProperties = {
-  fontSize: '10px',
+  fontSize: '11px',
   fontWeight: 700,
   color: 'rgba(161,161,170,1)',
   letterSpacing: '0.3em',
@@ -156,7 +156,7 @@ const CaloriesTrends: React.FC = () => {
 
   return (
     <section className="mb-8">
-      <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] mb-6" style={{ color: 'rgba(161,161,170,1)' }}>
+      <h3 className="text-[12px] font-bold uppercase tracking-[0.3em] mb-6" style={{ color: 'rgba(161,161,170,1)' }}>
         Performance Trends
       </h3>
       <div className="space-y-10">
@@ -251,7 +251,7 @@ const CaloriesTrends: React.FC = () => {
         {/* === Monthly Calories Chart === */}
         <div>
           {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 30 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <span style={trendLabelStyle}>Calories:&nbsp;</span>
               <span style={trendLabelStyle}>
