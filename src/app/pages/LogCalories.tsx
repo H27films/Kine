@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Page } from '../../types';
-import { supabase, todayStr, getISOWeek, getDayName, weeksAgoMonday, recalculateDailyTotals } from '../../lib/supabase';
+import { supabase, todayStr, getISOWeek, getDayName, recalculateDailyTotals } from '../../lib/supabase';
 import CaloriesSparkline from '../components/CaloriesSparkline';
 import CaloriesTrends from '../components/CaloriesTrends';
 
@@ -86,7 +86,6 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
   // Load body measurements
   useEffect(() => {
     const loadData = async () => {
-      const cutoff = weeksAgoMonday(3);
       const { data: bodyData } = await supabase
         .from('workouts')
         .select('date, bodyweight, body_fat_percent, muscle_mass')
@@ -116,15 +115,13 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
         .order('date', { ascending: true });
 
       const weekly = Array(7).fill(0);
-      const todayDate = new Date();
-      const todayDateStr = fmtDate(todayDate);
+      const todayDateStr = fmtDate(new Date());
       if (calData) {
         for (const row of calData as any[]) {
           if (!row.calories) continue;
           const d = new Date(row.date + 'T12:00:00');
           const dayIdx = d.getDay() === 0 ? 6 : d.getDay() - 1;
           weekly[dayIdx] += Number(row.calories);
-          // Pre-fill today's calories
           if (row.date === todayDateStr) {
             setCalories(String(row.calories));
           }
@@ -168,7 +165,6 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
       }
       setWeeklyRatings(ratings);
       setWeekNumber(wkNum);
-      // Pre-select today's food rating if viewing current week
       if (weekOffset === 0) {
         const todayIdx = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
         if (ratings[todayIdx]) setFoodRating(ratings[todayIdx]);
@@ -335,8 +331,8 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
               const today = new Date();
               const todayIdx = today.getDay() === 0 ? 6 : today.getDay() - 1;
               const isFuture = weekOffset === 0 && i > todayIdx;
-              let border = '1.5px solid rgba(255,255,255,0.15)';
-              let textColor = 'rgba(255,255,255,0.2)';
+              let border = '1.5px solid rgba(255,255,255,0.38)';
+              let textColor = 'rgba(255,255,255,0.5)';
               let glowShadow = 'none';
               if (rating === 'GOOD') { border = '2px solid #90c9a0'; textColor = '#90c9a0'; glowShadow = '0 0 8px rgba(144,201,160,0.75), 0 0 18px rgba(144,201,160,0.3)'; }
               else if (rating === 'BAD') { border = '2px solid #ef4444'; textColor = '#ef4444'; glowShadow = '0 0 8px rgba(239,68,68,0.75), 0 0 18px rgba(239,68,68,0.3)'; }
@@ -351,7 +347,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
                     width: 28, height: 28, borderRadius: '50%',
                     backgroundColor: 'transparent', border,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    opacity: isFuture && !rating ? 0.3 : 1,
+                    opacity: isFuture && !rating ? 0.35 : 1,
                     flexShrink: 0,
                     boxShadow: rating ? glowShadow : 'none',
                   }}>
