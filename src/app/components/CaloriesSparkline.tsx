@@ -147,15 +147,16 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars, expanded = false, onCl
           const brightness = val > 0 ? Math.round(80 + rawPct * 175) : 0;
           const barColor = val > 0
             ? `rgb(${brightness},${brightness},${brightness})`
-            : 'rgba(255,255,255,0.08)';
-          // Empty days: small stump (15%), data days: proportional fill (min 6%)
-          const fillPct = val > 0 ? Math.max(rawPct * 100, 6) : 15;
+            : 'rgba(255,255,255,0.05)';
+          // Empty days: tiny stump only (no background trail)
+          const fillPct = val > 0 ? Math.max(rawPct * 100, 6) : 8;
 
           return (
             <div key={i} style={{
               width: '100%',
               height: 5,
-              backgroundColor: 'rgba(255,255,255,0.04)',
+              // No background on empty rows — avoids the faint trail
+              backgroundColor: val > 0 ? 'transparent' : 'transparent',
               borderRadius: '9999px 0 0 9999px',
               overflow: 'hidden',
               position: 'relative',
@@ -167,7 +168,7 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars, expanded = false, onCl
                 bottom: 0,
                 width: `${fillPct}%`,
                 backgroundColor: barColor,
-                borderRadius: '9999px 0 0 9999px',
+                borderRadius: '9999px',
                 transition: 'width 0.3s ease',
               }} />
             </div>
