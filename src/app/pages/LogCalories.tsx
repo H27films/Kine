@@ -160,7 +160,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
         .from('workouts')
         .select('date, food_rating, week')
         .eq('type', 'MEASUREMENT')
-        .eq('exercise_id', FOOD_EXERCISE_ID)
+        .not('food_rating', 'is', null)
         .gte('date', fmt(monday))
         .lte('date', fmt(sunday))
         .order('date', { ascending: true });
