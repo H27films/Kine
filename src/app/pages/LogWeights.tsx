@@ -464,55 +464,58 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
         {/* Muscle group circles */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
           <div style={{ display: 'flex', gap: '24px', flex: 1, justifyContent: 'space-between' }}>
-            {['Chest', 'Back', 'Legs'].map(group => (
-              <button
-                key={group}
-                onClick={() => handleSelectGroup(group)}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: '8px',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  padding: 0,
-                }}
-              >
-                <div style={{
-                  width: '52px',
-                  height: '52px',
-                  borderRadius: '50%',
-                  backgroundColor: selectedGroup === group ? '#ffffff' : '#000000',
-                  border: '2px solid #ffffff',
-                  boxShadow: selectedGroup === group ? '0 0 16px rgba(255,255,255,0.5)' : 'none',
-                  transition: 'all 0.2s',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  overflow: 'hidden',
-                }}>
-                  {selectedGroup === group ? (
-                    <Check size={24} color="#000000" strokeWidth={3} />
-                  ) : (
-                    <img
-                      src={`/icons/${group}.svg`}
-                      alt={group}
-                      style={{ width: '38px', height: '38px', objectFit: 'contain', filter: 'brightness(0) invert(1)' }}
-                    />
-                  )}
-                </div>
-                <span style={{
-                  fontSize: '0.7rem',
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.2em',
-                  color: '#ffffff',
-                }}>
-                  {group}
-                </span>
-              </button>
-            ))}
+            {['Chest', 'Back', 'Legs'].map(group => {
+              const isSelected = selectedGroup === group;
+              return (
+                <button
+                  key={group}
+                  onClick={() => handleSelectGroup(group)}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '8px',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: 0,
+                  }}
+                >
+                  <div style={{
+                    width: '52px',
+                    height: '52px',
+                    borderRadius: '50%',
+                    backgroundColor: isSelected ? '#ffffff' : 'rgba(255,255,255,0.18)',
+                    border: 'none',
+                    boxShadow: isSelected ? '0 0 16px rgba(255,255,255,0.5)' : 'none',
+                    transition: 'all 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    overflow: 'hidden',
+                  }}>
+                    {isSelected ? (
+                      <Check size={24} color="#000000" strokeWidth={3} />
+                    ) : (
+                      <img
+                        src={`/icons/${group}.svg`}
+                        alt={group}
+                        style={{ width: '32px', height: '32px', objectFit: 'contain', filter: 'brightness(0) invert(1)' }}
+                      />
+                    )}
+                  </div>
+                  <span style={{
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.2em',
+                    color: '#ffffff',
+                  }}>
+                    {group}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
