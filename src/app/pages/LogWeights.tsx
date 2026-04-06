@@ -58,6 +58,12 @@ const ICON_SIZE: Record<string, string> = {
   Legs: '36px',
 };
 
+const ICON_OFFSET: Record<string, string> = {
+  Chest: '3px',
+  Back: '0px',
+  Legs: '0px',
+};
+
 export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
   const [selectedGroup, setSelectedGroup] = useState<string>(() => {
     try {
@@ -473,6 +479,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
             {['Chest', 'Back', 'Legs'].map(group => {
               const isSelected = selectedGroup === group;
               const iconSize = ICON_SIZE[group] || '44px';
+              const iconOffset = ICON_OFFSET[group] || '0px';
               return (
                 <button
                   key={group}
@@ -507,7 +514,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                       <img
                         src={`/icons/${group}.svg`}
                         alt={group}
-                        style={{ width: iconSize, height: iconSize, objectFit: 'contain', filter: 'brightness(0) invert(1)' }}
+                        style={{ width: iconSize, height: iconSize, objectFit: 'contain', filter: 'brightness(0) invert(1)', marginLeft: iconOffset }}
                       />
                     )}
                   </div>
