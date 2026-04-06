@@ -182,7 +182,7 @@ const CaloriesTrends: React.FC = () => {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <span style={trendLabelStyle}>Calories:&nbsp;</span>
+              <span style={trendLabelStyle}>Weekly:&nbsp;</span>
               <span style={trendLabelStyle}>
                 {weeklyAvg > 0 ? `${weeklyAvg.toLocaleString()} KCAL` : '\u2014 KCAL'}
               </span>
@@ -270,7 +270,7 @@ const CaloriesTrends: React.FC = () => {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 42 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <span style={trendLabelStyle}>Calories:&nbsp;</span>
+              <span style={trendLabelStyle}>Monthly:&nbsp;</span>
               <span style={trendLabelStyle}>
                 {monthlyAvg > 0 ? `${monthlyAvg.toLocaleString()} KCAL` : '\u2014 KCAL'}
               </span>
