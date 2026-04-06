@@ -44,7 +44,6 @@ export const BottomNav: React.FC<NavigationProps> = ({ currentPage, onNavigate }
   ];
 
   const isActive = (itemPage: Page): boolean => {
-    if (itemPage === 'weights' && (currentPage === 'weights' || currentPage === 'calories')) return true;
     return currentPage === itemPage;
   };
 
