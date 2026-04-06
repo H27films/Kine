@@ -291,6 +291,15 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
   // Index of highest bar (for previous weeks highlight)
   const maxBarIndex = weeklyBars.indexOf(Math.max(...weeklyBars));
 
+  // Shared style matching "Performance Trends" label
+  const trendLabelStyle: React.CSSProperties = {
+    fontSize: '10px',
+    fontWeight: 700,
+    color: 'rgba(161,161,170,1)',
+    letterSpacing: '0.3em',
+    textTransform: 'uppercase',
+  };
+
   return (
     <div>
       <nav className="flex gap-8 mb-12 items-end">
@@ -447,27 +456,25 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
             {/* Header row: CALORIES: avg kcal + chevrons | week number only */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <span style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(161,161,170,0.8)', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
-                  Calories:
-                </span>
-                <span style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.85)', letterSpacing: '0.1em' }}>
+                <span style={trendLabelStyle}>Calories:&nbsp;</span>
+                <span style={trendLabelStyle}>
                   {weeklyAvg > 0 ? `${weeklyAvg.toLocaleString()} KCAL` : '— KCAL'}
                 </span>
                 <button
                   onClick={() => setCalWeekOffset(o => o - 1)}
-                  style={{ background: 'none', border: 'none', padding: '2px 1px', cursor: 'pointer', color: 'rgba(255,255,255,0.55)', display: 'flex', alignItems: 'center' }}
+                  style={{ background: 'none', border: 'none', padding: '2px 1px', cursor: 'pointer', color: 'rgba(161,161,170,1)', display: 'flex', alignItems: 'center' }}
                 >
-                  <ChevronLeft size={14} />
+                  <ChevronLeft size={13} />
                 </button>
                 <button
                   onClick={() => setCalWeekOffset(o => Math.min(o + 1, 0))}
-                  style={{ background: 'none', border: 'none', padding: '2px 1px', cursor: 'pointer', color: calWeekOffset < 0 ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.18)', display: 'flex', alignItems: 'center' }}
+                  style={{ background: 'none', border: 'none', padding: '2px 1px', cursor: 'pointer', color: calWeekOffset < 0 ? 'rgba(161,161,170,1)' : 'rgba(161,161,170,0.25)', display: 'flex', alignItems: 'center' }}
                 >
-                  <ChevronRight size={14} />
+                  <ChevronRight size={13} />
                 </button>
               </div>
               {calWeekNumber !== null && (
-                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)', letterSpacing: '0.05em' }}>
+                <span style={trendLabelStyle}>
                   {calWeekNumber}
                 </span>
               )}
@@ -483,7 +490,8 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
                 const isToday = isCurrentWeek && i === todayIdx;
                 // For previous weeks: highlight the highest bar in bright white with glow
                 const isPeakBar = !isCurrentWeek && h > 0 && i === maxBarIndex;
-                const label = h >= 1000 ? `${(h / 1000).toFixed(1)}k` : h > 0 ? String(h) : '';
+                // Always show full number, never shorten
+                const label = h > 0 ? String(h) : '';
 
                 let bgColor = h > 0 ? '#3f3f46' : '#18181b';
                 if (isToday) bgColor = '#ffffff';
