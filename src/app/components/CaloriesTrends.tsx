@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
-const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const weekDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 const MONTH_NAMES = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
 const CALORIES_EXERCISE_ID = 90;
 
@@ -54,11 +54,10 @@ const CaloriesTrends: React.FC = () => {
       if (data && data.length > 0) {
         const earliest = new Date(data[0].date + 'T12:00:00');
         const now = new Date();
-        // Calculate how many months back from now
         const diffMonths =
           (earliest.getFullYear() - now.getFullYear()) * 12 +
           (earliest.getMonth() - now.getMonth());
-        setMinMonthOffset(diffMonths); // will be negative or 0
+        setMinMonthOffset(diffMonths);
       }
     };
     fetchEarliest();
@@ -163,7 +162,6 @@ const CaloriesTrends: React.FC = () => {
 
         {/* === Weekly Calories Chart === */}
         <div>
-          {/* Header — increased bottom margin for breathing room */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <span style={trendLabelStyle}>Calories:&nbsp;</span>
@@ -201,7 +199,6 @@ const CaloriesTrends: React.FC = () => {
               if (isToday) bgColor = '#ffffff';
               if (isPeakBar) bgColor = '#ffffff';
 
-              // Pure black on white bars, pure white on grey bars
               const labelColor = (isToday || isPeakBar) ? '#000000' : '#ffffff';
 
               return (
@@ -236,7 +233,7 @@ const CaloriesTrends: React.FC = () => {
             })}
           </div>
 
-          {/* Day labels */}
+          {/* Day labels - single letters */}
           <div className="flex justify-between mt-3" style={{ gap: 4 }}>
             {weekDays.map((d, i) => (
               <div key={i} className="flex-1 flex flex-col items-center">
@@ -250,7 +247,6 @@ const CaloriesTrends: React.FC = () => {
 
         {/* === Monthly Calories Chart === */}
         <div>
-          {/* Header */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 30 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <span style={trendLabelStyle}>Calories:&nbsp;</span>
@@ -304,7 +300,6 @@ const CaloriesTrends: React.FC = () => {
                       position: 'relative',
                     }}
                   >
-                    {/* Peak bar label — floats above the bar */}
                     {isPeakBar && h > 0 && (
                       <span style={{
                         position: 'absolute',
