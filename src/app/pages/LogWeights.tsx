@@ -495,7 +495,11 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                   {selectedGroup === group ? (
                     <Check size={24} color="#000000" strokeWidth={3} />
                   ) : (
-                    <img src={`/icons/${group}.svg`} alt={group} style={{ width: '38px', height: '38px', objectFit: 'contain' }} />
+                    <img
+                      src={`/icons/${group}.svg`}
+                      alt={group}
+                      style={{ width: '38px', height: '38px', objectFit: 'contain', filter: 'brightness(0) invert(1)' }}
+                    />
                   )}
                 </div>
                 <span style={{
