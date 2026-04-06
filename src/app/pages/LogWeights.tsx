@@ -482,8 +482,8 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                   }}
                 >
                   <div style={{
-                    width: '52px',
-                    height: '52px',
+                    width: '72px',
+                    height: '72px',
                     borderRadius: '50%',
                     backgroundColor: isSelected ? '#ffffff' : 'rgba(255,255,255,0.18)',
                     border: 'none',
@@ -495,12 +495,12 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                     overflow: 'hidden',
                   }}>
                     {isSelected ? (
-                      <Check size={24} color="#000000" strokeWidth={3} />
+                      <Check size={28} color="#000000" strokeWidth={3} />
                     ) : (
                       <img
                         src={`/icons/${group}.svg`}
                         alt={group}
-                        style={{ width: '32px', height: '32px', objectFit: 'contain', filter: 'brightness(0) invert(1)' }}
+                        style={{ width: '58px', height: '58px', objectFit: 'contain', filter: 'brightness(0) invert(1)' }}
                       />
                     )}
                   </div>
