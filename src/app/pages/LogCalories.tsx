@@ -69,6 +69,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
   const [bodyWeight, setBodyWeight] = useState('');
   const [bodyFat, setBodyFat] = useState('');
   const [muscleMass, setMuscleMass] = useState('');
+  const [focusedField, setFocusedField] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState('');
@@ -320,9 +321,8 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
               const today = new Date();
               const todayIdx = today.getDay() === 0 ? 6 : today.getDay() - 1;
               const isFuture = weekOffset === 0 && i > todayIdx;
-              // Empty: visible border + letter even without data
-              let border = '1.5px solid rgba(255,255,255,0.38)';
-              let textColor = 'rgba(255,255,255,0.5)';
+              let border = '1.5px solid rgba(255,255,255,0.15)';
+              let textColor = 'rgba(255,255,255,0.2)';
               let glowShadow = 'none';
               if (rating === 'GOOD') { border = '2px solid #90c9a0'; textColor = '#90c9a0'; glowShadow = '0 0 8px rgba(144,201,160,0.75), 0 0 18px rgba(144,201,160,0.3)'; }
               else if (rating === 'BAD') { border = '2px solid #ef4444'; textColor = '#ef4444'; glowShadow = '0 0 8px rgba(239,68,68,0.75), 0 0 18px rgba(239,68,68,0.3)'; }
@@ -337,7 +337,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
                     width: 28, height: 28, borderRadius: '50%',
                     backgroundColor: 'transparent', border,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    opacity: isFuture && !rating ? 0.35 : 1,
+                    opacity: isFuture && !rating ? 0.3 : 1,
                     flexShrink: 0,
                     boxShadow: rating ? glowShadow : 'none',
                   }}>
@@ -365,17 +365,33 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
         <span className="text-[13px] uppercase tracking-[0.2em] font-black block mb-6" style={{ color: '#ffffff' }}>Body Measurements</span>
         <div className="grid grid-cols-1 gap-4">
           {[
-            { label: 'Body Weight (KG)', value: bodyWeight, onChange: setBodyWeight },
-            { label: 'Body Fat (%)', value: bodyFat, onChange: setBodyFat },
-            { label: 'Muscle Mass (KG)', value: muscleMass, onChange: setMuscleMass },
-          ].map(field => (
-            <div key={field.label} className="flex justify-between items-center p-5 rounded-lg" style={{ backgroundColor: '#121212', border: '1px solid rgba(255,255,255,0.05)' }}>
-              <label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'rgba(161,161,170,0.8)' }}>{field.label}</label>
-              <input type="number" value={field.value} onChange={e => field.onChange(e.target.value)} step="0.1"
-                className="text-right text-lg font-black tracking-tight text-white p-0 w-24"
-                style={{ backgroundColor: 'transparent', border: 'none' }} />
-            </div>
-          ))}
+            { label: 'Body Weight (KG)', value: bodyWeight, onChange: setBodyWeight, id: 'field-bodyweight' },
+            { label: 'Body Fat (%)', value: bodyFat, onChange: setBodyFat, id: 'field-bodyfat' },
+            { label: 'Muscle Mass (KG)', value: muscleMass, onChange: setMuscleMass, id: 'field-musclemass' },
+          ].map(field => {
+            const isFocused = focusedField === field.id;
+            return (
+              <label key={field.label} htmlFor={field.id} className="flex justify-between items-center p-5 rounded-lg cursor-text"
+                style={{
+                  backgroundColor: isFocused ? '#ffffff' : '#121212',
+                  border: isFocused ? '1px solid #ffffff' : '1px solid rgba(255,255,255,0.05)',
+                  transition: 'background-color 0.15s, border-color 0.15s',
+                }}>
+                <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: isFocused ? '#000000' : '#ffffff' }}>{field.label}</span>
+                <input
+                  id={field.id}
+                  type="number"
+                  value={field.value}
+                  onChange={e => field.onChange(e.target.value)}
+                  onFocus={() => setFocusedField(field.id)}
+                  onBlur={() => setFocusedField(null)}
+                  step="0.1"
+                  className="text-right text-lg font-black tracking-tight p-0 w-24"
+                  style={{ backgroundColor: 'transparent', border: 'none', color: isFocused ? '#000000' : '#ffffff', outline: 'none' }}
+                />
+              </label>
+            );
+          })}
         </div>
 
         {saveError && <p className="text-red-400 text-sm mt-4 text-center">{saveError}</p>}
