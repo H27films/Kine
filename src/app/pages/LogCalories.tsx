@@ -15,6 +15,8 @@ const tabs: { label: string; page: Page }[] = [
   { label: 'Calories', page: 'calories' },
 ];
 
+const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
 type FoodRating = 'BAD' | 'OK' | 'GOOD' | null;
 
 const CALORIES_EXERCISE_ID = 90;
@@ -361,7 +363,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
       </section>
 
       <section className="mb-16">
-        <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] mb-6" style={{ color: 'rgba(161,161,170,1)' }}>Body Measurements</h3>
+        <span className="text-[13px] uppercase tracking-[0.2em] font-black block mb-6" style={{ color: '#ffffff' }}>Body Measurements</span>
         <div className="grid grid-cols-1 gap-4">
           {[
             { label: 'Body Weight (KG)', value: bodyWeight, onChange: setBodyWeight },
