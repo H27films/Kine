@@ -140,7 +140,7 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate: _onNavigate }) => 
           className="mt-4 px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest active:scale-[0.97] transition-all"
           style={{ backgroundColor: '#1a1a1a', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.1)' }}
         >
-          ↻ Refresh
+          ↻ REFRESH
         </button>
       </div>
 
