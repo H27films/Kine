@@ -52,6 +52,12 @@ const makeDefaultSets = (): SetRow[] =>
 
 const STORAGE_KEY = 'kine_logweights_v1';
 
+const ICON_SIZE: Record<string, string> = {
+  Chest: '44px',
+  Back: '44px',
+  Legs: '36px',
+};
+
 export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
   const [selectedGroup, setSelectedGroup] = useState<string>(() => {
     try {
@@ -466,6 +472,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
           <div style={{ display: 'flex', gap: '24px', flex: 1, justifyContent: 'space-between' }}>
             {['Chest', 'Back', 'Legs'].map(group => {
               const isSelected = selectedGroup === group;
+              const iconSize = ICON_SIZE[group] || '44px';
               return (
                 <button
                   key={group}
@@ -500,7 +507,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                       <img
                         src={`/icons/${group}.svg`}
                         alt={group}
-                        style={{ width: '58px', height: '58px', objectFit: 'contain', filter: 'brightness(0) invert(1)' }}
+                        style={{ width: iconSize, height: iconSize, objectFit: 'contain', filter: 'brightness(0) invert(1)' }}
                       />
                     )}
                   </div>
