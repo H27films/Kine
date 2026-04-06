@@ -15,8 +15,6 @@ const tabs: { label: string; page: Page }[] = [
   { label: 'Calories', page: 'calories' },
 ];
 
-const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
 type FoodRating = 'BAD' | 'OK' | 'GOOD' | null;
 
 const CALORIES_EXERCISE_ID = 90;
