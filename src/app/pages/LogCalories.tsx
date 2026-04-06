@@ -116,12 +116,18 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
         .order('date', { ascending: true });
 
       const weekly = Array(7).fill(0);
+      const todayDate = new Date();
+      const todayDateStr = fmtDate(todayDate);
       if (calData) {
         for (const row of calData as any[]) {
           if (!row.calories) continue;
           const d = new Date(row.date + 'T12:00:00');
           const dayIdx = d.getDay() === 0 ? 6 : d.getDay() - 1;
           weekly[dayIdx] += Number(row.calories);
+          // Pre-fill today's calories
+          if (row.date === todayDateStr) {
+            setCalories(String(row.calories));
+          }
         }
       }
       setWeeklyBars(weekly);
@@ -162,6 +168,11 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
       }
       setWeeklyRatings(ratings);
       setWeekNumber(wkNum);
+      // Pre-select today's food rating if viewing current week
+      if (weekOffset === 0) {
+        const todayIdx = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
+        if (ratings[todayIdx]) setFoodRating(ratings[todayIdx]);
+      }
     };
     loadRatings();
   }, [weekOffset]);
