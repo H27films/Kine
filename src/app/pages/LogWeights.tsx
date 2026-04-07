@@ -548,7 +548,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                   position: 'absolute',
                   right: 0, top: 0, bottom: 0,
                   width: `${Math.min(100, (thisWeekTotal / 20000) * 100)}%`,
-                  background: 'linear-gradient(to right, rgba(255,255,255,0.5), #ffffff)',
+                  background: 'linear-gradient(to right, #ffffff, rgba(255,255,255,0.45))',
                   borderRadius: '999px',
                   transition: 'width 0.6s ease',
                 }} />
@@ -572,25 +572,25 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
             padding: '0 16px',
           }}>
             <div style={{
-              height: '38px',
+              height: '28px',
               backgroundColor: 'rgba(255,255,255,0.12)',
               borderRadius: '999px',
               position: 'relative',
               overflow: 'hidden',
             }}>
-              {/* Fill anchored to right edge, gradient white */}
+              {/* Fill anchored to right edge, white on left fading to grey on right */}
               <div style={{
                 position: 'absolute',
                 right: 0, top: 0, bottom: 0,
                 width: `${barPct}%`,
-                background: 'linear-gradient(to right, rgba(255,255,255,0.55), #ffffff)',
+                background: 'linear-gradient(to right, #ffffff, rgba(255,255,255,0.45))',
                 borderRadius: '999px',
                 transition: 'width 0.6s ease',
               }} />
               {/* Volume figure inside bar at right edge */}
               <div style={{
                 position: 'absolute',
-                right: '14px',
+                right: '12px',
                 top: '50%',
                 transform: 'translateY(-50%)',
                 display: 'flex',
@@ -599,12 +599,12 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                 zIndex: 2,
               }}>
                 <span style={{
-                  fontSize: '1rem', fontWeight: 900, lineHeight: 1,
+                  fontSize: '0.85rem', fontWeight: 900, lineHeight: 1,
                   letterSpacing: '-0.02em',
                   color: textOnFill ? '#000000' : 'rgba(255,255,255,0.5)',
-                }}>{fmtVol(thisWeekTotal)}</span>
+                }}>{Math.round(thisWeekTotal).toLocaleString()}</span>
                 <span style={{
-                  fontSize: '0.55rem', fontWeight: 700,
+                  fontSize: '0.5rem', fontWeight: 700,
                   letterSpacing: '0.1em', textTransform: 'uppercase',
                   color: textOnFill ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.3)',
                 }}>KG</span>
