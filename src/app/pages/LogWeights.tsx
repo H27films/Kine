@@ -531,6 +531,20 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
           </div>
         )}
       </div>
+
+      {/* Right-to-left progress bar — max 20,000kg */}
+      <div style={{ marginTop: '10px', height: '2px', backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '1px', position: 'relative', overflow: 'hidden' }}>
+        <div style={{
+          position: 'absolute',
+          right: 0,
+          top: 0,
+          bottom: 0,
+          width: `${Math.min(100, (thisWeekTotal / 20000) * 100)}%`,
+          backgroundColor: 'rgba(255,255,255,0.75)',
+          borderRadius: '1px',
+          transition: 'width 0.6s ease',
+        }} />
+      </div>
       </div>
 
       <section style={{ marginBottom: selectedGroup ? '28px' : '3rem', transition: 'margin 0.35s ease' }}>
