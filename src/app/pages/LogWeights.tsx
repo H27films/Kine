@@ -294,11 +294,38 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
     }
   };
 
-  const loadMaxSession = (id: number) => {
+  const loadMaxSession = async (id: number) => {
+    const ex = addedExercises.find(e => e.exercise.id === id);
+    if (!ex) return;
+
+    let maxSets = ex.maxSets;
+
+    // If maxSets wasn't loaded (e.g. stale localStorage), fetch it now
+    if (!maxSets || maxSets.length === 0) {
+      const { data } = await supabase
+        .from('workouts')
+        .select('total_weight,w1,r1,w2,r2,w3,r3,w4,r4,w5,r5,w6,r6')
+        .eq('exercise_id', id)
+        .order('total_weight', { ascending: false })
+        .limit(1);
+      if (data && data.length > 0) {
+        const maxRow = data[0] as any;
+        const parsed: SetRow[] = [];
+        for (let i = 1; i <= 6; i++) {
+          const w = maxRow[`w${i}`];
+          const r = maxRow[`r${i}`];
+          if (w != null && Number(w) > 0) {
+            parsed.push({ weight: String(Number(w)), reps: Number(r) || 10 });
+          }
+        }
+        if (parsed.length > 0) maxSets = parsed;
+      }
+    }
+
     setAddedExercises(prev => prev.map(e => {
       if (e.exercise.id !== id) return e;
-      if (!e.maxSets || e.maxSets.length === 0) return { ...e, expanded: true };
-      return { ...e, sets: [...e.maxSets], expanded: true };
+      if (!maxSets || maxSets.length === 0) return { ...e, expanded: true };
+      return { ...e, sets: [...maxSets], maxSets, expanded: true };
     }));
   };
 
@@ -506,7 +533,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
       </div>
       </div>
 
-      <section style={{ marginBottom: selectedGroup ? '8px' : '3rem', transition: 'margin 0.35s ease' }}>
+      <section style={{ marginBottom: selectedGroup ? '28px' : '3rem', transition: 'margin 0.35s ease' }}>
         {/* Muscle group circles */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
           <div style={{ display: 'flex', gap: '24px', flex: 1, justifyContent: 'space-between' }}>
