@@ -511,39 +511,49 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
         marginBottom: selectedGroup ? '0px' : '2rem',
       }}>
       <div className="flex items-start">
+        {/* Big weekly total on left */}
         <div className="text-[3.25rem] font-black leading-none tracking-tighter text-white flex-shrink-0">
           {fmtVol(thisWeekTotal)}
         </div>
-        <div className="flex flex-col justify-center ml-4 pt-1 flex-1 min-w-0">
-          <div style={{ fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2.5px', color: '#ffffff' }}>
-            VOLUME (KG)
-          </div>
-          {lastWeekTotal > 0 && (
-            <div className="text-[11px] font-medium mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
-              Last week {fmtVol(lastWeekTotal)} kg
+        {/* Right section: labels + KG TODAY + bar */}
+        <div className="flex flex-col ml-4 pt-1 flex-1 min-w-0">
+          <div className="flex items-start justify-between">
+            <div>
+              <div style={{ fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2.5px', color: '#ffffff' }}>
+                VOLUME (KG)
+              </div>
+              {lastWeekTotal > 0 && (
+                <div className="text-[11px] font-medium mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                  Last week {fmtVol(lastWeekTotal)} kg
+                </div>
+              )}
             </div>
-          )}
-        </div>
-        {todayTotal > 0 && (
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginLeft: 'auto', alignSelf: 'flex-start', marginTop: '4px' }}>
-            <span style={{ color: '#ffffff', fontWeight: 900, fontSize: '1.1rem', letterSpacing: '-0.02em', lineHeight: 1 }}>{Math.round(todayTotal).toLocaleString()}</span>
-            <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 700, fontSize: '0.65rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>KG TODAY</span>
+            {todayTotal > 0 && (
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginLeft: '12px', flexShrink: 0 }}>
+                <span style={{ color: '#ffffff', fontWeight: 900, fontSize: '1.1rem', letterSpacing: '-0.02em', lineHeight: 1 }}>{Math.round(todayTotal).toLocaleString()}</span>
+                <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 700, fontSize: '0.65rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>KG TODAY</span>
+              </div>
+            )}
           </div>
-        )}
-      </div>
-
-      {/* Right-to-left progress bar — max 20,000kg */}
-      <div style={{ marginTop: '10px', height: '2px', backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '1px', position: 'relative', overflow: 'hidden' }}>
-        <div style={{
-          position: 'absolute',
-          right: 0,
-          top: 0,
-          bottom: 0,
-          width: `${Math.min(100, (thisWeekTotal / 20000) * 100)}%`,
-          backgroundColor: 'rgba(255,255,255,0.75)',
-          borderRadius: '1px',
-          transition: 'width 0.6s ease',
-        }} />
+          {/* Progress bar — right to left, max 20,000kg, spans full right section */}
+          <div style={{
+            marginTop: '10px',
+            height: '18px',
+            backgroundColor: 'rgba(255,255,255,0.1)',
+            borderRadius: '999px',
+            position: 'relative',
+            overflow: 'hidden',
+          }}>
+            <div style={{
+              position: 'absolute',
+              right: 0, top: 0, bottom: 0,
+              width: `${Math.min(100, (thisWeekTotal / 20000) * 100)}%`,
+              backgroundColor: '#ffffff',
+              borderRadius: '999px',
+              transition: 'width 0.6s ease',
+            }} />
+          </div>
+        </div>
       </div>
       </div>
 
