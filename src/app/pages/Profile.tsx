@@ -86,6 +86,7 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
           'BODY FAT %': r.body_fat_percent ?? '',
           'MUSCLE MASS': r.muscle_mass ?? '',
           TIME: time,
+          NEW_ENTRY: r.new_entry ?? '',
         };
       });
 
