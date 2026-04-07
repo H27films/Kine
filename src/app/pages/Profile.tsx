@@ -70,7 +70,7 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
           }
         }
         return {
-          DATE: r.date ? new Date(r.date + 'T00:00:00') : '',
+          DATE: r.date ? r.date.split('-').reverse().join('/') : '',
           EXERCISE: r.exercises?.exercise_name ?? '',
           KM: r.km ?? '',
           CALORIES: r.calories ?? '',
@@ -103,12 +103,12 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
 
       const wb = XLSX.utils.book_new();
       if (newRows.length > 0) {
-        const ws1 = XLSX.utils.json_to_sheet(newRows, { cellDates: true });
+        const ws1 = XLSX.utils.json_to_sheet(newRows);
         applyDateFormat(ws1);
         XLSX.utils.book_append_sheet(wb, ws1, 'Sheet1');
       }
       if (editRows.length > 0) {
-        const ws2 = XLSX.utils.json_to_sheet(editRows, { cellDates: true });
+        const ws2 = XLSX.utils.json_to_sheet(editRows);
         applyDateFormat(ws2);
         XLSX.utils.book_append_sheet(wb, ws2, 'Sheet2');
       }
