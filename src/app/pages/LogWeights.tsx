@@ -44,6 +44,7 @@ interface AddedExercise {
   logged: boolean;
   copied: boolean;
   lastSets: SetRow[] | null;
+  maxSets: SetRow[] | null;
   fail: boolean;
   pbThreshold: number;
 }
@@ -184,7 +185,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
         .limit(1),
       supabase
         .from('workouts')
-        .select('total_weight')
+        .select('total_weight,w1,r1,w2,r2,w3,r3,w4,r4,w5,r5,w6,r6')
         .eq('exercise_id', exercise.id)
         .order('total_weight', { ascending: false })
         .limit(1),
@@ -206,6 +207,20 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
 
     const pbThreshold = pbData && pbData.length > 0 ? Number((pbData[0] as any).total_weight || 0) : 0;
 
+    let maxSets: SetRow[] | null = null;
+    if (pbData && pbData.length > 0) {
+      const maxRow = pbData[0] as any;
+      const parsed: SetRow[] = [];
+      for (let i = 1; i <= 6; i++) {
+        const w = maxRow[`w${i}`];
+        const r = maxRow[`r${i}`];
+        if (w != null && Number(w) > 0) {
+          parsed.push({ weight: String(Number(w)), reps: Number(r) || 10 });
+        }
+      }
+      if (parsed.length > 0) maxSets = parsed;
+    }
+
     setAddedExercises(prev => [...prev, {
       exercise,
       sets: makeDefaultSets(),
@@ -213,6 +228,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
       logged: false,
       copied: false,
       lastSets,
+      maxSets,
       fail: false,
       pbThreshold,
     }]);
@@ -276,6 +292,14 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
         return { ...e, sets: [...e.lastSets!], copied: true };
       }));
     }
+  };
+
+  const loadMaxSession = (id: number) => {
+    setAddedExercises(prev => prev.map(e => {
+      if (e.exercise.id !== id) return e;
+      if (!e.maxSets || e.maxSets.length === 0) return { ...e, expanded: true };
+      return { ...e, sets: [...e.maxSets], expanded: true };
+    }));
   };
 
   const toggleFail = (id: number) => {
@@ -764,6 +788,21 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                           }}
                         >
                           Fail
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); loadMaxSession(ex.exercise.id); }}
+                          className="text-xs font-bold uppercase tracking-widest"
+                          style={{
+                            padding: '3px 12px',
+                            borderRadius: '999px',
+                            border: '1px solid rgba(255,255,255,0.12)',
+                            backgroundColor: 'transparent',
+                            color: 'rgba(255,255,255,0.28)',
+                            transition: 'all 0.2s',
+                            letterSpacing: '0.1em',
+                          }}
+                        >
+                          Max
                         </button>
                       </div>
                     </div>
