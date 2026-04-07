@@ -516,7 +516,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
           {fmtVol(thisWeekTotal)}
           {lastWeekTotal > 0 && (
             <div style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.45)', marginTop: '6px', letterSpacing: '-0.01em', lineHeight: 1 }}>
-              Last Week {Math.round(lastWeekTotal).toLocaleString()} KG
+              LAST WEEK {Math.round(lastWeekTotal).toLocaleString()} KG
             </div>
           )}
         </div>
@@ -561,60 +561,19 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
       </div>
       </div>
 
-      {/* Big full-width progress bar — only visible when group selected */}
-      {selectedGroup && (() => {
-        const barPct = Math.min(100, (thisWeekTotal / 25000) * 100);
-        const hasData = thisWeekTotal > 0;
-        const textOnFill = hasData && barPct > 25;
-        return (
-          <div style={{
-            marginLeft: '-1.5rem',
-            marginRight: '-1.5rem',
-            marginBottom: '20px',
-            padding: '0 16px',
-          }}>
-            <div style={{
-              height: '28px',
-              backgroundColor: 'rgba(255,255,255,0.12)',
-              borderRadius: '999px',
-              position: 'relative',
-              overflow: 'hidden',
-            }}>
-              {/* Fill anchored to right edge, white on left fading to grey on right */}
-              <div style={{
-                position: 'absolute',
-                right: 0, top: 0, bottom: 0,
-                width: `${barPct}%`,
-                background: 'linear-gradient(to right, #ffffff, rgba(255,255,255,0.45))',
-                borderRadius: '999px',
-                transition: 'width 0.6s ease',
-              }} />
-              {/* Volume figure inside bar at right edge */}
-              <div style={{
-                position: 'absolute',
-                right: '12px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                display: 'flex',
-                alignItems: 'baseline',
-                gap: '3px',
-                zIndex: 2,
-              }}>
-                <span style={{
-                  fontSize: '0.85rem', fontWeight: 900, lineHeight: 1,
-                  letterSpacing: '-0.02em',
-                  color: textOnFill ? '#000000' : 'rgba(255,255,255,0.5)',
-                }}>{Math.round(thisWeekTotal).toLocaleString()}</span>
-                <span style={{
-                  fontSize: '0.5rem', fontWeight: 700,
-                  letterSpacing: '0.1em', textTransform: 'uppercase',
-                  color: textOnFill ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.3)',
-                }}>KG</span>
-              </div>
-            </div>
+      {/* Today's total — visible when group selected */}
+      {selectedGroup && todayTotal > 0 && (
+        <div style={{ marginBottom: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+            <span style={{ color: '#ffffff', fontWeight: 900, fontSize: '1.5rem', letterSpacing: '-0.02em', lineHeight: 1 }}>
+              {Math.round(todayTotal).toLocaleString()}
+            </span>
+            <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              KG TODAY
+            </span>
           </div>
-        );
-      })()}
+        </div>
+      )}
 
       <section style={{ marginBottom: selectedGroup ? '28px' : '3rem', transition: 'margin 0.35s ease' }}>
         {/* Muscle group circles */}
