@@ -70,7 +70,7 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
           }
         }
         return {
-          DATE: r.date ? new Date(r.date + 'T12:00:00Z') : '',
+          DATE: r.date ? new Date(r.date + 'T00:00:00') : '',
           EXERCISE: r.exercises?.exercise_name ?? '',
           KM: r.km ?? '',
           CALORIES: r.calories ?? '',
