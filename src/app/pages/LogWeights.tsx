@@ -517,16 +517,10 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
         </div>
         {/* Right section: labels + KG TODAY + bar */}
         <div className="flex flex-col ml-4 pt-1 flex-1 min-w-0">
+          {/* Top row: label + KG TODAY */}
           <div className="flex items-start justify-between">
-            <div>
-              <div style={{ fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2.5px', color: '#ffffff' }}>
-                VOLUME (KG)
-              </div>
-              {lastWeekTotal > 0 && (
-                <div className="text-[11px] font-medium mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                  Last week {fmtVol(lastWeekTotal)} kg
-                </div>
-              )}
+            <div style={{ fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2.5px', color: '#ffffff' }}>
+              VOLUME (KG)
             </div>
             {todayTotal > 0 && (
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginLeft: '12px', flexShrink: 0 }}>
@@ -535,24 +529,32 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
               </div>
             )}
           </div>
-          {/* Progress bar — right to left, max 20,000kg */}
-          <div style={{
-            marginTop: '10px',
-            height: '12px',
-            backgroundColor: 'rgba(255,255,255,0.12)',
-            borderRadius: '999px',
-            position: 'relative',
-            overflow: 'hidden',
-          }}>
-            <div style={{
-              position: 'absolute',
-              right: 0, top: 0, bottom: 0,
-              width: `${Math.min(100, (thisWeekTotal / 20000) * 100)}%`,
-              background: 'linear-gradient(to right, rgba(255,255,255,0.55), #ffffff)',
-              borderRadius: '999px',
-              transition: 'width 0.6s ease',
-            }} />
-          </div>
+          {/* Bottom row: Last week text + inline progress bar */}
+          {lastWeekTotal > 0 && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px' }}>
+              <span style={{ fontSize: '11px', fontWeight: 500, color: 'rgba(255,255,255,0.4)', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                Last week {fmtVol(lastWeekTotal)} kg
+              </span>
+              {/* Progress bar — starts right after "kg", ends at right edge */}
+              <div style={{
+                flex: 1,
+                height: '8px',
+                backgroundColor: 'rgba(255,255,255,0.22)',
+                borderRadius: '999px',
+                position: 'relative',
+                overflow: 'hidden',
+              }}>
+                <div style={{
+                  position: 'absolute',
+                  right: 0, top: 0, bottom: 0,
+                  width: `${Math.min(100, (thisWeekTotal / 20000) * 100)}%`,
+                  background: 'linear-gradient(to right, rgba(255,255,255,0.5), #ffffff)',
+                  borderRadius: '999px',
+                  transition: 'width 0.6s ease',
+                }} />
+              </div>
+            </div>
+          )}
         </div>
       </div>
       </div>
