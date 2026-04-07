@@ -525,7 +525,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
           )}
         </div>
         {todayTotal > 0 && (
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginLeft: 'auto', alignSelf: 'flex-start', marginTop: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginLeft: 'auto', alignSelf: 'flex-start', marginTop: '4px' }}>
             <span style={{ color: '#ffffff', fontWeight: 900, fontSize: '1.1rem', letterSpacing: '-0.02em', lineHeight: 1 }}>{Math.round(todayTotal).toLocaleString()}</span>
             <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 700, fontSize: '0.65rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>KG TODAY</span>
           </div>
