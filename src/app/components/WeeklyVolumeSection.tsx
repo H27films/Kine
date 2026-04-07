@@ -22,27 +22,10 @@ const WeeklyVolumeSection: React.FC = () => {
   const [weekIdx, setWeekIdx] = useState(0);
   const [showWeekPicker, setShowWeekPicker] = useState(false);
 
-  useEffect(() => {
-    const loadWeeks = async () => {
-      const { data } = await supabase
-        .from('workouts')
-        .select('week')
-        .in('type', WEIGHT_TYPES)
-        .not('week', 'is', null);
-      if (data) {
-        const weeks = [...new Set((data as any[]).map(r => Number(r.week)))]
-          .filter(w => !isNaN(w))
-          .sort((a, b) => b - a);
-        setAvailableWeeks(weeks);
-      }
-    };
-    loadWeeks();
-  }, []);
-
-  const loadWeekly = async () => {
-    if (availableWeeks.length === 0) return;
-    const currentWeek = availableWeeks[weekIdx] ?? 0;
-    const lastWeek = availableWeeks[weekIdx + 1] ?? 0;
+  const loadWeeklyData = async (weeks: number[], idx: number) => {
+    if (weeks.length === 0) return;
+    const currentWeek = weeks[idx] ?? 0;
+    const lastWeek = weeks[idx + 1] ?? 0;
 
     const [{ data: thisWeek }, { data: lastWeekData }] = await Promise.all([
       supabase.from('workouts').select('type, total_weight').in('type', WEIGHT_TYPES).eq('week', currentWeek),
@@ -52,17 +35,37 @@ const WeeklyVolumeSection: React.FC = () => {
     const sumByType = (rows: any[] | null, type: string) =>
       (rows || []).filter(r => r.type === type).reduce((s, r) => s + Number(r.total_weight || 0), 0);
 
-const groups = ['CHEST', 'BACK', 'LEGS'].map(t => ({
-        group: t.charAt(0) + t.slice(1).toLowerCase(),
-        total: sumByType(thisWeek, t),
-        lastWeek: sumByType(lastWeekData, t),
-      }));
+    const groups = ['CHEST', 'BACK', 'LEGS'].map(t => ({
+      group: t.charAt(0) + t.slice(1).toLowerCase(),
+      total: sumByType(thisWeek, t),
+      lastWeek: sumByType(lastWeekData, t),
+    }));
     setWeeklyData(groups);
   };
 
+  // On mount: fetch weeks then immediately load weekly data — no extra round trip
   useEffect(() => {
-    loadWeekly();
-  }, [weekIdx, availableWeeks]);
+    const init = async () => {
+      const { data } = await supabase
+        .from('workouts')
+        .select('week')
+        .in('type', WEIGHT_TYPES)
+        .not('week', 'is', null);
+      if (!data) return;
+      const weeks = [...new Set((data as any[]).map(r => Number(r.week)))]
+        .filter(w => !isNaN(w))
+        .sort((a, b) => b - a);
+      setAvailableWeeks(weeks);
+      await loadWeeklyData(weeks, 0);
+    };
+    init();
+  }, []);
+
+  // When user navigates weeks (not on initial mount)
+  useEffect(() => {
+    if (availableWeeks.length === 0) return;
+    loadWeeklyData(availableWeeks, weekIdx);
+  }, [weekIdx]);
 
   const canGoBack = weekIdx < availableWeeks.length - 1;
   const canGoForward = weekIdx > 0;

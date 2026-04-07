@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { Page } from '../types';
 import { Header } from './components/Header';
 import { BottomNav } from './components/BottomNav';
-import { Dashboard } from './pages/Dashboard';
-import { LogWeights } from './pages/LogWeights';
-import { LogCardio } from './pages/LogCardio';
-import { LogCalories } from './pages/LogCalories';
-import { Analytics } from './pages/Analytics';
-import { Profile } from './pages/Profile';
-import { Summary } from './pages/Summary';
 import { WeeklySummaryBar } from './components/WeeklySummaryBar';
+
+const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
+const LogWeights = lazy(() => import('./pages/LogWeights').then(m => ({ default: m.LogWeights })));
+const LogCardio = lazy(() => import('./pages/LogCardio').then(m => ({ default: m.LogCardio })));
+const LogCalories = lazy(() => import('./pages/LogCalories').then(m => ({ default: m.LogCalories })));
+const Analytics = lazy(() => import('./pages/Analytics').then(m => ({ default: m.Analytics })));
+const Profile = lazy(() => import('./pages/Profile').then(m => ({ default: m.Profile })));
+const Summary = lazy(() => import('./pages/Summary').then(m => ({ default: m.Summary })));
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>('dashboard');
@@ -73,7 +74,9 @@ const App: React.FC = () => {
             <WeeklySummaryBar />
           </div>
         )}
-        {renderPage()}
+        <Suspense fallback={<></>}>
+          {renderPage()}
+        </Suspense>
       </main>
       <BottomNav currentPage={currentPage} onNavigate={setCurrentPage} />
     </div>
