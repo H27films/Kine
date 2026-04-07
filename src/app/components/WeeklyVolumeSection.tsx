@@ -12,7 +12,7 @@ interface WeeklyGroupData {
 }
 
 const sectionLabelStyle: React.CSSProperties = {
-  fontSize: '1.15rem', fontWeight: 800, letterSpacing: '-0.03em',
+  fontSize: '13px', fontWeight: 900, letterSpacing: '0.2em',
   textTransform: 'uppercase', color: '#ffffff', marginBottom: '1.25rem',
 };
 
