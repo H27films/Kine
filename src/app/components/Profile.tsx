@@ -46,7 +46,7 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
       const { data, error: err } = await supabase
         .from('workouts')
         .select('*, exercises(exercise_name)')
-        .in('new_entry', ['New', 'Edit'])
+        .or("new_entry.ilike.new,new_entry.ilike.edit")
         .order('date');
 
       if (err) throw err;
@@ -122,7 +122,8 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
         await supabase
           .from('workouts')
           .update({ new_entry: 'Exported' })
-          .in('id', ids);
+          .in('id', ids)
+          .or("new_entry.ilike.new,new_entry.ilike.edit");
       }
 
       await loadData();
