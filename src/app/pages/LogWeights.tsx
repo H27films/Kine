@@ -7,6 +7,7 @@ import RecentLogsSection from '../components/RecentLogsSection';
 
 interface LogWeightsProps {
   onNavigate: (page: Page) => void;
+  showWeeklySummary?: boolean;
 }
 
 const tabs: { label: string; page: Page }[] = [
@@ -54,7 +55,7 @@ const makeDefaultSets = (): SetRow[] =>
 
 const STORAGE_KEY = 'kine_logweights_v1';
 
-export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
+export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySummary = false }) => {
   const [selectedGroup, setSelectedGroup] = useState<string>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -488,7 +489,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
 
   return (
     <div>
-      <nav className="flex gap-8 items-end" style={{ marginBottom: selectedGroup ? '0' : '3rem', maxHeight: selectedGroup ? '0' : '80px', overflow: 'hidden', opacity: selectedGroup ? 0 : 1, transition: 'all 0.35s ease' }}>
+      <nav className="flex gap-8 items-end" style={{ marginBottom: (selectedGroup || showWeeklySummary) ? '0' : '3rem', maxHeight: (selectedGroup || showWeeklySummary) ? '0' : '80px', overflow: 'hidden', opacity: (selectedGroup || showWeeklySummary) ? 0 : 1, transition: 'all 0.35s ease' }}>
         {tabs.map(tab => {
           const isActive = tab.page === 'weights';
           return (

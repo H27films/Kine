@@ -8,6 +8,7 @@ import CaloriesEditSheet from '../components/CaloriesEditSheet';
 
 interface LogCaloriesProps {
   onNavigate: (page: Page) => void;
+  showWeeklySummary?: boolean;
 }
 
 const tabs: { label: string; page: Page }[] = [
@@ -63,7 +64,7 @@ const getMondayAtOffset = (offset: number): Date => {
 const fmtDate = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
-export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
+export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate, showWeeklySummary = false }) => {
   const [calories, setCalories] = useState('');
   const [chartExpanded, setChartExpanded] = useState(false);
   const [showEditSheet, setShowEditSheet] = useState(false);
@@ -254,7 +255,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate }) => {
 
   return (
     <div>
-      <nav className="flex gap-8 mb-12 items-end">
+      <nav className="flex gap-8 items-end" style={{ marginBottom: showWeeklySummary ? '0' : '3rem', maxHeight: showWeeklySummary ? '0' : '80px', overflow: 'hidden', opacity: showWeeklySummary ? 0 : 1, transition: 'all 0.35s ease' }}>
         {tabs.map(tab => {
           const isActive = tab.page === 'calories';
           return (

@@ -38,11 +38,11 @@ const App: React.FC = () => {
       case 'dashboard':
         return <Dashboard showWeeklySummary={showWeeklySummary} />;
       case 'weights':
-        return <LogWeights onNavigate={setCurrentPage} />;
+        return <LogWeights onNavigate={setCurrentPage} showWeeklySummary={showWeeklySummary} />;
       case 'cardio':
-        return <LogCardio onNavigate={setCurrentPage} />;
+        return <LogCardio onNavigate={setCurrentPage} showWeeklySummary={showWeeklySummary} />;
       case 'calories':
-        return <LogCalories onNavigate={setCurrentPage} />;
+        return <LogCalories onNavigate={setCurrentPage} showWeeklySummary={showWeeklySummary} />;
       case 'analytics':
         return <Analytics />;
       case 'profile':

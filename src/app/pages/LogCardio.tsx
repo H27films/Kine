@@ -9,6 +9,7 @@ import ExerciseLogDots from '../components/ExerciseLogDots';
 
 interface LogCardioProps {
   onNavigate: (page: Page) => void;
+  showWeeklySummary?: boolean;
 }
 
 const tabs: { label: string; page: Page }[] = [
@@ -21,7 +22,7 @@ const tabs: { label: string; page: Page }[] = [
 const TOTAL_CARDIO_IDS = [82, 83, 87];
 const NO_TRACKER_CARDIO_IDS = [83, 84, 85, 86, 87]; // Row + Running + Walking + Cross Trainer + Cycle
 
-export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
+export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySummary = false }) => {
   const [trackerDistance, setTrackerDistance] = useState('');
   const [trackerInputVisible, setTrackerInputVisible] = useState(false);
   const [distance, setDistance] = useState('');
@@ -315,7 +316,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
 
   return (
     <div>
-      <nav className="flex gap-8 mb-12 items-end">
+      <nav className="flex gap-8 items-end" style={{ marginBottom: showWeeklySummary ? '0' : '3rem', maxHeight: showWeeklySummary ? '0' : '80px', overflow: 'hidden', opacity: showWeeklySummary ? 0 : 1, transition: 'all 0.35s ease' }}>
         {tabs.map(tab => {
           const isActive = tab.page === 'cardio';
           return (
