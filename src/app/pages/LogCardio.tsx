@@ -10,6 +10,7 @@ import ExerciseLogDots from '../components/ExerciseLogDots';
 
 interface LogCardioProps {
   onNavigate: (page: Page) => void;
+  showWeeklySummary?: boolean;
 }
 
 const tabs: { label: string; page: Page }[] = [
@@ -593,7 +594,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
 
       {/* Tracker Edit Sheet */}
       {showTrackerEdit && (
-        <TrackerEditSheet onClose={() => setShowTrackerEdit(false)} />
+        <TrackerEditSheet onClose={() => setShowTrackerEdit(false)} onSaved={() => setShowTrackerEdit(false)} />
       )}
 
     </div>
