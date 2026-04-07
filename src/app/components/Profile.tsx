@@ -70,7 +70,7 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
           }
         }
         return {
-          DATE: r.date ? new Date(r.date + 'T00:00:00') : '',
+          DATE: r.date ? r.date.split('-').reverse().join('/') : '',
           EXERCISE: r.exercises?.exercise_name ?? '',
           KM: r.km ?? '',
           CALORIES: r.calories ?? '',
@@ -93,25 +93,15 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
       const newRows = rows.filter(r => String(r.NEW_ENTRY).toLowerCase() === 'new');
       const editRows = rows.filter(r => String(r.NEW_ENTRY).toLowerCase() === 'edit');
 
-      const applyDateFormat = (ws: any) => {
-        const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
-        for (let R = range.s.r + 1; R <= range.e.r; R++) {
-          const addr = XLSX.utils.encode_cell({ r: R, c: 0 });
-          if (ws[addr]) ws[addr].z = 'DD/MM/YYYY';
-        }
-      };
-
       const wb = XLSX.utils.book_new();
 
       if (newRows.length > 0) {
-        const ws = XLSX.utils.json_to_sheet(newRows, { cellDates: true });
-        applyDateFormat(ws);
+        const ws = XLSX.utils.json_to_sheet(newRows);
         XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
       }
 
       if (editRows.length > 0) {
-        const ws = XLSX.utils.json_to_sheet(editRows, { cellDates: true });
-        applyDateFormat(ws);
+        const ws = XLSX.utils.json_to_sheet(editRows);
         XLSX.utils.book_append_sheet(wb, ws, 'Sheet2');
       }
       XLSX.writeFile(wb, 'ImportKineData.xlsx');
