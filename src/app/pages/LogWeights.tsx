@@ -308,7 +308,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
         const multiplier = ex.exercise.multiplier ?? 1;
         const rawVolume = ex.sets.reduce((acc, s) => acc + (parseFloat(s.weight) || 0) * s.reps, 0);
         const totalWeight = rawVolume * multiplier;
-        const isPB = totalWeight > 0 && totalWeight > (ex.pbThreshold ?? 0);
+        const isPB = totalWeight > 0 && (ex.pbThreshold ?? 0) > 0 && totalWeight > (ex.pbThreshold ?? 0);
 
         await supabase.from('workouts').insert({
           date: today,
@@ -437,7 +437,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
 
   return (
     <div>
-      <nav className="flex gap-8 mb-12 items-end">
+      <nav className="flex gap-8 items-end" style={{ marginBottom: selectedGroup ? '16px' : '3rem', transition: 'margin 0.35s ease' }}>
         {tabs.map(tab => {
           const isActive = tab.page === 'weights';
           return (
@@ -451,8 +451,15 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
         })}
       </nav>
 
-      {/* Weekly volume display */}
-      <div className="flex items-start mb-8">
+      {/* Weekly volume display — collapses when group selected */}
+      <div style={{
+        maxHeight: selectedGroup ? '0px' : '160px',
+        opacity: selectedGroup ? 0 : 1,
+        overflow: 'hidden',
+        transition: 'max-height 0.35s ease, opacity 0.25s ease, margin 0.35s ease',
+        marginBottom: selectedGroup ? '0px' : '2rem',
+      }}>
+      <div className="flex items-start">
         <div className="text-[3.25rem] font-black leading-none tracking-tighter text-white flex-shrink-0">
           {fmtVol(thisWeekTotal)}
         </div>
@@ -473,8 +480,9 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
           </div>
         )}
       </div>
+      </div>
 
-      <section className="mb-12">
+      <section style={{ marginBottom: selectedGroup ? '8px' : '3rem', transition: 'margin 0.35s ease' }}>
         {/* Muscle group circles */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
           <div style={{ display: 'flex', gap: '24px', flex: 1, justifyContent: 'space-between' }}>
@@ -648,7 +656,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                               </>
                             )}
                           </div>
-                          {exTotal > 0 && exTotal > (ex.pbThreshold ?? 0) && (
+                          {exTotal > 0 && (ex.pbThreshold ?? 0) > 0 && exTotal > (ex.pbThreshold ?? 0) && (
                             <div style={{
                               width: 32, height: 32, borderRadius: '50%',
                               backgroundColor: '#ffffff',
