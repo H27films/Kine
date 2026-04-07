@@ -101,17 +101,18 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
       const newRows = rows.filter(r => String(r.NEW_ENTRY).toLowerCase() === 'new');
       const editRows = rows.filter(r => String(r.NEW_ENTRY).toLowerCase() === 'edit');
 
+      const headers = ['DATE','EXERCISE','KM','CALORIES','FOOD','W1','R1','W2','R2','W3','R3','W4','R4','W5','R5','W6','R6','FAIL','WEIGHT','BODY FAT %','MUSCLE MASS','TIME','NEW_ENTRY'];
       const wb = XLSX.utils.book_new();
-      if (newRows.length > 0) {
-        const ws1 = XLSX.utils.json_to_sheet(newRows, { cellDates: true });
-        applyDateFormat(ws1);
-        XLSX.utils.book_append_sheet(wb, ws1, 'Sheet1');
-      }
-      if (editRows.length > 0) {
-        const ws2 = XLSX.utils.json_to_sheet(editRows, { cellDates: true });
-        applyDateFormat(ws2);
-        XLSX.utils.book_append_sheet(wb, ws2, 'Sheet2');
-      }
+      const ws1 = newRows.length > 0
+        ? XLSX.utils.json_to_sheet(newRows, { cellDates: true })
+        : XLSX.utils.aoa_to_sheet([headers]);
+      applyDateFormat(ws1);
+      XLSX.utils.book_append_sheet(wb, ws1, 'Sheet1');
+      const ws2 = editRows.length > 0
+        ? XLSX.utils.json_to_sheet(editRows, { cellDates: true })
+        : XLSX.utils.aoa_to_sheet([headers]);
+      applyDateFormat(ws2);
+      XLSX.utils.book_append_sheet(wb, ws2, 'Sheet2');
       XLSX.writeFile(wb, 'ImportKineData.xlsx');
 
       // Mark all exported rows as 'Exported'
