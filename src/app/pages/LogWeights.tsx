@@ -535,11 +535,11 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
               </div>
             )}
           </div>
-          {/* Progress bar — right to left, max 20,000kg, spans full right section */}
+          {/* Progress bar — right to left, max 20,000kg */}
           <div style={{
             marginTop: '10px',
-            height: '18px',
-            backgroundColor: 'rgba(255,255,255,0.1)',
+            height: '12px',
+            backgroundColor: 'rgba(255,255,255,0.12)',
             borderRadius: '999px',
             position: 'relative',
             overflow: 'hidden',
@@ -548,7 +548,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
               position: 'absolute',
               right: 0, top: 0, bottom: 0,
               width: `${Math.min(100, (thisWeekTotal / 20000) * 100)}%`,
-              backgroundColor: '#ffffff',
+              background: 'linear-gradient(to right, rgba(255,255,255,0.55), #ffffff)',
               borderRadius: '999px',
               transition: 'width 0.6s ease',
             }} />
@@ -561,44 +561,52 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
       {selectedGroup && (() => {
         const barPct = Math.min(100, (thisWeekTotal / 20000) * 100);
         const hasData = thisWeekTotal > 0;
+        const textOnFill = hasData && barPct > 25;
         return (
           <div style={{
             marginLeft: '-1.5rem',
             marginRight: '-1.5rem',
             marginBottom: '20px',
-            height: '68px',
-            backgroundColor: 'rgba(255,255,255,0.06)',
-            position: 'relative',
-            overflow: 'hidden',
+            padding: '0 16px',
           }}>
-            {/* Fill anchored to right edge */}
             <div style={{
-              position: 'absolute',
-              right: 0, top: 0, bottom: 0,
-              width: `${barPct}%`,
-              backgroundColor: 'rgba(255,255,255,0.82)',
-              transition: 'width 0.6s ease',
-            }} />
-            {/* Volume figure at right edge base — on top of fill */}
-            <div style={{
-              position: 'absolute',
-              right: '14px',
-              bottom: '10px',
-              display: 'flex',
-              alignItems: 'baseline',
-              gap: '4px',
-              zIndex: 2,
+              height: '38px',
+              backgroundColor: 'rgba(255,255,255,0.12)',
+              borderRadius: '999px',
+              position: 'relative',
+              overflow: 'hidden',
             }}>
-              <span style={{
-                fontSize: '1.5rem', fontWeight: 900, lineHeight: 1,
-                letterSpacing: '-0.02em',
-                color: hasData ? '#000000' : 'rgba(255,255,255,0.35)',
-              }}>{fmtVol(thisWeekTotal)}</span>
-              <span style={{
-                fontSize: '0.6rem', fontWeight: 700,
-                letterSpacing: '0.1em', textTransform: 'uppercase',
-                color: hasData ? 'rgba(0,0,0,0.55)' : 'rgba(255,255,255,0.2)',
-              }}>KG</span>
+              {/* Fill anchored to right edge, gradient white */}
+              <div style={{
+                position: 'absolute',
+                right: 0, top: 0, bottom: 0,
+                width: `${barPct}%`,
+                background: 'linear-gradient(to right, rgba(255,255,255,0.55), #ffffff)',
+                borderRadius: '999px',
+                transition: 'width 0.6s ease',
+              }} />
+              {/* Volume figure inside bar at right edge */}
+              <div style={{
+                position: 'absolute',
+                right: '14px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                display: 'flex',
+                alignItems: 'baseline',
+                gap: '3px',
+                zIndex: 2,
+              }}>
+                <span style={{
+                  fontSize: '1rem', fontWeight: 900, lineHeight: 1,
+                  letterSpacing: '-0.02em',
+                  color: textOnFill ? '#000000' : 'rgba(255,255,255,0.5)',
+                }}>{fmtVol(thisWeekTotal)}</span>
+                <span style={{
+                  fontSize: '0.55rem', fontWeight: 700,
+                  letterSpacing: '0.1em', textTransform: 'uppercase',
+                  color: textOnFill ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.3)',
+                }}>KG</span>
+              </div>
             </div>
           </div>
         );
