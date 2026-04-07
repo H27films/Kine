@@ -531,7 +531,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
           </div>
           {/* Bottom row: Last week text + inline progress bar */}
           {lastWeekTotal > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '6px' }}>
               <span style={{ fontSize: '11px', fontWeight: 500, color: 'rgba(255,255,255,0.4)', whiteSpace: 'nowrap', flexShrink: 0 }}>
                 Last week {fmtVol(lastWeekTotal)} kg
               </span>
