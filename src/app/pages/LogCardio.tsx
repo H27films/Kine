@@ -4,12 +4,12 @@ import { Page } from '../../types';
 import { supabase, Exercise, todayStr, getISOWeek, getDayName, currentWeekMonday, weeksAgoMonday, recalculateDailyTotals } from '../../lib/supabase';
 import { CardioTypeChart } from '../components/CardioTypeChart';
 import TrackerSparkline from '../components/TrackerSparkline';
+import TrackerEditSheet from '../components/TrackerEditSheet';
 import ExerciseIconBar from '../components/ExerciseIconBar';
 import ExerciseLogDots from '../components/ExerciseLogDots';
 
 interface LogCardioProps {
   onNavigate: (page: Page) => void;
-  showWeeklySummary?: boolean;
 }
 
 const tabs: { label: string; page: Page }[] = [
@@ -22,7 +22,7 @@ const tabs: { label: string; page: Page }[] = [
 const TOTAL_CARDIO_IDS = [82, 83, 87];
 const NO_TRACKER_CARDIO_IDS = [83, 84, 85, 86, 87]; // Row + Running + Walking + Cross Trainer + Cycle
 
-export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySummary = false }) => {
+export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate }) => {
   const [trackerDistance, setTrackerDistance] = useState('');
   const [trackerInputVisible, setTrackerInputVisible] = useState(false);
   const [distance, setDistance] = useState('');
@@ -39,6 +39,8 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySumm
   const [lastWeekTotal, setLastWeekTotal] = useState<number>(0);
 
   const [weekChartData, setWeekChartData] = useState<number[]>(Array(7).fill(0));
+  const [sparklineClicked, setSparklineClicked] = useState(false);
+  const [showTrackerEdit, setShowTrackerEdit] = useState(false);
   const [thirtyDayData, setThirtyDayData] = useState<{ date: string; total: number }[]>([]);
   const [thirtyDayOffset, setThirtyDayOffset] = useState(0);
   const [hasOlderCardioData, setHasOlderCardioData] = useState(false);
@@ -316,7 +318,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySumm
 
   return (
     <div>
-      <nav className="flex gap-8 items-end" style={{ marginBottom: showWeeklySummary ? '0' : '3rem', maxHeight: showWeeklySummary ? '0' : '80px', overflow: 'hidden', opacity: showWeeklySummary ? 0 : 1, transition: 'all 0.35s ease' }}>
+      <nav className="flex gap-8 mb-12 items-end">
         {tabs.map(tab => {
           const isActive = tab.page === 'cardio';
           return (
@@ -344,11 +346,24 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySumm
             {weeklyTotal.toFixed(1)}
           </div>
           <div className="flex flex-col justify-center ml-4 pt-3 flex-1 min-w-0">
-            <div
-              style={{ fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2.5px', color: '#ffffff', cursor: 'pointer' }}
-              onClick={() => setTrackerInputVisible(v => !v)}
-            >
-              MOVEMENT (KM)
+            <div className="flex items-center justify-between">
+              <div
+                style={{ fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2.5px', color: '#ffffff', cursor: 'pointer' }}
+                onClick={() => setTrackerInputVisible(v => !v)}
+              >
+                MOVEMENT (KM)
+              </div>
+              {sparklineClicked && (
+                <button
+                  onClick={() => setShowTrackerEdit(true)}
+                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#ffffff', opacity: 0.7, lineHeight: 1 }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                </button>
+              )}
             </div>
             {lastWeekTotal > 0 && (
               <div className="text-[11px] font-medium mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
@@ -375,8 +390,8 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySumm
           <div style={separatorStyle} />
         </div>}
 
-        {/* Row 3: full-width sparkline */}
-        <div style={{ width: '100%' }}>
+        {/* Row 3: full-width sparkline — tap to reveal pencil edit */}
+        <div style={{ width: '100%', cursor: 'pointer' }} onClick={() => setSparklineClicked(v => !v)}>
           <TrackerSparkline weekChartData={weekChartData} />
         </div>
       </header>
@@ -575,6 +590,11 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySumm
 
       {/* Per-type cardio chart */}
       <CardioTypeChart />
+
+      {/* Tracker Edit Sheet */}
+      {showTrackerEdit && (
+        <TrackerEditSheet onClose={() => setShowTrackerEdit(false)} />
+      )}
 
     </div>
   );
