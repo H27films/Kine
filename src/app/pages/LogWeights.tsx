@@ -488,7 +488,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
 
   return (
     <div>
-      <nav className="flex gap-8 items-end" style={{ marginBottom: selectedGroup ? '16px' : '3rem', transition: 'margin 0.35s ease' }}>
+      <nav className="flex gap-8 items-end" style={{ marginBottom: selectedGroup ? '0' : '3rem', maxHeight: selectedGroup ? '0' : '80px', overflow: 'hidden', opacity: selectedGroup ? 0 : 1, transition: 'all 0.35s ease' }}>
         {tabs.map(tab => {
           const isActive = tab.page === 'weights';
           return (
@@ -546,6 +546,53 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
         }} />
       </div>
       </div>
+
+      {/* Big full-width progress bar — only visible when group selected */}
+      {selectedGroup && (() => {
+        const barPct = Math.min(100, (thisWeekTotal / 20000) * 100);
+        const hasData = thisWeekTotal > 0;
+        return (
+          <div style={{
+            marginLeft: '-1.5rem',
+            marginRight: '-1.5rem',
+            marginBottom: '20px',
+            height: '68px',
+            backgroundColor: 'rgba(255,255,255,0.06)',
+            position: 'relative',
+            overflow: 'hidden',
+          }}>
+            {/* Fill anchored to right edge */}
+            <div style={{
+              position: 'absolute',
+              right: 0, top: 0, bottom: 0,
+              width: `${barPct}%`,
+              backgroundColor: 'rgba(255,255,255,0.82)',
+              transition: 'width 0.6s ease',
+            }} />
+            {/* Volume figure at right edge base — on top of fill */}
+            <div style={{
+              position: 'absolute',
+              right: '14px',
+              bottom: '10px',
+              display: 'flex',
+              alignItems: 'baseline',
+              gap: '4px',
+              zIndex: 2,
+            }}>
+              <span style={{
+                fontSize: '1.5rem', fontWeight: 900, lineHeight: 1,
+                letterSpacing: '-0.02em',
+                color: hasData ? '#000000' : 'rgba(255,255,255,0.35)',
+              }}>{fmtVol(thisWeekTotal)}</span>
+              <span style={{
+                fontSize: '0.6rem', fontWeight: 700,
+                letterSpacing: '0.1em', textTransform: 'uppercase',
+                color: hasData ? 'rgba(0,0,0,0.55)' : 'rgba(255,255,255,0.2)',
+              }}>KG</span>
+            </div>
+          </div>
+        );
+      })()}
 
       <section style={{ marginBottom: selectedGroup ? '28px' : '3rem', transition: 'margin 0.35s ease' }}>
         {/* Muscle group circles */}
