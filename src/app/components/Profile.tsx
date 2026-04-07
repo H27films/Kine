@@ -90,8 +90,8 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
         };
       });
 
-      const newRows = rows.filter(r => r.NEW_ENTRY === 'New');
-      const editRows = rows.filter(r => r.NEW_ENTRY === 'Edit');
+      const newRows = rows.filter(r => String(r.NEW_ENTRY).toLowerCase() === 'new');
+      const editRows = rows.filter(r => String(r.NEW_ENTRY).toLowerCase() === 'edit');
 
       const applyDateFormat = (ws: any) => {
         const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
@@ -106,13 +106,13 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
       if (newRows.length > 0) {
         const ws = XLSX.utils.json_to_sheet(newRows, { cellDates: true });
         applyDateFormat(ws);
-        XLSX.utils.book_append_sheet(wb, ws, 'New Entries');
+        XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
       }
 
       if (editRows.length > 0) {
         const ws = XLSX.utils.json_to_sheet(editRows, { cellDates: true });
         applyDateFormat(ws);
-        XLSX.utils.book_append_sheet(wb, ws, 'Edit Entries');
+        XLSX.utils.book_append_sheet(wb, ws, 'Sheet2');
       }
       XLSX.writeFile(wb, 'ImportKineData.xlsx');
 
