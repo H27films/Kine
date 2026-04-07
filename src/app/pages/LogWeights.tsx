@@ -45,24 +45,13 @@ interface AddedExercise {
   copied: boolean;
   lastSets: SetRow[] | null;
   fail: boolean;
+  pbThreshold: number;
 }
 
 const makeDefaultSets = (): SetRow[] =>
   Array.from({ length: 4 }, () => ({ weight: '', reps: 10 }));
 
 const STORAGE_KEY = 'kine_logweights_v1';
-
-const ICON_SIZE: Record<string, string> = {
-  Chest: '44px',
-  Back: '44px',
-  Legs: '36px',
-};
-
-const ICON_OFFSET: Record<string, string> = {
-  Chest: '3px',
-  Back: '0px',
-  Legs: '0px',
-};
 
 export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
   const [selectedGroup, setSelectedGroup] = useState<string>(() => {
@@ -186,12 +175,20 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
   const handleAddExercise = async (exercise: Exercise) => {
     if (addedExercises.find(e => e.exercise.id === exercise.id)) return;
 
-    const { data } = await supabase
-      .from('workouts')
-      .select('w1,r1,w2,r2,w3,r3,w4,r4,w5,r5,w6,r6')
-      .eq('exercise_id', exercise.id)
-      .order('date', { ascending: false })
-      .limit(1);
+    const [{ data }, { data: pbData }] = await Promise.all([
+      supabase
+        .from('workouts')
+        .select('w1,r1,w2,r2,w3,r3,w4,r4,w5,r5,w6,r6')
+        .eq('exercise_id', exercise.id)
+        .order('date', { ascending: false })
+        .limit(1),
+      supabase
+        .from('workouts')
+        .select('total_weight')
+        .eq('exercise_id', exercise.id)
+        .order('total_weight', { ascending: false })
+        .limit(1),
+    ]);
 
     let lastSets: SetRow[] | null = null;
     if (data && data.length > 0) {
@@ -207,6 +204,8 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
       if (parsed.length > 0) lastSets = parsed;
     }
 
+    const pbThreshold = pbData && pbData.length > 0 ? Number((pbData[0] as any).total_weight || 0) : 0;
+
     setAddedExercises(prev => [...prev, {
       exercise,
       sets: makeDefaultSets(),
@@ -215,6 +214,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
       copied: false,
       lastSets,
       fail: false,
+      pbThreshold,
     }]);
   };
 
@@ -308,6 +308,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
         const multiplier = ex.exercise.multiplier ?? 1;
         const rawVolume = ex.sets.reduce((acc, s) => acc + (parseFloat(s.weight) || 0) * s.reps, 0);
         const totalWeight = rawVolume * multiplier;
+        const isPB = totalWeight > 0 && totalWeight > (ex.pbThreshold ?? 0);
 
         await supabase.from('workouts').insert({
           date: today,
@@ -321,6 +322,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
           sets: filledSets.length,
           new_entry: 'New',
           fail: ex.fail ? 'Fail' : null,
+          pb: isPB ? 'PB' : null,
           source: 'app',
           ...setData,
         });
@@ -476,60 +478,51 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
         {/* Muscle group circles */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
           <div style={{ display: 'flex', gap: '24px', flex: 1, justifyContent: 'space-between' }}>
-            {['Chest', 'Back', 'Legs'].map(group => {
-              const isSelected = selectedGroup === group;
-              const iconSize = ICON_SIZE[group] || '44px';
-              const iconOffset = ICON_OFFSET[group] || '0px';
-              return (
-                <button
-                  key={group}
-                  onClick={() => handleSelectGroup(group)}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '8px',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    padding: 0,
-                  }}
-                >
-                  <div style={{
-                    width: '72px',
-                    height: '72px',
-                    borderRadius: '50%',
-                    backgroundColor: isSelected ? '#ffffff' : 'rgba(255,255,255,0.18)',
-                    border: 'none',
-                    boxShadow: isSelected ? '0 0 16px rgba(255,255,255,0.5)' : 'none',
-                    transition: 'all 0.2s',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    overflow: 'hidden',
-                  }}>
-                    {isSelected ? (
-                      <Check size={28} color="#000000" strokeWidth={3} />
-                    ) : (
-                      <img
-                        src={`/icons/${group}.svg`}
-                        alt={group}
-                        style={{ width: iconSize, height: iconSize, objectFit: 'contain', filter: 'brightness(0) invert(1)', marginLeft: iconOffset }}
-                      />
-                    )}
-                  </div>
-                  <span style={{
-                    fontSize: '0.7rem',
-                    fontWeight: 700,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.2em',
-                    color: '#ffffff',
-                  }}>
-                    {group}
-                  </span>
-                </button>
-              );
-            })}
+            {['Chest', 'Back', 'Legs'].map(group => (
+              <button
+                key={group}
+                onClick={() => handleSelectGroup(group)}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '8px',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: 0,
+                }}
+              >
+                <div style={{
+                  width: '52px',
+                  height: '52px',
+                  borderRadius: '50%',
+                  backgroundColor: selectedGroup === group ? '#ffffff' : '#000000',
+                  border: '2px solid #ffffff',
+                  boxShadow: selectedGroup === group ? '0 0 16px rgba(255,255,255,0.5)' : 'none',
+                  transition: 'all 0.2s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  overflow: 'hidden',
+                }}>
+                  {selectedGroup === group ? (
+                    <Check size={24} color="#000000" strokeWidth={3} />
+                  ) : (
+                    <img src={`/icons/${group}.svg`} alt={group} style={{ width: '38px', height: '38px', objectFit: 'contain' }} />
+                  )}
+                </div>
+                <span style={{
+                  fontSize: '0.7rem',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.2em',
+                  color: '#ffffff',
+                }}>
+                  {group}
+                </span>
+              </button>
+            ))}
           </div>
         </div>
 
@@ -633,7 +626,9 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                         <p className="font-bold text-sm text-white">
                           {ex.exercise.exercise_name.charAt(0).toUpperCase() + ex.exercise.exercise_name.slice(1).toLowerCase()}
                         </p>
-                        <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>{lastSummary}</p>
+                        <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                          {ex.expanded && ex.exercise.info_notes ? ex.exercise.info_notes : lastSummary}
+                        </p>
                       </div>
                       <div style={{ color: 'rgba(255,255,255,0.4)', flexShrink: 0 }}>
                         {ex.expanded ? <ChevronUp size={20} /> : <ChevronRight size={20} />}
@@ -644,12 +639,24 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                   {ex.expanded && (
                     <div className="pb-5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                       <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-baseline gap-1">
-                          {exTotal > 0 && (
-                            <>
-                              <span className="font-black" style={{ fontSize: '1.5rem', color: '#ffffff', lineHeight: 1 }}>{exTotal.toLocaleString()}</span>
-                              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#ffffff' }}>KG</span>
-                            </>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <div className="flex items-baseline gap-1">
+                            {exTotal > 0 && (
+                              <>
+                                <span className="font-black" style={{ fontSize: '1.5rem', color: '#ffffff', lineHeight: 1 }}>{exTotal.toLocaleString()}</span>
+                                <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#ffffff' }}>KG</span>
+                              </>
+                            )}
+                          </div>
+                          {exTotal > 0 && exTotal > (ex.pbThreshold ?? 0) && (
+                            <div style={{
+                              width: 32, height: 32, borderRadius: '50%',
+                              backgroundColor: '#ffffff',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              flexShrink: 0,
+                            }}>
+                              <span style={{ fontSize: '0.6rem', fontWeight: 900, color: '#000000', letterSpacing: '0.05em' }}>PB</span>
+                            </div>
                           )}
                         </div>
                         <button onClick={(e) => { e.stopPropagation(); toggleCopyFromLast(ex.exercise.id); }}
