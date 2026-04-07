@@ -87,7 +87,7 @@ const CaloriesEditSheet: React.FC<Props> = ({ onClose, onSaved }) => {
         .maybeSingle();
 
       if (existing) {
-        await supabase.from('workouts').update({ calories: val }).eq('id', existing.id);
+        await supabase.from('workouts').update({ calories: val, new_entry: 'Edit' }).eq('id', existing.id);
       } else if (val > 0) {
         await supabase.from('workouts').insert({
           date: dateStr,
