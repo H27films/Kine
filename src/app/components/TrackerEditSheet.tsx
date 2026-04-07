@@ -137,93 +137,105 @@ const TrackerEditSheet: React.FC<Props> = ({ onClose, onSaved }) => {
             Edit Tracker
           </p>
           {/* Running man icon */}
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="14" cy="3.5" r="1.5" fill="#000000" />
-            <path
-              d="M10.5 8.5L13 6l2.5 2.5-2 2 2 3H18v2h-3.5l-2-3.5-1.5 1.5V15H9v-4l1.5-2.5zM9 15l-1.5 4H9l1-2.5L11 18h1.5l-1.5-3H9z"
-              fill="#000000"
-            />
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="13" cy="4" r="1.5" fill="#000000" stroke="none" />
+            <path d="M7 22l2-6 2 2 3-5" />
+            <path d="M13.5 11.5L15 8l-3-1.5-2 3.5H7" />
+            <path d="M11 13.5l1 2.5-3 3" />
+            <path d="M15 8l2 1.5-1 3" />
           </svg>
         </div>
 
         {/* Rows */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', marginBottom: 28 }}>
           {editableDays.map((day, i) => {
             const isFocused = focusedRow === i;
             return (
-              <div
-                key={i}
-                style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  backgroundColor: isFocused ? '#e8e8e3' : '#eaeae5',
-                  borderRadius: 12,
-                  padding: '10px 14px',
-                  transition: 'background-color 0.15s',
-                }}
-              >
-                <span style={{
-                  fontSize: '12px', fontWeight: 900,
-                  color: '#000000',
-                  letterSpacing: '0.12em', textTransform: 'uppercase',
-                  minWidth: 90,
-                }}>
-                  {fmtEditLabel(day)}
-                </span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <input
-                    ref={el => { inputRefs.current[i] = el; }}
-                    type="number"
-                    inputMode="decimal"
-                    placeholder="—"
-                    value={editRowValues[i]}
-                    onFocus={() => setFocusedRow(i)}
-                    onBlur={() => setFocusedRow(null)}
-                    onChange={e => {
-                      const vals = [...editRowValues];
-                      vals[i] = e.target.value;
-                      setEditRowValues(vals);
-                    }}
-                    style={{
-                      width: 72,
-                      textAlign: 'right',
-                      backgroundColor: 'transparent',
-                      border: 'none',
-                      outline: 'none',
-                      fontSize: '15px',
-                      fontWeight: 900,
-                      color: '#000000',
-                      fontFamily: 'inherit',
-                    }}
-                  />
-                  <span style={{ fontSize: '11px', fontWeight: 700, color: '#888', letterSpacing: '0.08em' }}>KM</span>
+              <div key={i}>
+                <div
+                  onClick={() => inputRefs.current[i]?.focus()}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    paddingTop: isFocused ? 16 : 11,
+                    paddingBottom: isFocused ? 16 : 11,
+                    cursor: 'text',
+                    transition: 'padding 0.15s ease',
+                  }}
+                >
+                  {/* Date label */}
+                  <span style={{
+                    fontSize: isFocused ? '13px' : '11px',
+                    fontWeight: 700,
+                    color: '#000000',
+                    letterSpacing: '0.2em', textTransform: 'uppercase',
+                    flexShrink: 0,
+                    transition: 'font-size 0.15s ease',
+                  }}>
+                    {fmtEditLabel(day)}
+                  </span>
+
+                  {/* Inline input — no box */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <input
+                      ref={el => { inputRefs.current[i] = el; }}
+                      type="number"
+                      inputMode="decimal"
+                      value={editRowValues[i]}
+                      onChange={e => {
+                        const newVals = [...editRowValues];
+                        newVals[i] = e.target.value;
+                        setEditRowValues(newVals);
+                      }}
+                      onFocus={() => setFocusedRow(i)}
+                      onBlur={() => setFocusedRow(null)}
+                      placeholder="—"
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        outline: 'none',
+                        fontFamily: 'inherit',
+                        fontSize: isFocused ? '16px' : '13px',
+                        fontWeight: 400,
+                        letterSpacing: '0.15em',
+                        color: editRowValues[i] ? '#000000' : 'rgba(0,0,0,0.3)',
+                        textAlign: 'right',
+                        width: 80,
+                        padding: 0,
+                        transition: 'font-size 0.15s ease',
+                      }}
+                    />
+                    <span style={{
+                      fontSize: isFocused ? '11px' : '9px',
+                      fontWeight: 700,
+                      color: 'rgba(0,0,0,0.35)',
+                      letterSpacing: '0.08em',
+                      transition: 'font-size 0.15s ease',
+                    }}>KM</span>
+                  </div>
                 </div>
+                {/* Divider — not after last row */}
+                {i < editableDays.length - 1 && (
+                  <div style={{ height: '1px', backgroundColor: 'rgba(0,0,0,0.08)' }} />
+                )}
               </div>
             );
           })}
         </div>
 
-        {/* Save button */}
+        {/* Update button */}
         <button
           onClick={handleSave}
           disabled={editSaving}
           style={{
-            marginTop: 18,
-            width: '100%',
-            padding: '14px',
-            borderRadius: 14,
-            border: 'none',
-            backgroundColor: '#000000',
-            color: '#ffffff',
-            fontSize: '13px',
-            fontWeight: 900,
-            letterSpacing: '0.2em',
-            textTransform: 'uppercase',
-            cursor: editSaving ? 'not-allowed' : 'pointer',
-            opacity: editSaving ? 0.6 : 1,
-            transition: 'opacity 0.2s',
+            width: '100%', padding: '11px',
+            backgroundColor: '#000000', color: '#ffffff',
+            borderRadius: 999, border: 'none',
+            fontSize: '11px', fontWeight: 900,
+            letterSpacing: '0.2em', textTransform: 'uppercase',
+            cursor: 'pointer', opacity: editSaving ? 0.6 : 1,
           }}
         >
-          {editSaving ? 'Saving…' : 'Save'}
+          {editSaving ? 'Saving...' : 'Update'}
         </button>
       </div>
     </div>
