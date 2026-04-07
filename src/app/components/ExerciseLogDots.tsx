@@ -236,20 +236,41 @@ const ExerciseLogDots: React.FC<Props> = ({ exercises, saveSuccess }) => {
               gap: 8,
             }}
           >
-            {entry && entry.sessions.map((session) => (
+            {entry && (
               <div
-                key={session.id}
-                onClick={() => setExpandedKey(key)}
                 style={{
-                  width: 12,
-                  height: 12,
-                  borderRadius: '50%',
-                  backgroundColor: 'white',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 4,
                   cursor: 'pointer',
-                  boxShadow: '0 0 8px rgba(255,255,255,0.8)',
                 }}
-              />
-            ))}
+                onClick={() => setExpandedKey(key)}
+              >
+                {entry.sessions.length > 1 && (
+                  <span
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 900,
+                      letterSpacing: '0.15em',
+                      color: '#ffffff',
+                      lineHeight: 1,
+                    }}
+                  >
+                    {entry.sessions.length}
+                  </span>
+                )}
+                <div
+                  style={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: '50%',
+                    backgroundColor: 'white',
+                    boxShadow: '0 0 8px rgba(255,255,255,0.8)',
+                  }}
+                />
+              </div>
+            )}
           </div>
         );
       })}
