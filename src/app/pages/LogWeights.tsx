@@ -514,6 +514,11 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
         {/* Big weekly total on left */}
         <div className="text-[3.25rem] font-black leading-none tracking-tighter text-white flex-shrink-0">
           {fmtVol(thisWeekTotal)}
+          {lastWeekTotal > 0 && (
+            <div style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.45)', marginTop: '6px', letterSpacing: '-0.01em', lineHeight: 1 }}>
+              Last Week {Math.round(lastWeekTotal).toLocaleString()} KG
+            </div>
+          )}
         </div>
         {/* Right section: labels + KG TODAY + bar */}
         <div className="flex flex-col ml-4 pt-1 flex-1 min-w-0">
@@ -529,13 +534,10 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
               </div>
             )}
           </div>
-          {/* Bottom row: Last week text + inline progress bar */}
+          {/* Bottom row: inline progress bar */}
           {lastWeekTotal > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '6px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 500, color: 'rgba(255,255,255,0.4)', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                Last week {fmtVol(lastWeekTotal)} kg
-              </span>
-              {/* Progress bar — starts right after "kg", ends at right edge */}
+            <div style={{ display: 'flex', alignItems: 'center', marginTop: '6px' }}>
+              {/* Progress bar */}
               <div style={{
                 flex: 1,
                 height: '8px',
@@ -547,7 +549,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
                 <div style={{
                   position: 'absolute',
                   right: 0, top: 0, bottom: 0,
-                  width: `${Math.min(100, (thisWeekTotal / 20000) * 100)}%`,
+                  width: `${Math.min(100, (thisWeekTotal / 25000) * 100)}%`,
                   background: 'linear-gradient(to right, #ffffff, rgba(255,255,255,0.45))',
                   borderRadius: '999px',
                   transition: 'width 0.6s ease',
@@ -561,7 +563,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate }) => {
 
       {/* Big full-width progress bar — only visible when group selected */}
       {selectedGroup && (() => {
-        const barPct = Math.min(100, (thisWeekTotal / 20000) * 100);
+        const barPct = Math.min(100, (thisWeekTotal / 25000) * 100);
         const hasData = thisWeekTotal > 0;
         const textOnFill = hasData && barPct > 25;
         return (
