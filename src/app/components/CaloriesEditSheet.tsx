@@ -43,6 +43,7 @@ const CaloriesEditSheet: React.FC<Props> = ({ onClose, onSaved }) => {
   const [editSaving, setEditSaving] = useState(false);
   const [focusedRow, setFocusedRow] = useState<number | null>(null);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const originalRowValues = useRef<string[]>(Array(7).fill(''));
 
   useEffect(() => {
     const loadValues = async () => {
@@ -60,7 +61,9 @@ const CaloriesEditSheet: React.FC<Props> = ({ onClose, onSaved }) => {
           if (row.calories) valMap[row.date] = String(row.calories);
         }
       }
-      setEditRowValues(dateStrings.map(ds => valMap[ds] || ''));
+      const loaded = dateStrings.map(ds => valMap[ds] || '');
+      originalRowValues.current = loaded;
+      setEditRowValues(loaded);
     };
     loadValues();
   }, []);
@@ -72,6 +75,10 @@ const CaloriesEditSheet: React.FC<Props> = ({ onClose, onSaved }) => {
       if (raw === '') continue;
       const val = parseInt(raw);
       if (isNaN(val) || val < 0) continue;
+
+      // Only save if the value actually changed from what was loaded
+      const origVal = parseInt(originalRowValues.current[i]);
+      if (!isNaN(origVal) && val === origVal) continue;
 
       const dateStr = fmtDate(editableDays[i]);
       const barDate = editableDays[i];
