@@ -43,7 +43,7 @@ const SplashScreen: React.FC<Props> = ({ onComplete }) => {
         style={{
           width: logoReady ? 100 : 80,
           height: logoReady ? 100 : 80,
-          transition: 'width 0.8s cubic-bezier(0.22, 1, 0.36, 1), height 0.8s cubic-bezier(0.22, 1, 0.36, 1)',
+          transition: 'width 2s cubic-bezier(0.22, 1, 0.36, 1), height 2s cubic-bezier(0.22, 1, 0.36, 1)',
         }}
       />
 
