@@ -1,6 +1,6 @@
 import React from 'react';
-import { User, Flame } from 'lucide-react';
 import { Page, NavigationProps } from '../../types';
+import { HomeIcon, CaloriesIcon, ProfileIcon, RunningManIcon } from './NavIcons';
 
 interface NavItem {
   icon: React.ReactNode;
@@ -8,17 +8,11 @@ interface NavItem {
   page: Page;
 }
 
-const RunnerIcon = ({ size = 22 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-    <path d="M13.49 5.48c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-3.6 13.9l1-4.4 2.1 2v6h2v-7.5l-2.1-2 .6-3c1.3 1.5 3.3 2.5 5.5 2.5v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1l-5.2 2.2v4.7h2v-3.4l1.8-.7-1.6 8.1-4.9-1-.4 2 7 1.4z"/>
-  </svg>
-);
-
 export const BottomNav: React.FC<NavigationProps> = ({ currentPage, onNavigate }) => {
   const items: NavItem[] = [
     {
-      icon: <img src="/icons/home-icon.svg" style={{ width: 22, height: 22, filter: 'brightness(0) invert(1)' }} alt="home" />,
-      activeIcon: <img src="/icons/home-icon.svg" style={{ width: 22, height: 22, filter: 'brightness(0)' }} alt="home" />,
+      icon: <HomeIcon size={22} color="rgba(226,226,226,0.7)" />,
+      activeIcon: <HomeIcon size={22} color="#000000" />,
       page: 'dashboard',
     },
     {
@@ -27,18 +21,18 @@ export const BottomNav: React.FC<NavigationProps> = ({ currentPage, onNavigate }
       page: 'weights',
     },
     {
-      icon: <RunnerIcon size={22} />,
-      activeIcon: <RunnerIcon size={22} />,
+      icon: <RunningManIcon size={22} color="rgba(226,226,226,0.7)" />,
+      activeIcon: <RunningManIcon size={22} color="#000000" />,
       page: 'cardio',
     },
     {
-      icon: <Flame size={22} />,
-      activeIcon: <Flame size={22} />,
+      icon: <CaloriesIcon size={22} color="rgba(226,226,226,0.7)" />,
+      activeIcon: <CaloriesIcon size={22} color="#000000" />,
       page: 'calories',
     },
     {
-      icon: <User size={22} />,
-      activeIcon: <User size={22} strokeWidth={2.5} />,
+      icon: <ProfileIcon size={22} color="rgba(226,226,226,0.7)" />,
+      activeIcon: <ProfileIcon size={22} color="#000000" />,
       page: 'profile',
     },
   ];
