@@ -4,6 +4,7 @@ import { Page } from '../../types';
 import { supabase, Exercise, todayStr, getISOWeek, getDayName, weeksAgoMonday, recalculateDailyTotals } from '../../lib/supabase';
 import WeeklyVolumeSection from '../components/WeeklyVolumeSection';
 import RecentLogsSection from '../components/RecentLogsSection';
+import WeeklyWeightsChart from '../components/WeeklyWeightsChart';
 
 interface LogWeightsProps {
   onNavigate: (page: Page) => void;
@@ -893,6 +894,10 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
       <WeeklyVolumeSection />
 
       <RecentLogsSection refreshKey={refreshKey} />
+
+      <section className="mb-4 mt-8">
+        <WeeklyWeightsChart />
+      </section>
     </div>
   );
 };
