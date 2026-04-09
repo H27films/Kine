@@ -90,10 +90,10 @@ const WeeklyWeightsChart: React.FC = () => {
   const displayAvg = avgTotal >= 1000 ? `${Math.round(avgTotal / 1000)}K` : `${Math.round(avgTotal)}`;
 
   const totalPages = Math.ceil(allWeeks.length / NUM_WEEKS);
-  const canPrev = pageIdx > 0;
-  const canNext = pageIdx < totalPages - 1;
-  const onPrev = () => { if (canPrev) setPageIdx(i => i + 1); };
-  const onNext = () => { if (canNext) setPageIdx(i => i - 1); };
+  const canGoOlder = pageIdx < totalPages - 1;
+  const canGoNewer = pageIdx > 0;
+  const onGoOlder = () => { if (canGoOlder) setPageIdx(i => i + 1); };
+  const onGoNewer = () => { if (canGoNewer) setPageIdx(i => i - 1); };
 
   const weekRange = bars.length > 0 ? `${bars[0].weekNumber} - ${bars[bars.length - 1].weekNumber}` : '';
   const avgExercises = prevWeeks.length > 0 ? Math.round(prevWeeks.reduce((s, b) => s + b.count, 0) / prevWeeks.length) : 0;
@@ -103,10 +103,10 @@ const WeeklyWeightsChart: React.FC = () => {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <p style={{ ...sectionLabelStyle, marginBottom: 0 }}>7 WEEKS</p>
-          <button onClick={onPrev} disabled={!canPrev} style={{ opacity: canPrev ? 0.55 : 0.2, background: 'none', border: 'none', cursor: canPrev ? 'pointer' : 'default', padding: 0, display: 'flex', alignItems: 'center' }}>
+          <button onClick={onGoOlder} disabled={!canGoOlder} style={{ opacity: canGoOlder ? 0.55 : 0.2, background: 'none', border: 'none', cursor: canGoOlder ? 'pointer' : 'default', padding: 0, display: 'flex', alignItems: 'center' }}>
             <ChevronLeft size={18} color="white" />
           </button>
-          <button onClick={onNext} disabled={!canNext} style={{ opacity: canNext ? 0.55 : 0.2, background: 'none', border: 'none', cursor: canNext ? 'pointer' : 'default', padding: 0, display: 'flex', alignItems: 'center' }}>
+          <button onClick={onGoNewer} disabled={!canGoNewer} style={{ opacity: canGoNewer ? 0.55 : 0.2, background: 'none', border: 'none', cursor: canGoNewer ? 'pointer' : 'default', padding: 0, display: 'flex', alignItems: 'center' }}>
             <ChevronRight size={18} color="white" />
           </button>
         </div>
@@ -133,9 +133,10 @@ const WeeklyWeightsChart: React.FC = () => {
             KG
           </span>
         )}
-      </div>
-      <div className="mb-5" style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.5px' }}>
-        Avg {avgExercises} exercises/week
+        <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', marginLeft: '8px' }}>
+          <span style={{ color: '#ffffff' }}> / {avgExercises}</span>
+          <span style={{ color: 'rgba(255,255,255,0.35)' }}> EX</span>
+        </span>
       </div>
 
       <div className="flex items-end justify-between h-44" style={{ gap: '12px' }}>
