@@ -113,7 +113,7 @@ export const CardioTypeChart: React.FC = () => {
           if ((r.exercises?.exercise_name || '').toUpperCase() !== selectedType) return;
           count++;
           const idx = DAY_ORDER.indexOf((r.day || '').toUpperCase());
-          if (idx >= 0) days[idx] = +(days[idx] + Number(r.km || 0)).toFixed(2);
+          if (idx >= 0) days[idx] = +(days[idx] + Number(r.km || 0)).toFixed(1);
         });
       }
       setWeeklyData(days);
@@ -140,7 +140,7 @@ export const CardioTypeChart: React.FC = () => {
           if ((r.exercises?.exercise_name || '').toUpperCase() !== selectedType) return;
           count++;
           const d = parseInt(r.date.split('-')[2], 10);
-          byDay[d] = +((byDay[d] || 0) + Number(r.km || 0)).toFixed(2);
+          byDay[d] = +((byDay[d] || 0) + Number(r.km || 0)).toFixed(1);
         });
       }
       setMonthlyData(Array.from({ length: daysInMonth }, (_, i) => byDay[i + 1] || 0));

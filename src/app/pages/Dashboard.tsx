@@ -852,7 +852,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
       </section>
 
       <section className="mb-4">
-        <div className={`rounded-lg ${dayWeights.length > 0 ? 'p-5' : 'p-3'} cursor-pointer transition-opacity`} style={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff', opacity: weightsExpanded ? 0.6 : 1 }} onClick={() => setWeightsExpanded(!weightsExpanded)}>
+        <div className={`rounded-lg ${dayWeights.length > 0 ? 'p-5' : 'p-3'} cursor-pointer`} style={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff' }} onClick={() => setWeightsExpanded(!weightsExpanded)}>
           <div className={`flex items-center justify-between ${dayWeights.length > 0 ? 'mb-4' : 'mb-0'}`}>
             <div className="flex items-center gap-2">
               <Dumbbell size={16} color="white" />
@@ -868,9 +868,6 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
                 Weights
               </span>
             </div>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: weightsExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
-              <polyline points="6 9 12 15 18 9"/>
-            </svg>
           </div>
           {dayWeights.length > 0 ? (
             <>
