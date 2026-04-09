@@ -85,7 +85,8 @@ const WeeklyWeightsChart: React.FC = () => {
   const maxTotal = Math.max(...bars.map(b => b.total), 1);
   const yMin = 30000;
   const yMax = maxTotal;
-  const prevWeeks = bars.slice(1);
+  // Exclude current (most recent) week from averages - bars are sorted ascending
+  const prevWeeks = bars.slice(0, -1);
   const avgTotal = prevWeeks.length > 0 ? prevWeeks.reduce((s, b) => s + b.total, 0) / prevWeeks.length : 0;
   const displayAvg = avgTotal >= 1000 ? `${Math.round(avgTotal / 1000)}K` : `${Math.round(avgTotal)}`;
 
