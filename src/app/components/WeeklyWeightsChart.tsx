@@ -92,10 +92,11 @@ const WeeklyWeightsChart: React.FC = () => {
   const totalPages = Math.ceil(allWeeks.length / NUM_WEEKS);
   const canPrev = pageIdx > 0;
   const canNext = pageIdx < totalPages - 1;
-  const onPrev = () => { if (canPrev) setPageIdx(i => i - 1); };
-  const onNext = () => { if (canNext) setPageIdx(i => i + 1); };
+  const onPrev = () => { if (canPrev) setPageIdx(i => i + 1); };
+  const onNext = () => { if (canNext) setPageIdx(i => i - 1); };
 
   const weekRange = bars.length > 0 ? `${bars[0].weekNumber} - ${bars[bars.length - 1].weekNumber}` : '';
+  const avgExercises = prevWeeks.length > 0 ? Math.round(prevWeeks.reduce((s, b) => s + b.count, 0) / prevWeeks.length) : 0;
 
   return (
     <div className="rounded-lg p-6 relative" style={{ backgroundColor: '#121212' }}>
@@ -132,6 +133,9 @@ const WeeklyWeightsChart: React.FC = () => {
             KG
           </span>
         )}
+      </div>
+      <div className="mb-5" style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.5px' }}>
+        Avg {avgExercises} exercises/week
       </div>
 
       <div className="flex items-end justify-between h-44" style={{ gap: '12px' }}>
