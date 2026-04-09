@@ -11,6 +11,7 @@ const WEEKLY_MAX: Record<string, number> = {
 interface WeeklyGroupData {
   group: string;
   total: number;
+  count: number;
 }
 
 interface WeeklyVolumeCompactProps {
@@ -28,16 +29,20 @@ const WeeklyVolumeCompact: React.FC<WeeklyVolumeCompactProps> = ({ selectedWeekN
       if (!effectiveWeek || allWeekNumbers.length === 0) return;
       const { data } = await supabase
         .from('workouts')
-        .select('type, total_weight')
+        .select('type, total_weight, exercise_id')
         .in('type', WEIGHT_TYPES)
         .eq('week', effectiveWeek);
 
       const sumByType = (rows: any[] | null, type: string) =>
         (rows || []).filter(r => r.type === type).reduce((s, r) => s + Number(r.total_weight || 0), 0);
 
+      const countByType = (rows: any[] | null, type: string) =>
+        (rows || []).filter(r => r.type === type).length;
+
       const groups = WEIGHT_TYPES.map(t => ({
         group: t,
         total: sumByType(data, t),
+        count: countByType(data, t),
       }));
       setWeeklyData(groups);
     };
@@ -48,7 +53,7 @@ const WeeklyVolumeCompact: React.FC<WeeklyVolumeCompactProps> = ({ selectedWeekN
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-      {weeklyData.map(({ group, total }) => {
+      {weeklyData.map(({ group, total, count }) => {
         const maxVal = WEEKLY_MAX[group] ?? 30000;
         const pct = maxVal > 0 ? Math.min((total / maxVal) * 100, 100) : 0;
         return (
@@ -62,7 +67,7 @@ const WeeklyVolumeCompact: React.FC<WeeklyVolumeCompactProps> = ({ selectedWeekN
                 <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 700, fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>kg</span>
               </div>
             </div>
-            <div style={{ height: '24px', width: '100%', backgroundColor: '#1a1a1a', borderRadius: '999px', overflow: 'hidden', padding: '3px' }}>
+            <div style={{ height: '24px', width: '100%', backgroundColor: '#1a1a1a', borderRadius: '999px', overflow: 'hidden', padding: '3px', position: 'relative' }}>
               <div
                 style={{
                   height: '100%',
@@ -73,6 +78,20 @@ const WeeklyVolumeCompact: React.FC<WeeklyVolumeCompactProps> = ({ selectedWeekN
                   transition: 'width 0.5s cubic-bezier(0.4,0,0.2,1)',
                 }}
               />
+              {count > 0 && (
+                <div style={{
+                  position: 'absolute',
+                  bottom: '6px',
+                  left: '12px',
+                  fontSize: '10px',
+                  fontWeight: 700,
+                  color: '#000000',
+                  lineHeight: 1,
+                  opacity: 0.85,
+                }}>
+                  {count}
+                </div>
+              )}
             </div>
           </div>
         );
