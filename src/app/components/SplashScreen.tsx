@@ -34,41 +34,39 @@ const SplashScreen: React.FC<Props> = ({ onComplete }) => {
     >
       {/* Logo */}
       <img
-        src="/apple-icon.png"
+        src="/KineLogo.svg"
         alt="Kine"
         style={{
-          width: 80,
-          height: 80,
-          borderRadius: 18,
+          width: 100,
+          height: 100,
         }}
       />
 
-      {/* 3-dot bounce animation */}
-      <div style={{ display: 'flex', gap: 8, marginTop: 24 }}>
-        {[0, 1, 2].map((i) => (
+      {/* Circular dot spinner - dots fade in sequence */}
+      <div style={{ marginTop: 32, position: 'relative', width: 40, height: 40 }}>
+        {[0, 1, 2, 3, 4, 5].map((i) => (
           <div
             key={i}
             style={{
-              width: 10,
-              height: 10,
+              position: 'absolute',
+              width: 7,
+              height: 7,
               borderRadius: '50%',
               backgroundColor: '#000000',
-              animation: `bounce 1.4s ease-in-out ${i * 0.16}s infinite both`,
+              top: '50%',
+              left: '50%',
+              transform: `rotate(${i * 60}deg) translate(16px, 0)`,
+              opacity: 0,
+              animation: `dotPulse 1.5s ease-in-out ${i * 0.25}s infinite`,
             }}
           />
         ))}
       </div>
 
       <style>{`
-        @keyframes bounce {
-          0%, 80%, 100% {
-            transform: scale(0.6);
-            opacity: 0.3;
-          }
-          40% {
-            transform: scale(1);
-            opacity: 1;
-          }
+        @keyframes dotPulse {
+          0%, 100% { opacity: 0.15; }
+          50% { opacity: 1; }
         }
       `}</style>
     </div>
