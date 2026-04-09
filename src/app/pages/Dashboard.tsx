@@ -740,15 +740,15 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
 
         {/* Calories progress bar */}
         <div style={{ marginTop: '14px' }}>
-          <div style={{ height: '32px', width: '100%', backgroundColor: '#1a1a1a', borderRadius: '999px', overflow: 'hidden', padding: '4px' }}>
+          <div style={{ height: todayCalories > 0 ? '32px' : '16px', width: '100%', backgroundColor: '#1a1a1a', borderRadius: '999px', overflow: 'hidden', padding: todayCalories > 0 ? '4px' : '2px' }}>
             <div
               style={{
                 height: '100%',
-                width: `${Math.min((todayCalories / 1500) * 100, 100)}%`,
-                background: 'linear-gradient(90deg, #c6c6c7 0%, #ffffff 100%)',
+                width: todayCalories > 0 ? `${Math.min((todayCalories / 1500) * 100, 100)}%` : '0%',
+                background: todayCalories > 0 ? 'linear-gradient(90deg, #c6c6c7 0%, #ffffff 100%)' : 'transparent',
                 borderRadius: '999px',
-                boxShadow: '0 0 14px rgba(255,255,255,0.25)',
-                transition: 'width 0.6s cubic-bezier(0.4,0,0.2,1)',
+                boxShadow: todayCalories > 0 ? '0 0 14px rgba(255,255,255,0.25)' : 'none',
+                transition: 'all 0.6s cubic-bezier(0.4,0,0.2,1)',
                 display: 'flex',
                 alignItems: 'center',
                 paddingLeft: '10px',
