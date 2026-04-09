@@ -6,13 +6,17 @@ interface Props {
 
 const SplashScreen: React.FC<Props> = ({ onComplete }) => {
   const [visible, setVisible] = useState(true);
+  const [logoReady, setLogoReady] = useState(false);
 
   useEffect(() => {
-    // Show splash for at least 1.5s to feel intentional
+    // Trigger logo animation after a short delay
+    setTimeout(() => setLogoReady(true), 100);
+
+    // Show splash for 2.5s to feel intentional
     const timer = setTimeout(() => {
       setVisible(false);
       setTimeout(onComplete, 400); // wait for fade out
-    }, 1500);
+    }, 2500);
     return () => clearTimeout(timer);
   }, [onComplete]);
 
@@ -32,17 +36,18 @@ const SplashScreen: React.FC<Props> = ({ onComplete }) => {
         pointerEvents: visible ? 'auto' : 'none',
       }}
     >
-      {/* Logo */}
+      {/* Logo with scale animation */}
       <img
         src="/KineLogo.svg"
         alt="Kine"
         style={{
-          width: 100,
-          height: 100,
+          width: logoReady ? 100 : 80,
+          height: logoReady ? 100 : 80,
+          transition: 'width 0.8s cubic-bezier(0.22, 1, 0.36, 1), height 0.8s cubic-bezier(0.22, 1, 0.36, 1)',
         }}
       />
 
-      {/* Circular dot spinner - dots fade in sequence */}
+      {/* Circular dot spinner - faster */}
       <div style={{ marginTop: 32, position: 'relative', width: 40, height: 40 }}>
         {[0, 1, 2, 3, 4, 5].map((i) => (
           <div
@@ -57,7 +62,7 @@ const SplashScreen: React.FC<Props> = ({ onComplete }) => {
               left: '50%',
               transform: `rotate(${i * 60}deg) translate(16px, 0)`,
               opacity: 0,
-              animation: `dotPulse 1.5s ease-in-out ${i * 0.25}s infinite`,
+              animation: `dotPulse 0.8s ease-in-out ${i * 0.13}s infinite`,
             }}
           />
         ))}
