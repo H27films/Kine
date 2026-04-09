@@ -11,12 +11,13 @@ interface WeekBarData {
 }
 
 const sectionLabelStyle: React.CSSProperties = {
-  fontSize: '15px',
-  fontWeight: 900,
-  letterSpacing: '0.2em',
-  textTransform: 'uppercase',
+  fontSize: '13px',
+  fontWeight: 700,
+  letterSpacing: '1.5px',
   color: '#ffffff',
-  marginBottom: '1.25rem',
+  lineHeight: 1,
+  margin: 0,
+  textTransform: 'uppercase',
 };
 
 const WeeklyWeightsChart: React.FC = () => {
@@ -66,7 +67,7 @@ const WeeklyWeightsChart: React.FC = () => {
 
   return (
     <div className="rounded-lg p-6 relative" style={{ backgroundColor: '#121212' }}>
-      <p style={sectionLabelStyle}>7 WEEKS</p>
+      <p style={{ ...sectionLabelStyle, marginBottom: '14px' }}>7 WEEKS</p>
 
       <div className="flex items-baseline gap-1 mb-5">
         <span style={{
