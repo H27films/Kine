@@ -160,9 +160,13 @@ const WeeklyChart: React.FC<{
   calorieWeeks: WeekData[];
   scoreWeeks: WeekData[];
   weightsExerciseCounts: Record<number, number[]>;
-}> = ({ cardioWeeks, weightsWeeks, calorieWeeks, scoreWeeks, weightsExerciseCounts }) => {
+  selectedWeekNumber?: number | null;
+  onWeekChange?: (week: number | null) => void;
+}> = ({ cardioWeeks, weightsWeeks, calorieWeeks, scoreWeeks, weightsExerciseCounts, selectedWeekNumber: propWeek, onWeekChange }) => {
   const [activeTab, setActiveTab] = useState<ChartTab>('Cardio');
-  const [selectedWeekNumber, setSelectedWeekNumber] = useState<number | null>(null);
+  const [internalWeek, setInternalWeek] = useState<number | null>(null);
+  const controlledWeek = propWeek !== undefined ? propWeek : internalWeek;
+  const setWeek = onWeekChange || setInternalWeek;
 
   const chartConfig: Record<ChartTab, { weeks: WeekData[]; unit: string }> = {
     Cardio:   { weeks: cardioWeeks,  unit: 'km' },
@@ -182,7 +186,7 @@ const WeeklyChart: React.FC<{
     ])
   ).sort((a, b) => b - a);
 
-  const effectiveWeekNumber = selectedWeekNumber ?? (allWeekNumbers[0] ?? null);
+  const effectiveWeekNumber = controlledWeek ?? (allWeekNumbers[0] ?? null);
   const current = weeks.find(w => w.weekNumber === effectiveWeekNumber) ?? null;
   const data = current?.days || Array(7).fill(0);
   const rawMax = Math.max(...data, 1);
@@ -192,8 +196,8 @@ const WeeklyChart: React.FC<{
   const currentGlobalIdx = effectiveWeekNumber !== null ? allWeekNumbers.indexOf(effectiveWeekNumber) : 0;
   const canPrev = currentGlobalIdx < allWeekNumbers.length - 1;
   const canNext = currentGlobalIdx > 0;
-  const onPrev = () => { if (canPrev) setSelectedWeekNumber(allWeekNumbers[currentGlobalIdx + 1]); };
-  const onNext = () => { if (canNext) setSelectedWeekNumber(allWeekNumbers[currentGlobalIdx - 1]); };
+  const onPrev = () => { if (canPrev) setWeek(allWeekNumbers[currentGlobalIdx + 1]); };
+  const onNext = () => { if (canNext) setWeek(allWeekNumbers[currentGlobalIdx - 1]); };
 
   const yMin = activeTab === 'Cardio' ? 5 : activeTab === 'Calories' ? 500 : 0;
   const yMax = activeTab === 'Cardio' ? 20 : activeTab === 'Score' ? Math.max(rawMax, 100) : rawMax;
@@ -360,6 +364,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
   // ===== FIXED: Use Malaysia timezone for selected date =====
   const [selectedDate, setSelectedDate] = useState(() => malaysiaDateStr(new Date()));
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
+  const [selectedWeekNumber, setSelectedWeekNumber] = useState<number | null>(null);
 
   const [todayActivities, setTodayActivities] = useState<DayActivity[]>([]);
   const [totalMovement, setTotalMovement] = useState<number>(0);
@@ -574,6 +579,15 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
     const bHasData = todayActivities.some(act => act.exercise_name === b && act.km > 0);
     return (bHasData ? 1 : 0) - (aHasData ? 1 : 0); // Activities with data first
   });
+
+  const allWeekNumbers = Array.from(
+    new Set([
+      ...cardioWeeks.map(w => w.weekNumber),
+      ...weightsWeeks.map(w => w.weekNumber),
+      ...calorieWeeks.map(w => w.weekNumber),
+      ...scoreWeeks.map(w => w.weekNumber),
+    ])
+  ).sort((a, b) => b - a);
 
   const weeklyActivityTotal = selectedActivity && activityWeeklyData[selectedActivity]
     ? +activityWeeklyData[selectedActivity].reduce((s, v) => s + v, 0).toFixed(1)
@@ -875,11 +889,11 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
       </section>
 
       <section className="mb-4 mt-8">
-        <WeeklyChart cardioWeeks={cardioWeeks} weightsWeeks={weightsWeeks} calorieWeeks={calorieWeeks} scoreWeeks={scoreWeeks} weightsExerciseCounts={weightsExerciseCounts} />
+        <WeeklyChart cardioWeeks={cardioWeeks} weightsWeeks={weightsWeeks} calorieWeeks={calorieWeeks} scoreWeeks={scoreWeeks} weightsExerciseCounts={weightsExerciseCounts} selectedWeekNumber={selectedWeekNumber} onWeekChange={setSelectedWeekNumber} />
       </section>
 
       <section className="mt-6">
-        <WeeklyVolumeCompact weeksData={weightsWeeks} />
+        <WeeklyVolumeCompact selectedWeekNumber={selectedWeekNumber} allWeekNumbers={allWeekNumbers} />
       </section>
 
       <section className="mt-8">
