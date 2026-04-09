@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Download, RefreshCw, BarChart3, ChevronDown, ChevronUp, Plus, Trash2, Edit2 } from 'lucide-react';
+import { User, Download, RefreshCw, BarChart3, ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
 import { Page } from '../../types';
 import { supabase } from '../../lib/supabase';
 
