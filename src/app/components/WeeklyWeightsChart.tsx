@@ -10,6 +10,15 @@ interface WeekBarData {
   count: number;
 }
 
+const sectionLabelStyle: React.CSSProperties = {
+  fontSize: '15px',
+  fontWeight: 900,
+  letterSpacing: '0.2em',
+  textTransform: 'uppercase',
+  color: '#ffffff',
+  marginBottom: '1.25rem',
+};
+
 const WeeklyWeightsChart: React.FC = () => {
   const [bars, setBars] = useState<WeekBarData[]>([]);
 
@@ -50,14 +59,37 @@ const WeeklyWeightsChart: React.FC = () => {
   }, []);
 
   const maxTotal = Math.max(...bars.map(b => b.total), 1);
+  const avgTotal = bars.length > 0 ? bars.reduce((s, b) => s + b.total, 0) / bars.length : 0;
+  const displayAvg = avgTotal >= 1000 ? `${Math.round(avgTotal / 1000)}K` : `${Math.round(avgTotal)}`;
 
   return (
     <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff' }}>
-      <div className="text-[10px] font-bold uppercase tracking-[1.5px] mb-4" style={{ color: 'rgba(255,255,255,0.4)' }}>
-        WEEKLY
+      <p style={sectionLabelStyle}>7 WEEKS</p>
+
+      <div className="flex items-baseline gap-1 mb-5">
+        <span style={{
+          fontSize: '1.6rem',
+          fontWeight: 900,
+          letterSpacing: '-0.02em',
+          color: '#ffffff',
+          lineHeight: 1,
+        }}>
+          {displayAvg}
+        </span>
+        {avgTotal >= 1000 && (
+          <span style={{
+            fontSize: '10px',
+            fontWeight: 700,
+            color: 'rgba(255,255,255,0.4)',
+            letterSpacing: '0.12em',
+          }}>
+            KG
+          </span>
+        )}
       </div>
+
       <div className="flex items-end justify-between" style={{ height: '160px', gap: '12px' }}>
-        {bars.map((bar, i) => {
+        {bars.map((bar) => {
           const pct = maxTotal > 0 ? Math.max(bar.total / maxTotal, 0.04) : 0;
           const brightness = bar.total > 0 ? Math.round(80 + pct * 175) : 0;
           const barColor = bar.total > 0 ? `rgb(${brightness},${brightness},${brightness})` : 'rgba(255,255,255,0.05)';
