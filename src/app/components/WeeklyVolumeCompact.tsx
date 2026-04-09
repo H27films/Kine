@@ -67,7 +67,7 @@ const WeeklyVolumeCompact: React.FC<WeeklyVolumeCompactProps> = ({ selectedWeekN
                 <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 700, fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>kg</span>
               </div>
             </div>
-            <div style={{ height: '24px', width: '100%', backgroundColor: '#1a1a1a', borderRadius: '999px', overflow: 'hidden', padding: '3px', position: 'relative' }}>
+            <div style={{ height: '30px', width: '100%', backgroundColor: '#1a1a1a', borderRadius: '999px', overflow: 'hidden', padding: '4px', position: 'relative' }}>
               <div
                 style={{
                   height: '100%',
@@ -81,7 +81,7 @@ const WeeklyVolumeCompact: React.FC<WeeklyVolumeCompactProps> = ({ selectedWeekN
               {count > 0 && (
                 <div style={{
                   position: 'absolute',
-                  bottom: '4px',
+                  bottom: '6px',
                   left: '6px',
                   width: '18px',
                   height: '18px',
