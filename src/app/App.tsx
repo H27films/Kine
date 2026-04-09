@@ -3,6 +3,7 @@ import { Page } from '../types';
 import { Header } from './components/Header';
 import { BottomNav } from './components/BottomNav';
 import { WeeklySummaryBar } from './components/WeeklySummaryBar';
+import SplashScreen from './components/SplashScreen';
 
 const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
 const LogWeights = lazy(() => import('./pages/LogWeights').then(m => ({ default: m.LogWeights })));
@@ -15,6 +16,7 @@ const Summary = lazy(() => import('./pages/Summary').then(m => ({ default: m.Sum
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>('dashboard');
   const [showWeeklySummary, setShowWeeklySummary] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
 
   // Reset summary whenever user navigates to a different page
   React.useEffect(() => {
@@ -56,7 +58,9 @@ const App: React.FC = () => {
   const showBackButton = currentPage === 'profile' || currentPage === 'summary';
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#000000', color: '#e2e2e2', fontFamily: "'Inter Variable', 'Inter', system-ui, sans-serif" }}>
+    <>
+      {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
+      <div className="min-h-screen" style={{ backgroundColor: '#000000', color: '#e2e2e2', fontFamily: "'Inter Variable', 'Inter', system-ui, sans-serif", opacity: showSplash ? 0 : 1, transition: 'opacity 0.4s ease' }}>
       <Header
         title={getHeaderTitle()}
         currentPage={currentPage}
@@ -80,6 +84,7 @@ const App: React.FC = () => {
       </main>
       <BottomNav currentPage={currentPage} onNavigate={setCurrentPage} />
     </div>
+    </>
   );
 };
 
