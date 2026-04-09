@@ -298,8 +298,6 @@ const WeeklyChart: React.FC<{
             </span>
           )}
           {activeTab === 'Weights' && effectiveWeekNumber !== null && (() => {
-            const weekTotal = data.reduce((s, v) => s + v, 0);
-            const displayTotal = weekTotal > 0 ? (weekTotal / 1000 >= 10 ? `${Math.round(weekTotal / 1000)}K` : `${(weekTotal / 1000).toFixed(1)}K`) : '0K';
             const exerciseTotal = (weightsExerciseCounts[effectiveWeekNumber] || []).reduce((s, c) => s + c, 0);
             return (
               <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', marginLeft: '8px' }}>
