@@ -33,18 +33,15 @@ const SplashScreen: React.FC<Props> = ({ onComplete }) => {
       }}
     >
       {/* Logo */}
-      <h1
+      <img
+        src="/apple-icon.png"
+        alt="Kine"
         style={{
-          fontSize: '3rem',
-          fontWeight: 900,
-          letterSpacing: '-0.04em',
-          color: '#000000',
-          margin: 0,
-          lineHeight: 1,
+          width: 80,
+          height: 80,
+          borderRadius: 18,
         }}
-      >
-        KINE
-      </h1>
+      />
 
       {/* 3-dot bounce animation */}
       <div style={{ display: 'flex', gap: 8, marginTop: 24 }}>
