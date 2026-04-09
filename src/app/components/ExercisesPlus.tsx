@@ -1,268 +1,212 @@
-import React, { useState, useEffect } from 'react';
-import { Dumbbell, ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Dumbbell, Plus } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
-interface Exercise {
-  id: number;
-  exercise_name: string;
-  type: string;
-  multiplier: number;
-  info_notes: string | null;
-  type2: string | null;
+interface Props {
+  onClose: () => void;
+  onSaved: () => void;
 }
 
-const ExercisesPlus: React.FC = () => {
-  const [exercises, setExercises] = useState<Exercise[]>([]);
-  const [groupedExercises, setGroupedExercises] = useState<Record<string, Exercise[]>>({});
-  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [newExercise, setNewExercise] = useState({
-    exercise_name: '',
-    type: 'CHEST',
-    type2: 'BAR',
-    multiplier: 1,
-    info_notes: '',
-  });
-  const [addSuccess, setAddSuccess] = useState(false);
-  const [addError, setAddError] = useState('');
+const TYPE_OPTIONS = ['CHEST', 'BACK', 'LEGS', 'CARDIO', 'MEASUREMENT'];
+const TYPE2_OPTIONS = ['BAR', 'DUMB BELL', 'MACHINE', 'BODY WEIGHT'];
 
-  const loadExercises = async () => {
-    const { data } = await supabase
-      .from('exercises')
-      .select('*')
-      .order('type')
-      .order('exercise_name');
-    if (data) {
-      setExercises(data as Exercise[]);
-      const grouped: Record<string, Exercise[]> = {};
-      for (const ex of data as Exercise[]) {
-        if (!grouped[ex.type]) grouped[ex.type] = [];
-        grouped[ex.type].push(ex);
-      }
-      setGroupedExercises(grouped);
-    }
-  };
+const ExercisesPlus: React.FC<Props> = ({ onClose, onSaved }) => {
+  const [saving, setSaving] = useState(false);
+  const [focusedIdx, setFocusedIdx] = useState<number | null>(null);
+  const inputRefs = useRef<(HTMLInputElement | HTMLSelectElement | null)[]>([]);
 
-  useEffect(() => { loadExercises(); }, []);
+  const [name, setName] = useState('');
+  const [type, setType] = useState('CHEST');
+  const [type2, setType2] = useState('BAR');
+  const [multiplier, setMultiplier] = useState('1');
+  const [notes, setNotes] = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
 
-  const handleAddExercise = async () => {
-    if (!newExercise.exercise_name.trim()) {
-      setAddError('Exercise name is required');
+  const rows = [
+    { label: 'Name', value: name, onChange: setName, type: 'text' as const, placeholder: 'e.g. Bench Press' },
+    { label: 'Type', value: type, onChange: setType, type: 'select' as const, options: TYPE_OPTIONS },
+    { label: 'Type2', value: type2, onChange: setType2, type: 'select' as const, options: TYPE2_OPTIONS },
+    { label: 'Multiplier', value: multiplier, onChange: setMultiplier, type: 'number' as const, placeholder: '1' },
+    { label: 'Notes', value: notes, onChange: setNotes, type: 'text' as const, placeholder: 'Optional' },
+  ];
+
+  const handleSave = async () => {
+    if (!name.trim()) {
+      setError('Name is required');
       return;
     }
-    setAddError('');
-    const { error } = await supabase
+    setError('');
+    setSaving(true);
+
+    const { error: err } = await supabase
       .from('exercises')
       .insert([{
-        exercise_name: newExercise.exercise_name.trim().toUpperCase(),
-        type: newExercise.type,
-        type2: newExercise.type2,
-        multiplier: newExercise.multiplier,
-        info_notes: newExercise.info_notes.trim() || null,
+        exercise_name: name.trim().toUpperCase(),
+        type,
+        type2,
+        multiplier: parseFloat(multiplier) || 1,
+        info_notes: notes.trim() || null,
       }]);
-    if (error) {
-      setAddError(error.message);
+
+    setSaving(false);
+    if (err) {
+      setError(err.message);
       return;
     }
-    setAddSuccess(true);
-    setNewExercise({ exercise_name: '', type: 'CHEST', type2: 'BAR', multiplier: 1, info_notes: '' });
-    setTimeout(() => setAddSuccess(false), 2000);
-    await loadExercises();
-  };
 
-  const handleDeleteExercise = async (id: number) => {
-    if (!confirm('Delete this exercise? This cannot be undone.')) return;
-    await supabase.from('exercises').delete().eq('id', id);
-    await loadExercises();
-  };
-
-  const toggleGroup = (type: string) => {
-    setCollapsedGroups(prev => ({ ...prev, [type]: !prev[type] }));
+    setSuccess(true);
+    setTimeout(() => {
+      onSaved();
+      onClose();
+    }, 800);
   };
 
   return (
-    <div>
-      <button
-        onClick={() => setShowAddForm(!showAddForm)}
-        className="w-full rounded-2xl p-5 flex items-center justify-between active:scale-[0.98] transition-all"
-        style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.07)' }}
+    <div
+      style={{
+        position: 'fixed', inset: 0, zIndex: 100,
+        backgroundColor: 'rgba(0,0,0,0.55)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          position: 'absolute', bottom: '0px', left: '10px', right: '10px',
+          backgroundColor: '#F2F2ED',
+          borderRadius: '20px 20px 0 0',
+          padding: '24px 24px 32px',
+        }}
+        onClick={e => e.stopPropagation()}
       >
-        <div className="flex items-center gap-4">
-          <Dumbbell size={22} color="#ffffff" />
-          <span style={{
-            fontSize: '1.1rem',
-            fontWeight: 800,
-            letterSpacing: '-0.02em',
-            color: '#ffffff',
-            textTransform: 'uppercase',
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+          <p style={{
+            fontSize: '14px', fontWeight: 900,
+            color: '#000000',
+            letterSpacing: '0.2em', textTransform: 'uppercase',
+            margin: 0,
           }}>
-            Exercises+
-          </span>
+            New Exercise
+          </p>
+          <Dumbbell size={22} color="#000000" />
         </div>
-        <div style={{ color: 'rgba(255,255,255,0.3)' }}>{showAddForm ? <ChevronUp size={18} /> : <ChevronDown size={18} />}</div>
-      </button>
 
-      {showAddForm && (
-        <div className="mt-3 rounded-2xl p-5" style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.07)' }}>
-          {/* Add form */}
-          <div className="mb-4 p-4 rounded-xl" style={{ backgroundColor: '#1a1a1a', border: '1px solid rgba(255,255,255,0.07)' }}>
-            <div className="space-y-3">
-              <div>
-                <label style={{ fontSize: '0.65rem', fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.08em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Name</label>
-                <input
-                  type="text"
-                  value={newExercise.exercise_name}
-                  onChange={e => setNewExercise(p => ({ ...p, exercise_name: e.target.value }))}
-                  placeholder="e.g. Bench Press"
+        {/* Rows */}
+        <div style={{ display: 'flex', flexDirection: 'column', marginBottom: 28 }}>
+          {rows.map((row, i) => {
+            const isFocused = focusedIdx === i;
+            return (
+              <div key={i}>
+                <div
+                  onClick={() => inputRefs.current[i]?.focus()}
                   style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    borderRadius: '8px',
-                    backgroundColor: '#111',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    color: '#fff',
-                    fontSize: '0.875rem',
-                    outline: 'none',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    paddingTop: isFocused ? 16 : 11,
+                    paddingBottom: isFocused ? 16 : 11,
+                    cursor: 'text',
+                    transition: 'padding 0.15s ease',
                   }}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label style={{ fontSize: '0.65rem', fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.08em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Type</label>
-                  <select
-                    value={newExercise.type}
-                    onChange={e => setNewExercise(p => ({ ...p, type: e.target.value }))}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      borderRadius: '8px',
-                      backgroundColor: '#111',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      color: '#fff',
-                      fontSize: '0.875rem',
-                      outline: 'none',
-                    }}
-                  >
-                    {['CHEST', 'BACK', 'LEGS', 'CARDIO', 'MEASUREMENT'].map(t => (
-                      <option key={t} value={t}>{t}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label style={{ fontSize: '0.65rem', fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.08em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Type2</label>
-                  <select
-                    value={newExercise.type2}
-                    onChange={e => setNewExercise(p => ({ ...p, type2: e.target.value }))}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      borderRadius: '8px',
-                      backgroundColor: '#111',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      color: '#fff',
-                      fontSize: '0.875rem',
-                      outline: 'none',
-                    }}
-                  >
-                    {['BAR', 'DUMB BELL', 'MACHINE', 'BODY WEIGHT'].map(t => (
-                      <option key={t} value={t}>{t}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label style={{ fontSize: '0.65rem', fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.08em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Multiplier</label>
-                  <input
-                    type="number"
-                    value={newExercise.multiplier}
-                    onChange={e => setNewExercise(p => ({ ...p, multiplier: Number(e.target.value) }))}
-                    step="0.1"
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      borderRadius: '8px',
-                      backgroundColor: '#111',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      color: '#fff',
-                      fontSize: '0.875rem',
-                      outline: 'none',
-                    }}
-                  />
-                </div>
-                <div>
-                  <label style={{ fontSize: '0.65rem', fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.08em', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Notes</label>
-                  <input
-                    type="text"
-                    value={newExercise.info_notes}
-                    onChange={e => setNewExercise(p => ({ ...p, info_notes: e.target.value }))}
-                    placeholder="Optional"
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      borderRadius: '8px',
-                      backgroundColor: '#111',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      color: '#fff',
-                      fontSize: '0.875rem',
-                      outline: 'none',
-                    }}
-                  />
-                </div>
-              </div>
-              {addError && <p style={{ color: '#ff5050', fontSize: '0.75rem', margin: 0 }}>{addError}</p>}
-              {addSuccess && <p style={{ color: '#22c55e', fontSize: '0.75rem', margin: 0 }}>✓ Added successfully</p>}
-              <button
-                onClick={handleAddExercise}
-                className="w-full py-2.5 rounded-full font-black uppercase tracking-widest text-xs active:scale-95 duration-150"
-                style={{ backgroundColor: '#ffffff', color: '#1a1a1a', marginTop: '4px' }}
-              >
-                Add Exercise
-              </button>
-            </div>
-          </div>
+                >
+                  <span style={{
+                    fontSize: isFocused ? '13px' : '11px',
+                    fontWeight: 700,
+                    color: '#000000',
+                    letterSpacing: '0.2em', textTransform: 'uppercase',
+                    flexShrink: 0,
+                    transition: 'font-size 0.15s ease',
+                  }}>
+                    {row.label}
+                  </span>
 
-          {/* Exercise list grouped by type */}
-          {Object.entries(groupedExercises).map(([type, exs]) => (
-            <div key={type} className="mb-3">
-              <button
-                onClick={() => toggleGroup(type)}
-                className="w-full flex items-center justify-between py-2"
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-              >
-                <span style={{
-                  fontSize: '0.7rem',
-                  fontWeight: 700,
-                  letterSpacing: '0.12em',
-                  textTransform: 'uppercase',
-                  color: 'rgba(255,255,255,0.5)',
-                }}>
-                  {type} ({exs.length})
-                </span>
-                {collapsedGroups[type] ? <ChevronDown size={14} color="rgba(255,255,255,0.3)" /> : <ChevronUp size={14} color="rgba(255,255,255,0.3)" />}
-              </button>
-              {!collapsedGroups[type] && (
-                <div className="mt-1 space-y-1">
-                  {exs.map(ex => (
-                    <div key={ex.id} className="flex items-center justify-between py-1.5 px-2 rounded-lg" style={{ backgroundColor: '#1a1a1a' }}>
-                      <div className="flex items-center gap-2">
-                        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#ffffff' }}>{ex.exercise_name}</span>
-                        {ex.type2 && <span style={{ fontSize: '0.6rem', fontWeight: 600, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.05em' }}>{ex.type2}</span>}
-                      </div>
-                      <button
-                        onClick={() => handleDeleteExercise(ex.id)}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center' }}
-                      >
-                        <Trash2 size={12} color="rgba(255,255,255,0.2)" />
-                      </button>
+                  {row.type === 'select' ? (
+                    <select
+                      ref={el => { inputRefs.current[i] = el; }}
+                      value={row.value as string}
+                      onChange={e => row.onChange(e.target.value)}
+                      onFocus={() => setFocusedIdx(i)}
+                      onBlur={() => setFocusedIdx(null)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        outline: 'none',
+                        fontFamily: 'inherit',
+                        fontSize: isFocused ? '16px' : '13px',
+                        fontWeight: 400,
+                        letterSpacing: '0.15em',
+                        color: '#000000',
+                        textAlign: 'right',
+                        width: 140,
+                        padding: 0,
+                        transition: 'font-size 0.15s ease',
+                        cursor: 'pointer',
+                        appearance: 'none',
+                        WebkitAppearance: 'none',
+                      }}
+                    >
+                      {row.options?.map(opt => (
+                        <option key={opt} value={opt} style={{ color: '#000' }}>{opt}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <input
+                        ref={el => { inputRefs.current[i] = el as any; }}
+                        type={row.type === 'number' ? 'number' : 'text'}
+                        inputMode={row.type === 'number' ? 'decimal' : 'text'}
+                        value={row.value}
+                        onChange={e => row.onChange(e.target.value)}
+                        onFocus={() => setFocusedIdx(i)}
+                        onBlur={() => setFocusedIdx(null)}
+                        placeholder={row.placeholder}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          outline: 'none',
+                          fontFamily: 'inherit',
+                          fontSize: isFocused ? '16px' : '13px',
+                          fontWeight: 400,
+                          letterSpacing: '0.15em',
+                          color: row.value ? '#000000' : 'rgba(0,0,0,0.3)',
+                          textAlign: 'right',
+                          width: 140,
+                          padding: 0,
+                          transition: 'font-size 0.15s ease',
+                        }}
+                      />
                     </div>
-                  ))}
+                  )}
                 </div>
-              )}
-            </div>
-          ))}
+                {i < rows.length - 1 && (
+                  <div style={{ height: '1px', backgroundColor: 'rgba(0,0,0,0.08)' }} />
+                )}
+              </div>
+            );
+          })}
         </div>
-      )}
+
+        {error && <p style={{ color: '#ff5050', fontSize: '11px', margin: '0 0 16px 0', fontWeight: 700 }}>{error}</p>}
+        {success && <p style={{ color: '#22c55e', fontSize: '11px', margin: '0 0 16px 0', fontWeight: 700 }}>✓ Added</p>}
+
+        {/* Add Exercise button */}
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          style={{
+            width: '100%', padding: '12px',
+            backgroundColor: '#000000', color: '#ffffff',
+            borderRadius: 999, border: 'none',
+            fontSize: '11px', fontWeight: 900,
+            letterSpacing: '0.2em', textTransform: 'uppercase',
+            cursor: 'pointer', opacity: saving ? 0.6 : 1,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+          }}
+        >
+          <Plus size={14} /> {saving ? 'Adding...' : 'Add Exercise'}
+        </button>
+      </div>
     </div>
   );
 };

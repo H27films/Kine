@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Download, RefreshCw, BarChart3 } from 'lucide-react';
+import { User, Download, RefreshCw, BarChart3, Dumbbell } from 'lucide-react';
 import { Page } from '../../types';
 import { supabase } from '../../lib/supabase';
 import ExercisesPlus from '../components/ExercisesPlus';
@@ -19,6 +19,7 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
   const [exporting, setExporting] = useState(false);
   const [exportDone, setExportDone] = useState(false);
   const [exportError, setExportError] = useState('');
+  const [showExercises, setShowExercises] = useState(false);
 
   const loadData = async () => {
     const { data } = await supabase
@@ -231,7 +232,25 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
       </div>
 
       {/* Exercises+ */}
-      <ExercisesPlus />
+      <button
+        onClick={() => setShowExercises(true)}
+        className="w-full rounded-2xl p-5 flex items-center justify-between active:scale-[0.98] transition-all"
+        style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.07)' }}
+      >
+        <div className="flex items-center gap-4">
+          <Dumbbell size={22} color="#ffffff" />
+          <span style={{
+            fontSize: '1.1rem',
+            fontWeight: 800,
+            letterSpacing: '-0.02em',
+            color: '#ffffff',
+            textTransform: 'uppercase',
+          }}>
+            Exercises+
+          </span>
+        </div>
+        <div style={{ color: 'rgba(255,255,255,0.3)' }}>›</div>
+      </button>
 
       {/* Data+ Analytics */}
       <button
@@ -253,6 +272,11 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
         </div>
         <div style={{ color: 'rgba(255,255,255,0.3)' }}>›</div>
       </button>
+
+      {/* Exercises+ Sheet */}
+      {showExercises && (
+        <ExercisesPlus onClose={() => setShowExercises(false)} onSaved={() => setShowExercises(false)} />
+      )}
     </div>
   );
 };

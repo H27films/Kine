@@ -12,7 +12,8 @@
       "Bash(npx *)",
       "Bash(npm run *)",
       "Bash(git show *)",
-      "Bash(git checkout *)"
+      "Bash(git checkout *)",
+      "Bash(git rm *)"
     ]
   },
   "$version": 3
