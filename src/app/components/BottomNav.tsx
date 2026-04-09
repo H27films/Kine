@@ -21,8 +21,8 @@ export const BottomNav: React.FC<NavigationProps> = ({ currentPage, onNavigate }
       page: 'weights',
     },
     {
-      icon: <RunningManIcon size={22} color="rgba(226,226,226,0.7)" />,
-      activeIcon: <RunningManIcon size={22} color="#000000" />,
+      icon: <RunningManIcon size={26} color="rgba(226,226,226,0.7)" />,
+      activeIcon: <RunningManIcon size={26} color="#000000" />,
       page: 'cardio',
     },
     {
