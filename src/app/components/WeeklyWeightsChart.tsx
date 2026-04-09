@@ -44,8 +44,8 @@ const WeeklyWeightsChart: React.FC = () => {
 
       const sortedWeeks = Object.keys(weekMap)
         .map(Number)
-        .sort((a, b) => b - a)
-        .slice(0, NUM_WEEKS);
+        .sort((a, b) => a - b)
+        .slice(-NUM_WEEKS);
 
       const result: WeekBarData[] = sortedWeeks.map(week => ({
         weekNumber: week,
