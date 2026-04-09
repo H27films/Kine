@@ -889,11 +889,11 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
       </section>
 
       <section className="mb-4 mt-8">
-        <WeeklyChart cardioWeeks={cardioWeeks} weightsWeeks={weightsWeeks} calorieWeeks={calorieWeeks} scoreWeeks={scoreWeeks} weightsExerciseCounts={weightsExerciseCounts} selectedWeekNumber={selectedWeekNumber} onWeekChange={setSelectedWeekNumber} />
+        <WeeklyVolumeCompact selectedWeekNumber={selectedWeekNumber} allWeekNumbers={allWeekNumbers} />
       </section>
 
-      <section className="mt-6">
-        <WeeklyVolumeCompact selectedWeekNumber={selectedWeekNumber} allWeekNumbers={allWeekNumbers} />
+      <section className="mt-8">
+        <WeeklyChart cardioWeeks={cardioWeeks} weightsWeeks={weightsWeeks} calorieWeeks={calorieWeeks} scoreWeeks={scoreWeeks} weightsExerciseCounts={weightsExerciseCounts} selectedWeekNumber={selectedWeekNumber} onWeekChange={setSelectedWeekNumber} />
       </section>
 
       <section className="mt-8">
