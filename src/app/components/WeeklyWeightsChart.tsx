@@ -88,44 +88,46 @@ const WeeklyWeightsChart: React.FC = () => {
         )}
       </div>
 
-      <div className="flex items-end justify-between" style={{ height: '160px', gap: '12px' }}>
+      <div className="flex items-end justify-between h-44" style={{ gap: '12px' }}>
         {bars.map((bar) => {
           const pct = maxTotal > 0 ? Math.max(bar.total / maxTotal, 0.04) : 0;
-          const brightness = bar.total > 0 ? Math.round(80 + pct * 175) : 0;
+          const rawPct = maxTotal > 0 ? bar.total / maxTotal : 0;
+          const brightness = bar.total > 0 ? Math.round(80 + rawPct * 175) : 0;
           const barColor = bar.total > 0 ? `rgb(${brightness},${brightness},${brightness})` : 'rgba(255,255,255,0.05)';
           const displayValue = bar.total > 0 ? `${Math.round(bar.total / 1000)}k` : '';
 
           return (
-            <div key={bar.weekNumber} className="flex flex-col items-center h-full justify-end relative" style={{ flex: '1' }}>
-              {bar.total > 0 && (
-                <>
-                  <div className="absolute left-0 right-0 flex flex-col items-center" style={{ bottom: `${pct * 100}%` }}>
-                    <div className="text-[9px] font-bold text-white/70 mb-1 whitespace-nowrap">{displayValue}</div>
-                    <div className="w-[7px] h-[7px] rounded-full bg-white" />
-                  </div>
-                  <div className="absolute left-1/2 -translate-x-1/2 bottom-0" style={{ height: `${pct * 100}%`, width: '1px', backgroundColor: 'rgba(255,255,255,0.25)' }} />
-                </>
-              )}
-              {bar.count > 0 && (
-                <div className="absolute left-1/2 -translate-x-1/2" style={{ bottom: '24px' }}>
+            <div key={bar.weekNumber} className="flex flex-col items-center h-full justify-end" style={{ flex: '1', maxWidth: '28px' }}>
+              <div style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.6)', marginBottom: '4px', height: '14px' }}>{displayValue}</div>
+              <div className="w-full relative transition-all" style={{ height: `${pct * 100}%`, backgroundColor: barColor, borderRadius: '9999px 9999px 0 0', minHeight: bar.total > 0 ? '4px' : 0 }}>
+                {bar.count > 0 && (
                   <div style={{
-                    width: '16px',
-                    height: '16px',
-                    borderRadius: '50%',
-                    backgroundColor: '#000000',
+                    position: 'absolute',
+                    bottom: '5px',
+                    left: 0,
+                    right: 0,
                     display: 'flex',
-                    alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: '10px',
-                    fontWeight: 700,
-                    color: '#ffffff',
-                    lineHeight: 1,
                   }}>
-                    {bar.count}
+                    <div style={{
+                      width: '16px',
+                      height: '16px',
+                      borderRadius: '50%',
+                      backgroundColor: '#000000',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '10px',
+                      fontWeight: 700,
+                      color: '#ffffff',
+                      lineHeight: 1,
+                    }}>
+                      {bar.count}
+                    </div>
                   </div>
-                </div>
-              )}
-              <div className="text-[9px] font-bold uppercase mt-2" style={{ color: 'rgba(255,255,255,0.3)' }}>{bar.weekNumber}</div>
+                )}
+              </div>
+              <div style={{ fontSize: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#ffffff', marginTop: '8px' }}>{bar.weekNumber}</div>
             </div>
           );
         })}
