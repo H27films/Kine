@@ -81,13 +81,19 @@ const WeeklyVolumeCompact: React.FC<WeeklyVolumeCompactProps> = ({ selectedWeekN
               {count > 0 && (
                 <div style={{
                   position: 'absolute',
-                  bottom: '6px',
-                  left: '12px',
-                  fontSize: '10px',
+                  bottom: '4px',
+                  left: '6px',
+                  width: '18px',
+                  height: '18px',
+                  borderRadius: '50%',
+                  backgroundColor: '#000000',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '11px',
                   fontWeight: 700,
-                  color: '#000000',
+                  color: '#ffffff',
                   lineHeight: 1,
-                  opacity: 0.85,
                 }}>
                   {count}
                 </div>
