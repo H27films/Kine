@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { User, Download, RefreshCw, BarChart3 } from 'lucide-react';
 import { Page } from '../../types';
 import { supabase } from '../../lib/supabase';
+import ExercisesPlus from '../components/ExercisesPlus';
 
 interface ProfileProps {
   onNavigate: (page: Page) => void;
@@ -228,6 +229,9 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
           <p className="mt-3" style={{ color: '#ff5050', fontSize: '0.75rem' }}>{exportError}</p>
         )}
       </div>
+
+      {/* Exercises+ */}
+      <ExercisesPlus />
 
       {/* Data+ Analytics */}
       <button
