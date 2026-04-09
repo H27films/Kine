@@ -17,6 +17,16 @@ const RunningManIcon = ({ size = 16 }: { size?: number }) => (
   </svg>
 );
 
+const headerTextStyle: React.CSSProperties = {
+  fontFamily: "'Archivo', sans-serif",
+  fontSize: '23px',
+  fontWeight: 305,
+  fontStretch: '145%',
+  letterSpacing: '0.08em',
+  color: '#ffffff',
+  textTransform: 'uppercase',
+};
+
 const DumbbellIcon = ({ size = 16 }: { size?: number }) => (
   <img src="/icons/dumbbell.svg" style={{ width: size, height: size, filter: 'brightness(0) invert(1)' }} alt="weights" />
 );
@@ -118,13 +128,11 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
         <button
           onClick={onToggleWeeklySummary}
           className="absolute left-1/2 -translate-x-1/2 bottom-3"
-          style={{ background: 'none', border: 'none', cursor: 'pointer', WebkitTapHighlightColor: 'transparent', padding: 0 }}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', WebkitTapHighlightColor: 'transparent' }}
         >
-          <img
-            src="/KineHeader.svg"
-            alt="Kine"
-            style={{ height: '24px', width: 'auto', display: 'block' }}
-          />
+          <span style={headerTextStyle}>
+            KINÉ
+          </span>
         </button>
       ) : (
         <>
@@ -140,11 +148,9 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
               onClick={onToggleWeeklySummary}
               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, WebkitTapHighlightColor: 'transparent' }}
             >
-              <img
-                src="/KineHeader.svg"
-                alt="Kine"
-                style={{ height: '24px', width: 'auto', display: 'block' }}
-              />
+              <span style={headerTextStyle}>
+                KINÉ
+              </span>
             </button>
           </div>
         </>
