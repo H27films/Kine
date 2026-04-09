@@ -12,11 +12,11 @@ const SplashScreen: React.FC<Props> = ({ onComplete }) => {
     // Trigger logo animation after a short delay
     setTimeout(() => setLogoReady(true), 100);
 
-    // Show splash for 2.5s to feel intentional
+    // Show splash for 2.0s
     const timer = setTimeout(() => {
       setVisible(false);
       setTimeout(onComplete, 400); // wait for fade out
-    }, 2500);
+    }, 2000);
     return () => clearTimeout(timer);
   }, [onComplete]);
 
@@ -36,19 +36,27 @@ const SplashScreen: React.FC<Props> = ({ onComplete }) => {
         pointerEvents: visible ? 'auto' : 'none',
       }}
     >
-      {/* Logo with scale animation */}
+      {/* Logo with smooth scale animation */}
       <img
         src="/KineLogo.svg"
         alt="Kine"
         style={{
           width: logoReady ? 100 : 80,
           height: logoReady ? 100 : 80,
-          transition: 'width 2s cubic-bezier(0.22, 1, 0.36, 1), height 2s cubic-bezier(0.22, 1, 0.36, 1)',
+          transition: 'width 2.5s cubic-bezier(0.16, 1, 0.3, 1), height 2.5s cubic-bezier(0.16, 1, 0.3, 1)',
         }}
       />
 
-      {/* Circular dot spinner - faster */}
-      <div style={{ marginTop: 32, position: 'relative', width: 40, height: 40 }}>
+      {/* Circular dot spinner - starts slow, accelerates */}
+      <div
+        style={{
+          marginTop: 32,
+          position: 'relative',
+          width: 40,
+          height: 40,
+          animation: 'spinAccel 2s cubic-bezier(0.25, 0.1, 0.25, 1) infinite',
+        }}
+      >
         {[0, 1, 2, 3, 4, 5].map((i) => (
           <div
             key={i}
@@ -62,7 +70,7 @@ const SplashScreen: React.FC<Props> = ({ onComplete }) => {
               left: '50%',
               transform: `rotate(${i * 60}deg) translate(16px, 0)`,
               opacity: 0,
-              animation: `dotPulse 0.8s ease-in-out ${i * 0.13}s infinite`,
+              animation: `dotPulse 0.6s ease-in-out ${i * 0.1}s infinite`,
             }}
           />
         ))}
@@ -72,6 +80,10 @@ const SplashScreen: React.FC<Props> = ({ onComplete }) => {
         @keyframes dotPulse {
           0%, 100% { opacity: 0.15; }
           50% { opacity: 1; }
+        }
+        @keyframes spinAccel {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
       `}</style>
     </div>
