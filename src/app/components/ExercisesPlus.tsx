@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { Dumbbell, Plus } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Dumbbell, Plus, ChevronDown } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 interface Props {
@@ -13,7 +13,9 @@ const TYPE2_OPTIONS = ['BAR', 'DUMB BELL', 'MACHINE', 'BODY WEIGHT'];
 const ExercisesPlus: React.FC<Props> = ({ onClose, onSaved }) => {
   const [saving, setSaving] = useState(false);
   const [focusedIdx, setFocusedIdx] = useState<number | null>(null);
-  const inputRefs = useRef<(HTMLInputElement | HTMLSelectElement | null)[]>([]);
+  const [openDropdown, setOpenDropdown] = useState<number | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const [name, setName] = useState('');
   const [type, setType] = useState('CHEST');
@@ -23,10 +25,21 @@ const ExercisesPlus: React.FC<Props> = ({ onClose, onSaved }) => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setOpenDropdown(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
   const rows = [
     { label: 'Name', value: name, onChange: setName, type: 'text' as const, placeholder: 'e.g. Bench Press' },
-    { label: 'Type', value: type, onChange: setType, type: 'select' as const, options: TYPE_OPTIONS },
-    { label: 'Type2', value: type2, onChange: setType2, type: 'select' as const, options: TYPE2_OPTIONS },
+    { label: 'Type', value: type, onChange: setType, type: 'dropdown' as const, options: TYPE_OPTIONS },
+    { label: 'Type2', value: type2, onChange: setType2, type: 'dropdown' as const, options: TYPE2_OPTIONS },
     { label: 'Multiplier', value: multiplier, onChange: setMultiplier, type: 'number' as const, placeholder: '1' },
     { label: 'Notes', value: notes, onChange: setNotes, type: 'text' as const, placeholder: 'Optional' },
   ];
@@ -62,6 +75,12 @@ const ExercisesPlus: React.FC<Props> = ({ onClose, onSaved }) => {
     }, 800);
   };
 
+  const selectOption = (rowIdx: number, option: string) => {
+    rows[rowIdx].onChange(option);
+    setOpenDropdown(null);
+    inputRefs.current[rowIdx]?.focus();
+  };
+
   return (
     <div
       style={{
@@ -95,13 +114,17 @@ const ExercisesPlus: React.FC<Props> = ({ onClose, onSaved }) => {
         </div>
 
         {/* Rows */}
-        <div style={{ display: 'flex', flexDirection: 'column', marginBottom: 28 }}>
+        <div ref={dropdownRef} style={{ display: 'flex', flexDirection: 'column', marginBottom: 28, position: 'relative' }}>
           {rows.map((row, i) => {
             const isFocused = focusedIdx === i;
+            const isOpen = openDropdown === i;
             return (
-              <div key={i}>
+              <div key={i} style={{ position: 'relative' }}>
                 <div
-                  onClick={() => inputRefs.current[i]?.focus()}
+                  onClick={() => {
+                    inputRefs.current[i]?.focus();
+                    if (row.type === 'dropdown') setOpenDropdown(isOpen ? null : i);
+                  }}
                   style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     paddingTop: isFocused ? 16 : 11,
@@ -121,44 +144,29 @@ const ExercisesPlus: React.FC<Props> = ({ onClose, onSaved }) => {
                     {row.label}
                   </span>
 
-                  {row.type === 'select' ? (
-                    <select
-                      ref={el => { inputRefs.current[i] = el; }}
-                      value={row.value as string}
-                      onChange={e => row.onChange(e.target.value)}
-                      onFocus={() => setFocusedIdx(i)}
-                      onBlur={() => setFocusedIdx(null)}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        outline: 'none',
-                        fontFamily: 'inherit',
+                  {row.type === 'dropdown' ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <span style={{
                         fontSize: isFocused ? '16px' : '13px',
                         fontWeight: 400,
                         letterSpacing: '0.15em',
                         color: '#000000',
                         textAlign: 'right',
-                        width: 140,
-                        padding: 0,
                         transition: 'font-size 0.15s ease',
-                        cursor: 'pointer',
-                        appearance: 'none',
-                        WebkitAppearance: 'none',
-                      }}
-                    >
-                      {row.options?.map(opt => (
-                        <option key={opt} value={opt} style={{ color: '#000' }}>{opt}</option>
-                      ))}
-                    </select>
+                      }}>
+                        {row.value}
+                      </span>
+                      <ChevronDown size={14} color="rgba(0,0,0,0.3)" style={{ transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} />
+                    </div>
                   ) : (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                       <input
-                        ref={el => { inputRefs.current[i] = el as any; }}
+                        ref={el => { inputRefs.current[i] = el; }}
                         type={row.type === 'number' ? 'number' : 'text'}
                         inputMode={row.type === 'number' ? 'decimal' : 'text'}
                         value={row.value}
                         onChange={e => row.onChange(e.target.value)}
-                        onFocus={() => setFocusedIdx(i)}
+                        onFocus={() => { setFocusedIdx(i); setOpenDropdown(null); }}
                         onBlur={() => setFocusedIdx(null)}
                         placeholder={row.placeholder}
                         style={{
@@ -179,6 +187,44 @@ const ExercisesPlus: React.FC<Props> = ({ onClose, onSaved }) => {
                     </div>
                   )}
                 </div>
+
+                {/* Custom dropdown */}
+                {row.type === 'dropdown' && isOpen && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '100%',
+                    right: 0,
+                    backgroundColor: '#ffffff',
+                    borderRadius: 12,
+                    overflow: 'hidden',
+                    zIndex: 50,
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+                    minWidth: 140,
+                    border: '1px solid rgba(0,0,0,0.08)',
+                  }}>
+                    {row.options?.map((opt, j) => (
+                      <div
+                        key={opt}
+                        onClick={(e) => { e.stopPropagation(); selectOption(i, opt); }}
+                        style={{
+                          padding: '10px 14px',
+                          cursor: 'pointer',
+                          fontSize: '12px',
+                          fontWeight: row.value === opt ? 700 : 400,
+                          color: '#000000',
+                          letterSpacing: '0.1em',
+                          textTransform: 'uppercase',
+                          backgroundColor: row.value === opt ? 'rgba(0,0,0,0.06)' : 'transparent',
+                          borderBottom: j < (row.options?.length ?? 0) - 1 ? '1px solid rgba(0,0,0,0.06)' : 'none',
+                        }}
+                      >
+                        {opt}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Divider */}
                 {i < rows.length - 1 && (
                   <div style={{ height: '1px', backgroundColor: 'rgba(0,0,0,0.08)' }} />
                 )}
