@@ -564,7 +564,15 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
     ...CARDIO_CONDITIONAL.filter(key =>
       todayActivities.some(a => a.exercise_name === key && a.km > 0)
     ),
-  ];
+  ].sort((a, b) => {
+    // Tracker always first
+    if (a === 'TRACKER') return -1;
+    if (b === 'TRACKER') return 1;
+    // Then activities with today's data (km > 0)
+    const aHasData = todayActivities.some(act => act.exercise_name === a && act.km > 0);
+    const bHasData = todayActivities.some(act => act.exercise_name === b && act.km > 0);
+    return (bHasData ? 1 : 0) - (aHasData ? 1 : 0); // Activities with data first
+  });
 
   const weeklyActivityTotal = selectedActivity && activityWeeklyData[selectedActivity]
     ? +activityWeeklyData[selectedActivity].reduce((s, v) => s + v, 0).toFixed(1)
