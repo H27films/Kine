@@ -213,16 +213,14 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
         </div>
 
         {exportDates.length > 0 && (
-          <div className="mt-3 flex flex-col gap-1">
-            {exportDates.map(d => (
-              <span key={d} style={{
-                fontSize: '0.75rem',
-                color: 'rgba(255,255,255,0.4)',
-                letterSpacing: '0.01em',
-              }}>
-                {formatDate(d)}
-              </span>
-            ))}
+          <div className="mt-3">
+            <span style={{
+              fontSize: '0.75rem',
+              color: 'rgba(255,255,255,0.4)',
+              letterSpacing: '0.01em',
+            }}>
+              {formatDate(exportDates[0])} - {formatDate(exportDates[exportDates.length - 1])}
+            </span>
           </div>
         )}
 
