@@ -297,18 +297,18 @@ const WeeklyChart: React.FC<{
               {summaryParts.unit}
             </span>
           )}
+          {activeTab === 'Weights' && effectiveWeekNumber !== null && (() => {
+            const weekTotal = data.reduce((s, v) => s + v, 0);
+            const displayTotal = weekTotal > 0 ? (weekTotal / 1000 >= 10 ? `${Math.round(weekTotal / 1000)}K` : `${(weekTotal / 1000).toFixed(1)}K`) : '0K';
+            const exerciseTotal = (weightsExerciseCounts[effectiveWeekNumber] || []).reduce((s, c) => s + c, 0);
+            return (
+              <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', marginLeft: '8px' }}>
+                <span style={{ color: '#ffffff' }}> / {exerciseTotal}</span>
+                <span style={{ color: 'rgba(255,255,255,0.35)' }}> EX</span>
+              </span>
+            );
+          })()}
         </div>
-        {activeTab === 'Weights' && effectiveWeekNumber !== null && (() => {
-          const weekTotal = data.reduce((s, v) => s + v, 0);
-          const displayTotal = weekTotal > 0 ? (weekTotal / 1000 >= 10 ? `${Math.round(weekTotal / 1000)}K` : `${(weekTotal / 1000).toFixed(1)}K`) : '0K';
-          const exerciseTotal = (weightsExerciseCounts[effectiveWeekNumber] || []).reduce((s, c) => s + c, 0);
-          return (
-            <div className="mb-5" style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em' }}>
-              <span style={{ color: '#ffffff' }}>{displayTotal}</span>
-              <span style={{ color: 'rgba(255,255,255,0.35)' }}> / {exerciseTotal} EX</span>
-            </div>
-          );
-        })()}
 
         <div className="flex items-end justify-between h-44" style={{ gap: '12px' }}>
           {data.map((val, i) => {
