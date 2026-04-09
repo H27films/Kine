@@ -2,6 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 
 const WEIGHT_TYPES = ['CHEST', 'BACK', 'LEGS'];
+const WEEKLY_MAX: Record<string, number> = {
+  CHEST: 25000,
+  BACK: 25000,
+  LEGS: 30000,
+};
 
 interface WeeklyGroupData {
   group: string;
@@ -44,7 +49,8 @@ const WeeklyVolumeCompact: React.FC<WeeklyVolumeCompactProps> = ({ selectedWeekN
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
       {weeklyData.map(({ group, total }) => {
-        const pct = maxTotal > 0 ? (total / maxTotal) * 100 : 0;
+        const maxVal = WEEKLY_MAX[group] ?? 30000;
+        const pct = maxVal > 0 ? Math.min((total / maxVal) * 100, 100) : 0;
         return (
           <div key={group}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
