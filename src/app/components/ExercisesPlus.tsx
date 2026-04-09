@@ -37,7 +37,7 @@ const ExercisesPlus: React.FC<Props> = ({ onClose, onSaved }) => {
   }, []);
 
   const rows = [
-    { label: 'Name', value: name, onChange: setName, type: 'text' as const, placeholder: 'e.g. Fly Dumbbell' },
+    { label: 'Name', value: name, onChange: setName, type: 'text' as const, placeholder: 'Fly Dumbbell' },
     { label: 'Type', value: type, onChange: setType, type: 'dropdown' as const, options: TYPE_OPTIONS },
     { label: 'Type2', value: type2, onChange: setType2, type: 'dropdown' as const, options: TYPE2_OPTIONS },
     { label: 'Multiplier', value: multiplier, onChange: setMultiplier, type: 'number' as const, placeholder: '1' },
