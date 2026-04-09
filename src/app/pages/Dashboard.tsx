@@ -846,7 +846,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
                     <circle cx={p.x} cy={p.y} r="5" fill="rgba(255,255,255,0.18)" filter="url(#dotBlur)" />
                     <circle cx={p.x} cy={p.y} r="3" fill="white" />
                     <text x={p.x} y={p.y - 9} textAnchor="middle" fill="rgba(255,255,255,0.70)" fontSize="6.5" fontWeight="700">
-                      {p.val}
+                      {+p.val.toFixed(1)}
                     </text>
                   </g>
                 ))}
