@@ -16,7 +16,7 @@ const headerTextStyle: React.CSSProperties = {
   fontFamily: "'Archivo', sans-serif",
   fontSize: '22px',
   fontWeight: 530,
-  fontStretch: '170%',
+  fontStretch: '200%',
   letterSpacing: '0.12em',
   color: '#ffffff',
   textTransform: 'uppercase',
