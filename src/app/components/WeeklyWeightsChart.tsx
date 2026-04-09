@@ -59,6 +59,8 @@ const WeeklyWeightsChart: React.FC = () => {
   }, []);
 
   const maxTotal = Math.max(...bars.map(b => b.total), 1);
+  const yMin = 30000;
+  const yMax = maxTotal;
   const avgTotal = bars.length > 0 ? bars.reduce((s, b) => s + b.total, 0) / bars.length : 0;
   const displayAvg = avgTotal >= 1000 ? `${Math.round(avgTotal / 1000)}K` : `${Math.round(avgTotal)}`;
 
@@ -90,16 +92,17 @@ const WeeklyWeightsChart: React.FC = () => {
 
       <div className="flex items-end justify-between h-44" style={{ gap: '12px' }}>
         {bars.map((bar) => {
-          const pct = maxTotal > 0 ? Math.max(bar.total / maxTotal, 0.04) : 0;
-          const rawPct = maxTotal > 0 ? bar.total / maxTotal : 0;
-          const brightness = bar.total > 0 ? Math.round(80 + rawPct * 175) : 0;
-          const barColor = bar.total > 0 ? `rgb(${brightness},${brightness},${brightness})` : 'rgba(255,255,255,0.05)';
+          const clampedVal = Math.min(Math.max(bar.total, yMin), yMax);
+          const pct = bar.total > yMin ? Math.max((clampedVal - yMin) / (yMax - yMin), 0.04) : 0;
+          const rawPct = yMax > yMin ? (bar.total - yMin) / (yMax - yMin) : 0;
+          const brightness = bar.total > yMin ? Math.round(80 + Math.max(rawPct, 0) * 175) : 0;
+          const barColor = bar.total > yMin ? `rgb(${brightness},${brightness},${brightness})` : 'rgba(255,255,255,0.05)';
           const displayValue = bar.total > 0 ? `${Math.round(bar.total / 1000)}k` : '';
 
           return (
             <div key={bar.weekNumber} className="flex flex-col items-center h-full justify-end" style={{ flex: '1', maxWidth: '28px' }}>
               <div style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.6)', marginBottom: '4px', height: '14px' }}>{displayValue}</div>
-              <div className="w-full relative transition-all" style={{ height: `${pct * 100}%`, backgroundColor: barColor, borderRadius: '9999px 9999px 0 0', minHeight: bar.total > 0 ? '4px' : 0 }}>
+              <div className="w-full relative transition-all" style={{ height: `${pct * 100}%`, backgroundColor: barColor, borderRadius: '9999px 9999px 0 0', minHeight: bar.total > yMin ? '4px' : 0 }}>
                 {bar.count > 0 && (
                   <div style={{
                     position: 'absolute',
