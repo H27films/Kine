@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 const WEIGHT_TYPES = ['CHEST', 'BACK', 'LEGS'];
@@ -21,17 +22,41 @@ const sectionLabelStyle: React.CSSProperties = {
 };
 
 const WeeklyWeightsChart: React.FC = () => {
+  const [allWeeks, setAllWeeks] = useState<number[]>([]);
+  const [pageIdx, setPageIdx] = useState(0);
   const [bars, setBars] = useState<WeekBarData[]>([]);
 
   useEffect(() => {
-    const loadData = async () => {
+    const loadWeeks = async () => {
+      const { data } = await supabase
+        .from('workouts')
+        .select('week')
+        .in('type', WEIGHT_TYPES)
+        .not('week', 'is', null);
+
+      if (!data) return;
+      const weeks = [...new Set((data as any[]).map(r => Number(r.week)))]
+        .filter(w => !isNaN(w))
+        .sort((a, b) => b - a);
+      setAllWeeks(weeks);
+    };
+    loadWeeks();
+  }, []);
+
+  useEffect(() => {
+    const loadBars = async () => {
+      if (allWeeks.length === 0) return;
+      const startIdx = pageIdx * NUM_WEEKS;
+      const endIdx = Math.min(startIdx + NUM_WEEKS, allWeeks.length);
+      const windowWeeks = allWeeks.slice(startIdx, endIdx);
+
+      if (windowWeeks.length === 0) return;
+
       const { data } = await supabase
         .from('workouts')
         .select('week, total_weight, exercise_id')
         .in('type', WEIGHT_TYPES)
-        .not('week', 'is', null)
-        .order('week', { ascending: false })
-        .limit(1000);
+        .in('week', windowWeeks);
 
       if (!data) return;
 
@@ -43,33 +68,49 @@ const WeeklyWeightsChart: React.FC = () => {
         weekMap[week].count += 1;
       }
 
-      const sortedWeeks = Object.keys(weekMap)
-        .map(Number)
+      const result: WeekBarData[] = windowWeeks
+        .filter(w => weekMap[w])
         .sort((a, b) => a - b)
-        .slice(-NUM_WEEKS);
-
-      const result: WeekBarData[] = sortedWeeks.map(week => ({
-        weekNumber: week,
-        total: weekMap[week].total,
-        count: weekMap[week].count,
-      }));
+        .map(week => ({
+          weekNumber: week,
+          total: weekMap[week].total,
+          count: weekMap[week].count,
+        }));
 
       setBars(result);
     };
-    loadData();
-  }, []);
+    loadBars();
+  }, [allWeeks, pageIdx]);
 
   const maxTotal = Math.max(...bars.map(b => b.total), 1);
   const yMin = 30000;
   const yMax = maxTotal;
-  // Exclude most recent week from average calculation
   const prevWeeks = bars.slice(1);
   const avgTotal = prevWeeks.length > 0 ? prevWeeks.reduce((s, b) => s + b.total, 0) / prevWeeks.length : 0;
   const displayAvg = avgTotal >= 1000 ? `${Math.round(avgTotal / 1000)}K` : `${Math.round(avgTotal)}`;
 
+  const totalPages = Math.ceil(allWeeks.length / NUM_WEEKS);
+  const canPrev = pageIdx > 0;
+  const canNext = pageIdx < totalPages - 1;
+  const onPrev = () => { if (canPrev) setPageIdx(i => i - 1); };
+  const onNext = () => { if (canNext) setPageIdx(i => i + 1); };
+
+  const weekRange = bars.length > 0 ? `${bars[0].weekNumber} - ${bars[bars.length - 1].weekNumber}` : '';
+
   return (
     <div className="rounded-lg p-6 relative" style={{ backgroundColor: '#121212' }}>
-      <p style={{ ...sectionLabelStyle, marginBottom: '14px' }}>7 WEEKS</p>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <p style={{ ...sectionLabelStyle, marginBottom: 0 }}>7 WEEKS</p>
+          <button onClick={onPrev} disabled={!canPrev} style={{ opacity: canPrev ? 0.55 : 0.2, background: 'none', border: 'none', cursor: canPrev ? 'pointer' : 'default', padding: 0, display: 'flex', alignItems: 'center' }}>
+            <ChevronLeft size={18} color="white" />
+          </button>
+          <button onClick={onNext} disabled={!canNext} style={{ opacity: canNext ? 0.55 : 0.2, background: 'none', border: 'none', cursor: canNext ? 'pointer' : 'default', padding: 0, display: 'flex', alignItems: 'center' }}>
+            <ChevronRight size={18} color="white" />
+          </button>
+        </div>
+        <span style={{ fontSize: '0.85rem', fontWeight: 700, letterSpacing: '0.06em', color: '#ffffff', marginRight: '6px' }}>{weekRange}</span>
+      </div>
 
       <div className="flex items-baseline gap-1 mb-5">
         <span style={{
