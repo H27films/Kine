@@ -15,9 +15,9 @@ interface HeaderProps {
 const headerTextStyle: React.CSSProperties = {
   fontFamily: "'Archivo', sans-serif",
   fontSize: '23px',
-  fontWeight: 500,
-  fontStretch: '145%',
-  letterSpacing: '0.10em',
+  fontWeight: 550,
+  fontStretch: '170%',
+  letterSpacing: '0.12em',
   color: '#ffffff',
   textTransform: 'uppercase',
 };
