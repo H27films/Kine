@@ -63,7 +63,7 @@ const WeeklyWeightsChart: React.FC = () => {
   const displayAvg = avgTotal >= 1000 ? `${Math.round(avgTotal / 1000)}K` : `${Math.round(avgTotal)}`;
 
   return (
-    <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff' }}>
+    <div className="rounded-lg p-6 relative" style={{ backgroundColor: '#121212' }}>
       <p style={sectionLabelStyle}>7 WEEKS</p>
 
       <div className="flex items-baseline gap-1 mb-5">
@@ -132,6 +132,8 @@ const WeeklyWeightsChart: React.FC = () => {
           );
         })}
       </div>
+
+      <div className="absolute inset-0 pointer-events-none rounded-lg" style={{ opacity: 0.025, background: 'radial-gradient(circle at top right, white, transparent, transparent)' }} />
     </div>
   );
 };
