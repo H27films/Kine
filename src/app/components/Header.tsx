@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, ArrowLeft, BarChart3, Flame } from 'lucide-react';
+import { Menu, ArrowLeft, BarChart3 } from 'lucide-react';
 import { Page } from '../../types';
+import { RunningManIcon as NewRunningManIcon, CaloriesIcon as NewCaloriesIcon } from './NavIcons';
 
 interface HeaderProps {
   title: string;
@@ -10,12 +11,6 @@ interface HeaderProps {
   onToggleWeeklySummary?: () => void;
   showWeeklySummary?: boolean;
 }
-
-const RunningManIcon = ({ size = 16 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-    <path d="M13.49 5.48c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-3.6 13.9l1-4.4 2.1 2v6h2v-7.5l-2.1-2 .6-3c1.3 1.5 3.3 2.5 5.5 2.5v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1l-5.2 2.2v4.7h2v-3.4l1.8-.7-1.6 8.1-4.9-1-.4 2 7 1.4z"/>
-  </svg>
-);
 
 const headerTextStyle: React.CSSProperties = {
   fontFamily: "'Archivo', sans-serif",
@@ -50,8 +45,8 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
 
   const menuItems: { label: string; icon: IconComponent; page: Page }[] = [
     { label: 'Weights',  icon: DumbbellIcon,                                                    page: 'weights'   },
-    { label: 'Cardio',   icon: ({ size }: { size?: number }) => <RunningManIcon size={size} />, page: 'cardio'    },
-    { label: 'Calories', icon: Flame,                                                           page: 'calories'  },
+    { label: 'Cardio',   icon: ({ size }: { size?: number }) => <NewRunningManIcon size={size} />, page: 'cardio'    },
+    { label: 'Calories', icon: ({ size }: { size?: number }) => <NewCaloriesIcon size={size} />,  page: 'calories'  },
     { label: 'Data+',    icon: BarChart3,                                                       page: 'analytics' },
   ];
 
@@ -59,8 +54,8 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
 
   const getLogIcon = () => {
     if (currentPage === 'weights') return <img src="/icons/dumbbell.svg" style={{ width: 20, height: 20, filter: 'brightness(0) invert(1)' }} alt="weights" />;
-    if (currentPage === 'cardio') return <RunningManIcon size={20} />;
-    if (currentPage === 'calories') return <Flame size={20} color="white" />;
+    if (currentPage === 'cardio') return <NewRunningManIcon size={20} color="#ffffff" />;
+    if (currentPage === 'calories') return <NewCaloriesIcon size={20} color="#ffffff" />;
     return null;
   };
 

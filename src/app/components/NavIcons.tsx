@@ -5,9 +5,14 @@ interface IconProps {
   color?: string;
 }
 
+// Thicker stroke approach to make icons appear bolder
+const THICKER_STYLE: React.CSSProperties = {
+  filter: 'drop-shadow(0 0 0.5px currentColor)',
+};
+
 export const HomeIcon: React.FC<IconProps> = ({ size = 22, color = 'currentColor' }) => (
-  <svg width={size} height={size} viewBox="0 0 490 504" preserveAspectRatio="xMidYMid meet">
-    <g transform="translate(0,504) scale(0.05,-0.05)" fill={color} stroke="none">
+  <svg width={size} height={size} viewBox="0 0 490 504" preserveAspectRatio="xMidYMid meet" style={THICKER_STYLE}>
+    <g transform="translate(0,504) scale(0.05,-0.05)" fill={color} stroke={color} strokeWidth="8">
       <path d="M2660 6750 l-1970 -1970 605 0 605 0 0 -1420 0 -1420 1050 0 1050 0 0 890 0 890 640 0 640 0 0 -890 0 -890 1050 0 1050 0 0 1420 0 1420 605 0 605 0 -1970 1970 c-1083 1084 -1974 1970 -1980 1970 -6 0 -897 -886 -1980 -1970z m3698 -40 l1706 -1710 -442 0 -442 0 -5 -1425 -5 -1425 -845 -5 -845 -5 0 900 0 900 -840 0 -840 0 0 -900 0 -900 -845 5 -845 5 -5 1425 -5 1425 -443 0 -442 0 1707 1710 c938 941 1711 1710 1718 1710 7 0 780 -769 1718 -1710z"/>
     </g>
   </svg>
@@ -22,8 +27,8 @@ export const CaloriesIcon: React.FC<IconProps> = ({ size = 22, color = 'currentC
 );
 
 export const ProfileIcon: React.FC<IconProps> = ({ size = 22, color = 'currentColor' }) => (
-  <svg width={size} height={size} viewBox="0 0 503 600" preserveAspectRatio="xMidYMid meet">
-    <g transform="translate(0,600) scale(0.1,-0.1)" fill={color} stroke="none">
+  <svg width={size} height={size} viewBox="0 0 503 600" preserveAspectRatio="xMidYMid meet" style={THICKER_STYLE}>
+    <g transform="translate(0,600) scale(0.1,-0.1)" fill={color} stroke={color} strokeWidth="8">
       <path d="M2207 5534 c-223 -40 -424 -144 -596 -308 -268 -257 -403 -605 -372 -962 36 -407 244 -750 574 -946 l89 -52 -94 -32 c-194 -66 -361 -152 -540 -281 -100 -72 -288 -250 -370 -352 -223 -277 -366 -599 -425 -959 -16 -102 -32 -697 -19 -747 4 -14 15 -34 26 -45 20 -20 42 -20 1955 -20 1913 0 1935 0 1955 20 11 11 22 30 25 42 3 13 4 149 2 303 -3 297 -13 386 -63 594 -106 432 -342 816 -675 1096 -75 62 -96 75 -125 75 -46 0 -70 -14 -90 -52 -29 -56 -13 -88 79 -164 329 -270 552 -635 636 -1040 27 -130 43 -351 39 -529 l-3 -140 -1765 -3 c-971 -1 -1776 0 -1789 3 l-23 6 5 277 c5 311 15 377 87 594 165 497 550 906 1037 1104 197 79 376 114 688 133 237 15 358 47 533 142 110 59 196 125 295 228 174 180 282 397 323 649 19 114 14 305 -10 420 -103 479 -466 846 -933 941 -121 25 -334 27 -456 5z m419 -209 c373 -71 680 -369 777 -755 30 -121 30 -361 -1 -472 -99 -361 -368 -635 -717 -728 -101 -27 -291 -37 -395 -21 -420 65 -741 377 -831 806 -21 100 -17 315 9 419 93 376 400 674 772 751 89 18 290 18 386 0z"/>
     </g>
   </svg>
