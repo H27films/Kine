@@ -15,7 +15,8 @@ interface WeeklyVolumeCompactProps {
 
 const WeeklyVolumeCompact: React.FC<WeeklyVolumeCompactProps> = ({ selectedWeekNumber, allWeekNumbers }) => {
   const [weeklyData, setWeeklyData] = useState<WeeklyGroupData[]>([]);
-  const effectiveWeek = selectedWeekNumber ?? allWeekNumbers[0];
+  // Default to current week (index 0 = most recent week)
+  const effectiveWeek = selectedWeekNumber ?? (allWeekNumbers.length > 0 ? allWeekNumbers[0] : null);
 
   useEffect(() => {
     const loadWeeklyData = async () => {
