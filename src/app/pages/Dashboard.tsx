@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Dumbbell, ChevronLeft, ChevronRight, Footprints } from 'lucide-react';
 import { DailyActivityCards } from '../components/DailyActivityCards';
 import { WeeklySummaryBar } from '../components/WeeklySummaryBar';
+import WeeklyVolumeCompact from '../components/WeeklyVolumeCompact';
 import { supabase, weeksAgoMonday } from '../../lib/supabase';
 
 type ChartTab = 'Cardio' | 'Weights' | 'Calories' | 'Score';
@@ -875,6 +876,10 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
 
       <section className="mb-4 mt-8">
         <WeeklyChart cardioWeeks={cardioWeeks} weightsWeeks={weightsWeeks} calorieWeeks={calorieWeeks} scoreWeeks={scoreWeeks} weightsExerciseCounts={weightsExerciseCounts} />
+      </section>
+
+      <section className="mt-6">
+        <WeeklyVolumeCompact weeksData={weightsWeeks} />
       </section>
 
       <section className="mt-8">
