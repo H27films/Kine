@@ -49,19 +49,19 @@ const SplashScreen: React.FC<Props> = ({ onComplete }) => {
       />
 
       {/* Spinner - container stays fixed, dots pulse in sequence */}
-      <div style={{ marginTop: 32, position: 'relative', width: 40, height: 40 }}>
+      <div style={{ marginTop: 32, position: 'relative', width: 32, height: 32 }}>
         {[0, 1, 2, 3, 4, 5].map((i) => (
           <div
             key={i}
             style={{
               position: 'absolute',
-              width: 7,
-              height: 7,
+              width: 6,
+              height: 6,
               borderRadius: '50%',
               backgroundColor: '#000000',
               top: '50%',
               left: '50%',
-              transform: `rotate(${i * 60}deg) translate(16px, 0)`,
+              transform: `rotate(${i * 60}deg) translate(13px, 0)`,
               animation: `dotChase 0.8s ease-in-out ${i * 0.08}s infinite`,
             }}
           />
