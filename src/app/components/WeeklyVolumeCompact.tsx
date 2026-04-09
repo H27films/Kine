@@ -15,15 +15,16 @@ interface WeeklyVolumeCompactProps {
 
 const WeeklyVolumeCompact: React.FC<WeeklyVolumeCompactProps> = ({ selectedWeekNumber, allWeekNumbers }) => {
   const [weeklyData, setWeeklyData] = useState<WeeklyGroupData[]>([]);
+  const effectiveWeek = selectedWeekNumber ?? allWeekNumbers[0];
 
   useEffect(() => {
     const loadWeeklyData = async () => {
-      if (!selectedWeekNumber || allWeekNumbers.length === 0) return;
+      if (!effectiveWeek || allWeekNumbers.length === 0) return;
       const { data } = await supabase
         .from('workouts')
         .select('type, total_weight')
         .in('type', WEIGHT_TYPES)
-        .eq('week', selectedWeekNumber);
+        .eq('week', effectiveWeek);
 
       const sumByType = (rows: any[] | null, type: string) =>
         (rows || []).filter(r => r.type === type).reduce((s, r) => s + Number(r.total_weight || 0), 0);
@@ -35,7 +36,7 @@ const WeeklyVolumeCompact: React.FC<WeeklyVolumeCompactProps> = ({ selectedWeekN
       setWeeklyData(groups);
     };
     loadWeeklyData();
-  }, [selectedWeekNumber, allWeekNumbers]);
+  }, [effectiveWeek, allWeekNumbers.length]);
 
   const maxTotal = Math.max(...weeklyData.map(d => d.total), 1);
 
