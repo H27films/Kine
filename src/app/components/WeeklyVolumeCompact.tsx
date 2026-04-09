@@ -49,8 +49,6 @@ const WeeklyVolumeCompact: React.FC<WeeklyVolumeCompactProps> = ({ selectedWeekN
     loadWeeklyData();
   }, [effectiveWeek, allWeekNumbers.length]);
 
-  const maxTotal = Math.max(...weeklyData.map(d => d.total), 1);
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
       {weeklyData.map(({ group, total, count }) => {
