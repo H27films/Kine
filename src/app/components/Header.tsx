@@ -118,14 +118,13 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
         <button
           onClick={onToggleWeeklySummary}
           className="absolute left-1/2 -translate-x-1/2 bottom-3"
-          style={{ background: 'none', border: 'none', cursor: 'pointer', WebkitTapHighlightColor: 'transparent' }}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', WebkitTapHighlightColor: 'transparent', padding: 0 }}
         >
-          <span
-            className="text-xl font-black tracking-tighter text-white uppercase"
-            style={{ opacity: 1 }}
-          >
-            Kiné
-          </span>
+          <img
+            src="/KineHeader.svg"
+            alt="Kine"
+            style={{ height: '24px', width: 'auto', display: 'block' }}
+          />
         </button>
       ) : (
         <>
@@ -141,7 +140,11 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
               onClick={onToggleWeeklySummary}
               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, WebkitTapHighlightColor: 'transparent' }}
             >
-              <span className="text-xl font-black tracking-tighter text-white uppercase">Kiné</span>
+              <img
+                src="/KineHeader.svg"
+                alt="Kine"
+                style={{ height: '24px', width: 'auto', display: 'block' }}
+              />
             </button>
           </div>
         </>
