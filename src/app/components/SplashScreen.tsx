@@ -37,7 +37,7 @@ const SplashScreen: React.FC<Props> = ({ onComplete }) => {
       }}
     >
       {/* Logo with smooth fade-in */}
-      <div style={{ opacity: logoVisible ? 1 : 0, transition: 'opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1)', filter: 'brightness(0) invert(1)' }}>
+      <div style={{ opacity: logoVisible ? 1 : 0, transition: 'opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1)' }}>
         <img src="/KineLogo.svg" alt="Kine" style={{ width: 100, height: 100 }} />
       </div>
 
