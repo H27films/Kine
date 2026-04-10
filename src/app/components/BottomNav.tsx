@@ -16,8 +16,8 @@ export const BottomNav: React.FC<NavigationProps> = ({ currentPage, onNavigate }
       page: 'dashboard',
     },
     {
-      icon: <img src="/icons/dumbbell.svg" style={{ width: 22, height: 22, filter: 'brightness(0) invert(1)' }} alt="weights" />,
-      activeIcon: <img src="/icons/dumbbell.svg" style={{ width: 22, height: 22, filter: 'brightness(0)' }} alt="weights" />,
+      icon: <img src="/icons/dumbbell.svg" style={{ width: 21, height: 21, filter: 'brightness(0) invert(1)', opacity: 0.7 }} alt="weights" />,
+      activeIcon: <img src="/icons/dumbbell.svg" style={{ width: 21, height: 21, filter: 'brightness(0)' }} alt="weights" />,
       page: 'weights',
     },
     {

@@ -60,7 +60,7 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
   const getLogIcon = () => {
     if (currentPage === 'weights') return <img src="/icons/dumbbell.svg" style={{ width: 20, height: 20, filter: 'brightness(0) invert(1)' }} alt="weights" />;
     if (currentPage === 'cardio') return <NewRunningManIcon size={24} color="#ffffff" />;
-    if (currentPage === 'calories') return <NewCaloriesIcon size={20} color="#ffffff" />;
+    if (currentPage === 'calories') return <NewCaloriesIcon size={25} color="#ffffff" />;
     return null;
   };
 

@@ -26,7 +26,7 @@ const SplashScreen: React.FC<Props> = ({ onComplete }) => {
         position: 'fixed',
         inset: 0,
         zIndex: 9999,
-        backgroundColor: '#ffffff',
+        backgroundColor: '#0f0f0f',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -37,16 +37,9 @@ const SplashScreen: React.FC<Props> = ({ onComplete }) => {
       }}
     >
       {/* Logo with smooth fade-in */}
-      <img
-        src="/KineLogo.svg"
-        alt="Kine"
-        style={{
-          width: 100,
-          height: 100,
-          opacity: logoVisible ? 1 : 0,
-          transition: 'opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1)',
-        }}
-      />
+      <div style={{ opacity: logoVisible ? 1 : 0, transition: 'opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1)', filter: 'brightness(0) invert(1)' }}>
+        <img src="/KineLogo.svg" alt="Kine" style={{ width: 100, height: 100 }} />
+      </div>
 
       {/* Spinner - container stays fixed, dots pulse in sequence */}
       <div style={{ marginTop: 32, position: 'relative', width: 24, height: 24 }}>
@@ -58,7 +51,7 @@ const SplashScreen: React.FC<Props> = ({ onComplete }) => {
               width: 5,
               height: 5,
               borderRadius: '50%',
-              backgroundColor: '#000000',
+              backgroundColor: '#ffffff',
               top: '50%',
               left: '50%',
               transform: `rotate(${i * 60}deg) translate(10px, 0)`,
