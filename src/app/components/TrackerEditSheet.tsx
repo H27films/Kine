@@ -97,7 +97,7 @@ const TrackerEditSheet: React.FC<Props> = ({ onClose, onSaved }) => {
       const tcNeedsUpdate = existing && (existing.total_cardio == null || Number(existing.total_cardio) !== val);
 
       if (existing && (kmChanged || tcNeedsUpdate)) {
-        const updateData: Record<string, any> = { km: val, total_cardio: val, new_entry: getNewEntryStatus(dateStr) };
+        const updateData: Record<string, any> = { km: val, total_cardio: val, day: dayName, new_entry: getNewEntryStatus(dateStr) };
         await supabase.from('workouts').update(updateData).eq('id', existing.id);
       } else if (!existing && val > 0) {
         await supabase.from('workouts').insert({
