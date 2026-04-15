@@ -359,7 +359,7 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
             </div>
           </div>
           <button
-            onClick={loadData}
+            onClick={() => window.location.reload()}
             style={{
               background: 'none',
               border: 'none',
