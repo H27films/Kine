@@ -49,7 +49,7 @@ export interface Workout {
  * This ensures the date string matches the actual Malaysia calendar date,
  * not the UTC date that JavaScript would give by default.
  */
-function malaysiaDateStr(d: Date): string {
+export function malaysiaDateStr(d: Date): string {
   // Create a date formatter for Malaysia timezone
   const formatter = new Intl.DateTimeFormat('en-CA', {
     year: 'numeric',

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { supabase, getNewEntryStatus, recalculateDailyTotals, getISOWeek, getDayName, malaysiaDateStr } from '../../lib/supabase';
+import { supabase, getNewEntryStatus, recalculateDailyTotals, malaysiaDateStr } from '../../lib/supabase';
 
 const TRACKER_EXERCISE_ID = 82;
 const MONTH_NAMES = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
@@ -96,7 +96,7 @@ const TrackerEditSheet: React.FC<Props> = ({ onClose, onSaved }) => {
 
       const dateStr = fmtDate(editableDays[i]);
       const barDate = editableDays[i];
-      const weekNum = getWeekForDate(barDate);
+      const weekNum = getWeekForDate(new Date());
       const dayName = getDayForDate(barDate);
 
       const { data: existing } = await supabase
@@ -111,7 +111,7 @@ const TrackerEditSheet: React.FC<Props> = ({ onClose, onSaved }) => {
       const tcNeedsUpdate = existing && (existing.total_cardio == null || Number(existing.total_cardio) !== val);
 
       if (existing && (kmChanged || tcNeedsUpdate)) {
-        const updateData: Record<string, any> = { km: val, total_cardio: val, day: dayName, new_entry: getNewEntryStatus(dateStr) };
+        const updateData: Record<string, any> = { km: val, total_cardio: val, day: dayName, week: weekNum, new_entry: getNewEntryStatus(dateStr) };
         await supabase.from('workouts').update(updateData).eq('id', existing.id);
       } else if (!existing && val > 0) {
         await supabase.from('workouts').insert({
