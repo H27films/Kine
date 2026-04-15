@@ -120,6 +120,8 @@ const TrackerEditSheet: React.FC<Props> = ({ onClose, onSaved }) => {
       await recalculateDailyTotals(dateStr);
     }
     setEditSaving(false);
+    // Dispatch custom event so all charts can refetch
+    window.dispatchEvent(new CustomEvent('kine:data-updated'));
     onSaved();
     onClose();
   };

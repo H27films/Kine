@@ -36,6 +36,14 @@ export const CardioTypeChart: React.FC = () => {
   const [selectedType, setSelectedType] = useState('RUNNING');
   const [typePickerOpen, setTypePickerOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('weekly');
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  // Listen for data updates from TrackerEditSheet etc.
+  useEffect(() => {
+    const handler = () => setRefreshKey(k => k + 1);
+    window.addEventListener('kine:data-updated', handler);
+    return () => window.removeEventListener('kine:data-updated', handler);
+  }, []);
 
   // Weekly: navigate by actual week numbers from supabase
   const [availableWeeks, setAvailableWeeks] = useState<number[]>([]);
@@ -120,7 +128,7 @@ export const CardioTypeChart: React.FC = () => {
       setWeeklyCount(count);
     };
     load();
-  }, [selectedType, viewMode, weekIdx, availableWeeks]);
+  }, [selectedType, viewMode, weekIdx, availableWeeks, refreshKey]);
 
   // Load monthly bar data by date range
   useEffect(() => {
@@ -147,7 +155,7 @@ export const CardioTypeChart: React.FC = () => {
       setMonthlyCount(count);
     };
     load();
-  }, [selectedType, viewMode, monthOffset]);
+  }, [selectedType, viewMode, monthOffset, refreshKey]);
 
   const displayData = viewMode === 'weekly' ? weeklyData : monthlyData;
   const rawMax = Math.max(...displayData, 0.1);

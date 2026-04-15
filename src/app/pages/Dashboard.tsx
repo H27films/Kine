@@ -392,6 +392,14 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
   const [scoreWeeks, setScoreWeeks] = useState<WeekData[]>([]);
 
   const [activityWeeklyData, setActivityWeeklyData] = useState<Record<string, number[]>>({});
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  // Listen for data updates from TrackerEditSheet etc.
+  useEffect(() => {
+    const handler = () => setRefreshKey(k => k + 1);
+    window.addEventListener('kine:data-updated', handler);
+    return () => window.removeEventListener('kine:data-updated', handler);
+  }, []);
 
   useEffect(() => {
     const loadCardio = async () => {
@@ -586,7 +594,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
       }
     };
     loadWeeklyCharts();
-  }, []);
+  }, [refreshKey]);
 
   const visibleCardioKeys = [
     ...CARDIO_ALWAYS,
