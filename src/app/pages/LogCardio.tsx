@@ -593,7 +593,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySumm
 
       {/* Tracker Edit Sheet */}
       {showTrackerEdit && (
-        <TrackerEditSheet onClose={() => setShowTrackerEdit(false)} onSaved={() => setShowTrackerEdit(false)} />
+        <TrackerEditSheet onClose={() => setShowTrackerEdit(false)} onSaved={() => { setShowTrackerEdit(false); setSaveSuccess(v => !v); }} />
       )}
 
     </div>

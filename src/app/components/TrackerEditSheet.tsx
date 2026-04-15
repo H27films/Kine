@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { supabase, getNewEntryStatus } from '../../lib/supabase';
+import { supabase, getNewEntryStatus, recalculateDailyTotals } from '../../lib/supabase';
 
 const TRACKER_EXERCISE_ID = 82;
 const MONTH_NAMES = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
@@ -70,6 +70,7 @@ const TrackerEditSheet: React.FC<Props> = ({ onClose, onSaved }) => {
 
   const handleSave = async () => {
     setEditSaving(true);
+    const savedDates = new Set<string>();
     for (let i = 0; i < 7; i++) {
       const raw = editRowValues[i].trim();
       if (raw === '') continue;
@@ -83,19 +84,23 @@ const TrackerEditSheet: React.FC<Props> = ({ onClose, onSaved }) => {
       const dateStr = fmtDate(editableDays[i]);
       const barDate = editableDays[i];
       const weekNum = getWeekNum(barDate);
-      const dayName = DAY_NAMES[barDate.getDay()];
+      const dayName = DAY_ABBREVS[barDate.getDay()];
 
       const { data: existing } = await supabase
         .from('workouts')
-        .select('id')
+        .select('id, km, total_cardio')
         .eq('date', dateStr)
         .eq('type', 'CARDIO')
         .eq('exercise_id', TRACKER_EXERCISE_ID)
         .maybeSingle();
 
-      if (existing) {
-        await supabase.from('workouts').update({ km: val, new_entry: getNewEntryStatus(dateStr) }).eq('id', existing.id);
-      } else if (val > 0) {
+      const kmChanged = isNaN(origVal) || val !== origVal;
+      const tcNeedsUpdate = existing && (existing.total_cardio == null || Number(existing.total_cardio) !== val);
+
+      if (existing && (kmChanged || tcNeedsUpdate)) {
+        const updateData: Record<string, any> = { km: val, total_cardio: val, new_entry: getNewEntryStatus(dateStr) };
+        await supabase.from('workouts').update(updateData).eq('id', existing.id);
+      } else if (!existing && val > 0) {
         await supabase.from('workouts').insert({
           date: dateStr,
           week: weekNum,
@@ -103,11 +108,17 @@ const TrackerEditSheet: React.FC<Props> = ({ onClose, onSaved }) => {
           type: 'CARDIO',
           exercise_id: TRACKER_EXERCISE_ID,
           km: val,
+          total_cardio: val,
           total_score_k: null,
           new_entry: 'New',
           source: 'app',
         });
       }
+      savedDates.add(dateStr);
+    }
+    // Recalculate daily totals for all saved dates
+    for (const dateStr of savedDates) {
+      await recalculateDailyTotals(dateStr);
     }
     setEditSaving(false);
     onSaved();
