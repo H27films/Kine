@@ -1,16 +1,30 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { supabase, getNewEntryStatus, recalculateDailyTotals } from '../../lib/supabase';
+import { supabase, getNewEntryStatus, recalculateDailyTotals, getISOWeek, getDayName, malaysiaDateStr } from '../../lib/supabase';
 
 const TRACKER_EXERCISE_ID = 82;
 const MONTH_NAMES = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
 const DAY_ABBREVS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
-const getWeekNum = (d: Date): number => {
-  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-  const dayNum = date.getUTCDay() || 7;
-  date.setUTCDate(date.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
-  return Math.ceil((((date.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+// Same week calculation as getISOWeek in supabase.ts but for any date
+const getWeekForDate = (d: Date): number => {
+  const APP_START = new Date('2025-01-06T00:00:00Z');
+  const dateStr = malaysiaDateStr(d);
+  const dateObj = new Date(dateStr + 'T00:00:00Z');
+  const diffDays = Math.floor((dateObj.getTime() - APP_START.getTime()) / (1000 * 60 * 60 * 24));
+  return Math.max(1, Math.floor(diffDays / 7) + 1);
+};
+
+// Same day logic as getDayName in supabase.ts but for any date
+const getDayForDate = (d: Date): string => {
+  const dateStr = malaysiaDateStr(d);
+  const dateObj = new Date(dateStr + 'T12:00:00Z');
+  const formatter = new Intl.DateTimeFormat('en-US', { weekday: 'short', timeZone: 'Asia/Kuala_Lumpur' });
+  const dayName = formatter.format(dateObj).toUpperCase();
+  const dayMap: Record<string, string> = {
+    'MON': 'MON', 'TUE': 'TUE', 'WED': 'WED', 'THU': 'THU',
+    'FRI': 'FRI', 'SAT': 'SAT', 'SUN': 'SUN',
+  };
+  return dayMap[dayName] || dayName;
 };
 
 const getEditableDays = (): Date[] => {
@@ -82,8 +96,8 @@ const TrackerEditSheet: React.FC<Props> = ({ onClose, onSaved }) => {
 
       const dateStr = fmtDate(editableDays[i]);
       const barDate = editableDays[i];
-      const weekNum = getWeekNum(barDate);
-      const dayName = DAY_ABBREVS[barDate.getDay()];
+      const weekNum = getWeekForDate(barDate);
+      const dayName = getDayForDate(barDate);
 
       const { data: existing } = await supabase
         .from('workouts')
