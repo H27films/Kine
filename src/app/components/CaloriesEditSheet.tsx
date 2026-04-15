@@ -1,17 +1,30 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { supabase, getNewEntryStatus } from '../../lib/supabase';
+import { supabase, getNewEntryStatus, recalculateDailyTotals, malaysiaDateStr } from '../../lib/supabase';
 
 const CALORIES_EXERCISE_ID = 90;
 const MONTH_NAMES = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
 const DAY_ABBREVS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-const getWeekNum = (d: Date): number => {
-  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-  const dayNum = date.getUTCDay() || 7;
-  date.setUTCDate(date.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
-  return Math.ceil((((date.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+// Same week calculation as getISOWeek in supabase.ts but for any date
+const getWeekForDate = (d: Date): number => {
+  const APP_START = new Date('2025-01-06T00:00:00Z');
+  const dateStr = malaysiaDateStr(d);
+  const dateObj = new Date(dateStr + 'T00:00:00Z');
+  const diffDays = Math.floor((dateObj.getTime() - APP_START.getTime()) / (1000 * 60 * 60 * 24));
+  return Math.max(1, Math.floor(diffDays / 7) + 1);
+};
+
+// Same day logic as getDayName in supabase.ts but for any date
+const getDayForDate = (d: Date): string => {
+  const dateStr = malaysiaDateStr(d);
+  const dateObj = new Date(dateStr + 'T12:00:00Z');
+  const formatter = new Intl.DateTimeFormat('en-US', { weekday: 'short', timeZone: 'Asia/Kuala_Lumpur' });
+  const dayName = formatter.format(dateObj).toUpperCase();
+  const dayMap: Record<string, string> = {
+    'MON': 'MON', 'TUE': 'TUE', 'WED': 'WED', 'THU': 'THU',
+    'FRI': 'FRI', 'SAT': 'SAT', 'SUN': 'SUN',
+  };
+  return dayMap[dayName] || dayName;
 };
 
 const getEditableDays = (): Date[] => {
@@ -58,7 +71,7 @@ const CaloriesEditSheet: React.FC<Props> = ({ onClose, onSaved }) => {
       const valMap: Record<string, string> = {};
       if (data) {
         for (const row of data as any[]) {
-          if (row.calories) valMap[row.date] = String(row.calories);
+          if (row.calories != null) valMap[row.date] = String(row.calories);
         }
       }
       const loaded = dateStrings.map(ds => valMap[ds] || '');
@@ -70,6 +83,7 @@ const CaloriesEditSheet: React.FC<Props> = ({ onClose, onSaved }) => {
 
   const handleSave = async () => {
     setEditSaving(true);
+    const savedDates = new Set<string>();
     for (let i = 0; i < 7; i++) {
       const raw = editRowValues[i].trim();
       if (raw === '') continue;
@@ -82,20 +96,24 @@ const CaloriesEditSheet: React.FC<Props> = ({ onClose, onSaved }) => {
 
       const dateStr = fmtDate(editableDays[i]);
       const barDate = editableDays[i];
-      const weekNum = getWeekNum(barDate);
-      const dayName = DAY_NAMES[barDate.getDay()];
+      const weekNum = getWeekForDate(barDate);
+      const dayName = getDayForDate(barDate);
 
       const { data: existing } = await supabase
         .from('workouts')
-        .select('id')
+        .select('id, calories, day')
         .eq('date', dateStr)
         .eq('type', 'MEASUREMENT')
         .eq('exercise_id', CALORIES_EXERCISE_ID)
         .maybeSingle();
 
-      if (existing) {
-        await supabase.from('workouts').update({ calories: val, new_entry: getNewEntryStatus(dateStr) }).eq('id', existing.id);
-      } else if (val > 0) {
+      const calChanged = isNaN(origVal) || val !== origVal;
+      const dayNeedsUpdate = existing && (existing.day !== dayName);
+
+      if (existing && (calChanged || dayNeedsUpdate)) {
+        const updateData: Record<string, any> = { calories: val, day: dayName, week: weekNum, new_entry: getNewEntryStatus(dateStr) };
+        await supabase.from('workouts').update(updateData).eq('id', existing.id);
+      } else if (!existing && val > 0) {
         await supabase.from('workouts').insert({
           date: dateStr,
           week: weekNum,
@@ -108,8 +126,15 @@ const CaloriesEditSheet: React.FC<Props> = ({ onClose, onSaved }) => {
           source: 'app',
         });
       }
+      savedDates.add(dateStr);
+    }
+    // Recalculate daily totals for all saved dates
+    for (const dateStr of savedDates) {
+      await recalculateDailyTotals(dateStr);
     }
     setEditSaving(false);
+    // Dispatch custom event so all charts can refetch
+    window.dispatchEvent(new CustomEvent('kine:data-updated'));
     onSaved();
     onClose();
   };

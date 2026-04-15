@@ -437,7 +437,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate, showWeekly
       {showEditSheet && (
         <CaloriesEditSheet
           onClose={() => setShowEditSheet(false)}
-          onSaved={() => setShowEditSheet(false)}
+          onSaved={() => { setShowEditSheet(false); setSaveSuccess(v => !v); }}
         />
       )}
     </div>
