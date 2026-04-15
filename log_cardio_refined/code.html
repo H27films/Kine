@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kiné | Cardio Log</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "tertiary-container": "#919090",
+                        "error": "#ffb4ab",
+                        "on-tertiary-container": "#000000",
+                        "on-tertiary-fixed-variant": "#e4e2e1",
+                        "on-primary-fixed": "#ffffff",
+                        "on-tertiary": "#1b1c1c",
+                        "background": "#000000",
+                        "on-surface-variant": "#c6c6c6",
+                        "secondary-container": "#474746",
+                        "inverse-on-surface": "#303030",
+                        "tertiary-fixed": "#5f5e5e",
+                        "tertiary-fixed-dim": "#474747",
+                        "surface-container-highest": "#353535",
+                        "on-primary-container": "#000000",
+                        "on-secondary": "#1b1c1c",
+                        "tertiary": "#e4e2e1",
+                        "surface-variant": "#353535",
+                        "on-surface": "#e2e2e2",
+                        "secondary-fixed": "#c8c6c5",
+                        "inverse-surface": "#e2e2e2",
+                        "secondary": "#c8c6c5",
+                        "on-background": "#e2e2e2",
+                        "surface-tint": "#c6c6c7",
+                        "surface": "#000000",
+                        "error-container": "#93000a",
+                        "on-error": "#690005",
+                        "surface-dim": "#000000",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "on-secondary-fixed-variant": "#3c3b3b",
+                        "on-secondary-container": "#e5e2e1",
+                        "outline": "#919191",
+                        "inverse-primary": "#5d5f5f",
+                        "surface-bright": "#393939",
+                        "on-primary-fixed-variant": "#e2e2e2",
+                        "surface-container-low": "#121212",
+                        "primary-fixed-dim": "#454747",
+                        "on-primary": "#1a1c1c",
+                        "surface-container-high": "#121212",
+                        "on-tertiary-fixed": "#ffffff",
+                        "primary": "#ffffff",
+                        "on-error-container": "#ffdad6",
+                        "primary-fixed": "#5d5f5f",
+                        "secondary-fixed-dim": "#adabaa",
+                        "outline-variant": "#474747",
+                        "surface-container": "#1f1f1f",
+                        "surface-container-lowest": "#121212"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen pb-32">
+<!-- TopAppBar Shell -->
+<header class="bg-[#000000] dark:bg-[#000000] flex justify-between items-center w-full px-4 h-16 fixed top-0 z-50">
+<div class="flex items-center">
+<span class="material-symbols-outlined text-white hover:opacity-80 transition-opacity cursor-pointer">menu</span>
+</div>
+<div class="font-['Inter'] font-black tracking-tight text-white text-xl font-bold tracking-[0.2em] uppercase">Kiné</div>
+<div class="w-6"></div> <!-- Spacer for symmetry -->
+</header>
+<main class="pt-20 px-4 max-w-2xl mx-auto">
+<!-- Tab Navigation -->
+<nav class="flex gap-8 mb-12 items-end">
+<a class="font-['Inter'] uppercase tracking-widest text-[10px] text-[#e2e2e2] hover:opacity-80 transition-opacity" href="#">Weights</a>
+<div class="flex flex-col items-center">
+<a class="font-['Inter'] uppercase tracking-widest text-[10px] text-white font-bold" href="#">Cardio</a>
+<div class="h-1 w-1 bg-white rounded-full mt-1"></div>
+</div>
+<a class="font-['Inter'] uppercase tracking-widest text-[10px] text-[#e2e2e2] hover:opacity-80 transition-opacity" href="#">Calories</a>
+</nav>
+<!-- Page Editorial Header -->
+<header class="mb-16">
+<h1 class="text-[2rem] font-black tracking-tighter leading-none mb-2">LOG PERFORMANCE</h1>
+<p class="text-[0.75rem] uppercase tracking-[0.2em] text-on-surface-variant font-medium">Cardio • Session 042</p>
+</header>
+<!-- Metric Input Group: Distance -->
+<section class="mb-16">
+<div class="flex flex-col gap-2">
+<label class="text-[0.75rem] uppercase tracking-[0.3em] text-on-surface-variant font-bold">Distance</label>
+<div class="flex items-baseline gap-4 group">
+<input class="bg-transparent border-none p-0 text-[4.5rem] md:text-[6rem] font-black tracking-tighter focus:ring-0 text-white placeholder-surface-container-highest w-full" placeholder="00.00" type="text" value="12.45"/>
+<span class="text-[1.5rem] font-black tracking-tighter text-on-surface-variant">KM</span>
+</div>
+<div class="h-px w-full bg-outline-variant/20"></div>
+</div>
+</section>
+<!-- Metric Input Group: Time -->
+<section class="mb-16">
+<div class="flex flex-col gap-2">
+<label class="text-[0.75rem] uppercase tracking-[0.3em] text-on-surface-variant font-bold">Duration</label>
+<div class="flex items-baseline gap-4">
+<div class="flex items-baseline gap-2">
+<input class="bg-transparent border-none p-0 text-[3.5rem] md:text-[4rem] font-black tracking-tighter focus:ring-0 text-white placeholder-surface-container-highest w-20 text-right" placeholder="00" type="text" value="58"/>
+<span class="text-[0.75rem] uppercase tracking-widest text-on-surface-variant font-bold">MIN</span>
+</div>
+<div class="flex items-baseline gap-2">
+<input class="bg-transparent border-none p-0 text-[3.5rem] md:text-[4rem] font-black tracking-tighter focus:ring-0 text-white placeholder-surface-container-highest w-20 text-right" placeholder="00" type="text" value="12"/>
+<span class="text-[0.75rem] uppercase tracking-widest text-on-surface-variant font-bold">SEC</span>
+</div>
+</div>
+<div class="h-px w-full bg-outline-variant/20"></div>
+</div>
+</section>
+<!-- Grid of Secondary Metrics -->
+<div class="grid grid-cols-2 gap-px bg-white/10 rounded-xl overflow-hidden mb-16">
+<div class="bg-[#121212] p-6">
+<label class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold block mb-4">Avg Pace</label>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-black text-white">4'42"</span>
+<span class="text-[10px] text-on-surface-variant uppercase font-bold">/km</span>
+</div>
+</div>
+<div class="bg-[#121212] p-6">
+<label class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold block mb-4">Intensity</label>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-black text-white">ZONE 4</span>
+</div>
+</div>
+</div>
+<!-- Performance Graph Integration (Asymmetric) -->
+<section class="mb-20">
+<div class="bg-[#121212] p-8 rounded-xl relative overflow-hidden border border-white/10">
+<div class="relative z-10">
+<h3 class="text-[0.75rem] uppercase tracking-widest text-white font-bold mb-8">HEART RATE TELEMETRY</h3>
+<div class="flex items-end gap-1 h-32">
+<!-- Simulated Bar Chart for Heart Rate with Editorial feel -->
+<div class="w-2 bg-white/10 h-[40%] rounded-t-full"></div>
+<div class="w-2 bg-white/10 h-[55%] rounded-t-full"></div>
+<div class="w-2 bg-white/20 h-[70%] rounded-t-full"></div>
+<div class="w-2 bg-white h-[85%] rounded-t-full"></div>
+<div class="w-2 bg-white h-[95%] rounded-t-full"></div>
+<div class="w-2 bg-white h-[90%] rounded-t-full"></div>
+<div class="w-2 bg-white/60 h-[80%] rounded-t-full"></div>
+<div class="w-2 bg-white/40 h-[65%] rounded-t-full"></div>
+<div class="w-2 bg-white/20 h-[50%] rounded-t-full"></div>
+<div class="w-2 bg-white/10 h-[45%] rounded-t-full"></div>
+<div class="w-2 bg-white/10 h-[40%] rounded-t-full"></div>
+<div class="w-2 bg-white/10 h-[35%] rounded-t-full"></div>
+<div class="w-2 bg-white/40 h-[60%] rounded-t-full"></div>
+<div class="w-2 bg-white h-[85%] rounded-t-full"></div>
+<div class="w-2 bg-white h-[100%] rounded-t-full"></div>
+</div>
+<div class="mt-4 flex justify-between text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">
+<span>00:00</span>
+<span>164 BPM AVG</span>
+<span>58:12</span>
+</div>
+</div>
+<!-- Abstract Texture Background -->
+<div class="absolute inset-0 opacity-5 pointer-events-none bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
+</div>
+</section>
+<!-- Final Submission -->
+<button class="w-full bg-white text-[#000000] rounded-full py-5 text-[0.75rem] uppercase tracking-[0.4em] font-black hover:opacity-90 active:scale-95 transition-all shadow-[0_12px_32px_rgba(0,0,0,0.4)]">
+        Commit Session
+    </button>
+</main>
+<!-- BottomNavBar Shell -->
+<nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] rounded-full bg-black/60 border border-white/20 backdrop-blur-xl z-50 flex justify-around items-center px-6 py-2 shadow-[0_12px_32px_rgba(0,0,0,1)]">
+<div class="text-[#e2e2e2] p-3 hover:text-white transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="basecamp">camping</span>
+</div>
+<div class="text-[#e2e2e2] p-3 hover:text-white transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="fitness_center">fitness_center</span>
+</div>
+<div class="bg-white text-black rounded-full p-3 scale-110 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="history" data-weight="fill" style="font-variation-settings: 'FILL' 1;">history</span>
+</div>
+<div class="text-[#e2e2e2] p-3 hover:text-white transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+</div>
+</nav>
+<!-- Hidden Map Context (Optional Visual Anchor) -->
+<div class="hidden" data-location="Tokyo, Japan" style=""></div>
+</body></html>
