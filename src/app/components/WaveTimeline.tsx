@@ -330,7 +330,7 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
       );
     }
 
-    // View 3: Running
+    // View 3: Running (updated)
     if (view === 'running' && runningValues.length > 0) {
       const maxVal = Math.max(...runningValues, 1);
       const PAD = 0;
