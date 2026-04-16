@@ -810,58 +810,64 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
           const maxVal = Math.max(...sparkData.filter(v => v > 0), BASE_KM, 0.1);
           const getY = (val: number) => padTop + (1 - val / maxVal) * chartH;
 
-          const lineVals: (number | null)[] = sparkData.map((val, i) => {
-            if (val > 0) return val;
-            if (i === 0 || i === 6) return BASE_KM;
-            return null;
-          });
+          const lineVals: number[] = sparkData.map((val, i) => val > 0 ? val : BASE_KM);
 
-          const linePts = lineVals
-            .map((val, i) =>
-              val !== null
-                ? { x: padLeft + (i / 6) * chartW, y: getY(val), val, i, isAnchor: sparkData[i] === 0 }
-                : null
-            )
-            .filter((p): p is { x: number; y: number; val: number; i: number; isAnchor: boolean } => p !== null);
+          const linePts = lineVals.map((val, i) => ({
+            x: padLeft + (i / 6) * chartW,
+            y: getY(val),
+            val,
+            i,
+            isAnchor: sparkData[i] <= 0,
+          }));
 
-          let pathD = '';
-          if (linePts.length === 1) {
-            pathD = `M ${linePts[0].x} ${linePts[0].y}`;
-          } else if (linePts.length > 1) {
-            pathD = `M ${linePts[0].x} ${linePts[0].y}`;
-            for (let k = 1; k < linePts.length; k++) {
-              const prev = linePts[k - 1];
-              const curr = linePts[k];
+          const lastDataIndex = linePts.findLastIndex(p => !p.isAnchor);
+          const solidPts = lastDataIndex >= 0 ? linePts.slice(0, lastDataIndex + 1) : [];
+          const fadedPts = lastDataIndex >= 0 ? linePts.slice(lastDataIndex) : [];
+
+          const buildPath = (pts: typeof linePts) => {
+            if (pts.length === 0) return '';
+            if (pts.length === 1) return `M ${pts[0].x} ${pts[0].y}`;
+            let d = `M ${pts[0].x} ${pts[0].y}`;
+            for (let k = 1; k < pts.length; k++) {
+              const prev = pts[k - 1];
+              const curr = pts[k];
               const cpx = (prev.x + curr.x) / 2;
-              pathD += ` C ${cpx} ${prev.y}, ${cpx} ${curr.y}, ${curr.x} ${curr.y}`;
+              d += ` C ${cpx} ${prev.y}, ${cpx} ${curr.y}, ${curr.x} ${curr.y}`;
             }
-          }
+            return d;
+          };
+
+          const solidPath = buildPath(solidPts);
+          const fadedPath = buildPath(fadedPts);
 
           return (
             <div className="mt-6">
               <svg width="100%" viewBox={`0 0 ${VW} ${VH + 14}`} style={{ overflow: 'visible', display: 'block' }}>
                 <defs>
-                  <filter id="lineBlur1" x="-50%" y="-100%" width="200%" height="300%">
-                    <feGaussianBlur stdDeviation="6" />
-                  </filter>
-                  <filter id="lineBlur2" x="-50%" y="-100%" width="200%" height="300%">
-                    <feGaussianBlur stdDeviation="3" />
-                  </filter>
+          <filter id="lineBlur1" x="-50%" y="-100%" width="200%" height="300%">
+            <feGaussianBlur stdDeviation="6" />
+          </filter>
+          <filter id="lineBlur2" x="-50%" y="-100%" width="200%" height="300%">
+            <feGaussianBlur stdDeviation="3" />
+          </filter>
+          <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="1" dy="1" stdDeviation="1" flood-color="rgba(255,255,255,0.5)" />
+          </filter>
                   <filter id="dotBlur" x="-100%" y="-100%" width="300%" height="300%">
                     <feGaussianBlur stdDeviation="2.5" />
                   </filter>
                 </defs>
 
-                {linePts.length > 0 && pathD && (
-                  <>
-                    <path d={pathD} fill="none" stroke="rgba(255,255,255,0.10)" strokeWidth="14" strokeLinecap="round" filter="url(#lineBlur1)" />
-                    <path d={pathD} fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="6" strokeLinecap="round" filter="url(#lineBlur2)" />
-                    <path d={pathD} fill="none" stroke="rgba(255,255,255,0.60)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </>
+                {solidPath && (
+                  <path d={solidPath} fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                )}
+                {fadedPath && (
+                  <path d={fadedPath} fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 )}
 
                 {linePts.filter(p => !p.isAnchor).map((p, k) => (
                   <g key={k}>
+                    <line x1={p.x} y1={p.y} x2={p.x} y2={VH - 2} stroke="rgba(255,255,255,0.8)" strokeWidth="0.4" strokeLinecap="round" />
                     <circle cx={p.x} cy={p.y} r="5" fill="rgba(255,255,255,0.18)" filter="url(#dotBlur)" />
                     <circle cx={p.x} cy={p.y} r="3" fill="white" />
                     <text x={p.x} y={p.y - 9} textAnchor="middle" fill="rgba(255,255,255,0.70)" fontSize="6.5" fontWeight="700">
