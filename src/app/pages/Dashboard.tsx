@@ -820,7 +820,8 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
             isAnchor: sparkData[i] <= 0,
           }));
 
-          const lastDataIndex = linePts.findLastIndex(p => !p.isAnchor);
+          const reversedIndex = linePts.slice().reverse().findIndex(p => !p.isAnchor);
+          const lastDataIndex = reversedIndex === -1 ? -1 : linePts.length - 1 - reversedIndex;
           const solidPts = lastDataIndex >= 0 ? linePts.slice(0, lastDataIndex + 1) : [];
           const fadedPts = lastDataIndex >= 0 ? linePts.slice(lastDataIndex) : [];
 
@@ -856,16 +857,20 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
                   <filter id="dotBlur" x="-100%" y="-100%" width="300%" height="300%">
                     <feGaussianBlur stdDeviation="2.5" />
                   </filter>
-                </defs>
+                  <linearGradient id="fadeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="white" stopOpacity="0.1" />
+            <stop offset="100%" stopColor="white" stopOpacity="0.05" />
+          </linearGradient>
+        </defs>
 
                 {solidPath && (
                   <path d={solidPath} fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 )}
                 {fadedPath && (
-                  <path d={fadedPath} fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d={fadedPath} fill="none" stroke="url(#fadeGradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 )}
 
-                {linePts.filter(p => !p.isAnchor).map((p, k) => (
+                {linePts.filter(p => !p.isAnchor).map((p) => (
                   <g key={k}>
                     <line x1={p.x} y1={p.y} x2={p.x} y2={VH - 2} stroke="rgba(255,255,255,0.8)" strokeWidth="0.4" strokeLinecap="round" />
                     <circle cx={p.x} cy={p.y} r="5" fill="rgba(255,255,255,0.18)" filter="url(#dotBlur)" />

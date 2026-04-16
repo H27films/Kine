@@ -303,7 +303,7 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
             const normalizedVal = (val - minThreshold) / (maxVal - minThreshold);
             const barHeight = normalizedVal * availableAbove * 0.85;
             const y = baselineY - barHeight;
-            const shadowHeight = normalizedVal * availableBelow * 0.85;
+
 
             return (
               <g key={i}>
