@@ -635,7 +635,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
 
         {selectedGroup && (
           <div ref={exerciseRef} className="relative">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0' }}>
               <div onClick={() => setExerciseOpen(o => !o)} style={textTriggerStyle}>
                 <span style={{ color: '#ffffff', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Choose Exercise</span>
                 <ChevronDown size={14} style={{ color: '#ffffff', transform: exerciseOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
@@ -647,7 +647,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
               )}
             </div>
             {exerciseOpen && (
-              <div style={{ ...dropdownStyle, top: 'calc(100% + 6px)', left: '-16px', right: '-16px', maxHeight: '65vh', overflowY: 'auto' }}>
+              <div style={{ ...dropdownStyle, top: 'calc(100% + 16px)', left: '-16px', right: '-16px', maxHeight: '65vh', overflowY: 'auto' }}>
                 {renderExerciseDropdown()}
               </div>
             )}
