@@ -871,7 +871,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
                 )}
 
                 {linePts.filter(p => !p.isAnchor).map((p) => (
-                  <g key={k}>
+                  <g key={p.i}>
                     <line x1={p.x} y1={p.y} x2={p.x} y2={VH - 2} stroke="rgba(255,255,255,0.8)" strokeWidth="0.4" strokeLinecap="round" />
                     <circle cx={p.x} cy={p.y} r="5" fill="rgba(255,255,255,0.18)" filter="url(#dotBlur)" />
                     <circle cx={p.x} cy={p.y} r="3" fill="white" />

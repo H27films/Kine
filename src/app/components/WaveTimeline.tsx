@@ -338,7 +338,6 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
       const barWidth = Math.max(2, (drawW / runningValues.length) - 1.5);
       const baselineY = H - 10;
       const availableAbove = baselineY - 20;
-      const availableBelow = H - baselineY;
 
       // Build curved line path with moving average of non-zero bars, shifted up by 2km
       const nonZeroPoints: { x: number; y: number }[] = [];
@@ -426,7 +425,6 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
             const normalizedVal = val / maxVal;
             const barHeight = isZero ? 3 : normalizedVal * availableAbove * 0.85;
             const y = baselineY - barHeight;
-            const shadowHeight = isZero ? 1 : normalizedVal * availableBelow * 0.85;
 
             return (
               <g key={i}>
