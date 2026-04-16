@@ -810,7 +810,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
           const maxVal = Math.max(...sparkData.filter(v => v > 0), BASE_KM, 0.1);
           const getY = (val: number) => padTop + (1 - val / maxVal) * chartH;
 
-          const lineVals: number[] = sparkData.map((val, i) => val > 0 ? val : BASE_KM);
+          const lineVals: number[] = sparkData.map((val) => val > 0 ? val : BASE_KM);
 
           const linePts = lineVals.map((val, i) => ({
             x: padLeft + (i / 6) * chartW,
