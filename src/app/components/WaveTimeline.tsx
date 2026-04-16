@@ -336,7 +336,7 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
       const PAD = 0;
       const drawW = W - PAD;
       const barWidth = Math.max(2, (drawW / runningValues.length) - 1.5);
-      const baselineY = H * 0.72;
+      const baselineY = H - 10;
       const availableAbove = baselineY - 20;
       const availableBelow = H - baselineY;
 
@@ -430,15 +430,6 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
 
             return (
               <g key={i}>
-                {/* Mirror shadow below baseline */}
-                <rect
-                  x={x}
-                  y={baselineY}
-                  width={barWidth}
-                  height={Math.max(shadowHeight, 1)}
-                  fill="#1a1a1a"
-                  opacity={isZero ? 0.05 : 0.25}
-                />
                 {/* Main bar above baseline */}
                 <rect
                   x={x}
