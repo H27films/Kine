@@ -269,10 +269,9 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
       const barWidth = Math.max(2, (drawW / trackerValues.length) - 1.5);
       const baselineY = H * 0.72;
       const minThreshold = 5;
-      const availableAbove = baselineY - 20;
-      const availableBelow = H - baselineY;
+  const availableAbove = baselineY - 20;
 
-      return (
+  return (
         <>
           {/* Tracker label - top left, same style as View 1 date labels */}
           <text x={0} y={6} textAnchor="start" style={{
@@ -300,12 +299,12 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
           {trackerValues.map((val, i) => {
             if (val < minThreshold) return null;
             const x = (i / Math.max(trackerValues.length - 1, 1)) * drawW + PAD - barWidth / 2;
-            const normalizedVal = (val - minThreshold) / (maxVal - minThreshold);
-            const barHeight = normalizedVal * availableAbove * 0.85;
-            const y = baselineY - barHeight;
+    const normalizedVal = (val - minThreshold) / (maxVal - minThreshold);
+    const barHeight = normalizedVal * availableAbove * 0.85;
+    const y = baselineY - barHeight;
+    const shadowHeight = normalizedVal * availableBelow * 0.85;
 
-
-            return (
+    return (
               <g key={i}>
                 <rect
                   x={x}
