@@ -11,6 +11,7 @@ interface RecentLog {
   setsData: { w: number; r: number }[]; // non-zero only, for collapsed summary
   allSets: { w: number; r: number }[];   // all 6 slots for editing
   date: string;
+  pb: string | null;
 }
 
 interface Props {
@@ -32,7 +33,7 @@ const RecentLogsSection: React.FC<Props> = ({ refreshKey }) => {
   const loadRecent = useCallback(async () => {
     const { data } = await supabase
       .from('workouts')
-      .select('id, date, total_weight, w1, r1, w2, r2, w3, r3, w4, r4, w5, r5, w6, r6, exercises:exercise_id(exercise_name)')
+      .select('id, date, total_weight, pb, w1, r1, w2, r2, w3, r3, w4, r4, w5, r5, w6, r6, exercises:exercise_id(exercise_name)')
       .in('type', WEIGHT_TYPES)
       .order('date', { ascending: false })
       .limit(50);
@@ -77,6 +78,7 @@ const RecentLogsSection: React.FC<Props> = ({ refreshKey }) => {
           setsData,
           allSets,
           date: r.date,
+          pb: r.pb || null,
         };
       }));
     }
@@ -173,6 +175,11 @@ const RecentLogsSection: React.FC<Props> = ({ refreshKey }) => {
                     </p>
                   )}
                 </div>
+                {log.pb === 'PB' && (
+                  <div style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <span style={{ fontSize: '0.6rem', fontWeight: 900, color: '#000000', letterSpacing: '0.05em' }}>PB</span>
+                  </div>
+                )}
                 {log.weight > 0 && (
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px', flexShrink: 0, marginLeft: 'auto', alignSelf: 'flex-start', marginTop: '2px' }}>
                     <span style={{ color: '#ffffff', fontWeight: 900, fontSize: '1.15rem', letterSpacing: '-0.02em', lineHeight: 1 }}>{Math.round(log.weight).toLocaleString()}</span>
