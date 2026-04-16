@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm *)",
+      "Bash(git init)",
+      "Bash(git remote *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(curl *)",
+      "Bash(python3 *)",
+      "Bash(npx *)",
+      "Bash(npm run *)",
+      "Bash(git show *)",
+      "Bash(git checkout *)",
+      "Bash(git rm *)",
+      "Bash(file *)",
+      "Bash(npm install)",
+      "Bash(find *)",
+      "Bash(cp *)",
+      "Bash(unzip *)",
+      "Bash(cat *)",
+      "Bash(npm uninstall *)",
+      "Bash(lsof *)",
+      "Bash(ls *)"
+    ]
+  },
+  "$version": 3
+}
