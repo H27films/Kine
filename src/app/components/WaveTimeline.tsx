@@ -21,8 +21,10 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
   const isDragging = useRef(false);
 
   const W = 400;
-  const H = 180;
+  /** Taller than legacy 180 so labels (baseline ~20px) are not clipped; bar views keep foot padding above dots. */
+  const H = 200;
   const midY = H / 2;
+  const LABEL_BASELINE = 20;
 
   // Load first date
   useEffect(() => {
@@ -267,15 +269,15 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
       const PAD = 0;
       const drawW = W - PAD;
       const barWidth = Math.max(2, (drawW / trackerValues.length) - 1.5);
-      const baselineY = H * 0.72;
+      const baselineY = H * 0.7;
       const minThreshold = 5;
-  const availableAbove = baselineY - 20;
-  const availableBelow = H - baselineY;
+      const availableAbove = baselineY - LABEL_BASELINE - 8;
+      const availableBelow = H - baselineY - 8;
 
   return (
         <>
           {/* Tracker label - top left, same style as View 1 date labels */}
-          <text x={0} y={6} textAnchor="start" style={{
+          <text x={0} y={LABEL_BASELINE} textAnchor="start" style={{
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: '16px',
             fontWeight: 500,
@@ -285,7 +287,7 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
           }}>TRACKER</text>
 
           {/* Total sum - top right */}
-          <text x={W} y={6} textAnchor="end" style={{
+          <text x={W} y={LABEL_BASELINE} textAnchor="end" style={{
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: '16px',
             fontWeight: 500,
@@ -336,8 +338,8 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
       const PAD = 0;
       const drawW = W - PAD;
       const barWidth = Math.max(2, (drawW / runningValues.length) - 1.5);
-      const baselineY = H - 10;
-  const availableAbove = baselineY - 20;
+      const baselineY = H - 22;
+      const availableAbove = baselineY - LABEL_BASELINE - 8;
   
 
       // Build curved line path with moving average of non-zero bars, shifted up by 2km
@@ -386,7 +388,7 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
       return (
         <>
           {/* Running label - top left */}
-          <text x={0} y={6} textAnchor="start" style={{
+          <text x={0} y={LABEL_BASELINE} textAnchor="start" style={{
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: '16px',
             fontWeight: 500,
@@ -396,7 +398,7 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
           }}>RUNNING</text>
 
           {/* Total sum - top right */}
-          <text x={W} y={6} textAnchor="end" style={{
+          <text x={W} y={LABEL_BASELINE} textAnchor="end" style={{
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: '16px',
             fontWeight: 500,
@@ -453,15 +455,16 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
       const totalAll = weeklyTotals.reduce((sum, val) => sum + val, 0);
       const PAD = 14;
       const drawW = W - PAD * 2;
-      const baselineY = H - 2;
-      const availableHeight = baselineY - 20;
+      const chartTop = LABEL_BASELINE + 10;
+      const baselineY = H - 20;
+      const availableHeight = baselineY - chartTop;
 
       const barWidth = Math.max(3, (drawW / allWeightsValues.length) - 2);
 
       return (
         <>
           {/* AllWeights label - top left */}
-          <text x={0} y={6} textAnchor="start" style={{
+          <text x={0} y={LABEL_BASELINE} textAnchor="start" style={{
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: '16px',
             fontWeight: 500,
@@ -471,7 +474,7 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
           }}>ALL WEIGHTS</text>
 
           {/* Total sum - top right */}
-          <text x={W} y={6} textAnchor="end" style={{
+          <text x={W} y={LABEL_BASELINE} textAnchor="end" style={{
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: '16px',
             fontWeight: 500,
@@ -507,9 +510,9 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
                 {/* Dotted background */}
                 <rect
                   x={x}
-                  y={20}
+                  y={chartTop}
                   width={barWidth}
-                  height={baselineY - 20}
+                  height={baselineY - chartTop}
                   fill="url(#barDots)"
                   style={{ pointerEvents: 'none' }}
                 />
@@ -571,8 +574,8 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
       const referenceCal = 1300; // X-axis crosses at 1300
       
       // Y range: top = 1800, bottom = 1000
-      const topY = 25;
-      const bottomY = H - 35;
+      const topY = 28;
+      const bottomY = H - 40;
       const chartH = bottomY - topY;
 
       // Generate smooth Catmull-Rom curve points, padded with 1300 at start/end
@@ -643,7 +646,7 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
       return (
         <>
           {/* Calories label - top left */}
-          <text x={0} y={16} textAnchor="start" style={{
+          <text x={0} y={LABEL_BASELINE} textAnchor="start" style={{
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: '16px',
             fontWeight: 500,
@@ -653,7 +656,7 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
           }}>CALORIES</text>
 
           {/* Average - top right */}
-          <text x={W} y={16} textAnchor="end" style={{
+          <text x={W} y={LABEL_BASELINE} textAnchor="end" style={{
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: '16px',
             fontWeight: 500,
@@ -670,9 +673,9 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
               <rect
                 key={`bg-bar-${i}`}
                 x={x}
-                y={20}
+                y={topY}
                 width={barWidth}
-                height={H - 20}
+                height={H - topY}
                 fill={isEven ? 'url(#barFade)' : 'url(#barFadeDark)'}
               />
             );
@@ -714,9 +717,9 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
     return (
       <>
         {/* Start date marker */}
-        <line x1={0} y1={midY} x2={0} y2={16} stroke="#1a1a1a" strokeWidth="1.2" opacity="0.5" />
-        <circle cx={0} cy={16} r={5} fill="#1a1a1a" />
-        <text x={14} y={12} textAnchor="start" style={{
+        <line x1={0} y1={midY} x2={0} y2={LABEL_BASELINE + 2} stroke="#1a1a1a" strokeWidth="1.2" opacity="0.5" />
+        <circle cx={0} cy={LABEL_BASELINE + 2} r={5} fill="#1a1a1a" />
+        <text x={14} y={LABEL_BASELINE} textAnchor="start" style={{
           fontFamily: "'JetBrains Mono', monospace",
           fontSize: '16px',
           fontWeight: 500,
@@ -776,7 +779,8 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
     >
       <svg
         viewBox={`0 0 ${W} ${H}`}
-        style={{ width: '100%', height: '180px', display: 'block' }}
+        preserveAspectRatio="xMidYMid meet"
+        style={{ width: '100%', height: `${H}px`, display: 'block', overflow: 'visible' }}
       >
         <defs>
           <pattern id="barDots" x="0" y="0" width="6" height="6" patternUnits="userSpaceOnUse">
@@ -838,7 +842,7 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
       </svg>
 
       {/* View indicator dots */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginTop: '-4px' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginTop: '12px', paddingBottom: '4px' }}>
         <div
           onClick={() => setView('overview')}
           style={{
