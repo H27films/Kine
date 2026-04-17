@@ -58,6 +58,8 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
   const [lastExportDisplay, setLastExportDisplay] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  /** Min/max workout dates for WaveTimeline when nothing is pending export (all rows are Exported). */
+  const [allWorkoutDateSpan, setAllWorkoutDateSpan] = useState<{ first: string; last: string } | null>(null);
 
   // Load last export date from Supabase (most recent date with new_entry = 'Exported')
   useEffect(() => {
@@ -91,11 +93,18 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
   }, []);
 
   const loadData = async () => {
-    const { data } = await supabase
-      .from('workouts')
-      .select('date')
-      .in('new_entry', ['New', 'Edit'])
-      .order('date');
+    const [{ data }, { data: allDatesRows }] = await Promise.all([
+      supabase
+        .from('workouts')
+        .select('date')
+        .in('new_entry', ['New', 'Edit'])
+        .order('date'),
+      supabase
+        .from('workouts')
+        .select('date')
+        .not('date', 'is', null)
+        .order('date'),
+    ]);
 
     if (data) {
       setExportCount(data.length);
@@ -104,6 +113,13 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
     } else {
       setExportCount(0);
       setExportDates([]);
+    }
+
+    if (allDatesRows && allDatesRows.length > 0) {
+      const sorted = [...new Set((allDatesRows as { date: string }[]).map(r => r.date))].sort();
+      setAllWorkoutDateSpan({ first: sorted[0], last: sorted[sorted.length - 1] });
+    } else {
+      setAllWorkoutDateSpan(null);
     }
   };
 
@@ -215,6 +231,12 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
   };
 
   const hasRows = (exportCount ?? 0) > 0;
+
+  const chartFirstDate =
+    exportDates.length > 0 ? exportDates[0] : allWorkoutDateSpan?.first ?? '';
+  const chartLastDate =
+    exportDates.length > 0 ? exportDates[exportDates.length - 1] : allWorkoutDateSpan?.last ?? '';
+  const showWaveTimeline = Boolean(chartFirstDate && chartLastDate);
 
   const navItems: NavItem[] = [
     { label: 'Home', icon: <Home size={20} />, page: 'dashboard' },
@@ -380,9 +402,9 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
           </button>
         </div>
 
-        {/* Waveform Timeline */}
-        {exportDates.length > 0 && (
-          <WaveTimeline firstDate={exportDates[0]} lastDate={exportDates[exportDates.length - 1]} />
+        {/* Waveform Timeline: pending-export range, or full log span after everything is Exported */}
+        {showWaveTimeline && (
+          <WaveTimeline firstDate={chartFirstDate} lastDate={chartLastDate} />
         )}
 
         {/* Export Data section - in box */}
