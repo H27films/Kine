@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronDown, ChevronRight, ChevronUp, Plus, Minus, Check, X } from 'lucide-react';
+import { ChevronDown, ChevronRight, ChevronUp, Plus, Minus, Check, X, Save } from 'lucide-react';
 import { Page } from '../../types';
 import { supabase, Exercise, todayStr, getISOWeek, getDayName, weeksAgoMonday, recalculateDailyTotals } from '../../lib/supabase';
 import WeeklyVolumeSection from '../components/WeeklyVolumeSection';
@@ -55,8 +55,21 @@ const makeDefaultSets = (): SetRow[] =>
   Array.from({ length: 4 }, () => ({ weight: '', reps: 10 }));
 
 const STORAGE_KEY = 'kine_logweights_v1';
+const SAVED_WORKOUT_KEY = 'kine_saved_workout_template_v1';
 /** Matches Log Calories empty-state / placeholder (slate cool grey) */
 const EST_SLATE = '#94A3B8';
+
+const readSavedWorkoutIds = (): number[] => {
+  try {
+    const raw = localStorage.getItem(SAVED_WORKOUT_KEY);
+    if (!raw) return [];
+    const p = JSON.parse(raw) as { exerciseIds?: unknown };
+    if (!Array.isArray(p?.exerciseIds)) return [];
+    return p.exerciseIds.filter((id): id is number => typeof id === 'number');
+  } catch {
+    return [];
+  }
+};
 
 export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySummary = false }) => {
   const [selectedGroup, setSelectedGroup] = useState<string>(() => {
@@ -89,6 +102,9 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
   const [lastWeekTotal, setLastWeekTotal] = useState<number>(0);
   const [todayTotal, setTodayTotal] = useState<number>(0);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [savedWorkoutIds, setSavedWorkoutIds] = useState<number[]>(() => readSavedWorkoutIds());
+  const [templateSaveFlash, setTemplateSaveFlash] = useState(false);
+  const [applyingTemplate, setApplyingTemplate] = useState(false);
 
   const groupRef = useRef<HTMLDivElement>(null);
   const exerciseRef = useRef<HTMLDivElement>(null);
@@ -177,13 +193,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
     setExerciseOpen(false);
   };
 
-  const handleAddExercise = async (exercise: Exercise) => {
-    const existing = addedExercises.find(e => e.exercise.id === exercise.id);
-    if (existing) {
-      setAddedExercises(prev => prev.filter(e => e.exercise.id !== exercise.id));
-      return;
-    }
-
+  const fetchAddedExerciseRow = async (exercise: Exercise): Promise<AddedExercise> => {
     const [{ data }, { data: pbData }] = await Promise.all([
       supabase
         .from('workouts')
@@ -229,7 +239,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
       if (parsed.length > 0) maxSets = parsed;
     }
 
-    setAddedExercises(prev => [...prev, {
+    return {
       exercise,
       sets: makeDefaultSets(),
       expanded: false,
@@ -239,7 +249,45 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
       maxSets,
       fail: false,
       pbThreshold,
-    }]);
+    };
+  };
+
+  const handleAddExercise = async (exercise: Exercise) => {
+    const existing = addedExercises.find(e => e.exercise.id === exercise.id);
+    if (existing) {
+      setAddedExercises(prev => prev.filter(e => e.exercise.id !== exercise.id));
+      return;
+    }
+
+    const row = await fetchAddedExerciseRow(exercise);
+    setAddedExercises(prev => (prev.some(e => e.exercise.id === exercise.id) ? prev : [...prev, row]));
+  };
+
+  const handleSaveWorkoutTemplate = () => {
+    if (addedExercises.length <= 1) return;
+    const exerciseIds = addedExercises.map(e => e.exercise.id);
+    try {
+      localStorage.setItem(SAVED_WORKOUT_KEY, JSON.stringify({ exerciseIds }));
+      setSavedWorkoutIds(exerciseIds);
+      setTemplateSaveFlash(true);
+      setTimeout(() => setTemplateSaveFlash(false), 2200);
+    } catch {}
+  };
+
+  const handleApplySavedWorkoutTemplate = async () => {
+    if (addedExercises.length > 0 || savedWorkoutIds.length === 0) return;
+    const allExercises = Object.values(exercisesByGroup).flat();
+    setApplyingTemplate(true);
+    try {
+      for (const id of savedWorkoutIds) {
+        const exercise = allExercises.find(ex => ex.id === id);
+        if (!exercise) continue;
+        const row = await fetchAddedExerciseRow(exercise);
+        setAddedExercises(prev => (prev.some(e => e.exercise.id === id) ? prev : [...prev, row]));
+      }
+    } finally {
+      setApplyingTemplate(false);
+    }
   };
 
   const toggleExpanded = (id: number) => {
@@ -651,11 +699,36 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                 <span style={{ color: '#ffffff', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Choose Exercise</span>
                 <ChevronDown size={14} style={{ color: '#ffffff', transform: exerciseOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
               </div>
-              {exerciseOpen && (
-                <button onClick={() => setExerciseOpen(false)} style={{ display: 'flex', alignItems: 'center', color: 'rgba(255,255,255,0.35)', padding: '4px', flexShrink: 0, marginLeft: '8px' }}>
-                  <X size={16} strokeWidth={2} />
-                </button>
-              )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+                {addedExercises.length === 0 && savedWorkoutIds.length > 0 && (
+                  <button
+                    type="button"
+                    disabled={applyingTemplate || Object.values(exercisesByGroup).flat().length === 0}
+                    title="Add saved exercises"
+                    onClick={e => { e.stopPropagation(); void handleApplySavedWorkoutTemplate(); }}
+                    style={{
+                      width: 30,
+                      height: 30,
+                      borderRadius: '50%',
+                      backgroundColor: '#ffffff',
+                      color: '#1a1a1a',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: 'none',
+                      cursor: applyingTemplate || Object.values(exercisesByGroup).flat().length === 0 ? 'default' : 'pointer',
+                      opacity: applyingTemplate ? 0.55 : 1,
+                    }}
+                  >
+                    <Plus size={15} strokeWidth={2.5} />
+                  </button>
+                )}
+                {exerciseOpen && (
+                  <button type="button" onClick={() => setExerciseOpen(false)} style={{ display: 'flex', alignItems: 'center', color: 'rgba(255,255,255,0.35)', padding: '4px' }}>
+                    <X size={16} strokeWidth={2} />
+                  </button>
+                )}
+              </div>
             </div>
             {exerciseOpen && (
               <div style={{ ...dropdownStyle, top: 'calc(100% + 16px)', left: '-16px', right: '-16px', maxHeight: '65vh', overflowY: 'auto' }}>
@@ -666,19 +739,44 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
         )}
       </section>
 
-      {(grandTotal > 0 || showEstGrandTotal) && (
-        <div className="flex items-baseline gap-2 mb-6 mt-2">
-          {grandTotal > 0 ? (
-            <>
-              <span style={{ fontSize: '2.6rem', fontWeight: 900, lineHeight: 1, color: '#ffffff', letterSpacing: '-0.02em' }}>{grandTotal.toLocaleString()}</span>
-              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#ffffff', letterSpacing: '0.12em', textTransform: 'uppercase' }}>KG</span>
-            </>
-          ) : (
-            <>
-              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: EST_SLATE, letterSpacing: '0.12em', textTransform: 'uppercase', flexShrink: 0 }}>EST.</span>
-              <span style={{ fontSize: '2.6rem', fontWeight: 900, lineHeight: 1, color: EST_SLATE, letterSpacing: '-0.02em' }}>{estGrandTotal.toLocaleString()}</span>
-              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: EST_SLATE, letterSpacing: '0.12em', textTransform: 'uppercase' }}>KG</span>
-            </>
+      {(grandTotal > 0 || showEstGrandTotal || addedExercises.length > 1) && (
+        <div className="flex items-baseline justify-between gap-4 mb-6 mt-2 flex-wrap">
+          <div className="flex items-baseline gap-2 flex-wrap min-w-0">
+            {grandTotal > 0 ? (
+              <>
+                <span style={{ fontSize: '2.6rem', fontWeight: 900, lineHeight: 1, color: '#ffffff', letterSpacing: '-0.02em' }}>{grandTotal.toLocaleString()}</span>
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#ffffff', letterSpacing: '0.12em', textTransform: 'uppercase' }}>KG</span>
+              </>
+            ) : showEstGrandTotal ? (
+              <>
+                <span style={{ fontSize: '1.05rem', fontWeight: 800, color: EST_SLATE, letterSpacing: '0.1em', textTransform: 'uppercase', flexShrink: 0 }}>EST.</span>
+                <span style={{ fontSize: '2.6rem', fontWeight: 900, lineHeight: 1, color: EST_SLATE, letterSpacing: '-0.02em' }}>{estGrandTotal.toLocaleString()}</span>
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: EST_SLATE, letterSpacing: '0.12em', textTransform: 'uppercase' }}>KG</span>
+              </>
+            ) : null}
+          </div>
+          {addedExercises.length > 1 && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+              <button
+                type="button"
+                onClick={handleSaveWorkoutTemplate}
+                style={{
+                  ...textTriggerStyle,
+                  padding: 0,
+                  margin: 0,
+                  border: 'none',
+                  background: 'none',
+                  font: 'inherit',
+                  color: EST_SLATE,
+                }}
+              >
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: EST_SLATE }}>SAVE WORKOUT</span>
+                <Save size={14} strokeWidth={2.2} style={{ color: EST_SLATE }} />
+              </button>
+              {templateSaveFlash && (
+                <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#22c55e', letterSpacing: '0.08em' }}>Saved</span>
+              )}
+            </div>
           )}
         </div>
       )}
