@@ -55,6 +55,8 @@ const makeDefaultSets = (): SetRow[] =>
   Array.from({ length: 4 }, () => ({ weight: '', reps: 10 }));
 
 const STORAGE_KEY = 'kine_logweights_v1';
+/** Matches Log Calories empty-state / placeholder (slate cool grey) */
+const EST_SLATE = '#94A3B8';
 
 export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySummary = false }) => {
   const [selectedGroup, setSelectedGroup] = useState<string>(() => {
@@ -400,6 +402,12 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
     sets.reduce((acc, s) => acc + (parseFloat(s.weight) || 0) * s.reps, 0) * multiplier;
 
   const grandTotal = addedExercises.reduce((acc, ex) => acc + calcExerciseTotal(ex.sets, ex.exercise.multiplier ?? 1), 0);
+  const estGrandTotal = addedExercises.reduce((acc, ex) => {
+    const mult = ex.exercise.multiplier ?? 1;
+    if (ex.lastSets && ex.lastSets.length > 0) return acc + calcExerciseTotal(ex.lastSets, mult);
+    return acc;
+  }, 0);
+  const showEstGrandTotal = addedExercises.length > 0 && grandTotal === 0 && estGrandTotal > 0;
 
   const textTriggerStyle: React.CSSProperties = {
     display: 'inline-flex', alignItems: 'center', gap: '6px', cursor: 'pointer', userSelect: 'none',
@@ -655,10 +663,20 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
         )}
       </section>
 
-      {addedExercises.length > 0 && grandTotal > 0 && (
+      {(grandTotal > 0 || showEstGrandTotal) && (
         <div className="flex items-baseline gap-2 mb-6 mt-2">
-          <span style={{ fontSize: '2.6rem', fontWeight: 900, lineHeight: 1, color: '#ffffff', letterSpacing: '-0.02em' }}>{grandTotal.toLocaleString()}</span>
-          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#ffffff', letterSpacing: '0.12em', textTransform: 'uppercase' }}>KG</span>
+          {grandTotal > 0 ? (
+            <>
+              <span style={{ fontSize: '2.6rem', fontWeight: 900, lineHeight: 1, color: '#ffffff', letterSpacing: '-0.02em' }}>{grandTotal.toLocaleString()}</span>
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#ffffff', letterSpacing: '0.12em', textTransform: 'uppercase' }}>KG</span>
+            </>
+          ) : (
+            <>
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: EST_SLATE, letterSpacing: '0.12em', textTransform: 'uppercase', flexShrink: 0 }}>EST.</span>
+              <span style={{ fontSize: '2.6rem', fontWeight: 900, lineHeight: 1, color: EST_SLATE, letterSpacing: '-0.02em' }}>{estGrandTotal.toLocaleString()}</span>
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: EST_SLATE, letterSpacing: '0.12em', textTransform: 'uppercase' }}>KG</span>
+            </>
+          )}
         </div>
       )}
 
@@ -670,7 +688,11 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                 ? `Last: ${ex.lastSets.length} sets — ${ex.lastSets[0].weight}kg × ${ex.lastSets[0].reps}`
                 : 'No previous data';
               const hasData = ex.sets.some(s => s.weight !== '');
-              const exTotal = calcExerciseTotal(ex.sets, ex.exercise.multiplier ?? 1);
+              const mult = ex.exercise.multiplier ?? 1;
+              const exTotal = calcExerciseTotal(ex.sets, mult);
+              const estFromLast =
+                ex.lastSets && ex.lastSets.length > 0 ? calcExerciseTotal(ex.lastSets, mult) : 0;
+              const showEstHeader = exTotal === 0 && estFromLast > 0;
 
               const swipeOffset = swipeOffsets[ex.exercise.id] || 0;
 
@@ -759,11 +781,18 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                     <div className="pb-5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                       <div className="flex items-center justify-between mb-4">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          <div className="flex items-baseline gap-1">
+                          <div className="flex items-baseline gap-2 flex-wrap">
                             {exTotal > 0 && (
                               <>
                                 <span className="font-black" style={{ fontSize: '1.5rem', color: '#ffffff', lineHeight: 1 }}>{exTotal.toLocaleString()}</span>
                                 <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#ffffff' }}>KG</span>
+                              </>
+                            )}
+                            {showEstHeader && (
+                              <>
+                                <span className="text-xs font-bold uppercase tracking-widest" style={{ color: EST_SLATE }}>EST.</span>
+                                <span className="font-black" style={{ fontSize: '1.5rem', color: EST_SLATE, lineHeight: 1 }}>{estFromLast.toLocaleString()}</span>
+                                <span className="text-xs font-bold uppercase tracking-widest" style={{ color: EST_SLATE }}>KG</span>
                               </>
                             )}
                           </div>
