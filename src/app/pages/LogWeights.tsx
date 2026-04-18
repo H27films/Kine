@@ -281,10 +281,13 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
   const loadLastSession = (id: number) => {
     setAddedExercises(prev => prev.map(e => {
       if (e.exercise.id !== id) return e;
-      if (!e.lastSets || e.lastSets.length === 0) {
-        return { ...e, expanded: true };
+      if (e.copied && e.lastSets && e.lastSets.length > 0) {
+        return { ...e, sets: makeDefaultSets(), copied: false };
       }
-      return { ...e, sets: [...e.lastSets], expanded: true, copied: true };
+      if (!e.lastSets || e.lastSets.length === 0) {
+        return e;
+      }
+      return { ...e, sets: [...e.lastSets], copied: true };
     }));
   };
 
@@ -683,7 +686,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
       {addedExercises.length > 0 && (
         <section className="mb-10">
           <div className="space-y-0">
-            {addedExercises.map(ex => {
+            {[...addedExercises].sort((a, b) => (a.expanded === b.expanded ? 0 : a.expanded ? -1 : 1)).map(ex => {
               const lastSummary = ex.lastSets && ex.lastSets.length > 0
                 ? `Last: ${ex.lastSets.length} sets — ${ex.lastSets[0].weight}kg × ${ex.lastSets[0].reps}`
                 : 'No previous data';
