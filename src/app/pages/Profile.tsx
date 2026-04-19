@@ -475,28 +475,45 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
           <div style={{ marginTop: '4px' }}>
             <div className="flex items-baseline gap-1.5">
               <span style={{
-                fontSize: '3.5rem', fontWeight: 900, lineHeight: 1,
+                fontSize: '3rem', fontWeight: 900, lineHeight: 1,
                 letterSpacing: '-0.04em',
                 color: hasRows ? '#1a1a1a' : 'rgba(0,0,0,0.15)',
               }}>
                 {newCount ?? '—'}
               </span>
               <span style={{
-                fontSize: '0.65rem', fontWeight: 700,
-                color: '#555',
+                fontSize: '0.55rem', fontWeight: 700,
+                color: '#1a1a1a',
                 textTransform: 'uppercase', letterSpacing: '0.1em',
               }}>
                 new rows
               </span>
               {(editCount ?? 0) > 0 && (
-                <span style={{
-                  fontSize: '0.55rem', fontWeight: 600,
-                  color: '#1a1a1a',
-                  textTransform: 'uppercase', letterSpacing: '0.05em',
-                  marginLeft: '0.25rem',
-                }}>
-                  / {editCount} edited rows
-                </span>
+                <>
+                  <span style={{
+                    fontSize: '0.5rem', fontWeight: 600,
+                    color: '#888',
+                    marginLeft: '0.25rem',
+                  }}>
+                    /
+                  </span>
+                  <span style={{
+                    fontSize: '2rem', fontWeight: 700, lineHeight: 1,
+                    letterSpacing: '-0.02em',
+                    color: '#1a1a1a',
+                    marginLeft: '0.125rem',
+                  }}>
+                    {editCount}
+                  </span>
+                  <span style={{
+                    fontSize: '0.55rem', fontWeight: 600,
+                    color: '#1a1a1a',
+                    textTransform: 'uppercase', letterSpacing: '0.05em',
+                    marginLeft: '0.125rem',
+                  }}>
+                    edited rows
+                  </span>
+                </>
               )}
             </div>
           </div>
