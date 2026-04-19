@@ -111,7 +111,8 @@ const CaloriesEditSheet: React.FC<Props> = ({ onClose, onSaved }) => {
       const dayNeedsUpdate = existing && (existing.day !== dayName);
 
       if (existing && (calChanged || dayNeedsUpdate)) {
-        const updateData: Record<string, any> = { calories: val, day: dayName, week: weekNum, new_entry: getNewEntryStatus(dateStr) };
+        const newEntryStatus = await getNewEntryStatus(dateStr);
+        const updateData: Record<string, any> = { calories: val, day: dayName, week: weekNum, new_entry: newEntryStatus };
         await supabase.from('workouts').update(updateData).eq('id', existing.id);
       } else if (!existing && val > 0) {
         await supabase.from('workouts').insert({

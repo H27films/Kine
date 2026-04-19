@@ -229,8 +229,28 @@ export function weeksAgoMonday(n: number): string {
  * Returns 'Edit' if date is <= last export date, otherwise 'New'.
  * Used to determine new_entry status when updating existing entries.
  */
-export function getNewEntryStatus(dateStr: string): string {
-  const lastExport = localStorage.getItem('kine_last_export_date');
-  if (!lastExport) return 'New';
-  return dateStr <= lastExport ? 'Edit' : 'New';
+export async function getNewEntryStatus(dateStr: string): Promise<string> {
+  try {
+    const { data } = await supabase
+      .from('workouts')
+      .select('date')
+      .eq('new_entry', 'Exported')
+      .order('date', { ascending: false })
+      .limit(1);
+
+    const lastExport = data && data.length > 0 ? data[0].date as string : null;
+    console.log('getNewEntryStatus:', { dateStr, lastExport });
+
+    if (!lastExport) {
+      console.log('No lastExport found in database, returning New');
+      return 'New';
+    }
+
+    const result = dateStr <= lastExport ? 'Edit' : 'New';
+    console.log(`Date comparison: ${dateStr} <= ${lastExport} = ${result}`);
+    return result;
+  } catch (error) {
+    console.error('Error getting new entry status:', error);
+    return 'New';
+  }
 }

@@ -232,9 +232,10 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySumm
           .eq('exercise_id', trackerExercise.id)
           .maybeSingle();
         if (existing) {
+          const newEntryStatus = await getNewEntryStatus(today);
           const { error } = await supabase
             .from('workouts')
-            .update({ km, total_cardio: totalCardio, total_score_k: Math.round(totalCardio * 1000), new_entry: getNewEntryStatus(today) })
+            .update({ km, total_cardio: totalCardio, total_score_k: Math.round(totalCardio * 1000), new_entry: newEntryStatus })
             .eq('id', existing.id);
           if (error) throw error;
         } else {
