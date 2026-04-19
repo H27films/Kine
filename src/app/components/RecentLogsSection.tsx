@@ -12,6 +12,7 @@ interface RecentLog {
   allSets: { w: number; r: number }[];   // all 6 slots for editing
   date: string;
   pb: string | null;
+  multiplier: number;
 }
 
 interface Props {
@@ -33,7 +34,7 @@ const RecentLogsSection: React.FC<Props> = ({ refreshKey }) => {
   const loadRecent = useCallback(async () => {
     const { data } = await supabase
       .from('workouts')
-      .select('id, date, total_weight, pb, w1, r1, w2, r2, w3, r3, w4, r4, w5, r5, w6, r6, exercises:exercise_id(exercise_name)')
+      .select('id, date, total_weight, pb, w1, r1, w2, r2, w3, r3, w4, r4, w5, r5, w6, r6, exercises:exercise_id(exercise_name, multiplier)')
       .in('type', WEIGHT_TYPES)
       .order('date', { ascending: false })
       .limit(50);
@@ -62,25 +63,26 @@ const RecentLogsSection: React.FC<Props> = ({ refreshKey }) => {
         // If first date had >5, keep all; else stop at 5 total
         if (selectedLogs.length >= 5) break;
       }
-      setRecentLogs(selectedLogs.map(r => {
-        const setsData: { w: number; r: number }[] = [];
-        const allSets: { w: number; r: number }[] = [];
-        for (let i = 1; i <= 6; i++) {
-          const w = Number(r[`w${i}`] || 0);
-          const reps = Number(r[`r${i}`] || 0);
-          allSets.push({ w, r: reps });
-          if (w > 0) setsData.push({ w, r: reps });
-        }
-        return {
-          id: r.id,
-          name: r.exercises?.exercise_name || 'Unknown',
-          weight: Number(r.total_weight || 0),
-          setsData,
-          allSets,
-          date: r.date,
-          pb: r.pb || null,
-        };
-      }));
+       setRecentLogs(selectedLogs.map(r => {
+         const setsData: { w: number; r: number }[] = [];
+         const allSets: { w: number; r: number }[] = [];
+         for (let i = 1; i <= 6; i++) {
+           const w = Number(r[`w${i}`] || 0);
+           const reps = Number(r[`r${i}`] || 0);
+           allSets.push({ w, r: reps });
+           if (w > 0) setsData.push({ w, r: reps });
+         }
+         return {
+           id: r.id,
+           name: r.exercises?.exercise_name || 'Unknown',
+           weight: Number(r.total_weight || 0),
+           setsData,
+           allSets,
+           date: r.date,
+           pb: r.pb || null,
+           multiplier: r.exercises?.multiplier ?? 1,
+         };
+       }));
     }
   }, []);
 
@@ -125,12 +127,14 @@ const RecentLogsSection: React.FC<Props> = ({ refreshKey }) => {
     if (!sets) return;
     setSavingLogId(logId);
     const updateData: Record<string, number | null> = {};
+    const log = recentLogs.find(l => l.id === logId);
+    const multiplier = log?.multiplier ?? 1;
     let totalWeight = 0;
     sets.forEach((s, i) => {
       const w = parseFloat(s.w) || 0;
       updateData[`w${i + 1}`] = w > 0 ? w : null;
       updateData[`r${i + 1}`] = w > 0 ? s.r : null;
-      totalWeight += w * s.r;
+      totalWeight += w * s.r * multiplier;
     });
     updateData.total_weight = totalWeight;
     await supabase.from('workouts').update(updateData).eq('id', logId);
@@ -199,13 +203,13 @@ const RecentLogsSection: React.FC<Props> = ({ refreshKey }) => {
                     ))}
                   </div>
 
-                  {/* Set rows — only show originally-logged (non-zero) sets */}
-                  {sets.map((s, idx) => {
-                    if ((log.allSets[idx]?.w || 0) === 0) return null;
-                    const w = parseFloat(s.w) || 0;
-                    const rowTotal = w * s.r;
-                    const hasData = s.w !== '' && w > 0;
-                    const numColor = hasData ? '#ffffff' : 'rgba(255,255,255,0.25)';
+                   {/* Set rows — only show originally-logged (non-zero) sets */}
+                   {sets.map((s, idx) => {
+                     if ((log.allSets[idx]?.w || 0) === 0) return null;
+                     const w = parseFloat(s.w) || 0;
+                     const rowTotal = w * s.r * log.multiplier;
+                     const hasData = s.w !== '' && w > 0;
+                     const numColor = hasData ? '#ffffff' : 'rgba(255,255,255,0.25)';
                     return (
                       <div key={idx} className="grid items-center mb-2" style={{ gridTemplateColumns: '1.8rem 1fr 1fr 1fr', gap: '0.5rem' }}>
                         <p className="font-black text-center" style={{ fontSize: '1rem', color: numColor, lineHeight: 1 }}>{idx + 1}</p>

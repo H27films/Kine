@@ -417,8 +417,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
         }
 
         const multiplier = ex.exercise.multiplier ?? 1;
-        const rawVolume = ex.sets.reduce((acc, s) => acc + (parseFloat(s.weight) || 0) * s.reps, 0);
-        const totalWeight = rawVolume * multiplier;
+        const totalWeight = ex.sets.reduce((acc, s) => acc + (parseFloat(s.weight) || 0) * s.reps * multiplier, 0);
         const isPB = totalWeight > 0 && (ex.pbThreshold ?? 0) > 0 && totalWeight > (ex.pbThreshold ?? 0);
 
         await supabase.from('workouts').insert({
@@ -451,7 +450,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
   };
 
   const calcExerciseTotal = (sets: SetRow[], multiplier: number = 1): number =>
-    sets.reduce((acc, s) => acc + (parseFloat(s.weight) || 0) * s.reps, 0) * multiplier;
+    sets.reduce((acc, s) => acc + (parseFloat(s.weight) || 0) * s.reps * multiplier, 0);
 
   const grandTotal = addedExercises.reduce((acc, ex) => acc + calcExerciseTotal(ex.sets, ex.exercise.multiplier ?? 1), 0);
   const estGrandTotal = addedExercises.reduce((acc, ex) => {
@@ -976,9 +975,9 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                         {['kg', 'reps', 'total'].map(h => <p key={h} className="text-center text-[10px] font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.3)' }}>{h}</p>)}
                       </div>
 
-                      {ex.sets.map((set, idx) => {
-                        const w = parseFloat(set.weight) || 0;
-                        const rowTotal = w * set.reps;
+                       {ex.sets.map((set, idx) => {
+                         const w = parseFloat(set.weight) || 0;
+                         const rowTotal = w * set.reps * mult;
                         const rowHasData = set.weight !== '';
                         const numColor = rowHasData ? '#ffffff' : 'rgba(255,255,255,0.25)';
                         return (
