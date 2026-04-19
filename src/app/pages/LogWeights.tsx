@@ -105,6 +105,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
   const [savedWorkoutIds, setSavedWorkoutIds] = useState<number[]>(() => readSavedWorkoutIds());
   const [templateSaveFlash, setTemplateSaveFlash] = useState(false);
   const [applyingTemplate, setApplyingTemplate] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   const groupRef = useRef<HTMLDivElement>(null);
   const exerciseRef = useRef<HTMLDivElement>(null);
@@ -730,56 +731,112 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                 )}
               </div>
             </div>
-            {exerciseOpen && (
-              <div style={{ ...dropdownStyle, top: 'calc(100% + 16px)', left: '-16px', right: '-16px', maxHeight: '65vh', overflowY: 'auto' }}>
-                {renderExerciseDropdown()}
-              </div>
-            )}
-          </div>
-        )}
-      </section>
+             {exerciseOpen && (
+               <div style={{ ...dropdownStyle, top: 'calc(100% + 16px)', left: '-16px', right: '-16px', maxHeight: '65vh', overflowY: 'auto' }}>
+                 {renderExerciseDropdown()}
+               </div>
+             )}
+             
+             {addedExercises.length > 1 && (
+               <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '10px' }}>
+                 <button
+                   type="button"
+                   onClick={handleSaveWorkoutTemplate}
+                   style={{
+                     ...textTriggerStyle,
+                     padding: 0,
+                     margin: 0,
+                     border: 'none',
+                     background: 'none',
+                     font: 'inherit',
+                     color: EST_SLATE,
+                   }}
+                 >
+                   <span style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: EST_SLATE }}>SAVE WORKOUT</span>
+                   <Save size={11} strokeWidth={2.2} style={{ color: EST_SLATE }} />
+                 </button>
+                 {templateSaveFlash && (
+                   <span style={{ fontSize: '0.55rem', fontWeight: 800, color: '#22c55e', letterSpacing: '0.08em', position: 'absolute', marginLeft: '100px' }}>Saved</span>
+                 )}
 
-      {(grandTotal > 0 || showEstGrandTotal || addedExercises.length > 1) && (
-        <div className="flex items-baseline justify-between gap-4 mb-6 mt-2 flex-wrap">
-          <div className="flex items-baseline gap-2 flex-wrap min-w-0">
-            {grandTotal > 0 ? (
-              <>
-                <span style={{ fontSize: '2.6rem', fontWeight: 900, lineHeight: 1, color: '#ffffff', letterSpacing: '-0.02em' }}>{grandTotal.toLocaleString()}</span>
-                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#ffffff', letterSpacing: '0.12em', textTransform: 'uppercase' }}>KG</span>
-              </>
-            ) : showEstGrandTotal ? (
-              <>
-                <span style={{ fontSize: '1.05rem', fontWeight: 800, color: EST_SLATE, letterSpacing: '0.1em', textTransform: 'uppercase', flexShrink: 0 }}>EST.</span>
-                <span style={{ fontSize: '2.6rem', fontWeight: 900, lineHeight: 1, color: EST_SLATE, letterSpacing: '-0.02em' }}>{estGrandTotal.toLocaleString()}</span>
-                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: EST_SLATE, letterSpacing: '0.12em', textTransform: 'uppercase' }}>KG</span>
-              </>
-            ) : null}
-          </div>
-          {addedExercises.length > 1 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-              <button
-                type="button"
-                onClick={handleSaveWorkoutTemplate}
-                style={{
-                  ...textTriggerStyle,
-                  padding: 0,
-                  margin: 0,
-                  border: 'none',
-                  background: 'none',
-                  font: 'inherit',
-                  color: EST_SLATE,
-                }}
-              >
-                <span style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: EST_SLATE }}>SAVE WORKOUT</span>
-                <Save size={14} strokeWidth={2.2} style={{ color: EST_SLATE }} />
-              </button>
-              {templateSaveFlash && (
-                <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#22c55e', letterSpacing: '0.08em' }}>Saved</span>
-              )}
-            </div>
-          )}
-        </div>
-      )}
+                 {!showClearConfirm ? (
+                   <button
+                     type="button"
+                     onClick={() => setShowClearConfirm(true)}
+                     style={{
+                       ...textTriggerStyle,
+                       padding: 0,
+                       margin: 0,
+                       border: 'none',
+                       background: 'none',
+                       font: 'inherit',
+                     }}
+                   >
+                     <span style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,80,80,0.55)' }}>CLEAR ALL</span>
+                     <X size={11} strokeWidth={2.2} style={{ color: 'rgba(255,80,80,0.55)' }} />
+                   </button>
+                 ) : (
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                     <span style={{ fontSize: '0.55rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.4)' }}>Clear all?</span>
+                     <button
+                       type="button"
+                       onClick={() => {
+                         setAddedExercises([]);
+                         setShowClearConfirm(false);
+                       }}
+                       style={{
+                         ...textTriggerStyle,
+                         padding: 0,
+                         margin: 0,
+                         border: 'none',
+                         background: 'none',
+                         font: 'inherit',
+                       }}
+                     >
+                       <span style={{ fontSize: '0.55rem', fontWeight: 800, color: '#22c55e' }}>YES</span>
+                     </button>
+                     <button
+                       type="button"
+                       onClick={() => setShowClearConfirm(false)}
+                       style={{
+                         ...textTriggerStyle,
+                         padding: 0,
+                         margin: 0,
+                         border: 'none',
+                         background: 'none',
+                         font: 'inherit',
+                       }}
+                     >
+                       <span style={{ fontSize: '0.55rem', fontWeight: 700, color: 'rgba(255,80,80,0.55)' }}>CANCEL</span>
+                     </button>
+                   </div>
+                 )}
+               </div>
+             )}
+           </div>
+         )}
+       </section>
+
+       <div style={{ marginTop: '-4px' }} />
+       
+       {(grandTotal > 0 || showEstGrandTotal) && (
+         <div className="flex items-baseline justify-between gap-4 mb-6 mt-2 flex-wrap">
+           <div className="flex items-baseline gap-2 flex-wrap min-w-0">
+             {grandTotal > 0 ? (
+               <>
+                 <span style={{ fontSize: '2.6rem', fontWeight: 900, lineHeight: 1, color: '#ffffff', letterSpacing: '-0.02em' }}>{grandTotal.toLocaleString()}</span>
+                 <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#ffffff', letterSpacing: '0.12em', textTransform: 'uppercase' }}>KG</span>
+               </>
+             ) : showEstGrandTotal ? (
+               <>
+                 <span style={{ fontSize: '1.05rem', fontWeight: 800, color: EST_SLATE, letterSpacing: '0.1em', textTransform: 'uppercase', flexShrink: 0 }}>EST.</span>
+                 <span style={{ fontSize: '2.6rem', fontWeight: 900, lineHeight: 1, color: EST_SLATE, letterSpacing: '-0.02em' }}>{estGrandTotal.toLocaleString()}</span>
+                 <span style={{ fontSize: '0.75rem', fontWeight: 700, color: EST_SLATE, letterSpacing: '0.12em', textTransform: 'uppercase' }}>KG</span>
+               </>
+             ) : null}
+           </div>
+         </div>
+       )}
 
       {addedExercises.length > 0 && (
         <section className="mb-10">
