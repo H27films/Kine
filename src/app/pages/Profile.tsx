@@ -475,7 +475,7 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
           <div style={{ marginTop: '4px' }}>
             <div className="flex items-baseline gap-1.5">
               <span style={{
-                fontSize: '3rem', fontWeight: 900, lineHeight: 1,
+                fontSize: '3.5rem', fontWeight: 900, lineHeight: 1,
                 letterSpacing: '-0.04em',
                 color: hasRows ? '#1a1a1a' : 'rgba(0,0,0,0.15)',
               }}>
