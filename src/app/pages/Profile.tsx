@@ -218,6 +218,7 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
       if (exportedData && exportedData.length > 0) {
         const lastDate = exportedData[0].date as string;
         setLastExportDisplay(fmtMMM(lastDate));
+        localStorage.setItem('kine_last_export_date', lastDate);
       }
 
       await loadData();
