@@ -50,6 +50,8 @@ const ProfileUserIcon = ({ size = 24 }: { size?: number }) => (
 
 export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
   const [exportCount, setExportCount] = useState<number | null>(null);
+  const [newCount, setNewCount] = useState<number | null>(null);
+  const [editCount, setEditCount] = useState<number | null>(null);
   const [exportDates, setExportDates] = useState<string[]>([]);
   const [exporting, setExporting] = useState(false);
   const [exportDone, setExportDone] = useState(false);
@@ -93,11 +95,16 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
   }, []);
 
   const loadData = async () => {
-    const [{ data }, { data: allDatesRows }] = await Promise.all([
+    const [{ data: newData }, { data: editData }, { data: allDatesRows }] = await Promise.all([
       supabase
         .from('workouts')
         .select('date')
-        .in('new_entry', ['New', 'Edit'])
+        .eq('new_entry', 'New')
+        .order('date'),
+      supabase
+        .from('workouts')
+        .select('date')
+        .eq('new_entry', 'Edit')
         .order('date'),
       supabase
         .from('workouts')
@@ -106,12 +113,19 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
         .order('date'),
     ]);
 
-    if (data) {
-      setExportCount(data.length);
-      const distinct = [...new Set((data as any[]).map(r => r.date as string))].sort();
+    const totalData = [...(newData || []), ...(editData || [])];
+    const totalCount = totalData.length;
+
+    if (totalData.length > 0) {
+      setExportCount(totalCount);
+      setNewCount(newData?.length || 0);
+      setEditCount(editData?.length || 0);
+      const distinct = [...new Set(totalData.map(r => r.date as string))].sort();
       setExportDates(distinct);
     } else {
       setExportCount(0);
+      setNewCount(0);
+      setEditCount(0);
       setExportDates([]);
     }
 
@@ -465,7 +479,7 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
                 letterSpacing: '-0.04em',
                 color: hasRows ? '#1a1a1a' : 'rgba(0,0,0,0.15)',
               }}>
-                {exportCount ?? '—'}
+                {newCount ?? '—'}
               </span>
               <span style={{
                 fontSize: '0.65rem', fontWeight: 700,
@@ -474,6 +488,16 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
               }}>
                 new rows
               </span>
+              {(editCount ?? 0) > 0 && (
+                <span style={{
+                  fontSize: '0.55rem', fontWeight: 600,
+                  color: '#1a1a1a',
+                  textTransform: 'uppercase', letterSpacing: '0.05em',
+                  marginLeft: '0.25rem',
+                }}>
+                  / {editCount} edited rows
+                </span>
+              )}
             </div>
           </div>
 
