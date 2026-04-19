@@ -840,7 +840,13 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
       {addedExercises.length > 0 && (
         <section className="mb-10">
           <div className="space-y-0">
-            {[...addedExercises].sort((a, b) => (a.expanded === b.expanded ? 0 : a.expanded ? -1 : 1)).map(ex => {
+            {[...addedExercises].sort((a, b) => {
+              if (a.expanded !== b.expanded) return a.expanded ? -1 : 1;
+              const aHasData = a.sets.some(s => s.weight !== '');
+              const bHasData = b.sets.some(s => s.weight !== '');
+              if (aHasData !== bHasData) return aHasData ? -1 : 1;
+              return 0;
+            }).map(ex => {
               const lastSummary = ex.lastSets && ex.lastSets.length > 0
                 ? `Last: ${ex.lastSets.length} sets — ${ex.lastSets[0].weight}kg × ${ex.lastSets[0].reps}`
                 : 'No previous data';
