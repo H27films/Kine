@@ -55,25 +55,13 @@ const makeDefaultSets = (): SetRow[] =>
   Array.from({ length: 4 }, () => ({ weight: '', reps: 10 }));
 
 const STORAGE_KEY = 'kine_logweights_v1';
-const DEVICE_ID_KEY = 'kine_device_id_v1';
 /** Matches Log Calories empty-state / placeholder (slate cool grey) */
 const EST_SLATE = '#94A3B8';
 
-const getDeviceId = (): string => {
-  let id = localStorage.getItem(DEVICE_ID_KEY);
-  if (!id) {
-    id = `device_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
-    localStorage.setItem(DEVICE_ID_KEY, id);
-  }
-  return id;
-};
-
 const fetchSavedWorkoutIds = async (): Promise<number[]> => {
-  const deviceId = getDeviceId();
   const { data } = await supabase
     .from('workout_templates')
     .select('exercise_ids')
-    .eq('device_id', deviceId)
     .order('created_at', { ascending: false })
     .limit(1)
     .single();
@@ -285,10 +273,9 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
   const handleSaveWorkoutTemplate = async () => {
     if (addedExercises.length <= 1) return;
     const exerciseIds = addedExercises.map(e => e.exercise.id);
-    const deviceId = getDeviceId();
     try {
-      await supabase.from('workout_templates').delete().eq('device_id', deviceId);
-      await supabase.from('workout_templates').insert({ device_id: deviceId, exercise_ids: exerciseIds });
+      await supabase.from('workout_templates').delete().neq('id', 0);
+      await supabase.from('workout_templates').insert({ exercise_ids: exerciseIds });
       setSavedWorkoutIds(exerciseIds);
       setTemplateSaveFlash(true);
       setTimeout(() => setTemplateSaveFlash(false), 2200);
