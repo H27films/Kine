@@ -738,25 +738,27 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
              
 {(selectedGroup && addedExercises.length > 1) && (
                 <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '10px' }}>
-                  <button
-                    type="button"
-                    onClick={handleSaveWorkoutTemplate}
-                    style={{
-                      ...textTriggerStyle,
-                      padding: 0,
-                      margin: 0,
-                      border: 'none',
-                      background: 'none',
-                      font: 'inherit',
-                      color: EST_SLATE,
-                    }}
-                  >
-                    <span style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: EST_SLATE }}>SAVE WORKOUT</span>
-                    <Save size={11} strokeWidth={2.2} style={{ color: EST_SLATE }} />
-                  </button>
-                  {templateSaveFlash && (
-                    <span style={{ fontSize: '0.55rem', fontWeight: 800, color: '#22c55e', letterSpacing: '0.08em', position: 'absolute', marginLeft: '100px' }}>Saved</span>
-                  )}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <button
+                      type="button"
+                      onClick={handleSaveWorkoutTemplate}
+                      style={{
+                        ...textTriggerStyle,
+                        padding: 0,
+                        margin: 0,
+                        border: 'none',
+                        background: 'none',
+                        font: 'inherit',
+                        color: EST_SLATE,
+                      }}
+                    >
+                      <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: EST_SLATE }}>SAVE WORKOUT</span>
+                      <Save size={13} strokeWidth={2.2} style={{ color: EST_SLATE }} />
+                    </button>
+                    {templateSaveFlash && (
+                      <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#22c55e', letterSpacing: '0.08em' }}>Saved</span>
+                    )}
+                  </div>
 
                   {!showClearConfirm ? (
                     <button
@@ -771,8 +773,8 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                         font: 'inherit',
                       }}
                     >
-                      <span style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,80,80,0.55)' }}>CLEAR ALL</span>
-                      <X size={11} strokeWidth={2.2} style={{ color: 'rgba(255,80,80,0.55)' }} />
+                      <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,80,80,0.55)' }}>CLEAR ALL</span>
+                      <X size={13} strokeWidth={2.2} style={{ color: 'rgba(255,80,80,0.55)' }} />
                     </button>
                   ) : (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -810,8 +812,8 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
             onClick={() => setShowClearConfirm(0)}
             style={{ ...textTriggerStyle, padding: 0, margin: 0, border: 'none', background: 'none', font: 'inherit', marginBottom: '8px' }}
           >
-            <span style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,80,80,0.55)' }}>CLEAR ALL</span>
-            <X size={11} strokeWidth={2.2} style={{ color: 'rgba(255,80,80,0.55)' }} />
+            <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,80,80,0.55)' }}>CLEAR ALL</span>
+            <X size={13} strokeWidth={2.2} style={{ color: 'rgba(255,80,80,0.55)' }} />
           </button>
         )}
         {showClearConfirm !== null && !selectedGroup && addedExercises.length > 1 && (
