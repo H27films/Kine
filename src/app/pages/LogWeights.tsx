@@ -275,11 +275,14 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
     const exerciseIds = addedExercises.map(e => e.exercise.id);
     try {
       await supabase.from('workout_templates').delete().neq('id', 0);
-      await supabase.from('workout_templates').insert({ exercise_ids: exerciseIds });
+      const { error } = await supabase.from('workout_templates').insert({ exercise_ids: exerciseIds });
+      if (error) throw error;
       setSavedWorkoutIds(exerciseIds);
       setTemplateSaveFlash(true);
       setTimeout(() => setTemplateSaveFlash(false), 2200);
-    } catch {}
+    } catch (err) {
+      console.error('Failed to save workout template:', err);
+    }
   };
 
   const handleApplySavedWorkoutTemplate = async () => {
@@ -813,7 +816,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
 
 <div style={{ marginTop: '-4px' }} />
         
-        {!selectedGroup && addedExercises.length > 1 && !showClearConfirm && (grandTotal > 0 || showEstGrandTotal) && (
+        {addedExercises.length > 1 && !showClearConfirm && (grandTotal > 0 || showEstGrandTotal) && (
           <button
             type="button"
             onClick={() => setShowClearConfirm(0)}
@@ -823,7 +826,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
             <X size={13} strokeWidth={2.2} style={{ color: 'rgba(255,80,80,0.55)' }} />
           </button>
         )}
-        {showClearConfirm !== null && !selectedGroup && addedExercises.length > 1 && (
+        {showClearConfirm !== null && addedExercises.length > 1 && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
             <span style={{ fontSize: '0.55rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.4)' }}>Clear all?</span>
             <button
