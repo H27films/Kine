@@ -55,20 +55,32 @@ const makeDefaultSets = (): SetRow[] =>
   Array.from({ length: 4 }, () => ({ weight: '', reps: 10 }));
 
 const STORAGE_KEY = 'kine_logweights_v1';
-const SAVED_WORKOUT_KEY = 'kine_saved_workout_template_v1';
+const DEVICE_ID_KEY = 'kine_device_id_v1';
 /** Matches Log Calories empty-state / placeholder (slate cool grey) */
 const EST_SLATE = '#94A3B8';
 
-const readSavedWorkoutIds = (): number[] => {
-  try {
-    const raw = localStorage.getItem(SAVED_WORKOUT_KEY);
-    if (!raw) return [];
-    const p = JSON.parse(raw) as { exerciseIds?: unknown };
-    if (!Array.isArray(p?.exerciseIds)) return [];
-    return p.exerciseIds.filter((id): id is number => typeof id === 'number');
-  } catch {
-    return [];
+const getDeviceId = (): string => {
+  let id = localStorage.getItem(DEVICE_ID_KEY);
+  if (!id) {
+    id = `device_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
+    localStorage.setItem(DEVICE_ID_KEY, id);
   }
+  return id;
+};
+
+const fetchSavedWorkoutIds = async (): Promise<number[]> => {
+  const deviceId = getDeviceId();
+  const { data } = await supabase
+    .from('workout_templates')
+    .select('exercise_ids')
+    .eq('device_id', deviceId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
+  if (data?.exercise_ids && Array.isArray(data.exercise_ids)) {
+    return data.exercise_ids.filter((id): id is number => typeof id === 'number');
+  }
+  return [];
 };
 
 export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySummary = false }) => {
@@ -102,7 +114,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
   const [lastWeekTotal, setLastWeekTotal] = useState<number>(0);
   const [todayTotal, setTodayTotal] = useState<number>(0);
   const [refreshKey, setRefreshKey] = useState(0);
-  const [savedWorkoutIds, setSavedWorkoutIds] = useState<number[]>(() => readSavedWorkoutIds());
+  const [savedWorkoutIds, setSavedWorkoutIds] = useState<number[]>([]);
   const [templateSaveFlash, setTemplateSaveFlash] = useState(false);
   const [applyingTemplate, setApplyingTemplate] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState<number | null>(null);
@@ -142,6 +154,12 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
       }
     };
     loadExercises();
+
+    const loadSavedWorkout = async () => {
+      const ids = await fetchSavedWorkoutIds();
+      setSavedWorkoutIds(ids);
+    };
+    loadSavedWorkout();
   }, []);
 
   useEffect(() => {
@@ -264,11 +282,13 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
     setAddedExercises(prev => (prev.some(e => e.exercise.id === exercise.id) ? prev : [...prev, row]));
   };
 
-  const handleSaveWorkoutTemplate = () => {
+  const handleSaveWorkoutTemplate = async () => {
     if (addedExercises.length <= 1) return;
     const exerciseIds = addedExercises.map(e => e.exercise.id);
+    const deviceId = getDeviceId();
     try {
-      localStorage.setItem(SAVED_WORKOUT_KEY, JSON.stringify({ exerciseIds }));
+      await supabase.from('workout_templates').delete().eq('device_id', deviceId);
+      await supabase.from('workout_templates').insert({ device_id: deviceId, exercise_ids: exerciseIds });
       setSavedWorkoutIds(exerciseIds);
       setTemplateSaveFlash(true);
       setTimeout(() => setTemplateSaveFlash(false), 2200);
