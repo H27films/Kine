@@ -522,7 +522,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
     const loadWeeklyCharts = async () => {
       const { data: cardioData } = await supabase
         .from('workouts')
-        .select('week, day, total_cardio, exercise_id')
+        .select('week, day, date, total_cardio, exercise_id')
         .eq('type', 'CARDIO')
         .in('exercise_id', TOTAL_CARDIO_IDS)
         .not('week', 'is', null)
@@ -538,7 +538,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
 
       const { data: weightsData } = await supabase
         .from('workouts')
-        .select('week, day, total_weight, exercise_id')
+        .select('week, day, date, total_weight, exercise_id')
         .in('type', ['CHEST', 'BACK', 'LEGS'])
         .not('week', 'is', null)
         .not('day', 'is', null)
@@ -556,7 +556,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
 
       const { data: calData } = await supabase
         .from('workouts')
-        .select('week, day, calories')
+        .select('week, day, date, calories')
         .eq('type', 'MEASUREMENT')
         .eq('exercise_id', 90)
         .not('calories', 'is', null)
@@ -573,7 +573,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
 
       const { data: scoreData } = await supabase
         .from('workouts')
-        .select('week, day, total_score')
+        .select('week, day, date, total_score')
         .not('total_score', 'is', null)
         .not('week', 'is', null)
         .not('day', 'is', null)

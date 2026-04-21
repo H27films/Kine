@@ -217,8 +217,9 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySumm
     setSaveError('');
     try {
       const today = todayStr();
-      const week = getISOWeek();
-      const day = getDayName();
+      const todayDate = new Date(today + 'T12:00:00+08:00');
+      const week = getISOWeek(todayDate);
+      const day = getDayName(todayDate);
 
       if (hasTracker && trackerExercise) {
         const km = parseFloat(trackerDistance);

@@ -18,7 +18,7 @@ interface AnalyticsProps {
 const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
-  const [category, setCategory] = useState('CHEST');
+  const [category, setCategory] = useState('RUNNING');
   const [timePeriod, setTimePeriod] = useState('WEEKLY');
   const [data, setData] = useState<DataPoint[]>([]);
   const [total, setTotal] = useState(0);
@@ -305,7 +305,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
 
   useEffect(() => { loadChartData(); }, [weekOffset, monthOffset, timePeriod]);
 
-  const minValue = 40000;
+  const minValue = Math.min(...data.map(d => d.value), 0);
   const maxValue = Math.max(...data.map(d => d.value), minValue + 1);
   const metricLabel = isCalories ? 'KCAL' : isFood ? 'SCORE' : isScore ? 'SC' : (isCardio || isTracker ? 'KM' : 'KG');
 

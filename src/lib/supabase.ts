@@ -82,15 +82,13 @@ export function dateOffsetStr(offset: number): string {
  * Week 1 = Jan 6–12, 2025 (Malaysia timezone)
  * Week 66 = April 1–7, 2026 (Malaysia timezone)
  */
-export function getISOWeek(): number {
+export function getISOWeek(date?: Date): number {
   const APP_START = new Date('2025-01-06T00:00:00Z');
-  const today = new Date();
+  const today = date || new Date();
   
-  // Get today's date in Malaysia timezone
   const todayMalaysia = malaysiaDateStr(today);
   const todayDate = new Date(todayMalaysia + 'T00:00:00Z');
   
-  // Calculate days since start
   const diffDays = Math.floor((todayDate.getTime() - APP_START.getTime()) / (1000 * 60 * 60 * 24));
   return Math.max(1, Math.floor(diffDays / 7) + 1);
 }
@@ -99,12 +97,12 @@ export function getISOWeek(): number {
  * Day abbreviation in Malaysia timezone: "MON", "TUE", "WED", etc.
  * Critical: Must match the day in Malaysia local time, not UTC.
  */
-export function getDayName(): string {
+export function getDayName(date?: Date): string {
   const formatter = new Intl.DateTimeFormat('en-US', {
     weekday: 'short',
     timeZone: 'Asia/Kuala_Lumpur',
   });
-  const dayName = formatter.format(new Date()).toUpperCase();
+  const dayName = formatter.format(date || new Date()).toUpperCase();
   
   // Map to 3-letter format
   const dayMap: Record<string, string> = {

@@ -96,7 +96,7 @@ const CaloriesEditSheet: React.FC<Props> = ({ onClose, onSaved }) => {
 
       const dateStr = fmtDate(editableDays[i]);
       const barDate = editableDays[i];
-      const weekNum = getWeekForDate(new Date());
+      const weekNum = getWeekForDate(barDate);
       const dayName = getDayForDate(barDate);
 
       const { data: existing } = await supabase

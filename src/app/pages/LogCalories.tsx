@@ -181,8 +181,9 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate, showWeekly
     payload: Record<string, unknown>
   ): Promise<number | null> => {
     const today = todayStr();
-    const week = getISOWeek();
-    const day = getDayName();
+    const todayDate = new Date(today + 'T12:00:00+08:00');
+    const week = getISOWeek(todayDate);
+    const day = getDayName(todayDate);
 
     const { data: existing } = await supabase
       .from('workouts')

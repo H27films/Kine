@@ -406,8 +406,9 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
   const handleLogAll = async () => {
     setSaving(true);
     const today = todayStr();
-    const week = getISOWeek();
-    const day = getDayName();
+    const todayDate = new Date(today + 'T12:00:00+08:00');
+    const week = getISOWeek(todayDate);
+    const day = getDayName(todayDate);
 
     try {
       for (const ex of addedExercises) {
