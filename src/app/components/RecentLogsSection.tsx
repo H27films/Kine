@@ -148,14 +148,20 @@ const RecentLogsSection: React.FC<Props> = ({ refreshKey }) => {
         <p style={sectionLabelStyle}>Recent Logs</p>
         <Clock size={15} style={{ color: 'rgba(255,255,255,0.5)', marginBottom: '1.25rem' }} />
       </div>
-      <div className="space-y-3">
-        {recentLogs.map((log) => {
-          const isExpanded = expandedLogId === log.id;
-          const isConfirming = deleteConfirmId === log.id;
-          const lastSet = log.setsData[log.setsData.length - 1];
-          const sets = editSets[log.id] || [];
-          return (
-            <div key={log.id} className="rounded-lg overflow-hidden" style={{ backgroundColor: '#1b1b1b' }}>
+       <div className="space-y-3">
+         {recentLogs.map((log, index) => {
+           const previousLog = index > 0 ? recentLogs[index - 1] : null;
+           const showDateSeparator = previousLog && previousLog.date !== log.date;
+           const isExpanded = expandedLogId === log.id;
+           const isConfirming = deleteConfirmId === log.id;
+           const lastSet = log.setsData[log.setsData.length - 1];
+           const sets = editSets[log.id] || [];
+           return (
+             <>
+               {showDateSeparator && (
+                 <div key={`sep-${log.id}`} className="w-full h-px bg-white my-2" />
+               )}
+               <div key={log.id} className="rounded-lg overflow-hidden" style={{ backgroundColor: '#1b1b1b' }}>
               {/* Collapsed / header row */}
               <div
                 className="flex items-center gap-4 p-4 cursor-pointer"
@@ -271,11 +277,12 @@ const RecentLogsSection: React.FC<Props> = ({ refreshKey }) => {
                       </button>
                     </div>
                   )}
-                </div>
-              )}
-            </div>
-          );
-        })}
+                 </div>
+               )}
+             </div>
+             </>
+           );
+         })}
       </div>
     </section>
   );
