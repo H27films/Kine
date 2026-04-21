@@ -158,9 +158,9 @@ const RecentLogsSection: React.FC<Props> = ({ refreshKey }) => {
            const sets = editSets[log.id] || [];
            return (
              <>
-               {showDateSeparator && (
-                 <div key={`sep-${log.id}`} className="w-full h-px bg-white my-2" />
-               )}
+                {showDateSeparator && (
+                  <div key={`sep-${log.id}`} className="w-full h-[0.5px] bg-white my-2" />
+                )}
                <div key={log.id} className="rounded-lg overflow-hidden" style={{ backgroundColor: '#1b1b1b' }}>
               {/* Collapsed / header row */}
               <div
