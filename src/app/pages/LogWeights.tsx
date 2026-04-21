@@ -816,18 +816,18 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
 
 <div style={{ marginTop: '-4px' }} />
         
-        {addedExercises.length > 1 && !showClearConfirm && (grandTotal > 0 || showEstGrandTotal) && (
-          <button
-            type="button"
-            onClick={() => setShowClearConfirm(0)}
-            style={{ ...textTriggerStyle, padding: 0, margin: 0, border: 'none', background: 'none', font: 'inherit', marginBottom: '8px' }}
-          >
-            <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,80,80,0.55)' }}>CLEAR ALL</span>
-            <X size={13} strokeWidth={2.2} style={{ color: 'rgba(255,80,80,0.55)' }} />
-          </button>
-        )}
-        {showClearConfirm !== null && addedExercises.length > 1 && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+         {!selectedGroup && addedExercises.length > 1 && !showClearConfirm && (grandTotal > 0 || showEstGrandTotal) && (
+           <button
+             type="button"
+             onClick={() => setShowClearConfirm(0)}
+             style={{ ...textTriggerStyle, padding: 0, margin: 0, border: 'none', background: 'none', font: 'inherit', marginBottom: '8px' }}
+           >
+             <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,80,80,0.55)' }}>CLEAR ALL</span>
+             <X size={13} strokeWidth={2.2} style={{ color: 'rgba(255,80,80,0.55)' }} />
+           </button>
+         )}
+         {!selectedGroup && showClearConfirm !== null && addedExercises.length > 1 && (
+           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
             <span style={{ fontSize: '0.55rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.4)' }}>Clear all?</span>
             <button
               type="button"
