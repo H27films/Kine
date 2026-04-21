@@ -463,7 +463,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
                 {isSelected && (
                   <div style={{ position: 'absolute', bottom: '100%', left: '50%', transform: 'translateX(-50%)', marginBottom: '4px', whiteSpace: 'nowrap' }}>
                     <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', fontWeight: 900, color: '#1a1a1a', backgroundColor: 'rgba(0,0,0,0.06)', padding: '3px 8px', borderRadius: '4px' }}>
-                      {(isScore || isFood) ? d.value.toLocaleString() : `${d.value.toLocaleString()} ${metricLabel}`}
+                       {isScore || isFood ? d.value.toLocaleString() : `${(isCardio || isTracker) ? d.value.toFixed(1) : d.value.toLocaleString()} ${metricLabel}`}
                     </span>
                   </div>
                 )}
