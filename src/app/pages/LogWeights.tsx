@@ -748,7 +748,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
              
 {(selectedGroup && addedExercises.length > 1) && (
                 <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '10px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', position: 'relative', zIndex: 60 }}>
                     <button
                       type="button"
                       onClick={handleSaveWorkoutTemplate}
@@ -787,7 +787,7 @@ onClick={() => { setExerciseOpen(false); setShowClearConfirm(0); }}
                       <X size={13} strokeWidth={2.2} style={{ color: 'rgba(255,80,80,0.55)' }} />
                     </button>
                   ) : (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', position: 'relative', zIndex: 60 }}>
                       <span style={{ fontSize: '0.55rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.4)' }}>Clear all?</span>
                       <button
                         type="button"
@@ -826,8 +826,8 @@ onClick={() => { setExerciseOpen(false); setShowClearConfirm(0); }}
              <X size={13} strokeWidth={2.2} style={{ color: 'rgba(255,80,80,0.55)' }} />
            </button>
          )}
-         {!selectedGroup && showClearConfirm !== null && addedExercises.length > 1 && (
-           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+          {!selectedGroup && showClearConfirm !== null && addedExercises.length > 1 && (
+           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', position: 'relative', zIndex: 60 }}>
             <span style={{ fontSize: '0.55rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.4)' }}>Clear all?</span>
             <button
               type="button"
