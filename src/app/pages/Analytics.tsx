@@ -305,7 +305,8 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
 
   useEffect(() => { loadChartData(); }, [weekOffset, monthOffset, timePeriod]);
 
-  const maxValue = Math.max(...data.map(d => d.value), 1);
+  const minValue = 40000;
+  const maxValue = Math.max(...data.map(d => d.value), minValue + 1);
   const metricLabel = isCalories ? 'KCAL' : isFood ? 'SCORE' : isScore ? 'SC' : (isCardio || isTracker ? 'KM' : 'KG');
 
   // Food display for MONTHLY: average rating per day (only days with ratings)
@@ -448,7 +449,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
         {/* Bar chart */}
         <div style={{ height: '180px', display: 'flex', alignItems: 'flex-end', gap: '2px', marginBottom: '4px' }}>
           {data.map((d, i) => {
-            const pct = d.value / maxValue;
+            const pct = (d.value - minValue) / (maxValue - minValue);
             const height = pct * 100;
             const showBg = true;
             const hideZeroBar = timePeriod === 'MONTHLY' && d.value === 0;
@@ -469,7 +470,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
                 {!hideZeroBar && (
                   <div
                     onClick={() => showTooltip && setSelectedBarIdx(isSelected ? null : i)}
-                    style={{ position: 'relative', zIndex: 1, width: '100%', height: `${Math.max(height, 1)}%`, backgroundColor: isSelected ? '#1a1a1a' : '#1a1a1a', borderRadius: '2px 2px 0 0', opacity: isSelected ? 1 : (0.15 + (pct * 0.85)), transition: 'height 0.4s ease' }}
+                    style={{ position: 'relative', zIndex: 1, width: '100%', height: `${Math.max(height, 1)}%`, backgroundColor: isSelected ? '#1a1a1a' : '#1a1a1a', borderRadius: '2px 2px 0 0', opacity: isSelected ? 1 : (0.15 + (Math.max(pct, 0) * 0.85)), transition: 'height 0.4s ease' }}
                   />
                 )}
               </div>
