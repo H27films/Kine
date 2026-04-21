@@ -771,23 +771,22 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    {!showClearConfirm ? (
-                      <button
-                        type="button"
-                        onClick={() => { setExerciseOpen(false); setShowClearConfirm(0); }}
-                        style={{
-                          ...textTriggerStyle,
-                          padding: 0,
-                          margin: 0,
-                          border: 'none',
-                          background: 'none',
-                          font: 'inherit',
-                        }}
-                      >
-                        <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,80,80,0.55)' }}>CLEAR ALL</span>
-                        <X size={13} strokeWidth={2.2} style={{ color: 'rgba(255,80,80,0.55)' }} />
-                      </button>
-                    ) : (
+                    <button
+                      type="button"
+                      onClick={() => { setExerciseOpen(false); setShowClearConfirm(0); }}
+                      style={{
+                        ...textTriggerStyle,
+                        padding: 0,
+                        margin: 0,
+                        border: 'none',
+                        background: 'none',
+                        font: 'inherit',
+                      }}
+                    >
+                      <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,80,80,0.55)' }}>CLEAR ALL</span>
+                      <X size={13} strokeWidth={2.2} style={{ color: 'rgba(255,80,80,0.55)' }} />
+                    </button>
+                    {showClearConfirm && (
                       <>
                         <span style={{ fontSize: '0.55rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.4)' }}>Clear all?</span>
                         <button
@@ -820,16 +819,15 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
         
           {!selectedGroup && addedExercises.length > 1 && (grandTotal > 0 || showEstGrandTotal) && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-              {!showClearConfirm ? (
-                <button
-                  type="button"
-                  onClick={() => { setExerciseOpen(false); setShowClearConfirm(0); }}
-                  style={{ ...textTriggerStyle, padding: 0, margin: 0, border: 'none', background: 'none', font: 'inherit' }}
-                >
-                  <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,80,80,0.55)' }}>CLEAR ALL</span>
-                  <X size={13} strokeWidth={2.2} style={{ color: 'rgba(255,80,80,0.55)' }} />
-                </button>
-              ) : (
+              <button
+                type="button"
+                onClick={() => { setExerciseOpen(false); setShowClearConfirm(0); }}
+                style={{ ...textTriggerStyle, padding: 0, margin: 0, border: 'none', background: 'none', font: 'inherit' }}
+              >
+                <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,80,80,0.55)' }}>CLEAR ALL</span>
+                <X size={13} strokeWidth={2.2} style={{ color: 'rgba(255,80,80,0.55)' }} />
+              </button>
+              {showClearConfirm && (
                 <>
                   <span style={{ fontSize: '0.55rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.4)' }}>Clear all?</span>
                   <button
