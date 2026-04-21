@@ -786,7 +786,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                       <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,80,80,0.55)' }}>CLEAR ALL</span>
                       <X size={13} strokeWidth={2.2} style={{ color: 'rgba(255,80,80,0.55)' }} />
                     </button>
-                    {showClearConfirm && (
+{showClearConfirm !== null && (
                       <>
                         <span style={{ fontSize: '0.55rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.4)' }}>Clear all?</span>
                         <button
@@ -827,7 +827,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                 <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,80,80,0.55)' }}>CLEAR ALL</span>
                 <X size={13} strokeWidth={2.2} style={{ color: 'rgba(255,80,80,0.55)' }} />
               </button>
-              {showClearConfirm && (
+              {!!showClearConfirm && (
                 <>
                   <span style={{ fontSize: '0.55rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.4)' }}>Clear all?</span>
                   <button
