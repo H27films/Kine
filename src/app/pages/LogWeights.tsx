@@ -773,7 +773,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <button
                       type="button"
-                      onClick={() => { setExerciseOpen(false); setShowClearConfirm(0); }}
+                      onClick={(e) => { e.stopPropagation(); setShowClearConfirm(0); }}
                       style={{
                         ...textTriggerStyle,
                         padding: 0,
@@ -821,7 +821,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
               <button
                 type="button"
-                onClick={() => { setExerciseOpen(false); setShowClearConfirm(0); }}
+                onClick={(e) => { e.stopPropagation(); setShowClearConfirm(0); }}
                 style={{ ...textTriggerStyle, padding: 0, margin: 0, border: 'none', background: 'none', font: 'inherit' }}
               >
                 <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,80,80,0.55)' }}>CLEAR ALL</span>
