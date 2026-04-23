@@ -619,8 +619,8 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
 
     // View 6: Weekly Daily Check
     if (view === 'weekly') {
-      const barWidth = (W - 40) / 7;
       const barSpacing = 5;
+      const barWidth = (W - (6 * barSpacing)) / 7;
       const baselineY = H * 0.75;
       const itemHeight = 18;
       const itemSpacing = 2;
@@ -648,13 +648,13 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
 
           {/* Day labels */}
           {DAY_LABELS.map((day, i) => {
-            const x = 20 + i * (barWidth + barSpacing) + barWidth / 2;
+            const x = i * (barWidth + barSpacing) + barWidth / 2;
             const isToday = i === currentDayOfWeek;
             return (
               <text
                 key={day}
                 x={x}
-                y={baselineY + 20}
+                y={baselineY + 30}
                 textAnchor="middle"
                 style={{
                   fontFamily: "'JetBrains Mono', monospace",
@@ -672,7 +672,7 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
 
           {/* Status bars for each day */}
           {weeklyStatus.map((day, i) => {
-            const x = 20 + i * (barWidth + barSpacing);
+            const x = i * (barWidth + barSpacing);
             const isToday = i === currentDayOfWeek;
             const opacity = isToday ? 1 : 0.85;
 
@@ -711,7 +711,7 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
                 {isToday && (
                   <circle
                     cx={x + barWidth / 2}
-                    cy={baselineY + 28}
+                    cy={baselineY + 38}
                     r="3"
                     fill="#1a1a1a"
                   />
@@ -719,18 +719,6 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
               </g>
             );
           })}
-
-          {/* Legend */}
-          <text x={20} y={H - 8} textAnchor="start" style={{
-            fontFamily: "'JetBrains Mono', monospace",
-            fontSize: '9px',
-            fontWeight: 500,
-            letterSpacing: '0.08em',
-            fill: 'rgba(0,0,0,0.4)',
-            textTransform: 'uppercase',
-          }}>
-            TRACKER ● CALORIES ● FOOD
-          </text>
         </>
       );
     }
