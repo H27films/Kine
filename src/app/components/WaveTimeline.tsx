@@ -693,14 +693,15 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
                            L ${x} ${baselineY}
                            Z`;
                 
-                return <path d={d} fill={color} />;
+                const isWhite = color === '#ffffff';
+                return <path d={d} fill={color} stroke={isWhite ? '#1a1a1a' : 'none'} strokeWidth={isWhite ? '1' : '0'} />;
             };
 
             const isPastOrToday = i <= currentDayOfWeek;
 
-            const hTracker = day.hasTracker ? itemHeight * 7 : itemHeight;
-            const hCalories = day.hasCalories ? itemHeight * 5 : itemHeight;
-            const hFood = day.hasFood ? itemHeight * 3 : itemHeight;
+            const hTracker = itemHeight * 7;
+            const hCalories = itemHeight * 5;
+            const hFood = itemHeight * 3;
 
             // Food: light grey, Calories: slightly lighter, Tracker: slightly off black
             // If no values and day is past/today: white (#ffffff) with letter labels
@@ -712,11 +713,11 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
             return (
               <g key={day.date}>
                 {/* Back: Tracker */}
-                {colTracker && renderShape(hTracker, colTracker)}
+                {isPastOrToday && renderShape(hTracker, colTracker || '#ffffff')}
                 {!day.hasTracker && isPastOrToday && (
                   <text
                     x={x + barWidth / 2}
-                    y={baselineY - hTracker / 2}
+                    y={baselineY - hTracker + 8}
                     textAnchor="middle"
                     dominantBaseline="middle"
                     style={{
@@ -731,11 +732,11 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
                   </text>
                 )}
                 {/* Middle: Calories */}
-                {colCalories && renderShape(hCalories, colCalories)}
+                {isPastOrToday && renderShape(hCalories, colCalories || '#ffffff')}
                 {!day.hasCalories && isPastOrToday && (
                   <text
                     x={x + barWidth / 2}
-                    y={baselineY - hCalories / 2}
+                    y={baselineY - hCalories + 8}
                     textAnchor="middle"
                     dominantBaseline="middle"
                     style={{
@@ -750,11 +751,11 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
                   </text>
                 )}
                 {/* Front: Food */}
-                {colFood && renderShape(hFood, colFood)}
+                {isPastOrToday && renderShape(hFood, colFood || '#ffffff')}
                 {!day.hasFood && isPastOrToday && (
                   <text
                     x={x + barWidth / 2}
-                    y={baselineY - hFood / 2}
+                    y={baselineY - hFood + 8}
                     textAnchor="middle"
                     dominantBaseline="middle"
                     style={{
