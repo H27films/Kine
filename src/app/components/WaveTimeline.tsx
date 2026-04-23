@@ -621,9 +621,8 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
     if (view === 'weekly') {
       const barSpacing = 5;
       const barWidth = (W - (6 * barSpacing)) / 7;
-      const baselineY = H * 0.75; // Reverted baseline
+      const baselineY = H * 0.8; // Lower baseline to create more space from header
       const itemHeight = 18;
-      const itemSpacing = 2;
 
       return (
         <>
@@ -651,22 +650,31 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
             const x = i * (barWidth + barSpacing) + barWidth / 2;
             const isToday = i === currentDayOfWeek;
             return (
-              <text
-                key={day}
-                x={x}
-                y={baselineY + 30} // Reverted label position
-                textAnchor="middle"
-                style={{
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: '10px',
-                  fontWeight: isToday ? 700 : 500,
-                  letterSpacing: '0.1em',
-                  fill: isToday ? '#1a1a1a' : 'rgba(0,0,0,0.4)',
-                  textTransform: 'uppercase',
-                }}
-              >
-                {day}
-              </text>
+              <g key={day}>
+                <text
+                  x={x}
+                  y={baselineY + 30} // Reverted label position
+                  textAnchor="middle"
+                  style={{
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: '10px',
+                    fontWeight: isToday ? 700 : 500,
+                    letterSpacing: '0.1em',
+                    fill: isToday ? '#1a1a1a' : 'rgba(0,0,0,0.4)',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  {day}
+                </text>
+                {isToday && (
+                  <circle
+                    cx={x}
+                    cy={baselineY + 50} // Position below the day label
+                    r={3} // Small radius for the circle
+                    fill="#1a1a1a"
+                  />
+                )}
+              </g>
             );
           })}
 
@@ -688,24 +696,78 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
                 return <path d={d} fill={color} />;
             };
 
+            const isPastOrToday = i <= currentDayOfWeek;
+
             const hTracker = day.hasTracker ? itemHeight * 7 : itemHeight;
             const hCalories = day.hasCalories ? itemHeight * 5 : itemHeight;
             const hFood = day.hasFood ? itemHeight * 3 : itemHeight;
-            
+
             // Food: light grey, Calories: slightly lighter, Tracker: slightly off black
-            // If no values: white (#ffffff)
-            const colFood = day.hasFood ? '#c0c0c0' : '#ffffff';
-            const colCalories = day.hasCalories ? '#d0d0d0' : '#ffffff';
-            const colTracker = day.hasTracker ? '#202020' : '#ffffff';
+            // If no values and day is past/today: white (#ffffff) with letter labels
+            // If future day: don't render anything
+            const colFood = day.hasFood ? '#c0c0c0' : (isPastOrToday ? '#ffffff' : null);
+            const colCalories = day.hasCalories ? '#d0d0d0' : (isPastOrToday ? '#ffffff' : null);
+            const colTracker = day.hasTracker ? '#202020' : (isPastOrToday ? '#ffffff' : null);
 
             return (
               <g key={day.date}>
                 {/* Back: Tracker */}
-                {renderShape(hTracker, colTracker)}
+                {colTracker && renderShape(hTracker, colTracker)}
+                {!day.hasTracker && isPastOrToday && (
+                  <text
+                    x={x + barWidth / 2}
+                    y={baselineY - hTracker / 2}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    style={{
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontSize: '8px',
+                      fontWeight: 700,
+                      fill: '#1a1a1a',
+                      letterSpacing: '0.02em',
+                    }}
+                  >
+                    T
+                  </text>
+                )}
                 {/* Middle: Calories */}
-                {renderShape(hCalories, colCalories)}
+                {colCalories && renderShape(hCalories, colCalories)}
+                {!day.hasCalories && isPastOrToday && (
+                  <text
+                    x={x + barWidth / 2}
+                    y={baselineY - hCalories / 2}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    style={{
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontSize: '8px',
+                      fontWeight: 700,
+                      fill: '#1a1a1a',
+                      letterSpacing: '0.02em',
+                    }}
+                  >
+                    C
+                  </text>
+                )}
                 {/* Front: Food */}
-                {renderShape(hFood, colFood)}
+                {colFood && renderShape(hFood, colFood)}
+                {!day.hasFood && isPastOrToday && (
+                  <text
+                    x={x + barWidth / 2}
+                    y={baselineY - hFood / 2}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    style={{
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontSize: '8px',
+                      fontWeight: 700,
+                      fill: '#1a1a1a',
+                      letterSpacing: '0.02em',
+                    }}
+                  >
+                    F
+                  </text>
+                )}
               </g>
             );
           })}
