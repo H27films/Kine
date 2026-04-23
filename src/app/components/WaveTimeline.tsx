@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { supabase, getISOWeek } from '../../lib/supabase';
+import { supabase, getISOWeek, malaysiaDateStr } from '../../lib/supabase';
 
 const MONTH_NAMES = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
 
@@ -10,11 +10,12 @@ interface WaveTimelineProps {
 
 export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate }) => {
   const [actualFirstDate, setActualFirstDate] = useState(firstDate);
-  const [view, setView] = useState<'overview' | 'tracker' | 'running' | 'allweights' | 'calories'>('overview');
+  const [view, setView] = useState<'overview' | 'tracker' | 'running' | 'allweights' | 'calories' | 'weekly'>('overview');
   const [trackerValues, setTrackerValues] = useState<number[]>([]);
   const [runningValues, setRunningValues] = useState<number[]>([]);
   const [allWeightsValues, setAllWeightsValues] = useState<{ week: number; chest: number; back: number; legs: number }[]>([]);
   const [caloriesValues, setCaloriesValues] = useState<number[]>([]);
+  const [weeklyStatus, setWeeklyStatus] = useState<{ date: string; hasTracker: boolean; hasCalories: boolean; hasFood: boolean }[]>([]);
   const [selectedBarIdx, setSelectedBarIdx] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef(0);
@@ -25,6 +26,10 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
   const H = 200;
   const midY = H / 2;
   const LABEL_BASELINE = 20;
+  const DAY_LABELS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+
+  const todayMalaysia = new Date(malaysiaDateStr(new Date()) + "T00:00:00Z");
+  const currentDayOfWeek = todayMalaysia.getDay() === 0 ? 6 : todayMalaysia.getDay() - 1; // 0=Mon, 6=Sun
 
   // Load first date
   useEffect(() => {
@@ -192,6 +197,51 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
     loadAllWeightsData();
   }, [view]);
 
+  // Load Weekly Daily Check data
+  useEffect(() => {
+    if (view !== 'weekly') return;
+    const loadWeeklyData = async () => {
+      // Get monday of current week
+      const dow = todayMalaysia.getDay();
+      const monday = new Date(todayMalaysia);
+      monday.setDate(todayMalaysia.getDate() - (dow === 0 ? 6 : dow - 1));
+
+      const weekDates: string[] = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(monday);
+        d.setDate(monday.getDate() + i);
+        weekDates.push(malaysiaDateStr(d));
+      }
+
+      const { data } = await supabase
+        .from('workouts')
+        .select('date, exercise_id')
+        .in('date', weekDates)
+        .in('exercise_id', [82, 89, 90])
+        .order('date');
+
+      const status = weekDates.map(date => ({
+        date,
+        hasTracker: false,
+        hasCalories: false,
+        hasFood: false
+      }));
+
+      if (data) {
+        for (const row of data as any[]) {
+          const idx = weekDates.indexOf(row.date);
+          if (idx === -1) continue;
+          if (row.exercise_id === 82) status[idx].hasTracker = true;
+          if (row.exercise_id === 89) status[idx].hasFood = true;
+          if (row.exercise_id === 90) status[idx].hasCalories = true;
+        }
+      }
+
+      setWeeklyStatus(status);
+    };
+    loadWeeklyData();
+  }, [view]);
+
   const fmtDate = (dateStr: string): string => {
     const d = new Date(dateStr + 'T00:00:00');
     return `${MONTH_NAMES[d.getMonth()]} ${d.getDate()}`;
@@ -253,8 +303,10 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
         else if (view === 'tracker') setView('running');
         else if (view === 'running') setView('allweights');
         else if (view === 'allweights') setView('calories');
+        else if (view === 'calories') setView('weekly');
       } else {
-        if (view === 'calories') setView('allweights');
+        if (view === 'weekly') setView('calories');
+        else if (view === 'calories') setView('allweights');
         else if (view === 'allweights') setView('running');
         else if (view === 'running') setView('tracker');
         else if (view === 'tracker') setView('overview');
@@ -561,6 +613,124 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
               </g>
             );
           })}
+        </>
+      );
+    }
+
+    // View 6: Weekly Daily Check
+    if (view === 'weekly') {
+      const barWidth = (W - 40) / 7;
+      const barSpacing = 5;
+      const baselineY = H * 0.75;
+      const itemHeight = 18;
+      const itemSpacing = 2;
+
+      return (
+        <>
+          {/* Weekly label - top left */}
+          <text x={0} y={LABEL_BASELINE} textAnchor="start" style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: '16px',
+            fontWeight: 500,
+            letterSpacing: '0.04em',
+            fill: '#1a1a1a',
+            textTransform: 'uppercase',
+          }}>THIS WEEK</text>
+
+          {/* Week number - top right */}
+          <text x={W} y={LABEL_BASELINE} textAnchor="end" style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: '16px',
+            fontWeight: 500,
+            letterSpacing: '0.04em',
+            fill: '#1a1a1a',
+          }}>WEEK {getISOWeek()}</text>
+
+          {/* Day labels */}
+          {DAY_LABELS.map((day, i) => {
+            const x = 20 + i * (barWidth + barSpacing) + barWidth / 2;
+            const isToday = i === currentDayOfWeek;
+            return (
+              <text
+                key={day}
+                x={x}
+                y={baselineY + 20}
+                textAnchor="middle"
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: '10px',
+                  fontWeight: isToday ? 700 : 500,
+                  letterSpacing: '0.1em',
+                  fill: isToday ? '#1a1a1a' : 'rgba(0,0,0,0.4)',
+                  textTransform: 'uppercase',
+                }}
+              >
+                {day}
+              </text>
+            );
+          })}
+
+          {/* Status bars for each day */}
+          {weeklyStatus.map((day, i) => {
+            const x = 20 + i * (barWidth + barSpacing);
+            const isToday = i === currentDayOfWeek;
+            const opacity = isToday ? 1 : 0.85;
+
+            return (
+              <g key={day.date} opacity={opacity}>
+                {/* Tracker bar */}
+                <rect
+                  x={x}
+                  y={baselineY - itemHeight * 3 - itemSpacing * 2}
+                  width={barWidth}
+                  height={itemHeight}
+                  fill={day.hasTracker ? '#1a1a1a' : 'rgba(0,0,0,0.1)'}
+                  rx="3"
+                />
+                
+                {/* Calories bar */}
+                <rect
+                  x={x}
+                  y={baselineY - itemHeight * 2 - itemSpacing}
+                  width={barWidth}
+                  height={itemHeight}
+                  fill={day.hasCalories ? '#1a1a1a' : 'rgba(0,0,0,0.1)'}
+                  rx="3"
+                />
+                
+                {/* Food bar */}
+                <rect
+                  x={x}
+                  y={baselineY - itemHeight}
+                  width={barWidth}
+                  height={itemHeight}
+                  fill={day.hasFood ? '#1a1a1a' : 'rgba(0,0,0,0.1)'}
+                  rx="3"
+                />
+
+                {isToday && (
+                  <circle
+                    cx={x + barWidth / 2}
+                    cy={baselineY + 28}
+                    r="3"
+                    fill="#1a1a1a"
+                  />
+                )}
+              </g>
+            );
+          })}
+
+          {/* Legend */}
+          <text x={20} y={H - 8} textAnchor="start" style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: '9px',
+            fontWeight: 500,
+            letterSpacing: '0.08em',
+            fill: 'rgba(0,0,0,0.4)',
+            textTransform: 'uppercase',
+          }}>
+            TRACKER ● CALORIES ● FOOD
+          </text>
         </>
       );
     }
@@ -884,6 +1054,15 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
           style={{
             width: '6px', height: '6px', borderRadius: '50%',
             backgroundColor: view === 'calories' ? '#1a1a1a' : 'rgba(0,0,0,0.15)',
+            transition: 'background-color 0.2s',
+            cursor: 'pointer',
+          }}
+        />
+        <div
+          onClick={() => setView('weekly')}
+          style={{
+            width: '6px', height: '6px', borderRadius: '50%',
+            backgroundColor: view === 'weekly' ? '#1a1a1a' : 'rgba(0,0,0,0.15)',
             transition: 'background-color 0.2s',
             cursor: 'pointer',
           }}
