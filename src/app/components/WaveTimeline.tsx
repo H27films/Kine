@@ -621,7 +621,7 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
     if (view === 'weekly') {
       const barSpacing = 5;
       const barWidth = (W - (6 * barSpacing)) / 7;
-      const baselineY = H * 0.75;
+      const baselineY = H * 0.75; // Reverted baseline
       const itemHeight = 18;
       const itemSpacing = 2;
 
@@ -654,7 +654,7 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
               <text
                 key={day}
                 x={x}
-                y={baselineY + 30}
+                y={baselineY + 30} // Reverted label position
                 textAnchor="middle"
                 style={{
                   fontFamily: "'JetBrains Mono', monospace",
@@ -673,49 +673,39 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
           {/* Status bars for each day */}
           {weeklyStatus.map((day, i) => {
             const x = i * (barWidth + barSpacing);
-            const isToday = i === currentDayOfWeek;
-            const opacity = isToday ? 1 : 0.85;
+
+            const renderShape = (height: number, color: string) => {
+                const radius = barWidth / 2;
+                const topY = baselineY - height;
+                
+                // Single path for the entire shape (flat bottom, straight edges, semi-circle top)
+                const d = `M ${x} ${topY + radius} 
+                           A ${radius} ${radius} 0 0 1 ${x + barWidth} ${topY + radius}
+                           L ${x + barWidth} ${baselineY}
+                           L ${x} ${baselineY}
+                           Z`;
+                
+                return <path d={d} fill={color} />;
+            };
+
+            const hTracker = day.hasTracker ? itemHeight * 7 : itemHeight;
+            const hCalories = day.hasCalories ? itemHeight * 5 : itemHeight;
+            const hFood = day.hasFood ? itemHeight * 3 : itemHeight;
+            
+            // Food: light grey, Calories: slightly lighter, Tracker: slightly off black
+            // If no values: white (#ffffff)
+            const colFood = day.hasFood ? '#c0c0c0' : '#ffffff';
+            const colCalories = day.hasCalories ? '#d0d0d0' : '#ffffff';
+            const colTracker = day.hasTracker ? '#202020' : '#ffffff';
 
             return (
-              <g key={day.date} opacity={opacity}>
-                {/* Tracker bar */}
-                <rect
-                  x={x}
-                  y={baselineY - itemHeight * 3 - itemSpacing * 2}
-                  width={barWidth}
-                  height={itemHeight}
-                  fill={day.hasTracker ? '#1a1a1a' : 'rgba(0,0,0,0.1)'}
-                  rx="3"
-                />
-                
-                {/* Calories bar */}
-                <rect
-                  x={x}
-                  y={baselineY - itemHeight * 2 - itemSpacing}
-                  width={barWidth}
-                  height={itemHeight}
-                  fill={day.hasCalories ? '#1a1a1a' : 'rgba(0,0,0,0.1)'}
-                  rx="3"
-                />
-                
-                {/* Food bar */}
-                <rect
-                  x={x}
-                  y={baselineY - itemHeight}
-                  width={barWidth}
-                  height={itemHeight}
-                  fill={day.hasFood ? '#1a1a1a' : 'rgba(0,0,0,0.1)'}
-                  rx="3"
-                />
-
-                {isToday && (
-                  <circle
-                    cx={x + barWidth / 2}
-                    cy={baselineY + 38}
-                    r="3"
-                    fill="#1a1a1a"
-                  />
-                )}
+              <g key={day.date}>
+                {/* Back: Tracker */}
+                {renderShape(hTracker, colTracker)}
+                {/* Middle: Calories */}
+                {renderShape(hCalories, colCalories)}
+                {/* Front: Food */}
+                {renderShape(hFood, colFood)}
               </g>
             );
           })}
@@ -1000,7 +990,7 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
       </svg>
 
       {/* View indicator dots */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginTop: '12px', paddingBottom: '4px' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginTop: '4px', paddingBottom: '4px' }}>
         <div
           onClick={() => setView('overview')}
           style={{
