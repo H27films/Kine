@@ -820,10 +820,10 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
             isAnchor: sparkData[i] <= 0,
           }));
 
-          const reversedIndex = linePts.slice().reverse().findIndex(p => !p.isAnchor);
-          const lastDataIndex = reversedIndex === -1 ? -1 : linePts.length - 1 - reversedIndex;
-          const solidPts = lastDataIndex >= 0 ? linePts.slice(0, lastDataIndex + 1) : [];
-          const fadedPts = lastDataIndex >= 0 ? linePts.slice(lastDataIndex) : [];
+          const today = new Date();
+          const todayIndex = today.getDay() === 0 ? 6 : today.getDay() - 1;
+          const solidPts = linePts.slice(0, todayIndex + 1);
+          const fadedPts = linePts.slice(todayIndex);
 
           const buildPath = (pts: typeof linePts) => {
             if (pts.length === 0) return '';
