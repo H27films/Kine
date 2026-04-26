@@ -157,9 +157,10 @@ export const CardioTypeChart: React.FC = () => {
     load();
   }, [selectedType, viewMode, monthOffset, refreshKey]);
 
-  const displayData = viewMode === 'weekly' ? weeklyData : monthlyData;
-  const rawMax = Math.max(...displayData, 0.1);
-  const total = +(displayData.reduce((s, v) => s + v, 0)).toFixed(1);
+         const displayDataValues = viewMode === 'weekly' ? weeklyData : monthlyData;
+   const displayData = viewMode === 'weekly' ? weeklyData.map(v => parseFloat(v).toFixed(1)) : monthlyData;
+   const rawMax = Math.max(...displayDataValues, 0.1);
+   const total = +(displayDataValues.reduce((s, v) => s + v, 0)).toFixed(1);
 
   // Monthly peak highlighting (same as 30-day chart)
   const monthlyNonZero = monthlyData.filter(v => v > 0);
@@ -405,7 +406,7 @@ export const CardioTypeChart: React.FC = () => {
               if (isPeak) barGlow = '0 0 8px rgba(255,255,255,0.55), 0 0 16px rgba(255,255,255,0.25)';
             }
 
-            const barLabel = val > 0 ? `${+val.toFixed(1)}` : '';
+             const barLabel = val > 0 ? `${parseFloat(val).toFixed(1)}` : '';
             const labelOpacity = isWeekly ? 0.7 : (isPeak ? 1 : val >= monthlyAvg ? 0.65 : 0.35);
 
             return (
@@ -414,19 +415,19 @@ export const CardioTypeChart: React.FC = () => {
                 className="flex flex-col items-center h-full justify-end"
                 style={{ flex: 1, minWidth: 0, maxWidth: isWeekly ? 28 : 24, position: 'relative' }}
               >
-                {/* Data label above bar — weekly: in-flow; monthly: absolute so it doesn't stretch column */}
-                {isWeekly ? (
-                  <div style={{
-                    fontSize: '7.5px',
-                    fontWeight: 700,
-                    color: val > 0 ? `rgba(255,255,255,${labelOpacity})` : 'transparent',
-                    marginBottom: '4px',
-                    lineHeight: 1,
-                    whiteSpace: 'nowrap',
-                  }}>
-                    {barLabel}
-                  </div>
-                ) : val > 0 ? (
+                 {/* Data label above bar — weekly: in-flow; monthly: absolute so it doesn't stretch column */}
+                 {isWeekly ? (
+                   <div style={{
+                     fontSize: '9px',
+                     fontWeight: 700,
+                     color: val > 0 ? `rgba(255,255,255,${labelOpacity})` : 'transparent',
+                     marginBottom: '4px',
+                     lineHeight: 1,
+                     whiteSpace: 'nowrap',
+                   }}>
+                     {barLabel}
+                   </div>
+                 ) : val > 0 ? (
                   <div style={{
                     position: 'absolute',
                     bottom: `calc(${pct * 100}% + 3px)`,
