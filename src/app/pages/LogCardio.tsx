@@ -25,7 +25,7 @@ const NO_TRACKER_CARDIO_IDS = [83, 84, 85, 86, 87]; // Row + Running + Walking +
 
 export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySummary = false }) => {
   const [trackerDistance, setTrackerDistance] = useState('');
-  const [trackerInputVisible, setTrackerInputVisible] = useState(false);
+  const [trackerInputVisible, setTrackerInputVisible] = useState(true);
   const [distance, setDistance] = useState('');
   const [minutes, setMinutes] = useState('');
   const [seconds, setSeconds] = useState('');
