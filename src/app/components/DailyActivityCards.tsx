@@ -229,11 +229,11 @@ const DayCard: React.FC<{ day: DayData }> = ({ day }) => {
             </div>
             <div style={{ display: 'flex', gap: '10px', marginTop: '8px', flexWrap: 'wrap' }}>
               {[
-                { id: ROW_ID, icon: 'rowing' },
-                { id: RUNNING_ID, icon: 'running' },
-                { id: WALKING_ID, icon: 'walking' },
-                { id: CROSS_ID, icon: 'crosstrainer' },
-                { id: CYCLE_ID, icon: 'cycling' },
+                { id: ROW_ID, icon: 'rowing' as IconKey },
+                { id: RUNNING_ID, icon: 'running' as IconKey },
+                { id: WALKING_ID, icon: 'walking' as IconKey },
+                { id: CROSS_ID, icon: 'crosstrainer' as IconKey },
+                { id: CYCLE_ID, icon: 'cycling' as IconKey },
               ]
                 .filter(({ id }) => (c[id]?.km || 0) > 0)
                 .sort((a, b) => (c[b.id]?.km || 0) - (c[a.id]?.km || 0))
