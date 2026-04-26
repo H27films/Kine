@@ -29,6 +29,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySumm
   const [distance, setDistance] = useState('');
   const [minutes, setMinutes] = useState('');
   const [seconds, setSeconds] = useState('');
+  const [isUserEnteredTracker, setIsUserEnteredTracker] = useState(false);
 
   const [nonTrackerExercises, setNonTrackerExercises] = useState<Exercise[]>([]);
   const [trackerExercise, setTrackerExercise] = useState<Exercise | null>(null);
@@ -163,50 +164,75 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySumm
     loadWeekChart();
   }, [saveSuccess]);
 
-  useEffect(() => {
-    const load30Day = async () => {
-      const localStr = (d: Date) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-      const toD = new Date();
-      toD.setDate(toD.getDate() - thirtyDayOffset * 30);
-      const fromD = new Date(toD);
-      fromD.setDate(fromD.getDate() - 29);
-      const fromDate = localStr(fromD);
-      const toDate = localStr(toD);
-      const { data } = await supabase
-        .from('workouts')
-        .select('date, total_cardio')
-        .eq('type', 'CARDIO')
-        .in('exercise_id', TOTAL_CARDIO_IDS)
-        .gte('date', fromDate)
-        .lte('date', toDate);
-      if (data) {
-        const byDate: Record<string, number> = {};
-        (data as any[]).forEach(r => {
-          byDate[r.date] = (byDate[r.date] || 0) + Number(r.total_cardio || 0);
-        });
-        const result: { date: string; total: number }[] = [];
-        for (let i = 29; i >= 0; i--) {
-          const dd = new Date(toD);
-          dd.setDate(dd.getDate() - i);
-          const dateStr = localStr(dd);
-          result.push({ date: dateStr, total: +(byDate[dateStr] || 0).toFixed(2) });
-        }
-        setThirtyDayData(result);
-        // Check if older data exists beyond this window
-        const olderTo = new Date(fromD);
-        olderTo.setDate(olderTo.getDate() - 1);
-        const { data: olderCheck } = await supabase
-          .from('workouts')
-          .select('date')
-          .eq('type', 'CARDIO')
-          .in('exercise_id', TOTAL_CARDIO_IDS)
-          .lte('date', localStr(olderTo))
-          .limit(1);
-        setHasOlderCardioData(!!(olderCheck && olderCheck.length > 0));
-      }
-    };
-    load30Day();
-  }, [saveSuccess, thirtyDayOffset]);
+   useEffect(() => {
+     const load30Day = async () => {
+       const localStr = (d: Date) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+       const toD = new Date();
+       toD.setDate(toD.getDate() - thirtyDayOffset * 30);
+       const fromD = new Date(toD);
+       fromD.setDate(fromD.getDate() - 29);
+       const fromDate = localStr(fromD);
+       const toDate = localStr(toD);
+       const { data } = await supabase
+         .from('workouts')
+         .select('date, total_cardio')
+         .eq('type', 'CARDIO')
+         .in('exercise_id', TOTAL_CARDIO_IDS)
+         .gte('date', fromDate)
+         .lte('date', toDate);
+       if (data) {
+         const byDate: Record<string, number> = {};
+         (data as any[]).forEach(r => {
+           byDate[r.date] = (byDate[r.date] || 0) + Number(r.total_cardio || 0);
+         });
+         const result: { date: string; total: number }[] = [];
+         for (let i = 29; i >= 0; i--) {
+           const dd = new Date(toD);
+           dd.setDate(dd.getDate() - i);
+           const dateStr = localStr(dd);
+           result.push({ date: dateStr, total: +(byDate[dateStr] || 0).toFixed(2) });
+         }
+         setThirtyDayData(result);
+         // Check if older data exists beyond this window
+         const olderTo = new Date(fromD);
+         olderTo.setDate(olderTo.getDate() - 1);
+         const { data: olderCheck } = await supabase
+           .from('workouts')
+           .select('date')
+           .eq('type', 'CARDIO')
+           .in('exercise_id', TOTAL_CARDIO_IDS)
+           .lte('date', localStr(olderTo))
+           .limit(1);
+         setHasOlderCardioData(!!(olderCheck && olderCheck.length > 0));
+       }
+     };
+     load30Day();
+   }, [saveSuccess, thirtyDayOffset]);
+
+   // Load today's TRACKER distance if exists
+   useEffect(() => {
+     const loadTodayTracker = async () => {
+       const today = todayStr();
+       const { data } = await supabase
+         .from('workouts')
+         .select('km')
+         .eq('type', 'CARDIO')
+         .eq('exercise_id', 82) // TRACKER
+         .eq('date', today)
+         .single();
+       if (data && data.km !== null) {
+         // Format to one decimal place
+         const formattedKm = parseFloat(data.km).toFixed(1);
+         setTrackerDistance(formattedKm);
+         setIsUserEnteredTracker(false); // Reset when loading from DB
+       } else {
+         // Clear if no data found
+         setTrackerDistance('');
+         setIsUserEnteredTracker(false);
+       }
+     };
+     loadTodayTracker();
+   }, [saveSuccess]);
 
   const handleCommit = async () => {
     const hasTracker = trackerExercise && trackerDistance && parseFloat(trackerDistance) > 0;
@@ -375,22 +401,29 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySumm
           </div>
         </div>
 
-        {/* Row 2: Full-width distance input — shown when MOVEMENT tapped */}
-        {trackerInputVisible && <div style={{ marginBottom: 14 }}>
-          <label style={{ ...labelStyle, display: 'block', marginBottom: 8, color: '#ffffff' }}>TRACKER</label>
-          <div className="flex items-baseline gap-3">
-            <input
-              type="text"
-              value={trackerDistance}
-              onChange={e => setTrackerDistance(e.target.value)}
-              placeholder="0.0"
-              className="text-[2.5rem] font-black tracking-tighter text-white w-full p-0"
-              style={{ backgroundColor: 'transparent', border: 'none' }}
-            />
-            <span className="text-[1rem] font-black tracking-tighter" style={{ color: '#c6c6c6' }}>KM</span>
-          </div>
-          <div style={separatorStyle} />
-        </div>}
+         {/* Row 2: Full-width distance input — shown when MOVEMENT tapped */}
+         {trackerInputVisible && <div style={{ marginBottom: 14 }}>
+           <label style={{ ...labelStyle, display: 'block', marginBottom: 8, color: '#ffffff' }}>TRACKER</label>
+           <div className="flex items-baseline gap-3">
+             <input
+               type="text"
+               value={trackerDistance}
+               onChange={e => {
+                 setTrackerDistance(e.target.value);
+                 setIsUserEnteredTracker(true);
+               }}
+               placeholder="0.0"
+               className="text-[2.5rem] font-black tracking-tighter text-white w-full p-0"
+                style={{ 
+                  backgroundColor: 'transparent', 
+                  border: 'none', 
+                  color: isUserEnteredTracker && trackerDistance ? '#ffffff' : '#a0a0a0' 
+                }}
+             />
+             <span className="text-[1rem] font-black tracking-tighter" style={{ color: '#c6c6c6' }}>KM</span>
+           </div>
+           <div style={separatorStyle} />
+         </div>}
 
         {/* Row 3: full-width sparkline — tap to reveal pencil edit */}
         <div style={{ width: '100%', cursor: 'pointer' }} onClick={() => setSparklineClicked(v => !v)}>
