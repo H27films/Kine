@@ -797,7 +797,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
         {selectedActivity && activityWeeklyData[selectedActivity] && (() => {
           const sparkData = activityWeeklyData[selectedActivity];
           const sparkDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-          const BASE_KM = 1;
+          const BASE_KM = selectedActivity === 'ROW' ? 0.1 : 0.3;
           const VW = 280;
           const VH = 110;
           const padTop = 20;
