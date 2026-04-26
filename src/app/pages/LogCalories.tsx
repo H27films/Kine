@@ -396,7 +396,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate, showWeekly
                 <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: isFocused ? '#000000' : '#ffffff' }}>{field.label}</span>
                 <div style={{ position: 'relative', width: '6rem', textAlign: 'right' }}>
                   {showHint && (
-                    <span className="text-lg font-black tracking-tight" style={{ color: 'rgba(255,255,255,0.28)', pointerEvents: 'none', userSelect: 'none' }}>
+                    <span className="text-lg font-black tracking-tight" style={{ color: '#9ba4b0', pointerEvents: 'none', userSelect: 'none' }}>
                       {field.last}
                     </span>
                   )}

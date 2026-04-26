@@ -29,7 +29,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySumm
   const [distance, setDistance] = useState('');
   const [minutes, setMinutes] = useState('');
   const [seconds, setSeconds] = useState('');
-  const [isUserEnteredTracker, setIsUserEnteredTracker] = useState(false);
+
 
   const [nonTrackerExercises, setNonTrackerExercises] = useState<Exercise[]>([]);
   const [trackerExercise, setTrackerExercise] = useState<Exercise | null>(null);
@@ -220,16 +220,14 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySumm
          .eq('exercise_id', 82) // TRACKER
          .eq('date', today)
          .single();
-       if (data && data.km !== null) {
-         // Format to one decimal place
-         const formattedKm = parseFloat(data.km).toFixed(1);
-         setTrackerDistance(formattedKm);
-         setIsUserEnteredTracker(false); // Reset when loading from DB
-       } else {
-         // Clear if no data found
-         setTrackerDistance('');
-         setIsUserEnteredTracker(false);
-       }
+        if (data && data.km !== null) {
+          // Format to one decimal place
+          const formattedKm = parseFloat(data.km).toFixed(1);
+          setTrackerDistance(formattedKm);
+        } else {
+          // Clear if no data found
+          setTrackerDistance('');
+        }
      };
      loadTodayTracker();
    }, [saveSuccess]);
@@ -408,16 +406,13 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySumm
              <input
                type="text"
                value={trackerDistance}
-               onChange={e => {
-                 setTrackerDistance(e.target.value);
-                 setIsUserEnteredTracker(true);
-               }}
+                onChange={e => setTrackerDistance(e.target.value)}
                placeholder="0.0"
                className="text-[2.5rem] font-black tracking-tighter text-white w-full p-0"
-                style={{ 
-                  backgroundColor: 'transparent', 
-                  border: 'none', 
-                  color: isUserEnteredTracker && trackerDistance ? '#ffffff' : '#a0a0a0' 
+                style={{
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  color: trackerDistance ? '#9ba4b0' : '#a0a0a0'
                 }}
              />
              <span className="text-[1rem] font-black tracking-tighter" style={{ color: '#c6c6c6' }}>KM</span>
