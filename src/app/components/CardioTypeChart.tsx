@@ -157,18 +157,22 @@ export const CardioTypeChart: React.FC = () => {
     load();
   }, [selectedType, viewMode, monthOffset, refreshKey]);
 
-         const displayDataValues = viewMode === 'weekly' ? weeklyData : monthlyData;
-   const displayData = viewMode === 'weekly' ? weeklyData.map(v => parseFloat(v).toFixed(1)) : monthlyData;
-   const rawMax = Math.max(...displayDataValues, 0.1);
-   const total = +(displayDataValues.reduce((s, v) => s + v, 0)).toFixed(1);
+         const displayData = viewMode === 'weekly' ? weeklyData : monthlyData;
+    const rawMax = Math.max(...displayData, 0.1);
+    const total = +(displayData.reduce((s, v) => s + v, 0)).toFixed(1);
 
-  // Monthly peak highlighting (same as 30-day chart)
-  const monthlyNonZero = monthlyData.filter(v => v > 0);
-  const monthlyAvg = monthlyNonZero.length > 0
-    ? monthlyNonZero.reduce((a, b) => a + b, 0) / monthlyNonZero.length
-    : 0;
-  const monthlyMaxVal = Math.max(...monthlyData, 0);
-  const monthlyPeakIdx = monthlyMaxVal > 0 ? monthlyData.findIndex(v => v === monthlyMaxVal) : -1;
+    // For weekly display labels, format to one decimal place
+    const displayDataForLabels = viewMode === 'weekly' 
+      ? weeklyData.map(v => parseFloat(v).toFixed(1)) 
+      : monthlyData;
+
+    // Monthly peak highlighting (same as 30-day chart)
+    const monthlyNonZero = monthlyData.filter(v => v > 0);
+    const monthlyAvg = monthlyNonZero.length > 0
+      ? monthlyNonZero.reduce((a, b) => a + b, 0) / monthlyNonZero.length
+      : 0;
+    const monthlyMaxVal = Math.max(...monthlyData, 0);
+    const monthlyPeakIdx = monthlyMaxVal > 0 ? monthlyData.findIndex(v => v === monthlyMaxVal) : -1;
 
   const currentWeekNum = availableWeeks[weekIdx] ?? '—';
   const monthBounds = getMonthBounds(monthOffset);
@@ -406,7 +410,7 @@ export const CardioTypeChart: React.FC = () => {
               if (isPeak) barGlow = '0 0 8px rgba(255,255,255,0.55), 0 0 16px rgba(255,255,255,0.25)';
             }
 
-             const barLabel = val > 0 ? `${parseFloat(val).toFixed(1)}` : '';
+              const barLabel = val > 0 ? `${parseFloat(displayDataForLabels[i]).toFixed(1)}` : '';
             const labelOpacity = isWeekly ? 0.7 : (isPeak ? 1 : val >= monthlyAvg ? 0.65 : 0.35);
 
             return (
