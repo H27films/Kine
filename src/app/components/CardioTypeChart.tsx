@@ -162,8 +162,8 @@ export const CardioTypeChart: React.FC = () => {
     const total = +(displayData.reduce((s, v) => s + v, 0)).toFixed(1);
 
     // For weekly display labels, format to one decimal place
-    const displayDataForLabels = viewMode === 'weekly' 
-      ? weeklyData.map(v => Number(parseFloat(v).toFixed(1))) 
+    const displayDataForLabels = viewMode === 'weekly'
+      ? weeklyData.map(v => Number(v.toFixed(1)))
       : monthlyData;
 
     // Monthly peak highlighting (same as 30-day chart)
