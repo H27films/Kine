@@ -22,6 +22,7 @@ interface DayData {
   cardio: Record<number, { tc: number; km: number }>;
   muscleGroups: string[];
   totalWeightKg: number;
+  totalScore: number;
 }
 
 function dayLabel(dateStr: string): string {
@@ -165,10 +166,26 @@ const DayCard: React.FC<{ day: DayData }> = ({ day }) => {
         padding: '16px',
         display: 'flex',
         flexDirection: 'column',
-        borderLeft: isToday ? '2px solid rgba(255,255,255,0.7)' : '2px solid rgba(255,255,255,0.12)',
+        borderLeft: '2px solid rgba(255,255,255,0.7)',
         flexShrink: 0,
+        position: 'relative',
       }}
     >
+      {day.totalScore > 0 && (
+        <div style={{
+          position: 'absolute',
+          top: '-20px',
+          right: '12px',
+          fontSize: '1rem',
+          fontWeight: 900,
+          letterSpacing: '-0.04em',
+          color: '#ffffff',
+          lineHeight: 1,
+
+        }}>
+          <span style={{ color: 'rgba(255,255,255,0.4)', marginRight: '6px' }}>SCORE</span> {day.totalScore}
+        </div>
+      )}
       {/* Row 1: Day label + calories */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
         <div>
@@ -211,11 +228,19 @@ const DayCard: React.FC<{ day: DayData }> = ({ day }) => {
               </span>
             </div>
             <div style={{ display: 'flex', gap: '10px', marginTop: '8px', flexWrap: 'wrap' }}>
-              {(c[ROW_ID]?.km || 0) > 0 && <Chip iconKey="rowing" value={`${fmt(c[ROW_ID].km)}km`} />}
-              {(c[RUNNING_ID]?.km || 0) > 0 && <Chip iconKey="running" value={`${fmt(c[RUNNING_ID].km)}km`} />}
-              {(c[WALKING_ID]?.km || 0) > 0 && <Chip iconKey="walking" value={`${fmt(c[WALKING_ID].km)}km`} />}
-              {(c[CROSS_ID]?.km || 0) > 0 && <Chip iconKey="crosstrainer" value={`${fmt(c[CROSS_ID].km)}km`} />}
-              {(c[CYCLE_ID]?.km || 0) > 0 && <Chip iconKey="cycling" value={`${fmt(c[CYCLE_ID].km)}km`} />}
+              {[
+                { id: ROW_ID, icon: 'rowing' },
+                { id: RUNNING_ID, icon: 'running' },
+                { id: WALKING_ID, icon: 'walking' },
+                { id: CROSS_ID, icon: 'crosstrainer' },
+                { id: CYCLE_ID, icon: 'cycling' },
+              ]
+                .filter(({ id }) => (c[id]?.km || 0) > 0)
+                .sort((a, b) => (c[b.id]?.km || 0) - (c[a.id]?.km || 0))
+                .slice(0, 2)
+                .map(({ id, icon }) => (
+                  <Chip key={id} iconKey={icon} value={`${fmt(c[id].km)}km`} />
+                ))}
             </div>
           </>
         )}
@@ -285,6 +310,13 @@ export const DailyActivityCards: React.FC = () => {
         .gte('date', oldest)
         .order('date', { ascending: false });
 
+      const { data: scoreData } = await supabase
+        .from('workouts')
+        .select('date, total_score')
+        .not('total_score', 'is', null)
+        .gte('date', oldest)
+        .order('date', { ascending: false });
+
       // Build per-date, per-exercise_id totals
       const cardioMap: Record<string, Record<number, { tc: number; km: number }>> = {};
       for (const r of (cardioData || []) as any[]) {
@@ -309,12 +341,20 @@ export const DailyActivityCards: React.FC = () => {
         weightTotalMap[r.date] += Number(r.total_weight || 0);
       }
 
+      const scoreMap: Record<string, number> = {};
+      for (const r of (scoreData || []) as any[]) {
+        if (!scoreMap[r.date]) {
+          scoreMap[r.date] = Number(r.total_score || 0);
+        }
+      }
+
       const result: DayData[] = dates.map(date => ({
         date,
         calories: calMap[date] || 0,
         cardio: cardioMap[date] || {},
         muscleGroups: muscleMap[date] ? Array.from(muscleMap[date]) : [],
         totalWeightKg: weightTotalMap[date] || 0,
+        totalScore: scoreMap[date] || 0,
       }));
 
       setDays(result);
@@ -338,7 +378,7 @@ export const DailyActivityCards: React.FC = () => {
       </div>
       <div
         style={{
-          display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '8px',
+          display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '8px', paddingTop: '28px',
           msOverflowStyle: 'none', scrollbarWidth: 'none',
         }}
         className="hide-scrollbar"
