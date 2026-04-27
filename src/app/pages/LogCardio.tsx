@@ -489,7 +489,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySumm
       </button>
 
       {/* Monthly Calendar Chart */}
-      <section className="mb-6">
+      <section className="mb-10">
         <MonthlyCalendarChart monthOffset={0} />
       </section>
 
