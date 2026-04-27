@@ -4,6 +4,7 @@ import { DailyActivityCards } from '../components/DailyActivityCards';
 import { WeeklySummaryBar } from '../components/WeeklySummaryBar';
 import WeeklyVolumeCompact from '../components/WeeklyVolumeCompact';
 import CardioChartSection, { CARDIO_DISPLAY } from '../components/CardioChartSection';
+import MonthlyCalendarChart from '../components/MonthlyCalendarChart';
 import { supabase, weeksAgoMonday } from '../../lib/supabase';
 
 type ChartTab = 'Cardio' | 'Weights' | 'Calories' | 'Score';
@@ -719,6 +720,20 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
 
       <section className="mt-8">
         <WeeklyChart cardioWeeks={cardioWeeks} weightsWeeks={weightsWeeks} calorieWeeks={calorieWeeks} scoreWeeks={scoreWeeks} weightsExerciseCounts={weightsExerciseCounts} selectedWeekNumber={selectedWeekNumber} onWeekChange={setSelectedWeekNumber} />
+      </section>
+
+      <section className="mt-8">
+        <div style={{
+          fontSize: '1.15rem',
+          fontWeight: 800,
+          letterSpacing: '-0.03em',
+          textTransform: 'uppercase',
+          color: '#ffffff',
+          marginBottom: '1.25rem',
+        }}>
+          Monthly
+        </div>
+        <MonthlyCalendarChart />
       </section>
 
       <section className="mt-8">
