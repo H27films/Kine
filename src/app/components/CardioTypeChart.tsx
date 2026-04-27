@@ -49,6 +49,7 @@ export const CardioTypeChart: React.FC = () => {
   const [availableWeeks, setAvailableWeeks] = useState<number[]>([]);
   const [weekIdx, setWeekIdx] = useState(0); // 0 = most recent
   const [weeklyData, setWeeklyData] = useState<number[]>(Array(7).fill(0));
+  const [weeklySpeeds, setWeeklySpeeds] = useState<number[]>(Array(7).fill(0));
   const [weeklyCount, setWeeklyCount] = useState(0);
   const [monthlyCount, setMonthlyCount] = useState(0);
 
@@ -109,22 +110,39 @@ export const CardioTypeChart: React.FC = () => {
     if (viewMode !== 'weekly' || availableWeeks.length === 0) return;
     const currentWeek = availableWeeks[weekIdx];
     const load = async () => {
+      const selectFields = 'day, km, week, exercises:exercise_id(exercise_name)' + (selectedType === 'RUNNING' ? ', time' : '');
       const { data } = await supabase
         .from('workouts')
-        .select('day, km, week, exercises:exercise_id(exercise_name)')
+        .select(selectFields)
         .eq('type', 'CARDIO')
         .eq('week', currentWeek);
       const days = Array(7).fill(0);
+      const totalSecondsPerDay = Array(7).fill(0);
       let count = 0;
       if (data) {
         (data as any[]).forEach(r => {
           if ((r.exercises?.exercise_name || '').toUpperCase() !== selectedType) return;
           count++;
           const idx = DAY_ORDER.indexOf((r.day || '').toUpperCase());
-          if (idx >= 0) days[idx] = +(days[idx] + Number(r.km || 0)).toFixed(1);
+          if (idx >= 0) {
+            const km = Number(r.km || 0);
+            days[idx] = +(days[idx] + km).toFixed(1);
+            if (selectedType === 'RUNNING' && r.time) {
+              const [h, m, s] = r.time.split(':').map(Number);
+              totalSecondsPerDay[idx] += h * 3600 + m * 60 + s;
+            }
+          }
         });
       }
+      const speeds = totalSecondsPerDay.map((sec, idx) => {
+        if (sec > 0 && days[idx] > 0) {
+          const hours = sec / 3600;
+          return +(days[idx] / hours).toFixed(1);
+        }
+        return 0;
+      });
       setWeeklyData(days);
+      setWeeklySpeeds(speeds);
       setWeeklyCount(count);
     };
     load();
@@ -456,9 +474,33 @@ export const CardioTypeChart: React.FC = () => {
                       backgroundColor: barColor,
                       borderRadius: '9999px 9999px 0 0',
                       boxShadow: barGlow,
+                      position: 'relative',
                     }}
-                  />
+                  >
+                    {isWeekly && selectedType === 'RUNNING' && weeklySpeeds[i] > 0 && (
+                      <div style={{
+                        position: 'absolute',
+                        bottom: '4px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        width: '20px',
+                        height: '20px',
+                        borderRadius: '50%',
+                        backgroundColor: 'black',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '8px',
+                        fontWeight: 'bold',
+                        color: 'white',
+                        zIndex: 1,
+                      }}>
+                        {weeklySpeeds[i]}
+                      </div>
+                    )}
+                  </div>
                 )}
+
                 {isWeekly && (
                   <div style={{
                     fontSize: '8px',
@@ -466,7 +508,7 @@ export const CardioTypeChart: React.FC = () => {
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px',
                     color: 'rgba(255,255,255,0.55)',
-                    marginTop: '8px',
+                    marginTop: '4px',
                   }}>
                     {DAY_SHORT[i]}
                   </div>
