@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Home, ChevronDown, ChevronLeft, ChevronRight, Menu, Dumbbell as DumbbellIcon } from 'lucide-react';
+import { Home, ChevronDown, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Page } from '../../types';
 import { MaxStatsCard } from '../components/MaxStatsCard';
