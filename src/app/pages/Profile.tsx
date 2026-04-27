@@ -275,7 +275,7 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
       }}
     >
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', paddingLeft: '20px', paddingRight: '20px', paddingBottom: '16px', paddingTop: '50px', position: 'relative' }}>
+      <div style={{ display: 'flex', alignItems: 'center', paddingLeft: '20px', paddingRight: '20px', paddingBottom: '16px', paddingTop: '16px', position: 'relative' }}>
         {/* Left: hamburger */}
         <div style={{ width: 48, display: 'flex', alignItems: 'center', position: 'relative', zIndex: 10 }} ref={menuRef}>
           <button
