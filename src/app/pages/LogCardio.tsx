@@ -545,7 +545,12 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySumm
             {new Date(new Date().getFullYear(), new Date().getMonth() + monthlyOffset, 1).toLocaleDateString('en-US', { month: 'long' }).toUpperCase()}
           </span>
         </div>
-        <MonthlyCalendarChart monthOffset={monthlyOffset} />
+        <MonthlyCalendarChart
+          monthOffset={monthlyOffset}
+          className="p-6 rounded-xl relative mb-4"
+          containerStyle={{ backgroundColor: '#121212' }}
+          tabs={['ROW', 'CROSS TRAINER']}
+        />
       </section>
 
 

@@ -3,11 +3,19 @@ import { supabase } from '../../lib/supabase';
 
 interface MonthlyCalendarChartProps {
   monthOffset: number;
+  className?: string;
+  containerStyle?: React.CSSProperties;
+  tabs?: ('RUNNING' | 'SCORE' | 'WEIGHTS' | 'ROW' | 'CROSS TRAINER')[];
 }
 
-const MonthlyCalendarChart: React.FC<MonthlyCalendarChartProps> = ({ monthOffset }) => {
+const MonthlyCalendarChart: React.FC<MonthlyCalendarChartProps> = ({
+  monthOffset,
+  className = "rounded-lg p-6 mb-4",
+  containerStyle = { backgroundColor: '#121212', borderLeft: '2px solid #ffffff' },
+  tabs = ['RUNNING', 'SCORE', 'WEIGHTS'] as const
+}) => {
   const [calendarData, setCalendarData] = useState<Record<string, number>>({});
-  const [selectedTab, setSelectedTab] = useState<'RUNNING' | 'SCORE' | 'WEIGHTS'>('RUNNING');
+  const [selectedTab, setSelectedTab] = useState<'RUNNING' | 'SCORE' | 'WEIGHTS' | 'ROW' | 'CROSS TRAINER'>('ROW');
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -28,6 +36,14 @@ const MonthlyCalendarChart: React.FC<MonthlyCalendarChartProps> = ({ monthOffset
         selectField = 'date, total_cardio';
         typeFilter = 'CARDIO';
         exerciseFilter = 84;
+      } else if (selectedTab === 'ROW') {
+        selectField = 'date, total_cardio';
+        typeFilter = 'CARDIO';
+        exerciseFilter = 83;
+      } else if (selectedTab === 'CROSS TRAINER') {
+        selectField = 'date, total_cardio';
+        typeFilter = 'CARDIO';
+        exerciseFilter = 87;
       } else if (selectedTab === 'SCORE') {
         selectField = 'date, total_score';
         typeFilter = 'CARDIO';
@@ -101,9 +117,9 @@ const MonthlyCalendarChart: React.FC<MonthlyCalendarChartProps> = ({ monthOffset
   }
 
   return (
-    <div className="rounded-lg p-6 mb-4" style={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff' }}>
+    <div className={className} style={containerStyle}>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
-        {(['RUNNING', 'SCORE', 'WEIGHTS'] as const).map(tab => (
+        {tabs.map(tab => (
           <button
             key={tab}
             onClick={() => setSelectedTab(tab)}
