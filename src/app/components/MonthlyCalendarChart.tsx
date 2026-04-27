@@ -34,9 +34,14 @@ const MonthlyCalendarChart: React.FC = () => {
       let query = supabase
         .from('workouts')
         .select(selectField)
-        .eq('type', typeFilter)
         .gte('date', firstDateStr)
         .lte('date', lastDateStr);
+
+      if (selectedTab === 'WEIGHTS') {
+        query = query.in('type', ['CHEST', 'BACK', 'LEGS']);
+      } else {
+        query = query.eq('type', typeFilter);
+      }
 
       if (exerciseFilter) {
         query = query.eq('exercise_id', exerciseFilter);
