@@ -17,10 +17,7 @@ const tabs: { label: string; page: Page }[] = [
   { label: 'Calories', page: 'calories' },
 ];
 
-type FoodRating = 'BAD' | 'OK' | 'GOOD' | null;
-
 const CALORIES_EXERCISE_ID = 90;
-const FOOD_EXERCISE_ID = 89;
 const BODY_COMP_EXERCISE_ID = 88;
 
 
@@ -41,7 +38,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate, showWeekly
   const [calories, setCalories] = useState('');
   const [chartExpanded, setChartExpanded] = useState(false);
   const [showEditSheet, setShowEditSheet] = useState(false);
-  const [foodRating, setFoodRating] = useState<FoodRating>(null);
+
   const [bodyWeight, setBodyWeight] = useState('');
   const [bodyFat, setBodyFat] = useState('');
   const [muscleMass, setMuscleMass] = useState('');
@@ -53,11 +50,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate, showWeekly
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState('');
 
-  // Food rating week navigation
-  const [weekOffset, setWeekOffset] = useState(0);
-  const [weekNumber, setWeekNumber] = useState<number | null>(null);
   const [weeklyBars, setWeeklyBars] = useState<number[]>(Array(7).fill(0));
-  const [weeklyRatings, setWeeklyRatings] = useState<(FoodRating)[]>(Array(7).fill(null));
 
   // Load body measurements
   useEffect(() => {
@@ -108,46 +101,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate, showWeekly
     loadData();
   }, []);
 
-  // Load food ratings for selected week
-  useEffect(() => {
-    const loadRatings = async () => {
-      const monday = getMondayAtOffset(weekOffset);
-      const sunday = new Date(monday);
-      sunday.setDate(monday.getDate() + 6);
 
-      const { data } = await supabase
-        .from('workouts')
-        .select('date, food_rating, week')
-        .eq('type', 'MEASUREMENT')
-        .not('food_rating', 'is', null)
-        .gte('date', fmtDate(monday))
-        .lte('date', fmtDate(sunday))
-        .order('date', { ascending: true });
-
-      const ratings: (FoodRating)[] = Array(7).fill(null);
-      let wkNum: number | null = null;
-      if (data) {
-        for (const row of data as any[]) {
-          if (wkNum === null && row.week) wkNum = Number(row.week);
-          if (!row.food_rating) continue;
-          const d = new Date(row.date + 'T12:00:00');
-          const diffMs = d.getTime() - monday.getTime();
-          const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-          if (diffDays >= 0 && diffDays < 7) {
-            const dayIdx = d.getDay() === 0 ? 6 : d.getDay() - 1;
-            if (!ratings[dayIdx]) ratings[dayIdx] = (row.food_rating as string).toUpperCase() as FoodRating;
-          }
-        }
-      }
-      setWeeklyRatings(ratings);
-      setWeekNumber(wkNum);
-      if (weekOffset === 0) {
-        const todayIdx = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
-        if (ratings[todayIdx]) setFoodRating(ratings[todayIdx]);
-      }
-    };
-    loadRatings();
-  }, [weekOffset]);
 
   const upsertMeasurementRow = async (
     exerciseId: number,
@@ -196,10 +150,6 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate, showWeekly
         await upsertMeasurementRow(CALORIES_EXERCISE_ID, { calories: parseInt(calories) || null });
         anySaved = true;
       }
-      if (foodRating) {
-        await upsertMeasurementRow(FOOD_EXERCISE_ID, { food_rating: foodRating });
-        anySaved = true;
-      }
       const hasBodyData = bodyWeight || bodyFat || muscleMass;
       if (hasBodyData) {
         await upsertMeasurementRow(BODY_COMP_EXERCISE_ID, {
@@ -221,11 +171,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate, showWeekly
     }
   };
 
-  const ratingButtons: { label: string; value: 'BAD' | 'OK' | 'GOOD' }[] = [
-    { label: 'Bad', value: 'BAD' },
-    { label: 'Ok', value: 'OK' },
-    { label: 'Good', value: 'GOOD' },
-  ];
+
 
   return (
     <div>
