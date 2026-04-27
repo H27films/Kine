@@ -10,8 +10,8 @@ interface MonthlyCalendarChartProps {
 
 const MonthlyCalendarChart: React.FC<MonthlyCalendarChartProps> = ({
   monthOffset,
-  className = "rounded-lg p-6 mb-4",
-  containerStyle = { backgroundColor: '#121212', borderLeft: '2px solid #ffffff' },
+  className = "rounded-lg mb-4",
+  containerStyle = { backgroundColor: '#121212', borderLeft: '2px solid #ffffff', padding: '32px 24px' },
   tabs = ['RUNNING', 'SCORE', 'WEIGHTS'] as const
 }) => {
   const [calendarData, setCalendarData] = useState<Record<string, number>>({});
@@ -124,7 +124,8 @@ const MonthlyCalendarChart: React.FC<MonthlyCalendarChartProps> = ({
 
   return (
     <div className={className} style={containerStyle}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+      {/* Tab selector */}
+      <div style={{ marginBottom: '20px' }}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           {tabs.map(tab => (
             <button
@@ -146,18 +147,18 @@ const MonthlyCalendarChart: React.FC<MonthlyCalendarChartProps> = ({
             </button>
           ))}
         </div>
-
-        {/* Total display in same style as CardioTypeChart */}
-        {total > 0 && (
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-            <span style={{ fontSize: '1.6rem', fontWeight: 900, letterSpacing: '-0.02em', color: '#ffffff', lineHeight: 1 }}>
-              {total}
-            </span>
-            <span style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.12em' }}>KM</span>
-          </div>
-        )}
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gridTemplateRows: 'repeat(5, auto)', gap: '8px', marginTop: '20px' }}>
+
+      {/* Total display below tabs */}
+      {total > 0 && (
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '30px' }}>
+          <span style={{ fontSize: '1.6rem', fontWeight: 900, letterSpacing: '-0.02em', color: '#ffffff', lineHeight: 1 }}>
+            {total}
+          </span>
+          <span style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.12em' }}>KM</span>
+        </div>
+      )}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gridTemplateRows: 'repeat(5, auto)', gap: '8px', marginTop: '40px' }}>
         {grid.map((row, rowIdx) =>
           row.map((cell, colIdx) =>
             cell ? (() => {
