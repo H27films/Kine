@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
-const MonthlyCalendarChart: React.FC = () => {
+interface MonthlyCalendarChartProps {
+  monthOffset: number;
+}
+
+const MonthlyCalendarChart: React.FC<MonthlyCalendarChartProps> = ({ monthOffset }) => {
   const [calendarData, setCalendarData] = useState<Record<string, number>>({});
   const [selectedTab, setSelectedTab] = useState<'RUNNING' | 'SCORE' | 'WEIGHTS'>('RUNNING');
-  const [monthOffset, setMonthOffset] = useState(0);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -100,45 +102,26 @@ const MonthlyCalendarChart: React.FC = () => {
 
   return (
     <div className="rounded-lg p-6 mb-4" style={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-          {(['RUNNING', 'SCORE', 'WEIGHTS'] as const).map(tab => (
-            <button
-              key={tab}
-              onClick={() => setSelectedTab(tab)}
-              style={{
-                fontSize: '12px',
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: '1px',
-                color: selectedTab === tab ? '#ffffff' : 'rgba(255,255,255,0.4)',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-              }}
-            >
-              {tab}
-            </button>
-          ))}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '2px', marginLeft: '4px' }}>
-            <button
-              onClick={() => setMonthOffset(o => o - 1)}
-              style={{ opacity: 0.55, background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
-            >
-              <ChevronLeft size={18} color="white" />
-            </button>
-            <button
-              onClick={() => setMonthOffset(o => o + 1)}
-              disabled={monthOffset === 0}
-              style={{ opacity: monthOffset === 0 ? 0.2 : 0.55, background: 'none', border: 'none', cursor: monthOffset === 0 ? 'default' : 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
-            >
-              <ChevronRight size={18} color="white" />
-            </button>
-          </div>
-        </div>
-        <span style={{ fontSize: '0.95rem', fontWeight: 700, letterSpacing: '0.06em', color: '#ffffff', marginRight: '6px' }}>
-          {targetMonth.toLocaleString('default', { month: 'long', year: 'numeric' }).toUpperCase()}
-        </span>
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
+        {(['RUNNING', 'SCORE', 'WEIGHTS'] as const).map(tab => (
+          <button
+            key={tab}
+            onClick={() => setSelectedTab(tab)}
+            style={{
+              fontSize: '12px',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '1px',
+              color: selectedTab === tab ? '#ffffff' : 'rgba(255,255,255,0.4)',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              marginRight: '20px',
+            }}
+          >
+            {tab}
+          </button>
+        ))}
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gridTemplateRows: 'repeat(5, auto)', gap: '8px' }}>
         {grid.map((row, rowIdx) =>

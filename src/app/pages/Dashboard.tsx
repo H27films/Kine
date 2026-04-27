@@ -300,6 +300,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
   const [selectedWeekNumber, setSelectedWeekNumber] = useState<number | null>(null);
   const [weightsExpanded, setWeightsExpanded] = useState(false);
+  const [monthlyOffset, setMonthlyOffset] = useState(0);
 
   const [todayActivities, setTodayActivities] = useState<DayActivity[]>([]);
   const [totalMovement, setTotalMovement] = useState<number>(0);
@@ -723,17 +724,47 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
       </section>
 
       <section className="mt-8">
-        <div style={{
-          fontSize: '1.15rem',
-          fontWeight: 800,
-          letterSpacing: '-0.03em',
-          textTransform: 'uppercase',
-          color: '#ffffff',
-          marginBottom: '1.25rem',
-        }}>
-          Monthly
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <div style={{
+              fontSize: '1.15rem',
+              fontWeight: 800,
+              letterSpacing: '-0.03em',
+              textTransform: 'uppercase',
+              color: '#ffffff',
+            }}>
+              Monthly
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+              <button
+                onClick={() => setMonthlyOffset(o => o - 1)}
+                style={{ opacity: 0.55, background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
+              >
+                <ChevronLeft size={18} color="white" />
+              </button>
+              <button
+                onClick={() => setMonthlyOffset(o => o + 1)}
+                disabled={monthlyOffset === 0}
+                style={{ opacity: monthlyOffset === 0 ? 0.2 : 0.55, background: 'none', border: 'none', cursor: monthlyOffset === 0 ? 'default' : 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
+              >
+                <ChevronRight size={18} color="white" />
+              </button>
+            </div>
+          </div>
+          <span style={{
+            fontSize: '0.95rem',
+            fontWeight: 700,
+            letterSpacing: '0.06em',
+            color: '#ffffff',
+          }}>
+            {(() => {
+              const d = new Date();
+              d.setMonth(d.getMonth() + monthlyOffset);
+              return d.toLocaleString('default', { month: 'long' }).toUpperCase();
+            })()}
+          </span>
         </div>
-        <MonthlyCalendarChart />
+        <MonthlyCalendarChart monthOffset={monthlyOffset} />
       </section>
 
       <section className="mt-8">
