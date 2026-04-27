@@ -549,7 +549,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySumm
           monthOffset={monthlyOffset}
           className="p-6 rounded-xl relative mb-4"
           containerStyle={{ backgroundColor: '#121212' }}
-          tabs={['ROW', 'CROSS TRAINER']}
+          tabs={['RUNNING', 'ROW', 'CROSS TRAINER']}
         />
       </section>
 
