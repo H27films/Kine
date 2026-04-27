@@ -48,6 +48,8 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySumm
   const [thirtyDayOffset, setThirtyDayOffset] = useState(0);
   const [hasOlderCardioData, setHasOlderCardioData] = useState(false);
   const [monthlyOffset, setMonthlyOffset] = useState(0);
+  const [minMonthlyOffset, setMinMonthlyOffset] = useState(0);
+  const [maxMonthlyOffset, setMaxMonthlyOffset] = useState(0);
 
 
   const isRunning = selectedExercise?.exercise_name?.toUpperCase() === 'RUNNING';
@@ -209,9 +211,43 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySumm
        }
      };
      load30Day();
-   }, [saveSuccess, thirtyDayOffset]);
+    }, [saveSuccess, thirtyDayOffset]);
 
-   // Load today's TRACKER distance if exists
+    // Calculate monthly navigation limits based on available data
+    useEffect(() => {
+      const calculateMonthlyLimits = async () => {
+        try {
+          // Get earliest cardio data date
+          const { data: minData } = await supabase
+            .from('workouts')
+            .select('date')
+            .eq('type', 'CARDIO')
+            .in('exercise_id', TOTAL_CARDIO_IDS)
+            .order('date', { ascending: true })
+            .limit(1);
+
+          if (minData && minData.length > 0) {
+            const earliestDate = new Date(minData[0].date);
+            const currentDate = new Date();
+            const monthsDiff = (currentDate.getFullYear() - earliestDate.getFullYear()) * 12 +
+                              (currentDate.getMonth() - earliestDate.getMonth());
+            setMinMonthlyOffset(-monthsDiff);
+          } else {
+            setMinMonthlyOffset(0);
+          }
+
+          // For max offset, limit to current month (0) for now
+          setMaxMonthlyOffset(0);
+        } catch (error) {
+          console.error('Error calculating monthly limits:', error);
+          setMinMonthlyOffset(0);
+          setMaxMonthlyOffset(0);
+        }
+      };
+      calculateMonthlyLimits();
+    }, [saveSuccess]);
+
+    // Load today's TRACKER distance if exists
    useEffect(() => {
      const loadTodayTracker = async () => {
        const today = todayStr();
@@ -496,11 +532,13 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySumm
             <span style={{ fontSize: '14px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', color: '#ffffff' }}>Monthly</span>
             <button
               onClick={() => setMonthlyOffset(o => o - 1)}
-              style={{ background: 'none', border: 'none', padding: '0 8px', cursor: 'pointer', opacity: 0.85, color: '#fff', fontSize: '24px', lineHeight: 1 }}
+              disabled={monthlyOffset <= minMonthlyOffset}
+              style={{ background: 'none', border: 'none', padding: '0 8px', cursor: monthlyOffset <= minMonthlyOffset ? 'default' : 'pointer', opacity: monthlyOffset <= minMonthlyOffset ? 0.2 : 0.85, color: '#fff', fontSize: '24px', lineHeight: 1 }}
             >‹</button>
             <button
               onClick={() => setMonthlyOffset(o => o + 1)}
-              style={{ background: 'none', border: 'none', padding: '0 8px', cursor: 'pointer', opacity: 0.85, color: '#fff', fontSize: '24px', lineHeight: 1 }}
+              disabled={monthlyOffset >= maxMonthlyOffset}
+              style={{ background: 'none', border: 'none', padding: '0 8px', cursor: monthlyOffset >= maxMonthlyOffset ? 'default' : 'pointer', opacity: monthlyOffset >= maxMonthlyOffset ? 0.2 : 0.85, color: '#fff', fontSize: '24px', lineHeight: 1 }}
             >›</button>
           </div>
           <span style={{ fontSize: '14px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', color: '#ffffff' }}>
