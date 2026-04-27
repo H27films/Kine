@@ -62,12 +62,16 @@ const MonthlyCalendarChart: React.FC = () => {
 
   return (
     <div className="rounded-lg p-5 mb-4" style={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
-        {grid.flat().map((cell, idx) => (
-          <div key={idx} style={{ width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '8px', fontWeight: 'bold', color: cell?.value ? '#ffffff' : '#121212', backgroundColor: cell?.value ? '#000000' : '#ffffff' }}>
-            {cell?.value ? cell.value : ''}
-          </div>
-        ))}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gridTemplateRows: 'repeat(5, auto)', gap: '8px' }}>
+        {grid.map((row, rowIdx) =>
+          row.map((cell, colIdx) =>
+            cell ? (
+              <div key={`${rowIdx}-${colIdx}`} style={{ gridColumn: colIdx + 1, gridRow: rowIdx + 1, width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '8px', fontWeight: 'bold', color: '#ffffff', backgroundColor: '#000000' }}>
+                {cell.value}
+              </div>
+            ) : null
+          )
+        )}
       </div>
     </div>
   );
