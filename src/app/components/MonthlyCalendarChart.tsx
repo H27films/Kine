@@ -24,7 +24,7 @@ const MonthlyCalendarChart: React.FC = () => {
         typeFilter = 'CARDIO';
         exerciseFilter = 84;
       } else if (selectedTab === 'SCORE') {
-        selectField = 'date, total_score_k';
+        selectField = 'date, total_score';
         typeFilter = 'CARDIO';
       } else {
         selectField = 'date, total_weight';
@@ -50,9 +50,9 @@ const MonthlyCalendarChart: React.FC = () => {
           const date = r.date;
           if (selectedTab === 'SCORE') {
             // Take the score value (assumed same for all rows on date)
-            byDate[date] = Number(r.total_score_k || 0);
+            byDate[date] = Number(r.total_score || 0);
           } else {
-            const value = Number(r.total_cardio || r.total_score_k || r.total_weight || 0);
+            const value = Number(r.total_cardio || r.total_score || r.total_weight || 0);
             byDate[date] = +((byDate[date] || 0) + value).toFixed(1);
           }
         });
