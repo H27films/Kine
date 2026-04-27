@@ -17,7 +17,7 @@ const MonthlyCalendarChart: React.FC = () => {
         .from('workouts')
         .select('date, total_cardio')
         .eq('type', 'CARDIO')
-        .eq('exercise_id', 85) // RUNNING
+        .eq('exercise_id', 84) // RUNNING
         .gte('date', firstDateStr)
         .lte('date', lastDateStr);
 
@@ -41,38 +41,31 @@ const MonthlyCalendarChart: React.FC = () => {
   const daysInMonth = lastDayOfMonth.getDate();
   const startDayOfWeek = firstDayOfMonth.getDay(); // 0 = Sun, 1 = Mon, etc.
 
-  // Generate calendar grid
+  // Generate calendar grid: 7 columns, up to 5 rows
   const grid = [];
-  let day = 1;
   for (let row = 0; row < 5; row++) {
     const rowCells = [];
     for (let col = 0; col < 7; col++) {
-      const gridIndex = row * 7 + col;
-      const isBeforeStart = gridIndex < startDayOfWeek;
-      const isAfterEnd = day > daysInMonth;
-      if (isBeforeStart || isAfterEnd) {
-        rowCells.push(null);
-      } else {
-        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const dayNum = row * 7 + col - startDayOfWeek + 1;
+      if (dayNum > 0 && dayNum <= daysInMonth) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
         const value = calendarData[dateStr];
-        rowCells.push({ day, value });
-        day++;
+        rowCells.push({ day: dayNum, value });
+      } else {
+        rowCells.push(null);
       }
     }
     grid.push(rowCells);
-    if (day > daysInMonth) break;
+    // Stop if this row has no days (all null after first row with days)
+    if (row > 0 && rowCells.every(cell => cell === null)) break;
   }
 
   return (
     <div className="rounded-lg p-5 mb-4" style={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff' }}>
-      <div style={{ display: 'grid', gridTemplateRows: `repeat(${grid.length}, 1fr)`, gap: '8px' }}>
-        {grid.map((row, rowIdx) => (
-          <div key={rowIdx} style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-            {row.map((cell, colIdx) => (
-              <div key={colIdx} style={{ width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '8px', fontWeight: 'bold', color: cell?.value ? '#ffffff' : '#121212', backgroundColor: cell?.value ? '#000000' : '#ffffff' }}>
-                {cell ? (cell.value ? cell.value : '') : ''}
-              </div>
-            ))}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
+        {grid.flat().map((cell, idx) => (
+          <div key={idx} style={{ width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '8px', fontWeight: 'bold', color: cell?.value ? '#ffffff' : '#121212', backgroundColor: cell?.value ? '#000000' : '#ffffff' }}>
+            {cell?.value ? cell.value : ''}
           </div>
         ))}
       </div>
