@@ -499,7 +499,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySumm
       <CardioTypeChart />
 
       {/* 30-day chart */}
-      <section className="mb-12" style={{ marginTop: isRunning ? 0 : 0 }}>
+      <section className="mb-6" style={{ marginTop: isRunning ? 0 : 0 }}>
         <div style={{ paddingLeft: '2px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ fontSize: '14px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', color: '#ffffff' }}>Movement</span>
           <button
