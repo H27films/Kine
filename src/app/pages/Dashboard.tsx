@@ -301,6 +301,8 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
   const [selectedWeekNumber, setSelectedWeekNumber] = useState<number | null>(null);
   const [weightsExpanded, setWeightsExpanded] = useState(false);
   const [monthlyOffset, setMonthlyOffset] = useState(0);
+  const [monthlyMinOffset, setMonthlyMinOffset] = useState(-12);
+  const [monthlyMaxOffset, setMonthlyMaxOffset] = useState(0);
 
   const [todayActivities, setTodayActivities] = useState<DayActivity[]>([]);
   const [totalMovement, setTotalMovement] = useState<number>(0);
@@ -522,6 +524,35 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
     loadWeeklyCharts();
   }, [refreshKey]);
 
+  // Load min/max months for monthly navigation
+  useEffect(() => {
+    const loadMonthlyLimits = async () => {
+      const { data: minData } = await supabase
+        .from('workouts')
+        .select('date')
+        .order('date', { ascending: true })
+        .limit(1);
+      const { data: maxData } = await supabase
+        .from('workouts')
+        .select('date')
+        .order('date', { ascending: false })
+        .limit(1);
+
+      const current = new Date();
+      if (minData && minData[0]) {
+        const minD = new Date(minData[0].date + 'T12:00:00');
+        const minOffset = (minD.getFullYear() - current.getFullYear()) * 12 + (minD.getMonth() - current.getMonth());
+        setMonthlyMinOffset(minOffset);
+      }
+      if (maxData && maxData[0]) {
+        const maxD = new Date(maxData[0].date + 'T12:00:00');
+        const maxOffset = (maxD.getFullYear() - current.getFullYear()) * 12 + (maxD.getMonth() - current.getMonth());
+        setMonthlyMaxOffset(maxOffset);
+      }
+    };
+    loadMonthlyLimits();
+  }, []);
+
   const visibleCardioKeys = [
     ...CARDIO_ALWAYS,
     ...CARDIO_CONDITIONAL.filter(key =>
@@ -737,15 +768,16 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
               <button
-                onClick={() => setMonthlyOffset(o => o - 1)}
-                style={{ opacity: 0.55, background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
+                onClick={() => setMonthlyOffset(o => Math.max(o - 1, monthlyMinOffset))}
+                disabled={monthlyOffset <= monthlyMinOffset}
+                style={{ opacity: monthlyOffset <= monthlyMinOffset ? 0.2 : 0.55, background: 'none', border: 'none', cursor: monthlyOffset <= monthlyMinOffset ? 'default' : 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
               >
                 <ChevronLeft size={18} color="white" />
               </button>
               <button
-                onClick={() => setMonthlyOffset(o => o + 1)}
-                disabled={monthlyOffset === 0}
-                style={{ opacity: monthlyOffset === 0 ? 0.2 : 0.55, background: 'none', border: 'none', cursor: monthlyOffset === 0 ? 'default' : 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
+                onClick={() => setMonthlyOffset(o => Math.min(o + 1, monthlyMaxOffset))}
+                disabled={monthlyOffset >= monthlyMaxOffset}
+                style={{ opacity: monthlyOffset >= monthlyMaxOffset ? 0.2 : 0.55, background: 'none', border: 'none', cursor: monthlyOffset >= monthlyMaxOffset ? 'default' : 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
               >
                 <ChevronRight size={18} color="white" />
               </button>
