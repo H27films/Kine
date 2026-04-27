@@ -48,8 +48,13 @@ const MonthlyCalendarChart: React.FC = () => {
       if (data) {
         (data as any[]).forEach(r => {
           const date = r.date;
-          const value = Number(r.total_cardio || r.total_score_k || r.total_weight || 0);
-          byDate[date] = +((byDate[date] || 0) + value).toFixed(1);
+          if (selectedTab === 'SCORE') {
+            // Take the score value (assumed same for all rows on date)
+            byDate[date] = Number(r.total_score_k || 0);
+          } else {
+            const value = Number(r.total_cardio || r.total_score_k || r.total_weight || 0);
+            byDate[date] = +((byDate[date] || 0) + value).toFixed(1);
+          }
         });
       }
       setCalendarData(byDate);
@@ -129,7 +134,7 @@ const MonthlyCalendarChart: React.FC = () => {
                   color: isFuture ? 'transparent' : (cell.value ? '#000000' : '#ffffff'),
                   backgroundColor: isFuture ? 'transparent' : (cell.value ? '#ffffff' : '#000000')
                 }}>
-                  {isFuture ? '' : (cell.value || '')}
+                  {isFuture ? '' : (cell.value ? (selectedTab === 'WEIGHTS' ? `${Math.round(cell.value / 1000)}k` : cell.value) : '')}
                 </div>
               );
             })() : null
