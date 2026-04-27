@@ -7,6 +7,7 @@ import TrackerSparkline from '../components/TrackerSparkline';
 import TrackerEditSheet from '../components/TrackerEditSheet';
 import ExerciseIconBar from '../components/ExerciseIconBar';
 import ExerciseLogDots from '../components/ExerciseLogDots';
+import MonthlyCalendarChart from '../components/MonthlyCalendarChart';
 
 interface LogCardioProps {
   onNavigate: (page: Page) => void;
@@ -487,6 +488,16 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySumm
         {saving ? 'Saving...' : saveSuccess ? '✓ Session Saved!' : 'Log Session'}
       </button>
 
+      {/* Monthly Calendar Chart */}
+      <section className="mb-6">
+        <MonthlyCalendarChart monthOffset={0} />
+      </section>
+
+
+
+      {/* Per-type cardio chart */}
+      <CardioTypeChart />
+
       {/* 30-day chart */}
       <section className="mb-12" style={{ marginTop: isRunning ? 0 : 0 }}>
         <div style={{ paddingLeft: '2px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -617,9 +628,6 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySumm
           <div className="absolute inset-0 pointer-events-none" style={{ opacity: 0.025, background: 'radial-gradient(circle at top right, white, transparent, transparent)' }} />
         </div>
       </section>
-
-      {/* Per-type cardio chart */}
-      <CardioTypeChart />
 
       {/* Tracker Edit Sheet */}
       {showTrackerEdit && (

@@ -23,34 +23,7 @@ const CALORIES_EXERCISE_ID = 90;
 const FOOD_EXERCISE_ID = 89;
 const BODY_COMP_EXERCISE_ID = 88;
 
-const FoodScoreCircle: React.FC<{ pct: number; size?: number }> = ({ pct, size = 54 }) => {
-  const N = 20;
-  const cx = size / 2;
-  const cy = size / 2;
-  const r = size / 2 - 5.5;
-  const dotR = 2.8;
-  const filled = Math.round(pct * N);
-  const pctDisplay = Math.round(pct * 100);
-  return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-      {Array.from({ length: N }, (_, i) => {
-        const angle = (i / N) * 2 * Math.PI - Math.PI / 2;
-        const x = cx + r * Math.cos(angle);
-        const y = cy + r * Math.sin(angle);
-        return (
-          <circle
-            key={i}
-            cx={x} cy={y} r={dotR}
-            fill={i < filled ? 'rgba(255,255,255,0.90)' : 'rgba(255,255,255,0.10)'}
-          />
-        );
-      })}
-      <text x={cx} y={cy + 4} textAnchor="middle" fill="rgba(255,255,255,0.80)" fontSize="11" fontWeight="700">
-        {pctDisplay}%
-      </text>
-    </svg>
-  );
-};
+
 
 const getMondayAtOffset = (offset: number): Date => {
   const today = new Date();
@@ -256,7 +229,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate, showWeekly
 
   return (
     <div>
-      <nav className="flex gap-8 items-end" style={{ marginBottom: showWeeklySummary ? '0' : '3rem', maxHeight: showWeeklySummary ? '0' : '80px', overflow: 'hidden', opacity: showWeeklySummary ? 0 : 1, transition: 'all 0.35s ease' }}>
+       <nav className="flex gap-8 items-end" style={{ marginBottom: showWeeklySummary ? '0' : '3rem', maxHeight: showWeeklySummary ? '0' : '80px', overflow: 'hidden', opacity: showWeeklySummary ? 0 : 1, transition: 'all 0.35s ease' }}>
         {tabs.map(tab => {
           const isActive = tab.page === 'calories';
           return (
@@ -293,87 +266,6 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate, showWeekly
             </div>
           </div>
         )}
-
-        {/* Food Rating */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {(() => {
-            const foodScore = weeklyRatings.reduce((sum, r) => sum + (r === 'GOOD' ? 3 : r === 'OK' ? 2 : r === 'BAD' ? 1 : 0), 0);
-            const daysWithRating = weeklyRatings.filter(r => r !== null).length;
-            const maxScore = daysWithRating > 0 ? daysWithRating * 3 : 21;
-            const pct = daysWithRating > 0 ? foodScore / maxScore : 0;
-            return (
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span className="text-[13px] uppercase tracking-[0.2em] font-black" style={{ color: '#ffffff' }}>Food Rating</span>
-                    <button onClick={() => setWeekOffset(o => o - 1)} style={{ background: 'none', border: 'none', padding: '4px 2px', cursor: 'pointer', color: 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center' }}>
-                      <ChevronLeft size={16} />
-                    </button>
-                    <button onClick={() => setWeekOffset(o => Math.min(o + 1, 0))} style={{ background: 'none', border: 'none', padding: '4px 2px', cursor: 'pointer', color: weekOffset < 0 ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.18)', display: 'flex', alignItems: 'center' }}>
-                      <ChevronRight size={16} />
-                    </button>
-                  </div>
-                  {weekNumber !== null && (
-                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.1em' }}>
-                      {weekNumber}
-                    </span>
-                  )}
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-                    <span className="text-7xl font-black tracking-tighter text-white" style={{ lineHeight: 1 }}>{foodScore}</span>
-                    <span className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: 'rgba(161,161,170,1)' }}>/{maxScore}</span>
-                  </div>
-                  {daysWithRating > 0 && <FoodScoreCircle pct={pct} />}
-                </div>
-              </div>
-            );
-          })()}
-          <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-            {['M','T','W','T','F','S','S'].map((day, i) => {
-              const rating = weeklyRatings[i];
-              const prevRating = i > 0 ? weeklyRatings[i - 1] : null;
-              const today = new Date();
-              const todayIdx = today.getDay() === 0 ? 6 : today.getDay() - 1;
-              const isFuture = weekOffset === 0 && i > todayIdx;
-              let border = '1.5px solid rgba(255,255,255,0.38)';
-              let textColor = 'rgba(255,255,255,0.5)';
-              let glowShadow = 'none';
-              if (rating === 'GOOD') { border = '2px solid #90c9a0'; textColor = '#90c9a0'; glowShadow = '0 0 8px rgba(144,201,160,0.75), 0 0 18px rgba(144,201,160,0.3)'; }
-              else if (rating === 'BAD') { border = '2px solid #ef4444'; textColor = '#ef4444'; glowShadow = '0 0 8px rgba(239,68,68,0.75), 0 0 18px rgba(239,68,68,0.3)'; }
-              else if (rating === 'OK') { border = '2px solid rgba(255,255,255,0.75)'; textColor = 'rgba(255,255,255,0.9)'; glowShadow = '0 0 8px rgba(255,255,255,0.45), 0 0 18px rgba(255,255,255,0.15)'; }
-              const showLine = i > 0 && rating !== null && prevRating !== null;
-              return (
-                <React.Fragment key={i}>
-                  {i > 0 && (
-                    <div style={{ flex: 1, height: 1.5, backgroundColor: showLine ? 'rgba(255,255,255,0.75)' : 'transparent' }} />
-                  )}
-                  <div style={{
-                    width: 28, height: 28, borderRadius: '50%',
-                    backgroundColor: 'transparent', border,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    opacity: isFuture && !rating ? 0.35 : 1,
-                    flexShrink: 0,
-                    boxShadow: rating ? glowShadow : 'none',
-                  }}>
-                    <span style={{ fontSize: '8px', fontWeight: 800, color: textColor, letterSpacing: '0.05em' }}>{day}</span>
-                  </div>
-                </React.Fragment>
-              );
-            })}
-          </div>
-          <div style={{ marginTop: 16 }}>
-            <div className="flex gap-2">
-              {ratingButtons.map(btn => (
-                <button key={btn.value} onClick={() => setFoodRating(btn.value)}
-                  className="flex-1 py-4 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95"
-                  style={{ backgroundColor: foodRating === btn.value ? '#ffffff' : '#121212', border: foodRating === btn.value ? '1px solid #ffffff' : '1px solid rgba(255,255,255,0.05)', color: foodRating === btn.value ? '#000000' : 'rgba(161,161,170,1)' }}>
-                  {btn.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
       </section>
 
       <section className="mb-16">
