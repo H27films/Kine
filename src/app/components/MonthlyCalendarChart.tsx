@@ -66,8 +66,8 @@ const MonthlyCalendarChart: React.FC = () => {
         {grid.map((row, rowIdx) =>
           row.map((cell, colIdx) =>
             cell ? (
-              <div key={`${rowIdx}-${colIdx}`} style={{ gridColumn: colIdx + 1, gridRow: rowIdx + 1, width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '8px', fontWeight: 'bold', color: '#ffffff', backgroundColor: '#000000' }}>
-                {cell.value}
+              <div key={`${rowIdx}-${colIdx}`} style={{ gridColumn: colIdx + 1, gridRow: rowIdx + 1, width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '8px', fontWeight: 'bold', color: cell.value ? '#000000' : '#121212', backgroundColor: '#ffffff' }}>
+                {cell.value || ''}
               </div>
             ) : null
           )
