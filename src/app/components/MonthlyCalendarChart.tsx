@@ -16,6 +16,7 @@ const MonthlyCalendarChart: React.FC<MonthlyCalendarChartProps> = ({
 }) => {
   const [calendarData, setCalendarData] = useState<Record<string, number>>({});
   const [selectedTab, setSelectedTab] = useState<'RUNNING' | 'SCORE' | 'WEIGHTS' | 'ROW' | 'CROSS TRAINER'>('ROW');
+  const [total, setTotal] = useState(0);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -83,6 +84,11 @@ const MonthlyCalendarChart: React.FC<MonthlyCalendarChartProps> = ({
           }
         });
       }
+
+      // Calculate total
+      const totalValue = Object.values(byDate).reduce((sum, val) => sum + val, 0);
+      setTotal(+totalValue.toFixed(1));
+
       setCalendarData(byDate);
     };
     load();
@@ -118,28 +124,40 @@ const MonthlyCalendarChart: React.FC<MonthlyCalendarChartProps> = ({
 
   return (
     <div className={className} style={containerStyle}>
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
-        {tabs.map(tab => (
-          <button
-            key={tab}
-            onClick={() => setSelectedTab(tab)}
-            style={{
-              fontSize: '12px',
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              letterSpacing: '1px',
-              color: selectedTab === tab ? '#ffffff' : 'rgba(255,255,255,0.4)',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              marginRight: '20px',
-            }}
-          >
-            {tab}
-          </button>
-        ))}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          {tabs.map(tab => (
+            <button
+              key={tab}
+              onClick={() => setSelectedTab(tab)}
+              style={{
+                fontSize: '12px',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '1px',
+                color: selectedTab === tab ? '#ffffff' : 'rgba(255,255,255,0.4)',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                marginRight: '20px',
+              }}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        {/* Total display in same style as CardioTypeChart */}
+        {total > 0 && (
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+            <span style={{ fontSize: '1.6rem', fontWeight: 900, letterSpacing: '-0.02em', color: '#ffffff', lineHeight: 1 }}>
+              {total}
+            </span>
+            <span style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.12em' }}>KM</span>
+          </div>
+        )}
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gridTemplateRows: 'repeat(5, auto)', gap: '8px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gridTemplateRows: 'repeat(5, auto)', gap: '8px', marginTop: '20px' }}>
         {grid.map((row, rowIdx) =>
           row.map((cell, colIdx) =>
             cell ? (() => {
