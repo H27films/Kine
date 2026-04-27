@@ -4,6 +4,7 @@ import { supabase, todayStr, getISOWeek, getDayName, recalculateDailyTotals } fr
 import CaloriesSparkline from '../components/CaloriesSparkline';
 import CaloriesTrends from '../components/CaloriesTrends';
 import CaloriesEditSheet from '../components/CaloriesEditSheet';
+import MonthlyCalendarChart from '../components/MonthlyCalendarChart';
 
 interface LogCaloriesProps {
   onNavigate: (page: Page) => void;
@@ -50,6 +51,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate, showWeekly
   const [saveError, setSaveError] = useState('');
 
   const [weeklyBars, setWeeklyBars] = useState<number[]>(Array(7).fill(0));
+  const [monthlyOffset, setMonthlyOffset] = useState(0);
 
   // Load body measurements
   useEffect(() => {
@@ -270,6 +272,27 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate, showWeekly
       </section>
 
       <CaloriesTrends />
+
+      {/* Monthly Calendar Chart */}
+      <section className="mb-10">
+        <div style={{ paddingLeft: '2px', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: '14px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', color: '#ffffff' }}>Monthly</span>
+            <button
+              onClick={() => setMonthlyOffset(o => o - 1)}
+              style={{ background: 'none', border: 'none', padding: '0 8px', cursor: 'pointer', opacity: 0.85, color: '#fff', fontSize: '24px', lineHeight: 1 }}
+            >‹</button>
+            <button
+              onClick={() => setMonthlyOffset(o => o + 1)}
+              style={{ background: 'none', border: 'none', padding: '0 8px', cursor: 'pointer', opacity: 0.85, color: '#fff', fontSize: '24px', lineHeight: 1 }}
+            >›</button>
+          </div>
+          <span style={{ fontSize: '14px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', color: '#ffffff' }}>
+            {new Date(new Date().getFullYear(), new Date().getMonth() + monthlyOffset, 1).toLocaleDateString('en-US', { month: 'long' }).toUpperCase()}
+          </span>
+        </div>
+        <MonthlyCalendarChart monthOffset={monthlyOffset} />
+      </section>
 
       {/* Edit sheet triggered from sparkline pencil icon */}
       {showEditSheet && (
