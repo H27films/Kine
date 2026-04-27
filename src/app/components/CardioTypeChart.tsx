@@ -210,7 +210,7 @@ export const CardioTypeChart: React.FC = () => {
       : setMonthOffset(o => Math.max(o - 1, minMonthOffset));
 
   return (
-    <section className="mb-20">
+    <section className="mb-2">
 
       {/* WEEK / MONTH tabs + navigation + week number — above the box */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', paddingLeft: '2px' }}>
