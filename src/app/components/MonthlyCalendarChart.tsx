@@ -43,7 +43,7 @@ const MonthlyCalendarChart: React.FC<MonthlyCalendarChartProps> = ({
       } else if (selectedTab === 'CROSS TRAINER') {
         selectField = 'date, total_cardio';
         typeFilter = 'CARDIO';
-        exerciseFilter = 87;
+        exerciseFilter = 86;
       } else if (selectedTab === 'SCORE') {
         selectField = 'date, total_score';
         typeFilter = 'CARDIO';
