@@ -10,7 +10,7 @@ interface WaveTimelineProps {
 
 export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate }) => {
   const [actualFirstDate, setActualFirstDate] = useState(firstDate);
-  const [view, setView] = useState<'overview' | 'tracker' | 'running' | 'allweights' | 'calories' | 'weekly'>('overview');
+  const [view, setView] = useState<'overview' | 'tracker' | 'running' | 'allweights' | 'calories' | 'weekly'>('weekly');
   const [trackerValues, setTrackerValues] = useState<number[]>([]);
   const [runningValues, setRunningValues] = useState<number[]>([]);
   const [allWeightsValues, setAllWeightsValues] = useState<{ week: number; chest: number; back: number; legs: number }[]>([]);
@@ -298,19 +298,19 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
     const diff = touchStartX.current - e.changedTouches[0].clientX;
     if (Math.abs(diff) > 50) {
       setSelectedBarIdx(null);
-      if (diff > 0) {
-        if (view === 'overview') setView('tracker');
-        else if (view === 'tracker') setView('running');
-        else if (view === 'running') setView('allweights');
-        else if (view === 'allweights') setView('calories');
-        else if (view === 'calories') setView('weekly');
-      } else {
-        if (view === 'weekly') setView('calories');
-        else if (view === 'calories') setView('allweights');
-        else if (view === 'allweights') setView('running');
-        else if (view === 'running') setView('tracker');
-        else if (view === 'tracker') setView('overview');
-      }
+        if (diff > 0) {
+          if (view === 'weekly') setView('overview');
+          else if (view === 'overview') setView('tracker');
+          else if (view === 'tracker') setView('running');
+          else if (view === 'running') setView('allweights');
+          else if (view === 'allweights') setView('calories');
+        } else {
+          if (view === 'calories') setView('allweights');
+          else if (view === 'allweights') setView('running');
+          else if (view === 'running') setView('tracker');
+          else if (view === 'tracker') setView('overview');
+          else if (view === 'overview') setView('weekly');
+        }
     }
     isDragging.current = false;
   };
@@ -1055,6 +1055,15 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
       {/* View indicator dots */}
       <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginTop: '4px', paddingBottom: '4px' }}>
         <div
+          onClick={() => setView('weekly')}
+          style={{
+            width: '6px', height: '6px', borderRadius: '50%',
+            backgroundColor: view === 'weekly' ? '#1a1a1a' : 'rgba(0,0,0,0.15)',
+            transition: 'background-color 0.2s',
+            cursor: 'pointer',
+          }}
+        />
+        <div
           onClick={() => setView('overview')}
           style={{
             width: '6px', height: '6px', borderRadius: '50%',
@@ -1095,15 +1104,6 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
           style={{
             width: '6px', height: '6px', borderRadius: '50%',
             backgroundColor: view === 'calories' ? '#1a1a1a' : 'rgba(0,0,0,0.15)',
-            transition: 'background-color 0.2s',
-            cursor: 'pointer',
-          }}
-        />
-        <div
-          onClick={() => setView('weekly')}
-          style={{
-            width: '6px', height: '6px', borderRadius: '50%',
-            backgroundColor: view === 'weekly' ? '#1a1a1a' : 'rgba(0,0,0,0.15)',
             transition: 'background-color 0.2s',
             cursor: 'pointer',
           }}
