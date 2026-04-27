@@ -270,6 +270,7 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
         backgroundColor: '#f2f2f2',
         color: '#1a1a1a',
         fontFamily: "'JetBrains Mono', monospace",
+        paddingTop: 'env(safe-area-inset-top)',
         display: 'flex',
         flexDirection: 'column',
       }}
