@@ -683,7 +683,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
           </div>
           {selectedActivity && (
             <div
-              onClick={() => onNavigate?.('cardio')}
+              onClick={() => onNavigate?.('logcardio')}
               style={{ cursor: 'pointer', marginLeft: '16px', marginTop: '12px' }}
             >
               <div style={{
