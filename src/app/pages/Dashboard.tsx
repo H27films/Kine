@@ -651,6 +651,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
         </div>
       )}
 
+      {console.log('selectedActivity:', selectedActivity)}
       <section className="pt-1 mb-4">
         <div className="flex items-start">
           <div className="flex items-center gap-4 flex-shrink-0">
@@ -666,7 +667,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
                   width: '40px',
                   height: '40px',
                   borderRadius: '50%',
-                  backgroundColor: '#ff0000',
+                  backgroundColor: '#ffffff',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
