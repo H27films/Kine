@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 import { Page } from '../../types';
 import { supabase, Exercise, todayStr, getISOWeek, getDayName, currentWeekMonday, weeksAgoMonday, recalculateDailyTotals, getNewEntryStatus } from '../../lib/supabase';
@@ -26,6 +26,7 @@ const TOTAL_CARDIO_IDS = [82, 83, 87];
 const NO_TRACKER_CARDIO_IDS = [83, 84, 85, 86, 87]; // Row + Running + Walking + Cross Trainer + Cycle
 
 export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySummary = false, initialSelectedActivity }) => {
+  const exerciseSectionRef = useRef<HTMLDivElement>(null);
   const [trackerDistance, setTrackerDistance] = useState('');
   const [trackerInputVisible, setTrackerInputVisible] = useState(true);
   const [distance, setDistance] = useState('');
@@ -54,6 +55,15 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySumm
 
 
   const isRunning = selectedExercise?.exercise_name?.toUpperCase() === 'RUNNING';
+
+  // Scroll to exercise section when pre-selected cardio is Running, Row, or Cross Trainer
+  useEffect(() => {
+    if (selectedExercise && ['RUNNING', 'ROW', 'CROSS TRAINER'].includes(selectedExercise.exercise_name?.toUpperCase() || '')) {
+      setTimeout(() => {
+        exerciseSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100); // Small delay to ensure DOM is ready
+    }
+  }, [selectedExercise]);
 
   useEffect(() => {
     const loadExercises = async () => {
@@ -473,7 +483,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySumm
       </header>
 
       {/* EXERCISE section — icon picker */}
-      <section className="mb-0" style={{ marginTop: 56 }}>
+      <section ref={exerciseSectionRef} className="mb-0" style={{ marginTop: 56 }}>
         <div style={{ marginBottom: 20 }}>
           <ExerciseLogDots exercises={nonTrackerExercises} saveSuccess={saveSuccess} />
           <ExerciseIconBar
