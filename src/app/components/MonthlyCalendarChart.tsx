@@ -86,8 +86,18 @@ const MonthlyCalendarChart: React.FC<MonthlyCalendarChartProps> = ({
       }
 
       // Calculate total
-      const totalValue = Object.values(byDate).reduce((sum, val) => sum + val, 0);
-      setTotal(+totalValue.toFixed(1));
+      let totalValue: number;
+      if (selectedTab === 'SCORE') {
+        const nonZeroValues = Object.values(byDate).filter(v => v > 0);
+        totalValue = nonZeroValues.length > 0 ? nonZeroValues.reduce((a, b) => a + b, 0) / nonZeroValues.length : 0;
+      } else {
+        totalValue = Object.values(byDate).reduce((sum, val) => sum + val, 0);
+      }
+      if (selectedTab === 'WEIGHTS') {
+        setTotal(Math.round(totalValue));
+      } else {
+        setTotal(+totalValue.toFixed(1));
+      }
 
       setCalendarData(byDate);
     };
@@ -153,9 +163,11 @@ const MonthlyCalendarChart: React.FC<MonthlyCalendarChartProps> = ({
       {total > 0 && (
         <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '30px' }}>
           <span style={{ fontSize: '1.6rem', fontWeight: 900, letterSpacing: '-0.02em', color: '#ffffff', lineHeight: 1 }}>
-            {total}
+            {selectedTab === 'WEIGHTS' ? Math.round(total).toLocaleString() : total}
           </span>
-          <span style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.12em' }}>KM</span>
+          <span style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.12em' }}>
+            {selectedTab === 'WEIGHTS' ? 'KG' : selectedTab === 'SCORE' ? 'SCORE' : 'KM'}
+          </span>
         </div>
       )}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gridTemplateRows: 'repeat(5, auto)', gap: '8px', marginTop: '40px' }}>
