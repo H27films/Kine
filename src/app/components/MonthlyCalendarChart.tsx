@@ -17,6 +17,7 @@ const MonthlyCalendarChart: React.FC<MonthlyCalendarChartProps> = ({
   const [calendarData, setCalendarData] = useState<Record<string, number>>({});
   const [selectedTab, setSelectedTab] = useState<'RUNNING' | 'SCORE' | 'WEIGHTS' | 'ROW' | 'CROSS TRAINER'>('ROW');
   const [total, setTotal] = useState(0);
+  const [count, setCount] = useState(0);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -100,6 +101,10 @@ const MonthlyCalendarChart: React.FC<MonthlyCalendarChartProps> = ({
       }
 
       setCalendarData(byDate);
+
+      // Calculate count of entries with values > 0
+      const entryCount = Object.values(byDate).filter(v => v > 0).length;
+      setCount(entryCount);
     };
     load();
   }, [selectedTab, monthOffset]);
@@ -161,13 +166,31 @@ const MonthlyCalendarChart: React.FC<MonthlyCalendarChartProps> = ({
 
       {/* Total display below tabs */}
       {total > 0 && (
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '30px' }}>
-          <span style={{ fontSize: '1.6rem', fontWeight: 900, letterSpacing: '-0.02em', color: '#ffffff', lineHeight: 1 }}>
-            {selectedTab === 'WEIGHTS' ? Math.round(total).toLocaleString() : total}
-          </span>
-          <span style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.12em' }}>
-            {selectedTab === 'WEIGHTS' ? 'KG' : selectedTab === 'SCORE' ? 'SCORE' : 'KM'}
-          </span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+            <span style={{ fontSize: '1.6rem', fontWeight: 900, letterSpacing: '-0.02em', color: '#ffffff', lineHeight: 1 }}>
+              {selectedTab === 'WEIGHTS' ? Math.round(total).toLocaleString() : total}
+            </span>
+            <span style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.12em' }}>
+              {selectedTab === 'WEIGHTS' ? 'KG' : selectedTab === 'SCORE' ? 'SCORE' : 'KM'}
+            </span>
+          </div>
+          {selectedTab !== 'SCORE' && (
+            <div style={{
+              width: '28px',
+              height: '28px',
+              borderRadius: '50%',
+              backgroundColor: '#000000',
+              color: '#ffffff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '10px',
+              fontWeight: 'bold'
+            }}>
+              {count}
+            </div>
+          )}
         </div>
       )}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gridTemplateRows: 'repeat(5, auto)', gap: '8px', marginTop: '40px' }}>
