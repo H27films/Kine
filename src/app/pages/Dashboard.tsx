@@ -663,15 +663,15 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
                 style={{ cursor: 'pointer' }}
               >
                 <div style={{
-                  width: '32px',
-                  height: '32px',
+                  width: '40px',
+                  height: '40px',
                   borderRadius: '50%',
                   backgroundColor: '#ffffff',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
                 }}>
-                  <Plus size={16} color="#000000" />
+                  <Plus size={20} color="#000000" />
                 </div>
               </div>
             )}
