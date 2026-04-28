@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Dumbbell, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
-import { Page } from '../../types';
 
 import { DailyActivityCards } from '../components/DailyActivityCards';
 import { WeeklySummaryBar } from '../components/WeeklySummaryBar';
@@ -296,7 +295,7 @@ const WeeklyChart: React.FC<{
   );
 };
 
-export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (page: Page) => void }> = ({ showWeeklySummary = false, onNavigate }) => {
+export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeeklySummary = false }) => {
   // ===== FIXED: Use Malaysia timezone for selected date =====
   const [selectedDate, setSelectedDate] = useState(() => malaysiaDateStr(new Date()));
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
