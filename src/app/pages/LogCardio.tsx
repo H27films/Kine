@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 import { Page } from '../../types';
 import { supabase, Exercise, todayStr, getISOWeek, getDayName, currentWeekMonday, weeksAgoMonday, recalculateDailyTotals, getNewEntryStatus } from '../../lib/supabase';
@@ -25,6 +26,7 @@ const TOTAL_CARDIO_IDS = [82, 83, 87];
 const NO_TRACKER_CARDIO_IDS = [83, 84, 85, 86, 87]; // Row + Running + Walking + Cross Trainer + Cycle
 
 export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySummary = false }) => {
+  const location = useLocation();
   const [trackerDistance, setTrackerDistance] = useState('');
   const [trackerInputVisible, setTrackerInputVisible] = useState(true);
   const [distance, setDistance] = useState('');
@@ -168,7 +170,36 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySumm
     loadWeekChart();
   }, [saveSuccess]);
 
-   useEffect(() => {
+  useEffect(() => {
+    const activity = location.state?.activity;
+    if (activity) {
+      if (activity === 'TRACKER') {
+        setTrackerInputVisible(true);
+        setTimeout(() => {
+          const el = document.querySelector('label');
+          if (el && el.textContent?.includes('TRACKER')) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 100);
+      } else {
+        const exerciseName = activity === 'RUNNING' ? 'Running' : activity === 'ROW' ? 'Row' : activity === 'CROSS TRAINER' ? 'Cross Trainer' : null;
+        if (exerciseName) {
+          const ex = nonTrackerExercises.find(e => e.exercise_name?.toLowerCase() === exerciseName.toLowerCase());
+          if (ex) {
+            setSelectedExercise(ex);
+            setTimeout(() => {
+              const el = document.querySelector('label');
+              if (el && el.textContent?.includes('Distance')) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }
+            }, 100);
+          }
+        }
+      }
+    }
+  }, [location.state, nonTrackerExercises]);
+
+  useEffect(() => {
      const load30Day = async () => {
        const localStr = (d: Date) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
        const toD = new Date();
