@@ -57,6 +57,7 @@ export const BottomNav: React.FC<NavigationProps> = ({ currentPage, onNavigate }
         return (
           <button
             key={item.page}
+            data-page={item.page}
             onClick={() => onNavigate(item.page)}
             className="p-3 transition-all duration-150 active:scale-90"
             style={
