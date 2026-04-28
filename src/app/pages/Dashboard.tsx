@@ -796,7 +796,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
             })()}
           </span>
         </div>
-        <MonthlyCalendarChart monthOffset={monthlyOffset} />
+        <MonthlyCalendarChart monthOffset={monthlyOffset} containerStyle={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff', padding: '32px 24px' }} />
       </section>
 
       <section className="mt-8">

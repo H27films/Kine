@@ -188,9 +188,9 @@ const MonthlyCalendarChart: React.FC<MonthlyCalendarChartProps> = ({
                   justifyContent: 'center',
                   fontSize: '8px',
                   fontWeight: 'bold',
-                  border: isFuture ? '1px solid #ccc' : 'none',
-                  color: isFuture ? 'transparent' : (cell.value ? '#000000' : '#ffffff'),
-                  backgroundColor: isFuture ? 'transparent' : (cell.value ? '#ffffff' : '#000000')
+                  border: isFuture ? 'none' : (cell.value ? 'none' : '1px solid #ffffff'),
+                  color: isFuture ? 'transparent' : (cell.value ? '#000000' : 'transparent'),
+                  backgroundColor: isFuture ? 'rgba(211,211,211,0.7)' : (cell.value ? '#ffffff' : 'transparent')
                 }}>
                   {isFuture ? '' : (cell.value ? (selectedTab === 'WEIGHTS' ? `${Math.round(cell.value / 1000)}k` : cell.value) : '')}
                 </div>
