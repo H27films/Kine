@@ -652,55 +652,55 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
       )}
 
       <section className="pt-1 mb-4">
-        <div className="flex items-start justify-between">
-          <div className="flex items-start">
-            <div className="text-[4rem] font-black leading-none tracking-tighter text-white flex-shrink-0">
+        <div className="flex items-start">
+          <div className="flex items-center gap-4 flex-shrink-0">
+            <div className="text-[4rem] font-black leading-none tracking-tighter text-white">
               {displayMovement > 0 ? displayMovement.toFixed(1) : '0.0'}
             </div>
-            <div className="flex flex-col justify-center ml-4 pt-3 flex-1 min-w-0">
+            {selectedActivity && ['TRACKER', 'RUNNING', 'ROW', 'CROSS TRAINER'].includes(selectedActivity) && (
               <div
-                style={{
-                  fontSize: '12px',
-                  fontWeight: 800,
-                  textTransform: 'uppercase',
-                  letterSpacing: '2.5px',
-                  color: '#ffffff',
-                }}
+                onClick={() => navigate('/log-cardio', { state: { activity: selectedActivity } })}
+                style={{ cursor: 'pointer' }}
               >
-                {selectedActivity
-                  ? `${CARDIO_DISPLAY[selectedActivity]?.label || selectedActivity} (KM)`
-                  : 'MOVEMENT (KM)'}
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  backgroundColor: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <Plus size={16} color="#000000" />
+                </div>
               </div>
-              {selectedActivity && (
-                <div className="text-[11px] font-medium mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                  This week
-                </div>
-              )}
-              {!selectedActivity && yesterdayMovement > 0 && (
-                <div className="text-[11px] font-medium mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                  Yesterday {yesterdayMovement.toFixed(1)} km
-                </div>
-              )}
-            </div>
+            )}
           </div>
-          {selectedActivity && ['TRACKER', 'RUNNING', 'ROW', 'CROSS TRAINER'].includes(selectedActivity) && (
+          <div className="flex flex-col justify-center ml-4 pt-3 flex-1 min-w-0">
             <div
-              onClick={() => navigate('/log-cardio', { state: { activity: selectedActivity } })}
-              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', marginTop: '0.5rem' }}
+              style={{
+                fontSize: '12px',
+                fontWeight: 800,
+                textTransform: 'uppercase',
+                letterSpacing: '2.5px',
+                color: '#ffffff',
+              }}
             >
-              <div style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '50%',
-                backgroundColor: '#ffffff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                <Plus size={16} color="#000000" />
-              </div>
+              {selectedActivity
+                ? `${CARDIO_DISPLAY[selectedActivity]?.label || selectedActivity} (KM)`
+                : 'MOVEMENT (KM)'}
             </div>
-          )}
+            {selectedActivity && (
+              <div className="text-[11px] font-medium mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                This week
+              </div>
+            )}
+            {!selectedActivity && yesterdayMovement > 0 && (
+              <div className="text-[11px] font-medium mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                Yesterday {yesterdayMovement.toFixed(1)} km
+              </div>
+            )}
+          </div>
         </div>
 
         <CardioChartSection
