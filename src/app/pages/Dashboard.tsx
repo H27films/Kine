@@ -682,7 +682,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
           </div>
           {selectedActivity && (
             <div
-              onClick={() => window.location.href = '/log-cardio'}
+              onClick={() => window.location.hash = '#cardio'}
               style={{ cursor: 'pointer', marginLeft: '16px', marginTop: '12px' }}
             >
               <div style={{
