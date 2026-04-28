@@ -58,12 +58,12 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySumm
 
   // Scroll to exercise section when pre-selected cardio is Running, Row, or Cross Trainer
   useEffect(() => {
-    if (selectedExercise && ['RUNNING', 'ROW', 'CROSS TRAINER'].includes(selectedExercise.exercise_name?.toUpperCase() || '')) {
+    if (initialSelectedActivity && ['RUNNING', 'ROW', 'CROSS TRAINER'].includes(initialSelectedActivity.toUpperCase())) {
       setTimeout(() => {
         exerciseSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 100); // Small delay to ensure DOM is ready
     }
-  }, [selectedExercise]);
+  }, [initialSelectedActivity]);
 
   useEffect(() => {
     const loadExercises = async () => {
@@ -80,8 +80,12 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySumm
         setNonTrackerExercises(others);
         const running = others.find(e => e.exercise_name?.toLowerCase().includes('run')) ?? others[0] ?? null;
         if (initialSelectedActivity) {
-          const selected = others.find(e => e.exercise_name?.toUpperCase() === initialSelectedActivity.toUpperCase()) ?? running;
-          setSelectedExercise(selected);
+          if (initialSelectedActivity.toUpperCase() === 'TRACKER') {
+            setSelectedExercise(null);
+          } else {
+            const selected = others.find(e => e.exercise_name?.toUpperCase() === initialSelectedActivity.toUpperCase()) ?? running;
+            setSelectedExercise(selected);
+          }
         } else {
           setSelectedExercise(running);
         }
