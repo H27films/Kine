@@ -24,6 +24,13 @@ const App: React.FC = () => {
     setShowWeeklySummary(false);
   }, [currentPage.page]);
 
+  // Scroll to top when navigating to dashboard
+  React.useEffect(() => {
+    if (currentPage.page === 'dashboard') {
+      window.scrollTo(0, 0);
+    }
+  }, [currentPage.page]);
+
   const getHeaderTitle = (): string => {
     switch (currentPage.page) {
       case 'dashboard': return '';
