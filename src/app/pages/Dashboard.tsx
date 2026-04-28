@@ -657,7 +657,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
             <div className="text-[4rem] font-black leading-none tracking-tighter text-white">
               {displayMovement > 0 ? displayMovement.toFixed(1) : '0.0'}
             </div>
-            {selectedActivity && ['TRACKER', 'RUNNING', 'ROW', 'CROSS TRAINER'].includes(selectedActivity) && (
+            {selectedActivity && (
               <div
                 onClick={() => navigate('/log-cardio', { state: { activity: selectedActivity } })}
                 style={{ cursor: 'pointer' }}
