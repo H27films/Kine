@@ -683,18 +683,18 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
           {selectedActivity && (
             <div
               onClick={() => window.location.href = '/log-cardio'}
-              style={{ cursor: 'pointer', marginLeft: '16px' }}
+              style={{ cursor: 'pointer', marginLeft: '16px', marginTop: '12px' }}
             >
               <div style={{
-                width: '40px',
-                height: '40px',
+                width: '32px',
+                height: '32px',
                 borderRadius: '50%',
                 backgroundColor: '#ffffff',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-                <Plus size={20} color="#000000" />
+                <Plus size={16} color="#000000" />
               </div>
             </div>
           )}
