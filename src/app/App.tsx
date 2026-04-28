@@ -13,17 +13,19 @@ const Analytics = lazy(() => import('./pages/Analytics').then(m => ({ default: m
 const Profile = lazy(() => import('./pages/Profile').then(m => ({ default: m.Profile })));
 
 const App: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState<Page>('dashboard');
+  const [currentPage, setCurrentPage] = useState<{page: Page, data?: any}>({page: 'dashboard'});
   const [showWeeklySummary, setShowWeeklySummary] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
+
+  const onNavigate = (page: Page, data?: any) => setCurrentPage({page, data});
 
   // Reset summary whenever user navigates to a different page
   React.useEffect(() => {
     setShowWeeklySummary(false);
-  }, [currentPage]);
+  }, [currentPage.page]);
 
   const getHeaderTitle = (): string => {
-    switch (currentPage) {
+    switch (currentPage.page) {
       case 'dashboard': return '';
       case 'weights':
       case 'cardio':
@@ -35,24 +37,24 @@ const App: React.FC = () => {
   };
 
   const renderPage = () => {
-    switch (currentPage) {
+    switch (currentPage.page) {
       case 'dashboard':
-        return <Dashboard showWeeklySummary={showWeeklySummary} />;
+        return <Dashboard showWeeklySummary={showWeeklySummary} onNavigate={onNavigate} />;
       case 'weights':
-        return <LogWeights onNavigate={setCurrentPage} showWeeklySummary={showWeeklySummary} />;
+        return <LogWeights onNavigate={onNavigate} showWeeklySummary={showWeeklySummary} />;
       case 'cardio':
-        return <LogCardio onNavigate={setCurrentPage} showWeeklySummary={showWeeklySummary} />;
+        return <LogCardio onNavigate={onNavigate} showWeeklySummary={showWeeklySummary} initialSelectedActivity={currentPage.data?.selectedActivity} />;
       case 'calories':
-        return <LogCalories onNavigate={setCurrentPage} showWeeklySummary={showWeeklySummary} />;
+        return <LogCalories onNavigate={onNavigate} showWeeklySummary={showWeeklySummary} />;
       case 'analytics':
-        return <Analytics onNavigate={setCurrentPage} />;
+        return <Analytics onNavigate={onNavigate} />;
       case 'profile':
-        return <Profile onNavigate={setCurrentPage} />;
+        return <Profile onNavigate={onNavigate} />;
     }
   };
 
   const showBackButton = false;
-  const hideChrome = currentPage === 'analytics' || currentPage === 'profile';
+  const hideChrome = currentPage.page === 'analytics' || currentPage.page === 'profile';
 
   return (
     <>
@@ -66,9 +68,9 @@ const App: React.FC = () => {
         <>
       <Header
         title={getHeaderTitle()}
-        currentPage={currentPage}
-        onBack={showBackButton ? () => setCurrentPage('dashboard') : undefined}
-        onNavigate={setCurrentPage}
+        currentPage={currentPage.page}
+        onBack={showBackButton ? () => onNavigate('dashboard') : undefined}
+        onNavigate={onNavigate}
         onToggleWeeklySummary={() => setShowWeeklySummary(v => !v)}
         showWeeklySummary={showWeeklySummary}
       />
@@ -76,7 +78,7 @@ const App: React.FC = () => {
         className="pb-32 px-4 max-w-lg mx-auto"
         style={{ paddingTop: 'calc(5rem + env(safe-area-inset-top))' }}
       >
-        {showWeeklySummary && currentPage !== 'dashboard' && (
+        {showWeeklySummary && currentPage.page !== 'dashboard' && (
           <div style={{ marginBottom: 20 }}>
             <WeeklySummaryBar />
           </div>
@@ -85,7 +87,7 @@ const App: React.FC = () => {
           {renderPage()}
         </Suspense>
       </main>
-      <BottomNav currentPage={currentPage} onNavigate={setCurrentPage} />
+      <BottomNav currentPage={currentPage.page} onNavigate={onNavigate} />
     </>
     )}
     </div>

@@ -4,5 +4,5 @@ export type LogTab = 'weights' | 'cardio' | 'calories';
 
 export interface NavigationProps {
   currentPage: Page;
-  onNavigate: (page: Page) => void;
+  onNavigate: (page: Page, data?: any) => void;
 }

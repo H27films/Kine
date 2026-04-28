@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Dumbbell, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { Page } from '../../types';
 
 import { DailyActivityCards } from '../components/DailyActivityCards';
 import { WeeklySummaryBar } from '../components/WeeklySummaryBar';
@@ -295,7 +296,7 @@ const WeeklyChart: React.FC<{
   );
 };
 
-export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeeklySummary = false }) => {
+export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (page: Page, data?: any) => void }> = ({ showWeeklySummary = false, onNavigate }) => {
   // ===== FIXED: Use Malaysia timezone for selected date =====
   const [selectedDate, setSelectedDate] = useState(() => malaysiaDateStr(new Date()));
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
@@ -683,8 +684,12 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
           {selectedActivity && (
             <div
               onClick={() => {
-                const btn = document.querySelector('[data-page="cardio"]') as HTMLButtonElement;
-                btn?.click();
+                if (onNavigate) {
+                  onNavigate('cardio', { selectedActivity });
+                } else {
+                  const btn = document.querySelector('[data-page="cardio"]') as HTMLButtonElement;
+                  btn?.click();
+                }
               }}
               style={{ cursor: 'pointer', marginLeft: '16px', marginTop: '12px' }}
             >

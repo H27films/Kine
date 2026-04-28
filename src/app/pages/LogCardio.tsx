@@ -10,8 +10,9 @@ import ExerciseLogDots from '../components/ExerciseLogDots';
 import MonthlyCalendarChart from '../components/MonthlyCalendarChart';
 
 interface LogCardioProps {
-  onNavigate: (page: Page) => void;
+  onNavigate: (page: Page, data?: any) => void;
   showWeeklySummary?: boolean;
+  initialSelectedActivity?: string;
 }
 
 const tabs: { label: string; page: Page }[] = [
@@ -24,7 +25,7 @@ const tabs: { label: string; page: Page }[] = [
 const TOTAL_CARDIO_IDS = [82, 83, 87];
 const NO_TRACKER_CARDIO_IDS = [83, 84, 85, 86, 87]; // Row + Running + Walking + Cross Trainer + Cycle
 
-export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySummary = false }) => {
+export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySummary = false, initialSelectedActivity }) => {
   const [trackerDistance, setTrackerDistance] = useState('');
   const [trackerInputVisible, setTrackerInputVisible] = useState(true);
   const [distance, setDistance] = useState('');
@@ -68,11 +69,16 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySumm
         const others = exercises.filter(e => e.exercise_name?.toUpperCase() !== 'TRACKER');
         setNonTrackerExercises(others);
         const running = others.find(e => e.exercise_name?.toLowerCase().includes('run')) ?? others[0] ?? null;
-        setSelectedExercise(running);
+        if (initialSelectedActivity) {
+          const selected = others.find(e => e.exercise_name?.toUpperCase() === initialSelectedActivity.toUpperCase()) ?? running;
+          setSelectedExercise(selected);
+        } else {
+          setSelectedExercise(running);
+        }
       }
     };
     loadExercises();
-  }, []);
+  }, [initialSelectedActivity]);
 
   useEffect(() => {
     const loadWeeklyTotal = async () => {
