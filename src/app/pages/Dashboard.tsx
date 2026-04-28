@@ -666,7 +666,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
                   width: '40px',
                   height: '40px',
                   borderRadius: '50%',
-                  backgroundColor: '#ffffff',
+                  backgroundColor: '#ff0000',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
