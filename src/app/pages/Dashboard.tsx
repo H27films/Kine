@@ -683,7 +683,15 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
           </div>
           {selectedActivity && (
             <div
-              onClick={() => onNavigate?.('cardio')}
+              onClick={() => {
+                const buttons = document.querySelectorAll('button');
+                for (const btn of buttons) {
+                  if (btn.textContent?.toLowerCase().includes('cardio')) {
+                    (btn as HTMLButtonElement).click();
+                    break;
+                  }
+                }
+              }}
               style={{ cursor: 'pointer', marginLeft: '16px', marginTop: '12px' }}
             >
               <div style={{
