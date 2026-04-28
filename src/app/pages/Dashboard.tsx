@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Dumbbell, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+
 import { DailyActivityCards } from '../components/DailyActivityCards';
 import { WeeklySummaryBar } from '../components/WeeklySummaryBar';
 import WeeklyVolumeCompact from '../components/WeeklyVolumeCompact';
@@ -296,7 +296,6 @@ const WeeklyChart: React.FC<{
 };
 
 export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeeklySummary = false }) => {
-  const navigate = useNavigate();
   // ===== FIXED: Use Malaysia timezone for selected date =====
   const [selectedDate, setSelectedDate] = useState(() => malaysiaDateStr(new Date()));
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
@@ -659,7 +658,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
             </div>
             {selectedActivity && (
               <div
-                onClick={() => navigate('/log-cardio', { state: { activity: selectedActivity } })}
+                onClick={() => window.location.href = '/log-cardio'}
                 style={{ cursor: 'pointer' }}
               >
                 <div style={{
