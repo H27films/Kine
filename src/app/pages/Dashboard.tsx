@@ -652,28 +652,8 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
 
       <section className="pt-1 mb-4">
         <div className="flex items-start">
-          <div className="flex items-center gap-4 flex-shrink-0">
-            <div className="text-[4rem] font-black leading-none tracking-tighter text-white">
-              {displayMovement > 0 ? displayMovement.toFixed(1) : '0.0'}
-            </div>
-            {selectedActivity && (
-              <div
-                onClick={() => window.location.href = '/log-cardio'}
-                style={{ cursor: 'pointer' }}
-              >
-                <div style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '50%',
-                  backgroundColor: '#ffffff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <Plus size={20} color="#000000" />
-                </div>
-              </div>
-            )}
+          <div className="text-[4rem] font-black leading-none tracking-tighter text-white flex-shrink-0">
+            {displayMovement > 0 ? displayMovement.toFixed(1) : '0.0'}
           </div>
           <div className="flex flex-col justify-center ml-4 pt-3 flex-1 min-w-0">
             <div
@@ -700,6 +680,24 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean }> = ({ showWeekl
               </div>
             )}
           </div>
+          {selectedActivity && (
+            <div
+              onClick={() => window.location.href = '/log-cardio'}
+              style={{ cursor: 'pointer', marginLeft: '16px' }}
+            >
+              <div style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                backgroundColor: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <Plus size={20} color="#000000" />
+              </div>
+            </div>
+          )}
         </div>
 
         <CardioChartSection
