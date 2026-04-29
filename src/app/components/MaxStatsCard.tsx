@@ -56,7 +56,9 @@ export const MaxStatsCard: React.FC<MaxStatsCardProps> = ({ category, timePeriod
         rows = data || [];
       } else if (category === 'FOOD') {
         const sel = isMonthly ? 'date, food_rating' : 'week, food_rating';
-        const { data } = await supabase.from('workouts').select(sel).not('food_rating', 'is', null).not('week', 'is', null);
+        let query = supabase.from('workouts').select(sel).not('food_rating', 'is', null);
+        if (!isMonthly) query = query.not('week', 'is', null);
+        const { data } = await query;
         rows = data || [];
       } else if (CARDIO_MAP[category]) {
         // Fetch all cardio + exercises, filter by name in JS (same as Analytics page)
@@ -99,12 +101,6 @@ export const MaxStatsCard: React.FC<MaxStatsCardProps> = ({ category, timePeriod
           seenDays.add(row.date);
         }
 
-        // Track unique days for Food monthly average
-        if (category === 'FOOD' && isMonthly) {
-          if (!foodDaysPerBucket[bucket]) foodDaysPerBucket[bucket] = new Set();
-          foodDaysPerBucket[bucket].add(row.date);
-        }
-
         // SCORE weekly: dedup by week_day since same value stored on multiple rows
         if (category === 'SCORE' && !isMonthly) {
           const key = `${row.week}_${row.day}`;
@@ -122,6 +118,14 @@ export const MaxStatsCard: React.FC<MaxStatsCardProps> = ({ category, timePeriod
           val = Number(row.total_cardio || 0);
         } else {
           val = Number(row.total_weight || 0);
+        }
+
+        // Track unique days for Food monthly average (only days with rating >0)
+        if (category === 'FOOD' && isMonthly) {
+          if (val > 0) {
+            if (!foodDaysPerBucket[bucket]) foodDaysPerBucket[bucket] = new Set();
+            foodDaysPerBucket[bucket].add(row.date);
+          }
         }
 
         if (!totals[bucket]) { totals[bucket] = 0; dayCounts[bucket] = 0; }
@@ -143,15 +147,23 @@ export const MaxStatsCard: React.FC<MaxStatsCardProps> = ({ category, timePeriod
         || (category === 'FOOD' && isMonthly);
       const processedEntries = entries.map(e => {
         if (!isDailyAvg) return e;
-        return { ...e, value: Math.round(e.value / e.days) };
+        return { ...e, value: e.value / e.days };
       });
 
       const maxEntry = processedEntries.reduce((a, b) => a.value > b.value ? a : b);
-      const avg = processedEntries.reduce((s, e) => s + e.value, 0) / processedEntries.length;
+      let avg: number;
+      if (category === 'FOOD' && isMonthly) {
+        // For FOOD/MONTHLY, AVG is average of all daily scores across all data
+        const totalSum = entries.reduce((s, e) => s + e.value, 0);
+        const totalDays = entries.reduce((s, e) => s + e.days, 0);
+        avg = totalDays > 0 ? totalSum / totalDays : 0;
+      } else {
+        avg = processedEntries.reduce((s, e) => s + e.value, 0) / processedEntries.length;
+      }
 
-      setMaxValue(Math.round(maxEntry.value));
+      setMaxValue(maxEntry.value);
       setMaxLabel(formatBucket(maxEntry.bucket, isMonthly));
-      setAvgValue(Math.round(avg));
+      setAvgValue(avg);
     };
 
     loadData();
@@ -164,7 +176,7 @@ export const MaxStatsCard: React.FC<MaxStatsCardProps> = ({ category, timePeriod
       <div>
         <div style={headerStyle}>MAX</div>
         <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
-          {category === 'CALORIES' ? maxValue!.toLocaleString() : fmt(maxValue)}
+          {category === 'CALORIES' ? maxValue!.toLocaleString() : category === 'FOOD' ? maxValue!.toFixed(1) : fmt(maxValue)}
         </div>
         <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em', color: '#1a1a1a', marginTop: '2px', textTransform: 'uppercase' }}>
           {maxLabel}
@@ -173,7 +185,7 @@ export const MaxStatsCard: React.FC<MaxStatsCardProps> = ({ category, timePeriod
       <div style={{ textAlign: 'right' }}>
         <div style={headerStyleRight}>AVG</div>
         <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
-          {category === 'CALORIES' ? avgValue!.toLocaleString() : fmt(avgValue!)}
+          {category === 'CALORIES' ? avgValue!.toLocaleString() : category === 'FOOD' ? avgValue!.toFixed(1) : fmt(avgValue!)}
         </div>
         <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em', color: '#1a1a1a', marginTop: '2px', textTransform: 'uppercase' }}>
           All {timePeriod === 'MONTHLY' ? 'months' : 'weeks'}
