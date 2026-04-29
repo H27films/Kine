@@ -12,10 +12,10 @@ const MonthlyCalendarChart: React.FC<MonthlyCalendarChartProps> = ({
   monthOffset,
   className = "rounded-lg mb-4",
   containerStyle = { backgroundColor: '#121212', borderLeft: '2px solid #ffffff', padding: '32px 24px' },
-  tabs = ['RUNNING', 'SCORE', 'WEIGHTS'] as const
+  tabs = ['SCORE', 'RUNNING', 'WEIGHTS'] as const
 }) => {
   const [calendarData, setCalendarData] = useState<Record<string, number>>({});
-  const [selectedTab, setSelectedTab] = useState<'RUNNING' | 'SCORE' | 'WEIGHTS' | 'ROW' | 'CROSS TRAINER'>('ROW');
+  const [selectedTab, setSelectedTab] = useState<'RUNNING' | 'SCORE' | 'WEIGHTS' | 'ROW' | 'CROSS TRAINER'>('SCORE');
   const [total, setTotal] = useState(0);
   const [count, setCount] = useState(0);
   const today = new Date();
@@ -94,7 +94,7 @@ const MonthlyCalendarChart: React.FC<MonthlyCalendarChartProps> = ({
       } else {
         totalValue = Object.values(byDate).reduce((sum, val) => sum + val, 0);
       }
-      if (selectedTab === 'WEIGHTS') {
+      if (selectedTab === 'WEIGHTS' || selectedTab === 'SCORE') {
         setTotal(Math.round(totalValue));
       } else {
         setTotal(+totalValue.toFixed(1));
