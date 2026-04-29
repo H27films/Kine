@@ -6,16 +6,18 @@ interface MonthlyCalendarChartProps {
   className?: string;
   containerStyle?: React.CSSProperties;
   tabs?: ('RUNNING' | 'SCORE' | 'WEIGHTS' | 'ROW' | 'CROSS TRAINER')[];
+  defaultTab?: 'RUNNING' | 'SCORE' | 'WEIGHTS' | 'ROW' | 'CROSS TRAINER';
 }
 
 const MonthlyCalendarChart: React.FC<MonthlyCalendarChartProps> = ({
   monthOffset,
   className = "rounded-lg mb-4",
   containerStyle = { backgroundColor: '#121212', borderLeft: '2px solid #ffffff', padding: '32px 24px' },
-  tabs = ['SCORE', 'RUNNING', 'WEIGHTS'] as const
+  tabs = ['SCORE', 'RUNNING', 'WEIGHTS'] as const,
+  defaultTab = 'SCORE'
 }) => {
   const [calendarData, setCalendarData] = useState<Record<string, number>>({});
-  const [selectedTab, setSelectedTab] = useState<'RUNNING' | 'SCORE' | 'WEIGHTS' | 'ROW' | 'CROSS TRAINER'>('SCORE');
+  const [selectedTab, setSelectedTab] = useState<'RUNNING' | 'SCORE' | 'WEIGHTS' | 'ROW' | 'CROSS TRAINER'>(defaultTab);
   const [total, setTotal] = useState(0);
   const [count, setCount] = useState(0);
   const today = new Date();

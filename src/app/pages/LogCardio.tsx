@@ -572,6 +572,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySumm
           className="p-6 rounded-xl relative mb-4"
           containerStyle={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff' }}
           tabs={['RUNNING', 'ROW', 'CROSS TRAINER']}
+          defaultTab="RUNNING"
         />
       </section>
 
