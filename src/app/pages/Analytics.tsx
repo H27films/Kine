@@ -646,7 +646,8 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
                   setSelectedGroup(null);
                 }
               }}
-              style={{ ...pillStyle(), pointerEvents: categoryOpen ? 'none' : 'auto' }}
+              disabled={categoryOpen}
+              style={pillStyle()}
             >
               {category}
               <ChevronDown size={12} />
@@ -720,7 +721,8 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
           >
             <button
               onClick={(e) => { e.stopPropagation(); setPeriodOpen(!periodOpen); setCategoryOpen(false); setSelectedGroup(null); }}
-              style={{ ...pillStyle(), pointerEvents: periodOpen ? 'none' : 'auto' }}
+              disabled={periodOpen}
+              style={pillStyle()}
             >
               {timePeriod}
               <ChevronDown size={12} />
