@@ -46,7 +46,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
   const [data, setData] = useState<DataPoint[]>([]);
   const [total, setTotal] = useState(0);
   const [foodScore, setFoodScore] = useState(0);
-  const [foodMaxScore, setFoodMaxScore] = useState(21); // 7 days × 3 for weekly default
+  const [foodMaxScore, setFoodMaxScore] = useState(21);
   const [foodDaysWithRating, setFoodDaysWithRating] = useState(0);
   const [sessionCount, setSessionCount] = useState(0);
   const [avgValue, setAvgValue] = useState(0);
@@ -57,6 +57,9 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
   const [periodOpen, setPeriodOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  // FIX: separate refs for category and period dropdowns
+  const categoryRef = useRef<HTMLDivElement>(null);
+  const periodRef = useRef<HTMLDivElement>(null);
   const [currentWeek, setCurrentWeek] = useState(66);
   const currentMonth = (() => {
     const now = new Date();
@@ -78,7 +81,6 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
 
   const selectedWeek = currentWeek + weekOffset;
 
-  // Compute the actual selected month string (YYYY-MM)
   const getSelectedMonth = () => {
     const [year, month] = currentMonth.split('-').map(Number);
     const d = new Date(year, month - 1 + monthOffset, 1);
@@ -86,7 +88,6 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
   };
   const selectedMonth = getSelectedMonth();
 
-  // Get days in the selected month and month label
   const getMonthInfo = (monthStr: string) => {
     const [year, month] = monthStr.split('-').map(Number);
     const daysInMonth = new Date(year, month, 0).getDate();
@@ -95,7 +96,6 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
     return { daysInMonth, label };
   };
 
-  // Fetch available weeks, months, and current week from Supabase
   useEffect(() => {
     const loadData = async () => {
       const { data } = await supabase
@@ -110,12 +110,11 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
         setMaxWeek(weeks[weeks.length - 1]);
         setCurrentWeek(weeks[weeks.length - 1]);
 
-        // Compute min/max months from dates
         const dates = (data as any[]).map(r => r.date).filter(Boolean).sort();
         if (dates.length > 0) {
           const minDate = dates[0];
           const maxDate = dates[dates.length - 1];
-          const toMonth = (d: string) => d.substring(0, 7); // YYYY-MM
+          const toMonth = (d: string) => d.substring(0, 7);
           setMinMonth(toMonth(minDate));
           setMaxMonth(toMonth(maxDate));
         }
@@ -124,14 +123,20 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
     loadData();
   }, []);
 
+  // FIX: guard each close behind its own ref check so clicking inside a
+  // dropdown does not immediately close it via the global mousedown listener.
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setMenuOpen(false);
       }
-      setCategoryOpen(false);
-      setPeriodOpen(false);
-      setSelectedGroup(null);
+      if (categoryRef.current && !categoryRef.current.contains(e.target as Node)) {
+        setCategoryOpen(false);
+        setSelectedGroup(null);
+      }
+      if (periodRef.current && !periodRef.current.contains(e.target as Node)) {
+        setPeriodOpen(false);
+      }
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
@@ -147,15 +152,12 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
       labels = dayLabels.map(d => d);
       weekNumbers = [selectedWeek];
     } else if (timePeriod === 'MONTHLY') {
-      // Daily bars for the selected month
       const { daysInMonth } = getMonthInfo(selectedMonth);
       const [year, month] = selectedMonth.split('-').map(Number);
       dateStart = `${year}-${String(month).padStart(2, '0')}-01`;
       dateEnd = `${year}-${String(month).padStart(2, '0')}-${String(daysInMonth).padStart(2, '0')}`;
-      // Labels: day numbers (1-31)
       labels = Array.from({ length: daysInMonth }, (_, i) => String(i + 1));
     } else {
-      // PERIOD = 8 weeks
       const startWeek = selectedWeek - 7;
       weekNumbers = Array.from({ length: 8 }, (_, i) => startWeek + i);
       labels = weekNumbers.map(w => `W${w}`);
@@ -163,71 +165,28 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
 
     let query;
     if (timePeriod === 'MONTHLY') {
-      // Query by date range
       if (isCalories || isFood || isScore) {
-        query = supabase
-          .from('workouts')
-          .select('*')
-          .gte('date', dateStart!)
-          .lte('date', dateEnd!);
+        query = supabase.from('workouts').select('*').gte('date', dateStart!).lte('date', dateEnd!);
       } else if (isCardio) {
-        query = supabase
-          .from('workouts')
-          .select('*, exercises(exercise_name)')
-          .gte('date', dateStart!)
-          .lte('date', dateEnd!);
+        query = supabase.from('workouts').select('*, exercises(exercise_name)').gte('date', dateStart!).lte('date', dateEnd!);
       } else if (isTracker) {
-        query = supabase
-          .from('workouts')
-          .select('*')
-          .in('exercise_id', [82, 83, 87])
-          .gte('date', dateStart!)
-          .lte('date', dateEnd!);
+        query = supabase.from('workouts').select('*').in('exercise_id', [82, 83, 87]).gte('date', dateStart!).lte('date', dateEnd!);
       } else if (isAllWeights) {
-        query = supabase
-          .from('workouts')
-          .select('*, exercises(exercise_name)')
-          .in('type', ['CHEST', 'BACK', 'LEGS'])
-          .gte('date', dateStart!)
-          .lte('date', dateEnd!);
+        query = supabase.from('workouts').select('*, exercises(exercise_name)').in('type', ['CHEST', 'BACK', 'LEGS']).gte('date', dateStart!).lte('date', dateEnd!);
       } else {
-        query = supabase
-          .from('workouts')
-          .select('*, exercises(exercise_name)')
-          .eq('type', category)
-          .gte('date', dateStart!)
-          .lte('date', dateEnd!);
+        query = supabase.from('workouts').select('*, exercises(exercise_name)').eq('type', category).gte('date', dateStart!).lte('date', dateEnd!);
       }
     } else {
-      // Query by week numbers
       if (isCalories || isFood || isScore) {
-        query = supabase
-          .from('workouts')
-          .select('*')
-          .in('week', weekNumbers);
+        query = supabase.from('workouts').select('*').in('week', weekNumbers);
       } else if (isCardio) {
-        query = supabase
-          .from('workouts')
-          .select('*, exercises(exercise_name)')
-          .in('week', weekNumbers);
+        query = supabase.from('workouts').select('*, exercises(exercise_name)').in('week', weekNumbers);
       } else if (isTracker) {
-        query = supabase
-          .from('workouts')
-          .select('*')
-          .in('exercise_id', [82, 83, 87])
-          .in('week', weekNumbers);
+        query = supabase.from('workouts').select('*').in('exercise_id', [82, 83, 87]).in('week', weekNumbers);
       } else if (isAllWeights) {
-        query = supabase
-          .from('workouts')
-          .select('*, exercises(exercise_name)')
-          .in('type', ['CHEST', 'BACK', 'LEGS'])
-          .in('week', weekNumbers);
+        query = supabase.from('workouts').select('*, exercises(exercise_name)').in('type', ['CHEST', 'BACK', 'LEGS']).in('week', weekNumbers);
       } else {
-        query = supabase
-          .from('workouts')
-          .select('*, exercises(exercise_name)')
-          .eq('type', category)
-          .in('week', weekNumbers);
+        query = supabase.from('workouts').select('*, exercises(exercise_name)').eq('type', category).in('week', weekNumbers);
       }
     }
 
@@ -241,7 +200,6 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
     let sessionRows = 0;
 
     if (rows) {
-      // SCORE needs deduplication per week_day (same as Dashboard)
       const seenScoreKeys = isScore ? new Set<string>() : null;
       for (const row of rows as any[]) {
         if (isScore) {
@@ -256,10 +214,9 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
         else if (isScore) matchCategory = row.total_score != null && Number(row.total_score || 0) > 0;
         else if (isCardio) {
           const name = (row.exercises?.exercise_name || '').toUpperCase();
-          // ROWING dropdown maps to ROW exercise in Supabase
           matchCategory = name === (category === 'ROWING' ? 'ROW' : category === 'CROSS TRAINER' ? 'CROSS TRAINER' : category);
         } else if (isTracker) {
-          matchCategory = true; // Query already filtered by exercise_ids [82, 83, 87]
+          matchCategory = true;
         } else {
           matchCategory = true;
         }
@@ -271,11 +228,9 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
         let idx: number;
 
         if (timePeriod === 'MONTHLY') {
-          // Map row date to day of month index
           const dayOfMonth = parseInt(row.date.split('-')[2], 10);
           idx = dayOfMonth - 1;
         } else if (timePeriod === 'WEEKLY') {
-          // Map day name to index
           const dayMap: Record<string, number> = {
             'MON': 0, 'TUE': 1, 'WED': 2, 'THU': 3, 'FRI': 4, 'SAT': 5, 'SUN': 6,
           };
@@ -311,17 +266,15 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
     setData(points);
     setTotal(Math.round(values.reduce((a, b) => a + b, 0)));
 
-    // For PERIOD: average weekly score; for WEEKLY: raw score
     const numWeeks = timePeriod === 'PERIOD' ? 8 : timePeriod === 'MONTHLY' ? 4 : 1;
     const avgWeeklyFood = timePeriod === 'MONTHLY' ? foodScoreTotal : Math.round(foodScoreTotal / numWeeks);
     setFoodScore(avgWeeklyFood);
-    setFoodMaxScore(21); // Always 7 days × 3
+    setFoodMaxScore(21);
     setFoodDaysWithRating(foodDaysWithRatingCount);
 
     setTotalRaw(rawTotal);
     setSessionCount(sessionRows);
 
-    // Compute average: total / number of non-zero bars
     const nonZeroCount = count.filter(c => c > 0).length;
     setAvgValue(nonZeroCount > 0 ? Math.round(values.reduce((a, b) => a + b, 0) / nonZeroCount) : 0);
   };
@@ -341,14 +294,11 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
   const maxValue = Math.max(...data.map(d => d.value), minValue + 1);
   const metricLabel = isCalories ? 'KCAL' : isFood ? 'SCORE' : isScore ? 'SC' : (isCardio || isTracker ? 'KM' : 'KG');
 
-  // Food display for MONTHLY: average rating per day (only days with ratings)
   const foodAvgPerDay = timePeriod === 'MONTHLY' && foodDaysWithRating > 0 ? (foodScore / foodDaysWithRating).toFixed(1) : '0.0';
 
-  // Format display: Calories WEEKLY/MONTHLY shows avg, Calories PERIOD shows daily avg / 7
   const caloriesPeriodDaily = isCalories && timePeriod === 'PERIOD' ? Math.round(totalRaw / 49) : null;
   const scorePeriodDaily = isScore && timePeriod === 'PERIOD' ? Math.round(totalRaw / 49) : null;
 
-  // Weights PERIOD: show avg per week (total / 8)
   const isWeights = !isCalories && !isCardio && !isTracker && !isFood && !isScore;
   const weightsPeriodAvg = isWeights && timePeriod === 'PERIOD' ? Math.round(totalRaw / 8) : null;
 
@@ -364,7 +314,6 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
     ? totalRaw === 0 ? '0.0' : totalRaw.toFixed(1)
     : total.toLocaleString();
 
-  // Days with data for avg calculation
   const daysWithData = data.filter(d => d.value > 0).length;
   const trackerMonthlyAvg = isTracker && timePeriod === 'MONTHLY' && daysWithData > 0
     ? (totalRaw / daysWithData).toFixed(1)
@@ -376,7 +325,6 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
   const showTotalWithAvg = (isTracker && timePeriod === 'MONTHLY') || ((isCardio || isTracker) && timePeriod === 'PERIOD');
   const avgDisplay = isTracker && timePeriod === 'MONTHLY' ? trackerMonthlyAvg : cardioPeriodAvg;
 
-  // Navigation boundary checks
   const isMonthMode = timePeriod === 'MONTHLY';
   const canGoPrev = isMonthMode
     ? minMonth === null || selectedMonth > minMonth
@@ -444,19 +392,12 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
             <Menu size={22} />
           </button>
 
-          {/* Dropdown menu */}
           {menuOpen && (
             <>
-              {/* Backdrop overlay */}
               <div
-                style={{
-                  position: 'fixed',
-                  inset: 0,
-                  zIndex: 99,
-                }}
+                style={{ position: 'fixed', inset: 0, zIndex: 99 }}
                 onClick={() => setMenuOpen(false)}
               />
-              {/* Dropdown */}
               <div
                 style={{
                   position: 'absolute',
@@ -627,13 +568,10 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
       <div className="px-5" style={{ paddingBottom: 'calc(12px + env(safe-area-inset-bottom))', paddingTop: '8px' }}>
         {/* Two selectors side by side */}
         <div className="flex gap-2 mb-2">
-          {/* Category selector */}
-          <div className="flex-1 relative" style={{ position: 'relative' }}
-            onClick={(e) => e.stopPropagation()}
-          >
+          {/* Category selector — FIX: attach categoryRef here */}
+          <div className="flex-1 relative" style={{ position: 'relative' }} ref={categoryRef}>
             <button
-              onClick={(e) => {
-                e.stopPropagation();
+              onClick={() => {
                 const open = !categoryOpen;
                 setCategoryOpen(open);
                 setPeriodOpen(false);
@@ -660,10 +598,9 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
                 boxShadow: '0 -8px 24px rgba(0,0,0,0.12)',
               }}>
                 {!selectedGroup ? (
-                  // Level 1: Groups
                   <>
                     <div
-                      onClick={(e) => { e.stopPropagation(); setSelectedGroup('WEIGHTS'); }}
+                      onClick={() => setSelectedGroup('WEIGHTS')}
                       style={{ width: '100%', padding: '12px 14px', textAlign: 'left', border: 'none', background: 'transparent', fontSize: '10px', fontWeight: 700, letterSpacing: '0.12em', color: '#1a1a1a', cursor: 'pointer', textTransform: 'uppercase' }}
                       role="button"
                       tabIndex={0}
@@ -671,7 +608,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
                       Weights
                     </div>
                     <div
-                      onClick={(e) => { e.stopPropagation(); setSelectedGroup('CARDIO'); }}
+                      onClick={() => setSelectedGroup('CARDIO')}
                       style={{ width: '100%', padding: '12px 14px', textAlign: 'left', border: 'none', background: 'transparent', fontSize: '10px', fontWeight: 700, letterSpacing: '0.12em', color: '#1a1a1a', cursor: 'pointer', textTransform: 'uppercase' }}
                       role="button"
                       tabIndex={0}
@@ -679,7 +616,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
                       Cardio
                     </div>
                     <div
-                      onClick={(e) => { e.stopPropagation(); setSelectedGroup('MEASUREMENTS'); }}
+                      onClick={() => setSelectedGroup('MEASUREMENTS')}
                       style={{ width: '100%', padding: '12px 14px', textAlign: 'left', border: 'none', background: 'transparent', fontSize: '10px', fontWeight: 700, letterSpacing: '0.12em', color: '#1a1a1a', cursor: 'pointer', textTransform: 'uppercase' }}
                       role="button"
                       tabIndex={0}
@@ -688,10 +625,9 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
                     </div>
                   </>
                 ) : (
-                  // Level 2: Items
                   <>
                     <div
-                      onClick={(e) => { e.stopPropagation(); setSelectedGroup(null); }}
+                      onClick={() => setSelectedGroup(null)}
                       style={{ width: '100%', padding: '10px 14px', textAlign: 'left', border: 'none', background: 'rgba(0,0,0,0.04)', fontSize: '9px', fontWeight: 600, letterSpacing: '0.1em', color: '#999', cursor: 'pointer', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}
                       role="button"
                       tabIndex={0}
@@ -706,7 +642,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
                     ).map(cat => (
                       <div
                         key={cat}
-                        onClick={(e) => { e.stopPropagation(); setCategory(cat); setCategoryOpen(false); setSelectedGroup(null); }}
+                        onClick={() => { setCategory(cat); setCategoryOpen(false); setSelectedGroup(null); }}
                         style={{
                           width: '100%', padding: '10px 14px', textAlign: 'left',
                           border: 'none', background: category === cat ? 'rgba(0,0,0,0.06)' : 'transparent',
@@ -725,12 +661,10 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
             )}
           </div>
 
-          {/* Period selector */}
-          <div className="flex-1" style={{ position: 'relative' }}
-            onClick={(e) => e.stopPropagation()}
-          >
+          {/* Period selector — FIX: attach periodRef here */}
+          <div className="flex-1" style={{ position: 'relative' }} ref={periodRef}>
             <button
-              onClick={(e) => { e.stopPropagation(); setPeriodOpen(!periodOpen); setCategoryOpen(false); setSelectedGroup(null); }}
+              onClick={() => { setPeriodOpen(!periodOpen); setCategoryOpen(false); setSelectedGroup(null); }}
               disabled={periodOpen}
               style={pillStyle()}
             >
@@ -747,7 +681,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
                 {TIME_PERIODS.map(period => (
                   <button
                     key={period}
-                    onClick={(e) => { e.stopPropagation(); setTimePeriod(period); setPeriodOpen(false); }}
+                    onClick={() => { setTimePeriod(period); setPeriodOpen(false); }}
                     style={{
                       width: '100%', padding: '10px 14px', textAlign: 'left',
                       border: 'none', background: timePeriod === period ? 'rgba(0,0,0,0.06)' : 'transparent',
