@@ -498,24 +498,24 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
               </div>
             )}
             {isFood && ['WEEKLY', 'MONTHLY', 'PERIOD'].includes(timePeriod) && foodPercentage > 0 && (
-              <svg width={32} height={32} viewBox="0 0 32 32">
+              <svg width={40} height={40} viewBox="0 0 40 40">
                 {Array.from({ length: 20 }, (_, i) => {
                   const angle = (i / 20) * 2 * Math.PI - Math.PI / 2;
-                  const cx = 16;
-                  const cy = 16;
-                  const r = 12;
+                  const cx = 20;
+                  const cy = 20;
+                  const r = 15;
                   const x = cx + r * Math.cos(angle);
                   const y = cy + r * Math.sin(angle);
                   const filled = Math.round(foodPercentage * 20);
                   return (
                     <circle
                       key={i}
-                      cx={x} cy={y} r={1.5}
+                      cx={x} cy={y} r={1.8}
                       fill={i < filled ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.1)'}
                     />
                   );
                 })}
-                <text x={16} y={18} textAnchor="middle" fill="rgba(0,0,0,0.8)" fontSize="7" fontWeight="700">
+                <text x={20} y={23} textAnchor="middle" fill="rgba(0,0,0,0.8)" fontSize="8" fontWeight="700">
                   {Math.round(foodPercentage * 100)}%
                 </text>
               </svg>

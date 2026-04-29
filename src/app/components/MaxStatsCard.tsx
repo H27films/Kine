@@ -171,12 +171,48 @@ export const MaxStatsCard: React.FC<MaxStatsCardProps> = ({ category, timePeriod
 
   if (maxValue === null || maxLabel === null) return null;
 
+  const isCardio = !!CARDIO_MAP[category];
+
+  let maxDisplay: string;
+  if (category === 'CALORIES') {
+    maxDisplay = maxValue!.toLocaleString();
+  } else if (category === 'FOOD') {
+    maxDisplay = maxValue!.toFixed(1);
+  } else if (category === 'TRACKER') {
+    maxDisplay = Math.round(maxValue!).toLocaleString();
+  } else if (isCardio) {
+    if (timePeriod === 'PERIOD') {
+      maxDisplay = Math.round(maxValue!).toLocaleString();
+    } else {
+      maxDisplay = maxValue!.toFixed(1);
+    }
+  } else {
+    maxDisplay = Math.round(maxValue!).toLocaleString();
+  }
+
+  let avgDisplay: string;
+  if (category === 'CALORIES') {
+    avgDisplay = avgValue!.toLocaleString();
+  } else if (category === 'FOOD') {
+    avgDisplay = avgValue!.toFixed(1);
+  } else if (category === 'TRACKER') {
+    avgDisplay = Math.round(avgValue!).toLocaleString();
+  } else if (isCardio) {
+    if (timePeriod === 'PERIOD') {
+      avgDisplay = Math.round(avgValue!).toLocaleString();
+    } else {
+      avgDisplay = avgValue!.toFixed(1);
+    }
+  } else {
+    avgDisplay = Math.round(avgValue!).toLocaleString();
+  }
+
   return (
     <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '8px' }}>
       <div>
         <div style={headerStyle}>MAX</div>
         <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
-          {category === 'CALORIES' ? maxValue!.toLocaleString() : category === 'FOOD' ? maxValue!.toFixed(1) : fmt(maxValue)}
+          {maxDisplay}
         </div>
         <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em', color: '#1a1a1a', marginTop: '2px', textTransform: 'uppercase' }}>
           {maxLabel}
@@ -185,7 +221,7 @@ export const MaxStatsCard: React.FC<MaxStatsCardProps> = ({ category, timePeriod
       <div style={{ textAlign: 'right' }}>
         <div style={headerStyleRight}>AVG</div>
         <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
-          {category === 'CALORIES' ? avgValue!.toLocaleString() : category === 'FOOD' ? avgValue!.toFixed(1) : fmt(avgValue!)}
+          {avgDisplay}
         </div>
         <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em', color: '#1a1a1a', marginTop: '2px', textTransform: 'uppercase' }}>
           All {timePeriod === 'MONTHLY' ? 'months' : 'weeks'}
