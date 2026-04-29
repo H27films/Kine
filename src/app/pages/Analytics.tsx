@@ -697,7 +697,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
                     ).map(cat => (
                       <button
                         key={cat}
-                        onClick={(e) => { e.stopPropagation(); setCategory(cat); setCategoryOpen(false); setSelectedGroup(null); }}
+                        onClick={(e) => { e.stopPropagation(); console.log('setting category to', cat); setCategory(cat); setCategoryOpen(false); setSelectedGroup(null); }}
                         style={{
                           width: '100%', padding: '10px 14px', textAlign: 'left',
                           border: 'none', background: category === cat ? 'rgba(0,0,0,0.06)' : 'transparent',
