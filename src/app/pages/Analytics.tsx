@@ -662,19 +662,19 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
                   // Level 1: Groups
                   <>
                     <button
-                      onClick={() => setSelectedGroup('WEIGHTS')}
+                      onClick={(e) => { e.stopPropagation(); setSelectedGroup('WEIGHTS'); }}
                       style={{ width: '100%', padding: '12px 14px', textAlign: 'left', border: 'none', background: 'transparent', fontSize: '10px', fontWeight: 700, letterSpacing: '0.12em', color: '#1a1a1a', cursor: 'pointer', textTransform: 'uppercase' }}
                     >
                       Weights
                     </button>
                     <button
-                      onClick={() => setSelectedGroup('CARDIO')}
+                      onClick={(e) => { e.stopPropagation(); setSelectedGroup('CARDIO'); }}
                       style={{ width: '100%', padding: '12px 14px', textAlign: 'left', border: 'none', background: 'transparent', fontSize: '10px', fontWeight: 700, letterSpacing: '0.12em', color: '#1a1a1a', cursor: 'pointer', textTransform: 'uppercase' }}
                     >
                       Cardio
                     </button>
                     <button
-                      onClick={() => setSelectedGroup('MEASUREMENTS')}
+                      onClick={(e) => { e.stopPropagation(); setSelectedGroup('MEASUREMENTS'); }}
                       style={{ width: '100%', padding: '12px 14px', textAlign: 'left', border: 'none', background: 'transparent', fontSize: '10px', fontWeight: 700, letterSpacing: '0.12em', color: '#1a1a1a', cursor: 'pointer', textTransform: 'uppercase' }}
                     >
                       Measurements
@@ -684,7 +684,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
                   // Level 2: Items
                   <>
                     <button
-                      onClick={() => setSelectedGroup(null)}
+                      onClick={(e) => { e.stopPropagation(); setSelectedGroup(null); }}
                       style={{ width: '100%', padding: '10px 14px', textAlign: 'left', border: 'none', background: 'rgba(0,0,0,0.04)', fontSize: '9px', fontWeight: 600, letterSpacing: '0.1em', color: '#999', cursor: 'pointer', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}
                     >
                       <ChevronLeft size={12} /> {selectedGroup}
@@ -697,7 +697,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
                     ).map(cat => (
                       <button
                         key={cat}
-                        onClick={() => { setCategory(cat); setCategoryOpen(false); setSelectedGroup(null); }}
+                        onClick={(e) => { e.stopPropagation(); setCategory(cat); setCategoryOpen(false); setSelectedGroup(null); }}
                         style={{
                           width: '100%', padding: '10px 14px', textAlign: 'left',
                           border: 'none', background: category === cat ? 'rgba(0,0,0,0.06)' : 'transparent',
