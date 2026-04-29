@@ -273,7 +273,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate, showWeekly
       <section className="mb-16 space-y-12">
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {(() => {
-            const foodScore = weeklyRatings.reduce((sum, r) => sum + (r === 'GOOD' ? 3 : r === 'OK' ? 1 : r === 'BAD' ? 0 : 0), 0);
+            const foodScore = weeklyRatings.reduce((sum, r) => sum + (r === 'GOOD' ? 3 : r === 'OK' ? 2 : r === 'BAD' ? 0 : 0), 0);
             const daysWithRating = weeklyRatings.filter(r => r !== null).length;
             const maxScore = daysWithRating > 0 ? daysWithRating * 3 : 21;
             const pct = daysWithRating > 0 ? foodScore / maxScore : 0;
