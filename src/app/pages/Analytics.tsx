@@ -242,12 +242,12 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
         if (idx >= 0 && idx < labels.length) {
           let val = 0;
           if (isCalories) { val = row.calories || 0; rawTotal += val; }
-          else if (isFood) {
-            const rating = (row.food_rating || '').toUpperCase();
-            val = rating === 'GOOD' ? 3 : rating === 'OK' ? 2 : rating === 'BAD' ? 1 : 0;
-            foodScoreTotal += val;
-            if (val > 0) foodDaysWithRatingCount++;
-          }
+           else if (isFood) {
+             const rating = (row.food_rating || '').toUpperCase();
+             val = rating === 'GOOD' ? 3 : rating === 'OK' ? 2 : rating === 'BAD' ? 0 : 0;
+             foodScoreTotal += val;
+             if (val > 0) foodDaysWithRatingCount++;
+           }
           else if (isScore) { val = row.total_score || 0; rawTotal += val; }
           else if (isTracker) { val = row.total_cardio || 0; rawTotal += val; }
           else { val = row.total_weight || row.km || row.total_cardio || 0; rawTotal += val; }
@@ -294,10 +294,16 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
   const maxValue = Math.max(...data.map(d => d.value), minValue + 1);
   const metricLabel = isCalories ? 'KCAL' : isFood ? 'SCORE' : isScore ? 'SC' : (isCardio || isTracker ? 'KM' : 'KG');
 
-  const foodAvgPerDay = timePeriod === 'MONTHLY' && foodDaysWithRating > 0 ? (foodScore / foodDaysWithRating).toFixed(1) : '0.0';
+   const foodAvgPerDay = timePeriod === 'MONTHLY' && foodDaysWithRating > 0 ? (foodScore / foodDaysWithRating).toFixed(1) : '0.0';
 
-  const caloriesPeriodDaily = isCalories && timePeriod === 'PERIOD' ? Math.round(totalRaw / 49) : null;
-  const scorePeriodDaily = isScore && timePeriod === 'PERIOD' ? Math.round(totalRaw / 49) : null;
+   const foodPercentage = isFood ? (
+     timePeriod === 'WEEKLY' ? foodScore / 21 :
+     timePeriod === 'MONTHLY' ? parseFloat(foodAvgPerDay) / 3 :
+     timePeriod === 'PERIOD' ? foodScore / 21 : 0
+   ) : 0;
+
+   const caloriesPeriodDaily = isCalories && timePeriod === 'PERIOD' ? Math.round(totalRaw / 49) : null;
+   const scorePeriodDaily = isScore && timePeriod === 'PERIOD' ? Math.round(totalRaw / 49) : null;
 
   const isWeights = !isCalories && !isCardio && !isTracker && !isFood && !isScore;
   const weightsPeriodAvg = isWeights && timePeriod === 'PERIOD' ? Math.round(totalRaw / 8) : null;
@@ -480,7 +486,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
 
         {/* Big number */}
         <div className="flex items-start justify-between" style={{ marginBottom: '40px' }}>
-          <div>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
             {showTotalWithAvg ? (
               <div style={{ fontSize: '64px', fontWeight: 900, lineHeight: 1, letterSpacing: '-0.04em', color: '#1a1a1a', display: 'flex', alignItems: 'baseline' }}>
                 <span>{displayTotal}</span>
@@ -490,6 +496,29 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
               <div style={{ fontSize: '64px', fontWeight: 900, lineHeight: 1, letterSpacing: '-0.04em', color: '#1a1a1a' }}>
                 {isScore ? displayTotal : isFood ? (timePeriod !== 'MONTHLY' ? foodScore : foodAvgPerDay) : displayTotal}
               </div>
+            )}
+            {isFood && ['WEEKLY', 'MONTHLY', 'PERIOD'].includes(timePeriod) && foodPercentage > 0 && (
+              <svg width={32} height={32} viewBox="0 0 32 32">
+                {Array.from({ length: 20 }, (_, i) => {
+                  const angle = (i / 20) * 2 * Math.PI - Math.PI / 2;
+                  const cx = 16;
+                  const cy = 16;
+                  const r = 12;
+                  const x = cx + r * Math.cos(angle);
+                  const y = cy + r * Math.sin(angle);
+                  const filled = Math.round(foodPercentage * 20);
+                  return (
+                    <circle
+                      key={i}
+                      cx={x} cy={y} r={1.5}
+                      fill={i < filled ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.1)'}
+                    />
+                  );
+                })}
+                <text x={16} y={18} textAnchor="middle" fill="rgba(0,0,0,0.8)" fontSize="7" fontWeight="700">
+                  {Math.round(foodPercentage * 100)}%
+                </text>
+              </svg>
             )}
           </div>
           <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
