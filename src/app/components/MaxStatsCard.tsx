@@ -117,7 +117,7 @@ export const MaxStatsCard: React.FC<MaxStatsCardProps> = ({ category, timePeriod
         else if (category === 'SCORE') val = Number(row.total_score || 0);
         else if (category === 'FOOD') {
           const rating = (row.food_rating || '').toUpperCase();
-          val = rating === 'GOOD' ? 3 : rating === 'OK' ? 2 : rating === 'BAD' ? 1 : 0;
+          val = rating === 'GOOD' ? 3 : rating === 'OK' ? 1 : rating === 'BAD' ? 0 : 0;
         } else if (CARDIO_MAP[category]) {
           val = Number(row.total_cardio || 0);
         } else {
