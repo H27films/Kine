@@ -662,52 +662,62 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
                 {!selectedGroup ? (
                   // Level 1: Groups
                   <>
-                    <button
+                    <div
                       onClick={(e) => { e.stopPropagation(); setSelectedGroup('WEIGHTS'); }}
                       style={{ width: '100%', padding: '12px 14px', textAlign: 'left', border: 'none', background: 'transparent', fontSize: '10px', fontWeight: 700, letterSpacing: '0.12em', color: '#1a1a1a', cursor: 'pointer', textTransform: 'uppercase' }}
+                      role="button"
+                      tabIndex={0}
                     >
                       Weights
-                    </button>
-                    <button
+                    </div>
+                    <div
                       onClick={(e) => { e.stopPropagation(); setSelectedGroup('CARDIO'); }}
                       style={{ width: '100%', padding: '12px 14px', textAlign: 'left', border: 'none', background: 'transparent', fontSize: '10px', fontWeight: 700, letterSpacing: '0.12em', color: '#1a1a1a', cursor: 'pointer', textTransform: 'uppercase' }}
+                      role="button"
+                      tabIndex={0}
                     >
                       Cardio
-                    </button>
-                    <button
+                    </div>
+                    <div
                       onClick={(e) => { e.stopPropagation(); setSelectedGroup('MEASUREMENTS'); }}
                       style={{ width: '100%', padding: '12px 14px', textAlign: 'left', border: 'none', background: 'transparent', fontSize: '10px', fontWeight: 700, letterSpacing: '0.12em', color: '#1a1a1a', cursor: 'pointer', textTransform: 'uppercase' }}
+                      role="button"
+                      tabIndex={0}
                     >
                       Measurements
-                    </button>
+                    </div>
                   </>
                 ) : (
                   // Level 2: Items
                   <>
-                    <button
+                    <div
                       onClick={(e) => { e.stopPropagation(); setSelectedGroup(null); }}
                       style={{ width: '100%', padding: '10px 14px', textAlign: 'left', border: 'none', background: 'rgba(0,0,0,0.04)', fontSize: '9px', fontWeight: 600, letterSpacing: '0.1em', color: '#999', cursor: 'pointer', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}
+                      role="button"
+                      tabIndex={0}
                     >
                       <ChevronLeft size={12} /> {selectedGroup}
-                    </button>
+                    </div>
                     {(selectedGroup === 'WEIGHTS'
                       ? ['ALL WEIGHTS', 'CHEST', 'BACK', 'LEGS']
                       : selectedGroup === 'CARDIO'
                       ? ['TRACKER', 'RUNNING', 'ROWING', 'CROSS TRAINER']
                       : ['CALORIES', 'FOOD', 'SCORE']
                     ).map(cat => (
-                      <button
+                      <div
                         key={cat}
-                        onClick={(e) => { e.stopPropagation(); console.log('setting category to', cat); setCategory(cat); setCategoryOpen(false); setSelectedGroup(null); }}
+                        onClick={(e) => { e.stopPropagation(); setCategory(cat); setCategoryOpen(false); setSelectedGroup(null); }}
                         style={{
                           width: '100%', padding: '10px 14px', textAlign: 'left',
                           border: 'none', background: category === cat ? 'rgba(0,0,0,0.06)' : 'transparent',
                           fontSize: '10px', fontWeight: 500, letterSpacing: '0.08em', color: '#1a1a1a',
                           cursor: 'pointer',
                         }}
+                        role="button"
+                        tabIndex={0}
                       >
                         {cat}
-                      </button>
+                      </div>
                     ))}
                   </>
                 )}
