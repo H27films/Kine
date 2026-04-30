@@ -403,37 +403,27 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
                    {/* Rounded-top bars with height-based colors */}
                    {data.map((d, i) => {
                      const x = paddingX + i * (barWidth + barSpacing);
-                     const barHeight = Math.max(4, ((d.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
-                     const y = paddingY + plotHeight - barHeight;
-                     const radius = barWidth / 2;
-                      const color = getBarColor(d.value);
-                      const isHovered = hoveredIdx === i;
+                     const barCenter = x + barWidth / 2;
+                     const isHovered = hoveredIdx === i;
 
-                      // Background bar at max height (reference)
-                      const bgY = paddingY + plotHeight - maxBarHeight;
+                     // Background bar at max height (reference)
+                     const bgY = paddingY + plotHeight - maxBarHeight;
 
-                      return (
+                     // Tooltip fixed at the top (above highest bar), centered on this bar
+                     const tooltipX = barCenter;
+                     const tooltipY = paddingY + plotHeight - maxBarHeight - 46;
+
+                     return (
                        <g key={d.workoutId}>
-                         {/* Background reference bar - faint grey at max value height */}
+                         {/* Background reference bar - faint grey at max height */}
                          <rect
                            x={x}
                            y={bgY}
                            width={barWidth}
                            height={maxBarHeight}
-                           fill="rgba(0,0,0,0.04)"
-                           rx={barWidth / 2}
+                           fill="rgba(0,0,0,0.02)"
+                           rx="4"
                          />
-
-                         {/* Shadow for depth */}
-                         {isHovered && (
-                           <rect
-                             x={x + 2}
-                             y={y + 2}
-                             width={barWidth}
-                             height={barHeight}
-                             fill="rgba(0,0,0,0.15)"
-                           />
-                         )}
 
                          {/* Bar with flat bottom + rounded top */}
                          <path
@@ -451,8 +441,8 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
                          />
                          {isHovered && (
                            <g>
-                             <rect x={x + barWidth / 2 - 28} y={y - 46} width="56" height="36" rx="4" fill="rgba(0,0,0,0.06)" />
-                             <text x={x + barWidth / 2} y={y - 20} textAnchor="middle" style={{ fontSize: '12px', fontWeight: 900, color: '#1a1a1a', fontFamily: "'JetBrains Mono', monospace" }}>{d.value.toLocaleString()}</text>
+                             <rect x={tooltipX - 28} y={tooltipY} width="56" height="36" rx="4" fill="rgba(0,0,0,0.06)" />
+                             <text x={tooltipX} y={tooltipY + 16} textAnchor="middle" style={{ fontSize: '12px', fontWeight: 900, color: '#1a1a1a', fontFamily: "'JetBrains Mono', monospace" }}>{d.value.toLocaleString()}</text>
                            </g>
                          )}
                        </g>
