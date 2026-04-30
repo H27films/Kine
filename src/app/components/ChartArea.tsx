@@ -112,7 +112,7 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
       </div>
 
       {/* Chart */}
-      <div style={{ height: '220px', position: 'relative', marginBottom: '4px' }}>
+      <div style={{ height: '220px', position: 'relative', marginBottom: '2px' }}>
         {data.length > 0 ? (
           mode === 'exercise' ? (
             // Bar chart for exercise
@@ -246,7 +246,7 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
           })}
         </div>
       ) : mode === 'aggregate' && data.length > 0 ? (
-        <div style={{ position: 'relative', height: '12px' }}>
+        <div style={{ position: 'relative', height: '10px' }}>
           {data.map((point, i) => {
             const week = point?.occurrence || i + 1;
             const showLabel = i % 2 === 0; // Show every 2nd bar, starting from first
