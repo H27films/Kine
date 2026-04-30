@@ -10,6 +10,7 @@ const LogWeights = lazy(() => import('./pages/LogWeights').then(m => ({ default:
 const LogCardio = lazy(() => import('./pages/LogCardio').then(m => ({ default: m.LogCardio })));
 const LogCalories = lazy(() => import('./pages/LogCalories').then(m => ({ default: m.LogCalories })));
 const Analytics = lazy(() => import('./pages/Analytics').then(m => ({ default: m.Analytics })));
+const WeightsPlus = lazy(() => import('./pages/WeightsPlus').then(m => ({ default: m.WeightsPlus })));
 const Profile = lazy(() => import('./pages/Profile').then(m => ({ default: m.Profile })));
 
 const App: React.FC = () => {
@@ -39,6 +40,7 @@ const App: React.FC = () => {
       case 'calories':
         return 'Log';
       case 'analytics': return 'Data+';
+      case 'weights-plus': return 'Weights+';
       case 'profile': return 'Profile';
     }
   };
@@ -55,13 +57,15 @@ const App: React.FC = () => {
         return <LogCalories onNavigate={onNavigate} showWeeklySummary={showWeeklySummary} />;
       case 'analytics':
         return <Analytics onNavigate={onNavigate} />;
+      case 'weights-plus':
+        return <WeightsPlus onNavigate={onNavigate} />;
       case 'profile':
         return <Profile onNavigate={onNavigate} />;
     }
   };
 
   const showBackButton = false;
-  const hideChrome = currentPage.page === 'analytics' || currentPage.page === 'profile';
+  const hideChrome = currentPage.page === 'analytics' || currentPage.page === 'profile' || currentPage.page === 'weights-plus';
 
   return (
     <>

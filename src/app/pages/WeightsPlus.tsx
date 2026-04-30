@@ -2,8 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Home, ChevronDown, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Page } from '../../types';
-import { MaxStatsCard } from '../components/MaxStatsCard';
-import { RunningManIcon, CaloriesIcon } from '../components/NavIcons';
 
 const TIME_PERIODS = ['WEEKLY', 'MONTHLY', 'PERIOD'];
 
@@ -12,7 +10,7 @@ interface DataPoint {
   value: number;
 }
 
-interface AnalyticsProps {
+interface WeightsPlusProps {
   onNavigate: (page: Page) => void;
 }
 
@@ -40,51 +38,18 @@ const ProfileUserIcon = ({ size = 24 }: { size?: number }) => (
   </svg>
 );
 
-const DoubleArrowIcon = ({ size = 24 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 14 14" fill="none">
-    {/* First arrow (grey) - head up */}
-    <rect x="0" y="4" width="1" height="1" fill="#ccc" />
-    <rect x="1" y="5" width="1" height="1" fill="#ccc" />
-    {/* First arrow - head down */}
-    <rect x="0" y="8" width="1" height="1" fill="#ccc" />
-    <rect x="1" y="7" width="1" height="1" fill="#ccc" />
-    {/* First arrow - shaft */}
-    <rect x="1" y="6" width="1" height="1" fill="#ccc" />
-    <rect x="2" y="6" width="1" height="1" fill="#ccc" />
-    <rect x="3" y="6" width="1" height="1" fill="#ccc" />
-    <rect x="4" y="6" width="1" height="1" fill="#ccc" />
-    {/* Second arrow (black) - head up */}
-    <rect x="5" y="4" width="1" height="1" fill="#666" />
-    <rect x="6" y="5" width="1" height="1" fill="#666" />
-    {/* Second arrow - head down */}
-    <rect x="5" y="8" width="1" height="1" fill="#666" />
-    <rect x="6" y="7" width="1" height="1" fill="#666" />
-    {/* Second arrow - shaft */}
-    <rect x="6" y="6" width="1" height="1" fill="#666" />
-    <rect x="7" y="6" width="1" height="1" fill="#666" />
-    <rect x="8" y="6" width="1" height="1" fill="#666" />
-    <rect x="9" y="6" width="1" height="1" fill="#666" />
-  </svg>
-);
-
-export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
-  const [category, setCategory] = useState('RUNNING');
+export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
+  const [category, setCategory] = useState('ALL WEIGHTS');
   const [timePeriod, setTimePeriod] = useState('WEEKLY');
   const [data, setData] = useState<DataPoint[]>([]);
   const [total, setTotal] = useState(0);
-  const [foodScore, setFoodScore] = useState(0);
-  const [foodMaxScore, setFoodMaxScore] = useState(21);
-  const [foodDaysWithRating, setFoodDaysWithRating] = useState(0);
   const [sessionCount, setSessionCount] = useState(0);
-  const [avgValue, setAvgValue] = useState(0);
-  const [totalRaw, setTotalRaw] = useState(0);
   const [selectedBarIdx, setSelectedBarIdx] = useState<number | null>(null);
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
   const [periodOpen, setPeriodOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  // FIX: separate refs for category and period dropdowns
   const categoryRef = useRef<HTMLDivElement>(null);
   const periodRef = useRef<HTMLDivElement>(null);
   const [currentWeek, setCurrentWeek] = useState(66);
@@ -98,13 +63,6 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
   const [maxWeek, setMaxWeek] = useState<number | null>(null);
   const [minMonth, setMinMonth] = useState<string | null>(null);
   const [maxMonth, setMaxMonth] = useState<string | null>(null);
-
-  const isTracker = category === 'TRACKER';
-  const isAllWeights = category === 'ALL WEIGHTS';
-  const isCardio = ['RUNNING', 'ROWING', 'CROSS TRAINER'].includes(category);
-  const isCalories = category === 'CALORIES';
-  const isFood = category === 'FOOD';
-  const isScore = category === 'SCORE';
 
   const selectedWeek = currentWeek + weekOffset;
 
@@ -150,8 +108,6 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
     loadData();
   }, []);
 
-  // FIX: guard each close behind its own ref check so clicking inside a
-  // dropdown does not immediately close it via the global mousedown listener.
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
@@ -192,64 +148,20 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
 
     let query;
     if (timePeriod === 'MONTHLY') {
-      if (isCalories || isFood || isScore) {
-        query = supabase.from('workouts').select('*').gte('date', dateStart!).lte('date', dateEnd!);
-      } else if (isCardio) {
-        query = supabase.from('workouts').select('*, exercises(exercise_name)').gte('date', dateStart!).lte('date', dateEnd!);
-      } else if (isTracker) {
-        query = supabase.from('workouts').select('*').in('exercise_id', [82, 83, 87]).gte('date', dateStart!).lte('date', dateEnd!);
-      } else if (isAllWeights) {
-        query = supabase.from('workouts').select('*, exercises(exercise_name)').in('type', ['CHEST', 'BACK', 'LEGS']).gte('date', dateStart!).lte('date', dateEnd!);
-      } else {
-        query = supabase.from('workouts').select('*, exercises(exercise_name)').eq('type', category).gte('date', dateStart!).lte('date', dateEnd!);
-      }
+      query = supabase.from('workouts').select('*, exercises(exercise_name)').in('type', ['CHEST', 'BACK', 'LEGS']).gte('date', dateStart!).lte('date', dateEnd!);
     } else {
-      if (isCalories || isFood || isScore) {
-        query = supabase.from('workouts').select('*').in('week', weekNumbers);
-      } else if (isCardio) {
-        query = supabase.from('workouts').select('*, exercises(exercise_name)').in('week', weekNumbers);
-      } else if (isTracker) {
-        query = supabase.from('workouts').select('*').in('exercise_id', [82, 83, 87]).in('week', weekNumbers);
-      } else if (isAllWeights) {
-        query = supabase.from('workouts').select('*, exercises(exercise_name)').in('type', ['CHEST', 'BACK', 'LEGS']).in('week', weekNumbers);
-      } else {
-        query = supabase.from('workouts').select('*, exercises(exercise_name)').eq('type', category).in('week', weekNumbers);
-      }
+      query = supabase.from('workouts').select('*, exercises(exercise_name)').in('type', ['CHEST', 'BACK', 'LEGS']).in('week', weekNumbers);
     }
 
     const { data: rows } = await query;
 
     const values = new Array(labels.length).fill(0);
     const count = new Array(labels.length).fill(0);
-    let foodScoreTotal = 0;
-    let foodDaysWithRatingCount = 0;
     let rawTotal = 0;
     let sessionRows = 0;
 
     if (rows) {
-      const seenScoreKeys = isScore ? new Set<string>() : null;
       for (const row of rows as any[]) {
-        if (isScore) {
-          const key = `${row.week}_${row.day}`;
-          if (seenScoreKeys!.has(key)) continue;
-          seenScoreKeys!.add(key);
-        }
-
-        let matchCategory = false;
-        if (isCalories) matchCategory = (row.calories || 0) > 0;
-        else if (isFood) matchCategory = !!row.food_rating;
-        else if (isScore) matchCategory = row.total_score != null && Number(row.total_score || 0) > 0;
-        else if (isCardio) {
-          const name = (row.exercises?.exercise_name || '').toUpperCase();
-          matchCategory = name === (category === 'ROWING' ? 'ROW' : category === 'CROSS TRAINER' ? 'CROSS TRAINER' : category);
-        } else if (isTracker) {
-          matchCategory = true;
-        } else {
-          matchCategory = true;
-        }
-
-        if (!matchCategory) continue;
-
         sessionRows++;
 
         let idx: number;
@@ -267,43 +179,21 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
         }
 
         if (idx >= 0 && idx < labels.length) {
-          let val = 0;
-          if (isCalories) { val = row.calories || 0; rawTotal += val; }
-           else if (isFood) {
-             const rating = (row.food_rating || '').toUpperCase();
-             val = rating === 'GOOD' ? 3 : rating === 'OK' ? 2 : rating === 'BAD' ? 0 : 0;
-             foodScoreTotal += val;
-             if (val > 0) foodDaysWithRatingCount++;
-           }
-          else if (isScore) { val = row.total_score || 0; rawTotal += val; }
-          else if (isTracker) { val = row.total_cardio || 0; rawTotal += val; }
-          else { val = row.total_weight || row.km || row.total_cardio || 0; rawTotal += val; }
+          const val = row.total_weight || 0;
+          rawTotal += val;
           values[idx] += val;
           count[idx]++;
         }
       }
     }
 
-    const points = labels.map((label, i) => {
-      let val = Math.round(values[i]);
-      if (isCalories && timePeriod === 'PERIOD') val = Math.round(val / 7);
-      if (isScore && timePeriod === 'PERIOD') val = Math.round(val / 7);
-      return { label, value: val };
-    });
+    const points = labels.map((label, i) => ({
+      label,
+      value: Math.round(values[i]),
+    }));
     setData(points);
     setTotal(Math.round(values.reduce((a, b) => a + b, 0)));
-
-    const numWeeks = timePeriod === 'PERIOD' ? 8 : timePeriod === 'MONTHLY' ? 4 : 1;
-    const avgWeeklyFood = timePeriod === 'MONTHLY' ? foodScoreTotal : Math.round(foodScoreTotal / numWeeks);
-    setFoodScore(avgWeeklyFood);
-    setFoodMaxScore(21);
-    setFoodDaysWithRating(foodDaysWithRatingCount);
-
-    setTotalRaw(rawTotal);
     setSessionCount(sessionRows);
-
-    const nonZeroCount = count.filter(c => c > 0).length;
-    setAvgValue(nonZeroCount > 0 ? Math.round(values.reduce((a, b) => a + b, 0) / nonZeroCount) : 0);
   };
 
   useEffect(() => {
@@ -319,58 +209,15 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
 
   const minValue = Math.min(...data.map(d => d.value), 0);
   const maxValue = Math.max(...data.map(d => d.value), minValue + 1);
-  const metricLabel = isCalories ? 'KCAL' : isFood ? 'SCORE' : isScore ? 'SC' : (isCardio || isTracker ? 'KM' : 'KG');
+  const metricLabel = 'KG';
 
-   const foodAvgPerDay = timePeriod === 'MONTHLY' && foodDaysWithRating > 0 ? (foodScore / foodDaysWithRating).toFixed(1) : '0.0';
-
-   const foodPercentage = isFood ? (
-     timePeriod === 'WEEKLY' ? foodScore / 21 :
-     timePeriod === 'MONTHLY' ? parseFloat(foodAvgPerDay) / 3 :
-     timePeriod === 'PERIOD' ? foodScore / 21 : 0
-   ) : 0;
-
-   const caloriesPeriodDaily = isCalories && timePeriod === 'PERIOD' ? Math.round(totalRaw / 49) : null;
-   const scorePeriodDaily = isScore && timePeriod === 'PERIOD' ? Math.round(totalRaw / 49) : null;
-
-  const isWeights = !isCalories && !isCardio && !isTracker && !isFood && !isScore;
-  const weightsPeriodAvg = isWeights && timePeriod === 'PERIOD' ? Math.round(totalRaw / 8) : null;
-
-  const displayTotal = isCalories && timePeriod === 'PERIOD'
-    ? caloriesPeriodDaily!.toLocaleString()
-    : isScore && timePeriod === 'PERIOD'
-    ? scorePeriodDaily!.toLocaleString()
-    : isWeights && timePeriod === 'PERIOD'
-    ? weightsPeriodAvg!.toLocaleString()
-    : isCalories || isScore
-    ? avgValue.toLocaleString()
-    : isCardio || isTracker
-    ? totalRaw === 0 ? '0.0' : totalRaw.toFixed(1)
-    : total.toLocaleString();
-
-  const daysWithData = data.filter(d => d.value > 0).length;
-  const trackerMonthlyAvg = isTracker && timePeriod === 'MONTHLY' && daysWithData > 0
-    ? (totalRaw / daysWithData).toFixed(1)
-    : '';
-  const cardioPeriodAvg = (isCardio || isTracker) && timePeriod === 'PERIOD' && daysWithData > 0
-    ? (totalRaw / daysWithData).toFixed(1)
-    : '';
-
-  const showTotalWithAvg = (isTracker && timePeriod === 'MONTHLY') || ((isCardio || isTracker) && timePeriod === 'PERIOD');
-  const avgDisplay = isTracker && timePeriod === 'MONTHLY' ? trackerMonthlyAvg : cardioPeriodAvg;
-
-  const isMonthMode = timePeriod === 'MONTHLY';
-  const canGoPrev = isMonthMode
-    ? minMonth === null || selectedMonth > minMonth
-    : minWeek === null || selectedWeek > minWeek;
-  const canGoNext = isMonthMode
-    ? maxMonth === null || selectedMonth < maxMonth
-    : maxWeek === null || selectedWeek < maxWeek;
+  const displayTotal = total.toLocaleString();
 
   const navItems: NavItem[] = [
     { label: 'Home', icon: <Home size={20} />, page: 'dashboard' },
     { label: 'Weights', icon: <DumbbellIconSmall size={21} />, page: 'weights' },
-    { label: 'Cardio', icon: <RunningManIcon size={24} color="#1a1a1a" />, page: 'cardio' },
-    { label: 'Calories', icon: <CaloriesIcon size={20} color="#1a1a1a" />, page: 'calories' },
+    { label: 'Cardio', icon: <div></div>, page: 'cardio' },
+    { label: 'Calories', icon: <div></div>, page: 'calories' },
     { label: 'Profile', icon: <ProfileUserIcon size={20} />, page: 'profile' },
   ];
 
@@ -399,6 +246,14 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
     display: 'flex',
     flexDirection: 'column',
   };
+
+  const isMonthMode = timePeriod === 'MONTHLY';
+  const canGoPrev = isMonthMode
+    ? minMonth === null || selectedMonth > minMonth
+    : minWeek === null || selectedWeek > minWeek;
+  const canGoNext = isMonthMode
+    ? maxMonth === null || selectedMonth < maxMonth
+    : maxWeek === null || selectedWeek < maxWeek;
 
   return (
     <div
@@ -480,10 +335,10 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
           )}
         </div>
 
-        {/* Center: DATA+ */}
+        {/* Center: WEIGHTS+ */}
         <div style={{ flex: 1, textAlign: 'center', opacity: menuOpen ? 0 : 1, transition: 'opacity 0.15s', pointerEvents: menuOpen ? 'none' : 'auto' }}>
           <span style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.15em', color: '#1a1a1a', textTransform: 'uppercase' }}>
-            DATA+
+            WEIGHTS+
           </span>
         </div>
 
@@ -514,55 +369,23 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
         {/* Big number */}
         <div className="flex items-start justify-between" style={{ marginBottom: '40px' }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
-            {showTotalWithAvg ? (
-              <div style={{ fontSize: '64px', fontWeight: 900, lineHeight: 1, letterSpacing: '-0.04em', color: '#1a1a1a', display: 'flex', alignItems: 'baseline' }}>
-                <span>{displayTotal}</span>
-                <span style={{ fontSize: '24px', fontWeight: 500, color: '#999', marginLeft: '6px' }}>/{avgDisplay}</span>
-              </div>
-            ) : (
-              <div style={{ fontSize: '64px', fontWeight: 900, lineHeight: 1, letterSpacing: '-0.04em', color: '#1a1a1a' }}>
-                {isScore ? displayTotal : isFood ? (timePeriod !== 'MONTHLY' ? foodScore : foodAvgPerDay) : displayTotal}
-              </div>
-            )}
-            {isFood && ['WEEKLY', 'MONTHLY', 'PERIOD'].includes(timePeriod) && foodPercentage > 0 && (
-              <svg width={40} height={40} viewBox="0 0 40 40">
-                {Array.from({ length: 20 }, (_, i) => {
-                  const angle = (i / 20) * 2 * Math.PI - Math.PI / 2;
-                  const cx = 20;
-                  const cy = 20;
-                  const r = 15;
-                  const x = cx + r * Math.cos(angle);
-                  const y = cy + r * Math.sin(angle);
-                  const filled = Math.round(foodPercentage * 20);
-                  return (
-                    <circle
-                      key={i}
-                      cx={x} cy={y} r={1.8}
-                      fill={i < filled ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.1)'}
-                    />
-                  );
-                })}
-                <text x={20} y={23} textAnchor="middle" fill="rgba(0,0,0,0.8)" fontSize="8" fontWeight="700">
-                  {Math.round(foodPercentage * 100)}%
-                </text>
-              </svg>
-            )}
+            <div style={{ fontSize: '64px', fontWeight: 900, lineHeight: 1, letterSpacing: '-0.04em', color: '#1a1a1a' }}>
+              {displayTotal}
+            </div>
           </div>
           <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
             <div style={{ fontSize: '14px', fontWeight: 500, letterSpacing: '0.15em', color: '#999', textTransform: 'uppercase' }}>
               {metricLabel}
             </div>
-            {(isCardio || isWeights) && timePeriod === 'WEEKLY' && sessionCount > 0 && (
-              <div style={{
-                width: '26px', height: '26px', borderRadius: '50%',
-                backgroundColor: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                marginTop: '6px',
-              }}>
-                <span style={{ fontSize: '11px', fontWeight: 900, color: '#fff', lineHeight: 1 }}>
-                  {sessionCount}
-                </span>
-              </div>
-            )}
+            <div style={{
+              width: '26px', height: '26px', borderRadius: '50%',
+              backgroundColor: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              marginTop: '6px',
+            }}>
+              <span style={{ fontSize: '11px', fontWeight: 900, color: '#fff', lineHeight: 1 }}>
+                {sessionCount}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -583,7 +406,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
                 {isSelected && (
                   <div style={{ position: 'absolute', bottom: '100%', left: '50%', transform: 'translateX(-50%)', marginBottom: '4px', whiteSpace: 'nowrap' }}>
                     <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', fontWeight: 900, color: '#1a1a1a', backgroundColor: 'rgba(0,0,0,0.06)', padding: '3px 8px', borderRadius: '4px' }}>
-                       {isScore || isFood ? d.value.toLocaleString() : `${(isCardio || isTracker) ? d.value.toFixed(1) : d.value.toLocaleString()} ${metricLabel}`}
+                      {d.value.toLocaleString()} {metricLabel}
                     </span>
                   </div>
                 )}
@@ -611,46 +434,13 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
             );
           })}
         </div>
-
-        {/* Max/Avg stats card */}
-        {timePeriod !== 'PERIOD' && (
-          <div style={{ marginTop: '28px' }}>
-            <MaxStatsCard category={category} timePeriod={timePeriod} />
-          </div>
-        )}
       </div>
-
-      {/* Weights+ link */}
-      {['ALL WEIGHTS', 'CHEST', 'BACK', 'LEGS'].includes(category) && (
-        <div className="px-5" style={{ paddingTop: '8px', marginBottom: '8px' }}>
-          <button
-            onClick={() => onNavigate('weights-plus')}
-            style={{
-              background: 'none',
-              border: 'none',
-              padding: '4px 0',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              cursor: 'pointer',
-              fontSize: '11px',
-              fontWeight: 600,
-              letterSpacing: '0.08em',
-              color: '#1a1a1a',
-              textTransform: 'uppercase',
-            }}
-          >
-            <DoubleArrowIcon size={38} />
-            Weights +
-          </button>
-        </div>
-      )}
 
       {/* Selectors + metric cards */}
       <div className="px-5" style={{ paddingBottom: 'calc(12px + env(safe-area-inset-bottom))', paddingTop: '8px' }}>
         {/* Two selectors side by side */}
         <div className="flex gap-2 mb-2">
-          {/* Category selector — FIX: attach categoryRef here */}
+          {/* Category selector */}
           <div className="flex-1 relative" style={{ position: 'relative' }} ref={categoryRef}>
             <button
               onClick={() => {
@@ -658,10 +448,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
                 setCategoryOpen(open);
                 setPeriodOpen(false);
                 if (open) {
-                  if (['ALL WEIGHTS', 'CHEST', 'BACK', 'LEGS'].includes(category)) setSelectedGroup('WEIGHTS');
-                  else if (['TRACKER', 'RUNNING', 'ROWING', 'CROSS TRAINER'].includes(category)) setSelectedGroup('CARDIO');
-                  else if (['CALORIES', 'FOOD', 'SCORE'].includes(category)) setSelectedGroup('MEASUREMENTS');
-                  else setSelectedGroup(null);
+                  setSelectedGroup('WEIGHTS');
                 } else {
                   setSelectedGroup(null);
                 }
@@ -679,71 +466,35 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
                 borderRadius: '10px', marginBottom: '4px', overflow: 'hidden', zIndex: 50,
                 boxShadow: '0 -8px 24px rgba(0,0,0,0.12)',
               }}>
-                {!selectedGroup ? (
-                  <>
-                    <div
-                      onClick={() => setSelectedGroup('WEIGHTS')}
-                      style={{ width: '100%', padding: '12px 14px', textAlign: 'left', border: 'none', background: 'transparent', fontSize: '10px', fontWeight: 700, letterSpacing: '0.12em', color: '#1a1a1a', cursor: 'pointer', textTransform: 'uppercase' }}
-                      role="button"
-                      tabIndex={0}
-                    >
-                      Weights
-                    </div>
-                    <div
-                      onClick={() => setSelectedGroup('CARDIO')}
-                      style={{ width: '100%', padding: '12px 14px', textAlign: 'left', border: 'none', background: 'transparent', fontSize: '10px', fontWeight: 700, letterSpacing: '0.12em', color: '#1a1a1a', cursor: 'pointer', textTransform: 'uppercase' }}
-                      role="button"
-                      tabIndex={0}
-                    >
-                      Cardio
-                    </div>
-                    <div
-                      onClick={() => setSelectedGroup('MEASUREMENTS')}
-                      style={{ width: '100%', padding: '12px 14px', textAlign: 'left', border: 'none', background: 'transparent', fontSize: '10px', fontWeight: 700, letterSpacing: '0.12em', color: '#1a1a1a', cursor: 'pointer', textTransform: 'uppercase' }}
-                      role="button"
-                      tabIndex={0}
-                    >
-                      Measurements
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div
-                      onClick={() => setSelectedGroup(null)}
-                      style={{ width: '100%', padding: '10px 14px', textAlign: 'left', border: 'none', background: 'rgba(0,0,0,0.04)', fontSize: '9px', fontWeight: 600, letterSpacing: '0.1em', color: '#999', cursor: 'pointer', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}
-                      role="button"
-                      tabIndex={0}
-                    >
-                      <ChevronLeft size={12} /> {selectedGroup}
-                    </div>
-                    {(selectedGroup === 'WEIGHTS'
-                      ? ['ALL WEIGHTS', 'CHEST', 'BACK', 'LEGS']
-                      : selectedGroup === 'CARDIO'
-                      ? ['TRACKER', 'RUNNING', 'ROWING', 'CROSS TRAINER']
-                      : ['CALORIES', 'FOOD', 'SCORE']
-                    ).map(cat => (
-                      <div
-                        key={cat}
-                        onClick={() => { setCategory(cat); setCategoryOpen(false); setSelectedGroup(null); }}
-                        style={{
-                          width: '100%', padding: '10px 14px', textAlign: 'left',
-                          border: 'none', background: category === cat ? 'rgba(0,0,0,0.06)' : 'transparent',
-                          fontSize: '10px', fontWeight: 500, letterSpacing: '0.08em', color: '#1a1a1a',
-                          cursor: 'pointer',
-                        }}
-                        role="button"
-                        tabIndex={0}
-                      >
-                        {cat}
-                      </div>
-                    ))}
-                  </>
-                )}
+                <div
+                  onClick={() => setSelectedGroup(null)}
+                  style={{ width: '100%', padding: '10px 14px', textAlign: 'left', border: 'none', background: 'rgba(0,0,0,0.04)', fontSize: '9px', fontWeight: 600, letterSpacing: '0.1em', color: '#999', cursor: 'pointer', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <ChevronLeft size={12} /> WEIGHTS
+                </div>
+                {['ALL WEIGHTS', 'CHEST', 'BACK', 'LEGS'].map(cat => (
+                  <div
+                    key={cat}
+                    onClick={() => { setCategory(cat); setCategoryOpen(false); setSelectedGroup(null); }}
+                    style={{
+                      width: '100%', padding: '10px 14px', textAlign: 'left',
+                      border: 'none', background: category === cat ? 'rgba(0,0,0,0.06)' : 'transparent',
+                      fontSize: '10px', fontWeight: 500, letterSpacing: '0.08em', color: '#1a1a1a',
+                      cursor: 'pointer',
+                    }}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    {cat}
+                  </div>
+                ))}
               </div>
             )}
           </div>
 
-          {/* Period selector — FIX: attach periodRef here */}
+          {/* Period selector */}
           <div className="flex-1" style={{ position: 'relative' }} ref={periodRef}>
             <button
               onClick={() => { setPeriodOpen(!periodOpen); setCategoryOpen(false); setSelectedGroup(null); }}
@@ -786,21 +537,9 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
             <span style={{ fontSize: '8px', fontWeight: 500, color: '#999', letterSpacing: '0.1em', textTransform: 'uppercase', alignSelf: 'flex-start' }}>
               {metricLabel}
             </span>
-            {isFood && (timePeriod === 'WEEKLY' || timePeriod === 'PERIOD') ? (
-              <div style={{ fontSize: '28px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', marginTop: 'auto', display: 'flex', alignItems: 'baseline' }}>
-                <span>{foodScore}</span>
-                <span style={{ fontSize: '14px', fontWeight: 500, color: '#999', marginLeft: '4px' }}>/{foodMaxScore}</span>
-              </div>
-            ) : showTotalWithAvg ? (
-              <div style={{ fontSize: '28px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', marginTop: 'auto', display: 'flex', alignItems: 'baseline' }}>
-                <span>{displayTotal}</span>
-                <span style={{ fontSize: '14px', fontWeight: 500, color: '#999', marginLeft: '4px' }}>/{avgDisplay}</span>
-              </div>
-            ) : (
-              <span style={{ fontSize: '28px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', marginTop: 'auto' }}>
-                {isFood ? foodAvgPerDay : displayTotal}
-              </span>
-            )}
+            <span style={{ fontSize: '28px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', marginTop: 'auto' }}>
+              {displayTotal}
+            </span>
           </div>
 
           {/* Week/Month number card with chevrons */}
