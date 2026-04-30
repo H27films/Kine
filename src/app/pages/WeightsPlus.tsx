@@ -90,13 +90,16 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
   const loadChartData = async () => {
     let query = supabase
       .from('workouts')
-      .select('*, exercises(exercise_name)')
-      .eq('type', category)
+      .select('*, exercises(exercise_name, favourite, type)')
       .eq('exercises.favourite', 'yes')
       .order('date', { ascending: true });
 
+    // Filter by category type from workouts table
+    query = query.eq('type', category);
+
+    // Filter by selected exercise from exercises table
     if (selectedExercise) {
-      query = query.eq('exercise_name', selectedExercise);
+      query = query.eq('exercises.exercise_name', selectedExercise);
     }
 
     const { data: rows } = await query;
