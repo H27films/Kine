@@ -43,7 +43,7 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
   const [data, setData] = useState<DataPoint[]>([]);
   const [total, setTotal] = useState(0);
   const [sessionCount, setSessionCount] = useState(0);
-  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [exerciseOpen, setExerciseOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
