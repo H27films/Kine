@@ -441,15 +441,14 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
          <div className="flex gap-2 mb-2">
            {/* Category selector */}
            <div className="flex-1 relative" style={{ position: 'relative' }} ref={categoryRef}>
-             <button
-               onClick={() => {
-                 const open = !categoryOpen;
-                 setCategoryOpen(open);
-                 setExerciseOpen(false);
-               }}
-               disabled={categoryOpen}
-               style={pillStyle()}
-             >
+              <button
+                onClick={() => {
+                  setCategoryOpen(!categoryOpen);
+                  setExerciseOpen(false);
+                }}
+                disabled={categoryOpen}
+                style={pillStyle()}
+              >
                {category}
                <ChevronDown size={12} />
              </button>
