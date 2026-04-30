@@ -42,6 +42,7 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
   const desiredBarWidth = 22; // max width, similar to chest press pulley 3-set view
   const minBarWidth = 8;
   const maxBarWidth = desiredBarWidth;
+  const maxBars = 10; // Maximum number of bars to display with fixed spacing
 
   let barWidth: number;
   let barSpacing: number;
@@ -52,19 +53,17 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
   } else if (data.length === 1) {
     barWidth = Math.min(desiredBarWidth, plotWidth);
     barSpacing = 0;
-  } else {
+  } else if (data.length > maxBars) {
+    // More than 10 points: decrease spacing to fit all
     const totalGapCount = data.length - 1;
-    const requiredWidth = desiredBarWidth * data.length + 6 * totalGapCount;
-    if (requiredWidth <= plotWidth) {
-      barWidth = desiredBarWidth;
-      const extraSpace = plotWidth - requiredWidth;
-      barSpacing = 6 + extraSpace / totalGapCount;
-    } else {
-      const minGap = 4;
-      const availableForBars = plotWidth - minGap * totalGapCount;
-      barWidth = Math.max(minBarWidth, availableForBars / data.length);
-      barSpacing = minGap;
-    }
+    const minGap = 4;
+    const availableForBars = plotWidth - minGap * totalGapCount;
+    barWidth = Math.max(minBarWidth, availableForBars / data.length);
+    barSpacing = minGap;
+  } else {
+    // Up to 10 points: fixed 5px spacing
+    barWidth = desiredBarWidth;
+    barSpacing = 5;
   }
 
   // Height of a bar representing the max value (for background reference)
