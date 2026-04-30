@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { Page } from '../../types';
 import { MaxStatsCard } from '../components/MaxStatsCard';
 import { RunningManIcon, CaloriesIcon } from '../components/NavIcons';
+import { DoubleArrowIcon } from '../components/DoubleArrowIcon';
 
 const TIME_PERIODS = ['WEEKLY', 'MONTHLY', 'PERIOD'];
 
@@ -37,33 +38,6 @@ const DumbbellIconSmall = ({ size = 20 }: { size?: number }) => (
 const ProfileUserIcon = ({ size = 24 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <path fillRule="evenodd" clipRule="evenodd" d="M16.5 7.063C16.5 10.258 14.57 13 12 13c-2.572 0-4.5-2.742-4.5-5.938C7.5 3.868 9.16 2 12 2s4.5 1.867 4.5 5.063zM4.102 20.142C4.487 20.6 6.145 22 12 22c5.855 0 7.512-1.4 7.898-1.857a.416.416 0 0 0 .09-.317C19.9 18.944 19.106 15 12 15s-7.9 3.944-7.989 4.826a.416.416 0 0 0 .091.317z" fill="#1a1a1a" />
-  </svg>
-);
-
-const DoubleArrowIcon = ({ size = 24 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 14 14" fill="none">
-    {/* First arrow (grey) - head up */}
-    <rect x="0" y="4" width="1" height="1" fill="#ccc" />
-    <rect x="1" y="5" width="1" height="1" fill="#ccc" />
-    {/* First arrow - head down */}
-    <rect x="0" y="8" width="1" height="1" fill="#ccc" />
-    <rect x="1" y="7" width="1" height="1" fill="#ccc" />
-    {/* First arrow - shaft */}
-    <rect x="1" y="6" width="1" height="1" fill="#ccc" />
-    <rect x="2" y="6" width="1" height="1" fill="#ccc" />
-    <rect x="3" y="6" width="1" height="1" fill="#ccc" />
-    <rect x="4" y="6" width="1" height="1" fill="#ccc" />
-    {/* Second arrow (black) - head up */}
-    <rect x="5" y="4" width="1" height="1" fill="#666" />
-    <rect x="6" y="5" width="1" height="1" fill="#666" />
-    {/* Second arrow - head down */}
-    <rect x="5" y="8" width="1" height="1" fill="#666" />
-    <rect x="6" y="7" width="1" height="1" fill="#666" />
-    {/* Second arrow - shaft */}
-    <rect x="6" y="6" width="1" height="1" fill="#666" />
-    <rect x="7" y="6" width="1" height="1" fill="#666" />
-    <rect x="8" y="6" width="1" height="1" fill="#666" />
-    <rect x="9" y="6" width="1" height="1" fill="#666" />
   </svg>
 );
 
