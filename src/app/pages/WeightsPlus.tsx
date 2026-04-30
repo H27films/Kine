@@ -223,27 +223,27 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
       barWidth = 0;
       barSpacing = 0;
     } else if (data.length === 1) {
-      // Single bar: use desired width, centered
       barWidth = Math.min(desiredBarWidth, plotWidth);
       barSpacing = 0;
     } else {
       const totalGapCount = data.length - 1;
-      // Try to use desired bar width first
-      const requiredWidth = desiredBarWidth * data.length + 6 * totalGapCount; // 6px min gap
-
+      const requiredWidth = desiredBarWidth * data.length + 6 * totalGapCount;
       if (requiredWidth <= plotWidth) {
-        // Enough space: use desired bar width, distribute extra space as gap
         barWidth = desiredBarWidth;
         const extraSpace = plotWidth - requiredWidth;
         barSpacing = 6 + extraSpace / totalGapCount;
       } else {
-        // Not enough space: shrink bars evenly, keep minimum gap
         const minGap = 4;
         const availableForBars = plotWidth - minGap * totalGapCount;
         barWidth = Math.max(minBarWidth, availableForBars / data.length);
         barSpacing = minGap;
       }
     }
+
+    // Height of a bar representing the max value (for background reference)
+    const maxBarHeight = data.length > 0 && maxValue > minValue
+      ? ((maxValue - yMin) / (yMax - yMin)) * plotHeight
+      : 0;
 
     // Color based on value relative to range - gradient from light grey to black
     const getBarColor = (val: number) => {
@@ -400,6 +400,16 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
                    preserveAspectRatio="xMidYMid meet"
                    style={{ overflow: 'visible' }}
                  >
+                   {/* Faint background bar at maximum height */}
+                   <rect
+                     x={paddingX}
+                     y={paddingY}
+                     width={plotWidth}
+                     height={plotHeight}
+                     fill="rgba(0,0,0,0.04)"
+                     rx="2"
+                   />
+
                    {/* Rounded-top bars with height-based colors */}
                    {data.map((d, i) => {
                      const x = paddingX + i * (barWidth + barSpacing);
@@ -408,8 +418,25 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
                      const radius = barWidth / 2;
                      const color = getBarColor(d.value);
                      const isHovered = hoveredIdx === i;
+
+                     // Faint background bar at max value height
+                     const bgY = paddingY + plotHeight - maxBarHeight;
+
+                     // Faint background bar at max height (reference)
+                     const bgY = paddingY + plotHeight - maxBarHeight;
+
                      return (
                        <g key={d.workoutId}>
+                         {/* Background reference bar - faint grey at max value height */}
+                         <rect
+                           x={x}
+                           y={bgY}
+                           width={barWidth}
+                           height={maxBarHeight}
+                           fill="rgba(0,0,0,0.04)"
+                           rx={barWidth / 2}
+                         />
+
                          {/* Shadow for depth */}
                          {isHovered && (
                            <rect
@@ -420,6 +447,7 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
                              fill="rgba(0,0,0,0.15)"
                            />
                          )}
+
                          {/* Bar with flat bottom + rounded top */}
                          <path
                            d={`
