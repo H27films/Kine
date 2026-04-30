@@ -209,12 +209,12 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                   <g key={d.workoutId}>
                     {/* Background bar */}
                     <path
-                      d={`M ${x},${bgY + maxBarHeight} L ${x},${bgY + 4} A 4 4 0 0 1 ${x + barWidth},${bgY + 4} L ${x + barWidth},${bgY + maxBarHeight} Z`}
+                      d={`M ${x},${bgY + maxBarHeight} L ${x},${bgY + 2} A 2 2 0 0 1 ${x + barWidth},${bgY + 2} L ${x + barWidth},${bgY + maxBarHeight} Z`}
                       fill="rgba(0,0,0,0.02)"
                     />
                     {/* Foreground bar */}
                     <path
-                      d={`M ${x},${y + barHeight} L ${x},${y + 4} A 4 4 0 0 1 ${x + barWidth},${y + 4} L ${x + barWidth},${y + barHeight} Z`}
+                      d={`M ${x},${y + barHeight} L ${x},${y + 2} A 2 2 0 0 1 ${x + barWidth},${y + 2} L ${x + barWidth},${y + barHeight} Z`}
                       fill="#1a1a1a"
                       fillOpacity={opacity}
                       style={{ cursor: 'pointer', transition: 'fill-opacity 0.15s ease' }}
