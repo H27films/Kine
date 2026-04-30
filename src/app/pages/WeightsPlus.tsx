@@ -127,11 +127,15 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
     setTotal(Math.round(sum));
   };
 
-  useEffect(() => {
-    setSelectedExercise(null);
-    loadChartData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [category, selectedExercise]);
+   useEffect(() => {
+     // Reset to no specific exercise when category changes
+     setSelectedExercise(null);
+   }, [category]);
+
+   useEffect(() => {
+     loadChartData();
+     // eslint-disable-next-line react-hooks/exhaustive-deps
+   }, [category, selectedExercise]);
 
   const metricLabel = 'KG';
   const displayTotal = total.toLocaleString();
