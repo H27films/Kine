@@ -246,16 +246,30 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
           })}
         </div>
       ) : mode === 'aggregate' && data.length > 0 ? (
-        <div className="flex justify-between items-center">
-          {Array.from({ length: Math.min(data.length, 10) }).map((_, i) => {
-            const dataIdx = Math.round((i / (Math.min(data.length, 10) - 1)) * (data.length - 1));
-            const point = data[dataIdx];
-            const week = point?.occurrence || dataIdx + 1;
-            return (
-              <span key={i} className="flex-1 text-center" style={{ fontSize: '9px', fontWeight: 500, color: '#1a1a1a', letterSpacing: '0.02em' }}>
+        <div style={{ position: 'relative', height: '12px' }}>
+          {data.map((point, i) => {
+            const week = point?.occurrence || i + 1;
+            const showLabel = i % 2 === 0; // Show every 2nd bar, starting from first
+            const barLeft = paddingX + i * (barWidth + barSpacing);
+            const barCenter = barLeft + barWidth / 2;
+            const leftPercent = (barCenter / chartWidth) * 100;
+            return showLabel ? (
+              <span
+                key={i}
+                style={{
+                  position: 'absolute',
+                  left: `${leftPercent}%`,
+                  bottom: 0,
+                  transform: 'translateX(-50%)',
+                  fontSize: '9px',
+                  fontWeight: 500,
+                  color: '#1a1a1a',
+                  letterSpacing: '0.02em',
+                }}
+              >
                 {week}
               </span>
-            );
+            ) : null;
           })}
         </div>
       ) : null}
