@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Home, ChevronDown, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
 import { Page } from '../../types';
+import { supabase } from '../../lib/supabase';
+import { RunningManIcon, CaloriesIcon } from '../components/NavIcons';
 
 const TIME_PERIODS = ['WEEKLY', 'MONTHLY', 'PERIOD'];
 
@@ -213,13 +214,13 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
 
   const displayTotal = total.toLocaleString();
 
-  const navItems: NavItem[] = [
-    { label: 'Home', icon: <Home size={20} />, page: 'dashboard' },
-    { label: 'Weights', icon: <DumbbellIconSmall size={21} />, page: 'weights' },
-    { label: 'Cardio', icon: <div></div>, page: 'cardio' },
-    { label: 'Calories', icon: <div></div>, page: 'calories' },
-    { label: 'Profile', icon: <ProfileUserIcon size={20} />, page: 'profile' },
-  ];
+   const navItems: NavItem[] = [
+     { label: 'Home', icon: <Home size={20} />, page: 'dashboard' },
+     { label: 'Weights', icon: <DumbbellIconSmall size={21} />, page: 'weights' },
+     { label: 'Cardio', icon: <RunningManIcon size={24} color="#1a1a1a" />, page: 'cardio' },
+     { label: 'Calories', icon: <CaloriesIcon size={20} color="#1a1a1a" />, page: 'calories' },
+     { label: 'Profile', icon: <ProfileUserIcon size={20} />, page: 'profile' },
+   ];
 
   const pillStyle = (): React.CSSProperties => ({
     width: '100%',
@@ -260,7 +261,7 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
       style={{
         height: '100vh',
         maxHeight: '100vh',
-        overflow: 'auto',
+        overflow: 'hidden',
         backgroundColor: '#f2f2f2',
         color: '#1a1a1a',
         fontFamily: "'JetBrains Mono', monospace",
