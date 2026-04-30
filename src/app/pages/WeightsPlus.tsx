@@ -184,31 +184,22 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
     { label: 'Profile', icon: <ProfileUserIcon size={20} />, page: 'profile' },
   ];
 
-  const pillStyle = (): React.CSSProperties => ({
-    width: '100%',
-    padding: '12px 14px',
-    borderRadius: '8px',
-    border: 'none',
-    fontSize: '11px',
-    fontWeight: 600,
-    letterSpacing: '0.08em',
-    cursor: 'pointer',
-    backgroundColor: 'rgba(0,0,0,0.06)',
-    color: '#1a1a1a',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: '6px',
-  });
-
-  const cardStyle: React.CSSProperties = {
-    backgroundColor: 'rgba(0,0,0,0.05)',
-    borderRadius: '12px',
-    padding: '12px 16px',
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-  };
+   const pillStyle = (): React.CSSProperties => ({
+     width: '100%',
+     padding: '20px 18px',
+     borderRadius: '8px',
+     border: 'none',
+     fontSize: '11px',
+     fontWeight: 600,
+     letterSpacing: '0.08em',
+     cursor: 'pointer',
+     backgroundColor: 'rgba(0,0,0,0.06)',
+     color: '#1a1a1a',
+     display: 'flex',
+     alignItems: 'center',
+     justifyContent: 'space-between',
+     gap: '6px',
+   });
 
     // Bar chart mode when exercise selected
     // Fixed bar width with adjustable spacing
@@ -594,16 +585,16 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
        {/* Selectors + metric cards */}
       <div className="px-5" style={{ paddingBottom: 'calc(12px + env(safe-area-inset-bottom))', paddingTop: '8px' }}>
         {/* Two selectors side by side */}
-        <div className="flex gap-2 mb-2">
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
           {/* Category selector */}
-          <div className="flex-1 relative" style={{ position: 'relative' }} ref={categoryRef}>
+          <div style={{ flex: 1, position: 'relative', display: 'flex', flexDirection: 'column' }} ref={categoryRef}>
             <button
               onClick={() => {
                 setCategoryOpen(!categoryOpen);
                 setExerciseOpen(false);
               }}
               disabled={categoryOpen}
-              style={pillStyle()}
+              style={{ ...pillStyle(), flex: 1 }}
             >
               {category}
               <ChevronDown size={12} />
@@ -638,11 +629,11 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
           </div>
 
           {/* Exercise selector */}
-          <div className="flex-1" style={{ position: 'relative' }} ref={exerciseRef}>
+          <div style={{ flex: 1, position: 'relative', display: 'flex', flexDirection: 'column' }} ref={exerciseRef}>
             <button
               onClick={() => { setExerciseOpen(!exerciseOpen); setCategoryOpen(false); }}
               disabled={exerciseOpen}
-              style={pillStyle()}
+              style={{ ...pillStyle(), flex: 1 }}
             >
               {selectedExercise || 'EXERCISE'}
               <ChevronDown size={12} />
@@ -691,17 +682,9 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
                   )}
               </div>
             )}
-          </div>
-        </div>
-
-        {/* Bottom metric cards - reserved space for future use */}
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'stretch' }}>
-          {/* Left card - empty placeholder */}
-          <div style={{ ...cardStyle, flex: '1 1 0' }} />
-          {/* Right card - empty placeholder */}
-          <div style={{ ...cardStyle, flex: '1 1 0' }} />
-        </div>
-      </div>
+           </div>
+         </div>
+       </div>
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;900&family=Inconsolata:wght@200..900&display=swap');
