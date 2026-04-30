@@ -90,45 +90,59 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
      loadExercises();
    }, [category]);
 
-  const loadChartData = async () => {
-    let query = supabase
-      .from('workouts')
-      .select('*, exercises(exercise_name, favourite, type)')
-      .eq('exercises.favourite', 'yes')
-      .order('date', { ascending: true });
+   const loadChartData = async () => {
+     let query = supabase
+       .from('workouts')
+       .select('*, exercises(exercise_name, favourite, type)')
+       .eq('exercises.favourite', 'yes')
+       .order('date', { ascending: true });
 
-    // Filter by category type from workouts table
-    query = query.eq('type', category);
+     // Filter by category type from workouts table
+     query = query.eq('type', category);
 
-    // Filter by selected exercise_id if any
-    if (selectedExerciseId) {
-      query = query.eq('exercise_id', selectedExerciseId);
-    }
+     // Filter by selected exercise_id if any
+     if (selectedExerciseId) {
+       query = query.eq('exercise_id', selectedExerciseId);
+     }
 
-    const { data: rows } = await query;
+     const { data: rows } = await query;
 
-    const points: DataPoint[] = [];
-    let occurrence = 1;
+     const points: DataPoint[] = [];
+     let occurrence = 1;
 
-    if (rows) {
-      for (const row of rows as any[]) {
-        const workoutId = row.id || `${row.date}-${row.exercise_name}`;
-        const value = row.total_weight || 0;
-        points.push({
-          occurrence,
-          value,
-          date: row.date,
-          workoutId,
-        });
-        occurrence++;
-      }
-    }
+     if (rows) {
+       if (selectedExerciseId) {
+         // Individual exercise mode: each workout = one point
+         for (const row of rows as any[]) {
+           const workoutId = row.id || `${row.date}-${row.exercise_name}`;
+           const value = row.total_weight || 0;
+           points.push({ occurrence, value, date: row.date, workoutId });
+           occurrence++;
+         }
+       } else {
+         // Aggregate mode: group by date, sum total_weight per day (only non-zero days)
+         const dailySums: Record<string, number> = {};
+         for (const row of rows as any[]) {
+           const date = row.date;
+           const value = row.total_weight || 0;
+           dailySums[date] = (dailySums[date] || 0) + value;
+         }
+         // Only include days with sum > 0, sorted by date
+         Object.entries(dailySums)
+           .filter(([, sum]) => sum > 0)
+           .sort(([dateA], [dateB]) => dateA.localeCompare(dateB))
+           .forEach(([date, sum]) => {
+             points.push({ occurrence, value: sum, date, workoutId: date });
+             occurrence++;
+           });
+       }
+     }
 
-    setData(points);
-    setSessionCount(points.length);
-    const sum = points.reduce((acc, p) => acc + p.value, 0);
-    setTotal(Math.round(sum));
-  };
+     setData(points);
+     setSessionCount(points.length);
+     const sum = points.reduce((acc, p) => acc + p.value, 0);
+     setTotal(Math.round(sum));
+   };
 
    useEffect(() => {
      // Reset to no specific exercise when category changes
@@ -442,47 +456,49 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
                     );
                   })}
 
-                  {/* Line path */}
-                  {data.length > 1 && (
-                    <polyline
-                      points={data.map((d, i) => `${getX(i)},${getY(d.value)}`).join(' ')}
-                      fill="none"
-                      stroke="#1a1a1a"
-                      strokeWidth="2"
-                      strokeLinejoin="round"
-                      strokeLinecap="round"
-                    />
-                  )}
+                    {/* Line path with smooth curve */}
+                    {data.length > 1 && (
+                      <path
+                        d={`M ${data.map((d, i) => `${getX(i)},${getY(d.value)}`).join(' L ')}`}
+                        fill="none"
+                        stroke="#1a1a1a"
+                        strokeWidth="2"
+                        strokeLinejoin="round"
+                        strokeLinecap="round"
+                      />
+                    )}
 
-                  {/* Data points (dots) */}
-                  {data.map((d, i) => {
-                    const x = getX(i);
-                    const y = getY(d.value);
-                    const isHovered = hoveredIdx === i;
-                    const radius = isHovered ? 6 : 4;
-                    return (
-                      <g key={d.workoutId}>
+                    {/* Invisible hover targets for line chart */}
+                    {data.map((d, i) => {
+                      const x = getX(i);
+                      const y = getY(d.value);
+                      return (
                         <circle
+                          key={d.workoutId}
                           cx={x}
                           cy={y}
-                          r={radius}
-                          fill="#1a1a1a"
-                          stroke="#f2f2f2"
-                          strokeWidth="2"
-                          style={{ cursor: 'pointer', transition: 'r 0.15s ease' }}
+                          r={8}
+                          fill="transparent"
+                          style={{ cursor: 'pointer' }}
                           onMouseEnter={() => setHoveredIdx(i)}
                           onMouseLeave={() => setHoveredIdx(null)}
                         />
-                        {isHovered && (
-                          <g>
-                            <rect x={x - 24} y={y - 42} width="48" height="28" rx="4" fill="rgba(0,0,0,0.9)" />
-                            <text x={x} y={y - 24} textAnchor="middle" style={{ fontSize: '11px', fontWeight: 700, color: '#fff', fontFamily: "'JetBrains Mono', monospace" }}>{d.value.toLocaleString()}</text>
-                            <text x={x} y={y - 12} textAnchor="middle" style={{ fontSize: '8px', fontWeight: 500, color: '#ccc', fontFamily: "'JetBrains Mono', monospace" }}>KG</text>
-                          </g>
-                        )}
-                      </g>
-                    );
-                  })}
+                      );
+                    })}
+
+                    {/* Tooltip for line chart */}
+                    {hoveredIdx !== null && data[hoveredIdx] && (() => {
+                      const d = data[hoveredIdx];
+                      const x = getX(hoveredIdx);
+                      const y = getY(d.value);
+                      return (
+                        <g>
+                          <rect x={x - 24} y={y - 42} width="48" height="28" rx="4" fill="rgba(0,0,0,0.9)" />
+                          <text x={x} y={y - 24} textAnchor="middle" style={{ fontSize: '11px', fontWeight: 700, color: '#fff', fontFamily: "'JetBrains Mono', monospace" }}>{d.value.toLocaleString()}</text>
+                          <text x={x} y={y - 12} textAnchor="middle" style={{ fontSize: '8px', fontWeight: 500, color: '#ccc', fontFamily: "'JetBrains Mono', monospace" }}>KG</text>
+                        </g>
+                      );
+                    })()}
                 </svg>
               )
             ) : (
