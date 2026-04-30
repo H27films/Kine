@@ -120,23 +120,25 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
            points.push({ occurrence, value, date: row.date, workoutId });
            occurrence++;
          }
-       } else {
-         // Aggregate mode: group by date, sum total_weight per day (only non-zero days)
-         const dailySums: Record<string, number> = {};
-         for (const row of rows as any[]) {
-           const date = row.date;
-           const value = row.total_weight || 0;
-           dailySums[date] = (dailySums[date] || 0) + value;
-         }
-         // Only include days with sum > 0, sorted by date
-         Object.entries(dailySums)
-           .filter(([, sum]) => sum > 0)
-           .sort(([dateA], [dateB]) => dateA.localeCompare(dateB))
-           .forEach(([date, sum]) => {
-             points.push({ occurrence, value: sum, date, workoutId: date });
-             occurrence++;
-           });
-       }
+        } else {
+          // Aggregate mode: group by week, sum total_weight per week (only non-zero weeks)
+          const weeklySums: Record<number, number> = {};
+          for (const row of rows as any[]) {
+            const week = row.week;
+            const value = row.total_weight || 0;
+            if (week != null) {
+              weeklySums[week] = (weeklySums[week] || 0) + value;
+            }
+          }
+          // Only include weeks with sum > 0, sorted by week
+          Object.entries(weeklySums)
+            .filter(([, sum]) => sum > 0)
+            .sort(([weekA], [weekB]) => parseInt(weekA) - parseInt(weekB))
+            .forEach(([week, sum]) => {
+              points.push({ occurrence: parseInt(week), value: sum, date: week, workoutId: week });
+              occurrence++;
+            });
+        }
      }
 
       setData(points);
