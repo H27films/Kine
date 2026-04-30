@@ -20,7 +20,7 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
   const displayTotal = total.toLocaleString();
 
   // SVG chart dimensions
-  const chartHeight = 200;
+  const chartHeight = 220;
   const chartWidth = 340; // approximate width based on container
   const paddingX = 8;
   const paddingY = 20;
@@ -112,7 +112,7 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
       </div>
 
       {/* Chart */}
-      <div style={{ height: '200px', position: 'relative', marginBottom: '4px' }}>
+      <div style={{ height: '220px', position: 'relative', marginBottom: '4px' }}>
         {data.length > 0 ? (
           mode === 'exercise' ? (
             // Bar chart for exercise
