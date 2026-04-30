@@ -105,6 +105,7 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
          .from('exercises')
          .select('exercise_name')
          .eq('type', category)
+         .eq('favourite', 'yes')
          .order('exercise_name');
 
        if (data) {
@@ -113,7 +114,7 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
        setLoadingExercises(false);
      };
      loadExercises();
-    }, [category]);
+   }, [category]);
 
    const loadChartData = async () => {
     let labels: string[] = [];
@@ -142,12 +143,14 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
      } else {
        query = query.in('week', weekNumbers);
      }
-     // Filter by category type
-     query = query.eq('type', category);
-     // Filter by selected exercise if any
-     if (selectedExercise) {
-       query = query.eq('exercise_name', selectedExercise);
-     }
+      // Filter by category type
+      query = query.eq('type', category);
+      // Filter by favorite exercises only
+      query = query.eq('exercises.favourite', 'yes');
+      // Filter by selected exercise if any
+      if (selectedExercise) {
+        query = query.eq('exercise_name', selectedExercise);
+      }
 
     const { data: rows } = await query;
 
