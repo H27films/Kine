@@ -210,15 +210,49 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
     flexDirection: 'column',
   };
 
-   // Bar chart mode when exercise selected
-   const barWidth = data.length > 0 ? Math.max(4, (plotWidth - (data.length - 1) * 6) / data.length) : 0;
-   const barSpacing = 6;
+    // Bar chart mode when exercise selected
+    // Fixed bar width with adjustable spacing
+    const desiredBarWidth = 22; // max width, similar to chest press pulley 3-set view
+    const minBarWidth = 8;
+    const maxBarWidth = desiredBarWidth;
 
-   // Color intensity: normalized 0-1 based on value within range
-   const getBarOpacity = (val: number) => {
-     if (maxValue === minValue) return 0.9;
-     return 0.2 + ((val - minValue) / (maxValue - minValue)) * 0.8;
-   };
+    let barWidth: number;
+    let barSpacing: number;
+
+    if (data.length === 0) {
+      barWidth = 0;
+      barSpacing = 0;
+    } else if (data.length === 1) {
+      // Single bar: use desired width, centered
+      barWidth = Math.min(desiredBarWidth, plotWidth);
+      barSpacing = 0;
+    } else {
+      const totalGapCount = data.length - 1;
+      // Try to use desired bar width first
+      const requiredWidth = desiredBarWidth * data.length + 6 * totalGapCount; // 6px min gap
+
+      if (requiredWidth <= plotWidth) {
+        // Enough space: use desired bar width, distribute extra space as gap
+        barWidth = desiredBarWidth;
+        const extraSpace = plotWidth - requiredWidth;
+        barSpacing = 6 + extraSpace / totalGapCount;
+      } else {
+        // Not enough space: shrink bars evenly, keep minimum gap
+        const minGap = 4;
+        const availableForBars = plotWidth - minGap * totalGapCount;
+        barWidth = Math.max(minBarWidth, availableForBars / data.length);
+        barSpacing = minGap;
+      }
+    }
+
+    // Color based on value relative to range - gradient from light grey to black
+    const getBarColor = (val: number) => {
+      if (maxValue === minValue) return '#1a1a1a';
+      const normalized = (val - minValue) / (maxValue - minValue);
+      // Interpolate from #cccccc (light grey) to #1a1a1a (near black)
+      const intensity = Math.round(204 - (204 - 26) * normalized);
+      return `rgb(${intensity}, ${intensity}, ${intensity})`;
+    };
 
   return (
     <div
@@ -357,72 +391,59 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
           {/* Bar chart (when exercise selected) or Line chart (category view) */}
           <div style={{ height: '180px', position: 'relative', marginBottom: '4px' }}>
             {data.length > 0 ? (
-              selectedExercise ? (
-                // === BAR CHART MODE ===
-                <svg
-                  width="100%"
-                  height="100%"
-                  viewBox={`0 0 ${chartWidth} ${chartHeight}`}
-                  preserveAspectRatio="xMidYMid meet"
-                  style={{ overflow: 'visible' }}
-                >
-                  {/* Grid lines */}
-                  {[0, 0.25, 0.5, 0.75, 1].map((tick, i) => {
-                    const y = paddingY + plotHeight * (1 - tick);
-                    return (
-                      <line key={i} x1={paddingX} y1={y} x2={paddingX + plotWidth} y2={y} stroke="rgba(0,0,0,0.06)" strokeWidth="1" />
-                    );
-                  })}
-
-                  {/* Y-axis labels */}
-                  {[0, 0.25, 0.5, 0.75, 1].map((tick, i) => {
-                    const val = yMin + (yMax - yMin) * tick;
-                    const y = paddingY + plotHeight * (1 - tick);
-                    return (
-                      <text
-                        key={i}
-                        x={paddingX - 8}
-                        y={y + 3}
-                        textAnchor="end"
-                        style={{ fontSize: '9px', fontWeight: 500, color: 'rgba(0,0,0,0.4)', fontFamily: "'JetBrains Mono', monospace" }}
-                      >
-                        {Math.round(val)}
-                      </text>
-                    );
-                  })}
-
-                  {/* Rounded bars */}
-                  {data.map((d, i) => {
-                    const x = paddingX + i * (barWidth + barSpacing);
-                    const barHeight = Math.max(4, ((d.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
-                    const y = paddingY + plotHeight - barHeight;
-                    const opacity = getBarOpacity(d.value);
-                    const isHovered = hoveredIdx === i;
-                    return (
-                      <g key={d.workoutId}>
-                        <rect
-                          x={x}
-                          y={y}
-                          width={barWidth}
-                          height={barHeight}
-                          rx={barWidth / 2}
-                          ry={barWidth / 2}
-                          fill="#1a1a1a"
-                          opacity={isHovered ? 1 : opacity}
-                          style={{ cursor: 'pointer', transition: 'opacity 0.15s ease' }}
-                          onMouseEnter={() => setHoveredIdx(i)}
-                          onMouseLeave={() => setHoveredIdx(null)}
-                        />
-                        {isHovered && (
-                          <g>
-                            <rect x={x + barWidth / 2 - 24} y={y - 42} width="48" height="28" rx="4" fill="rgba(0,0,0,0.9)" />
-                            <text x={x + barWidth / 2} y={y - 24} textAnchor="middle" style={{ fontSize: '11px', fontWeight: 700, color: '#fff', fontFamily: "'JetBrains Mono', monospace" }}>{d.value.toLocaleString()}</text>
-                            <text x={x + barWidth / 2} y={y - 12} textAnchor="middle" style={{ fontSize: '8px', fontWeight: 500, color: '#ccc', fontFamily: "'JetBrains Mono', monospace" }}>KG</text>
-                          </g>
-                        )}
-                      </g>
-                    );
-                  })}
+               selectedExercise ? (
+                 // === BAR CHART MODE ===
+                 <svg
+                   width="100%"
+                   height="100%"
+                   viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+                   preserveAspectRatio="xMidYMid meet"
+                   style={{ overflow: 'visible' }}
+                 >
+                   {/* Rounded-top bars with height-based colors */}
+                   {data.map((d, i) => {
+                     const x = paddingX + i * (barWidth + barSpacing);
+                     const barHeight = Math.max(4, ((d.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
+                     const y = paddingY + plotHeight - barHeight;
+                     const radius = barWidth / 2;
+                     const color = getBarColor(d.value);
+                     const isHovered = hoveredIdx === i;
+                     return (
+                       <g key={d.workoutId}>
+                         {/* Shadow for depth */}
+                         {isHovered && (
+                           <rect
+                             x={x + 2}
+                             y={y + 2}
+                             width={barWidth}
+                             height={barHeight}
+                             fill="rgba(0,0,0,0.15)"
+                           />
+                         )}
+                         {/* Bar with flat bottom + rounded top */}
+                         <path
+                           d={`
+                             M ${x},${y + barHeight}
+                             L ${x},${y + radius}
+                             A ${radius} ${radius} 0 0 1 ${x + barWidth},${y + radius}
+                             L ${x + barWidth},${y + barHeight}
+                             Z
+                           `}
+                           fill={color}
+                           style={{ cursor: 'pointer', transition: 'opacity 0.15s ease' }}
+                           onMouseEnter={() => setHoveredIdx(i)}
+                           onMouseLeave={() => setHoveredIdx(null)}
+                         />
+                         {isHovered && (
+                           <g>
+                             <rect x={x + barWidth / 2 - 24} y={y - 42} width="48" height="28" rx="4" fill="rgba(0,0,0,0.9)" />
+                             <text x={x + barWidth / 2} y={y - 24} textAnchor="middle" style={{ fontSize: '11px', fontWeight: 700, color: '#fff', fontFamily: "'JetBrains Mono', monospace" }}>{d.value.toLocaleString()}</text>
+                             <text x={x + barWidth / 2} y={y - 12} textAnchor="middle" style={{ fontSize: '8px', fontWeight: 500, color: '#ccc', fontFamily: "'JetBrains Mono', monospace" }}>KG</text>
+                           </g>
+                         )}
+                       </g>
+                     );
+                   })}
                 </svg>
               ) : (
                 // === LINE CHART MODE (category aggregate) ===
@@ -508,40 +529,57 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
             )}
           </div>
 
-          {/* X-axis labels */}
-          <div className="flex justify-between items-center" style={{ paddingTop: '8px' }}>
-            {selectedExercise ? (
-              // Bars: show first, middle, last
-              data.length > 0 ? (
-                [0, Math.floor(data.length / 2), data.length - 1].filter((v, i, a) => a.indexOf(v) === i).map((dataIdx, i) => {
-                  const point = data[dataIdx];
-                  const occurrence = point?.occurrence || dataIdx + 1;
-                  return (
-                    <span key={i} className="flex-1 text-center" style={{ fontSize: '9px', fontWeight: 500, color: '#1a1a1a', letterSpacing: '0.02em' }}>
-                      {occurrence}
-                    </span>
-                  );
-                })
-              ) : null
-            ) : (
-              // Line chart: evenly spaced occurrence labels across all data
-              data.length > 0 ? (
-                (() => {
-                  const tickCount = Math.min(data.length, 10);
-                  return Array.from({ length: tickCount }).map((_, i) => {
-                    const dataIdx = Math.round((i / (tickCount - 1)) * (data.length - 1));
-                    const point = data[dataIdx];
-                    const occurrence = point?.occurrence || dataIdx + 1;
-                    return (
-                      <span key={i} className="flex-1 text-center" style={{ fontSize: '9px', fontWeight: 500, color: '#1a1a1a', letterSpacing: '0.02em' }}>
-                        {occurrence}
-                      </span>
-                    );
-                  });
-                })()
-              ) : null
-            )}
-         </div>
+           {/* X-axis labels */}
+           <div style={{ paddingTop: '8px' }}>
+             {selectedExercise ? (
+               // Bar chart: show all occurrence numbers aligned with bars
+               data.length > 0 ? (
+                 <div style={{ position: 'relative', height: '16px' }}>
+                   {data.map((point, i) => {
+                     const occurrence = point?.occurrence || i + 1;
+                     const barLeft = paddingX + i * (barWidth + barSpacing);
+                     const barCenter = barLeft + barWidth / 2;
+                     const leftPercent = (barCenter / chartWidth) * 100;
+                     return (
+                       <span
+                         key={i}
+                         style={{
+                           position: 'absolute',
+                           left: `${leftPercent}%`,
+                           transform: 'translateX(-50%)',
+                           fontSize: '9px',
+                           fontWeight: 500,
+                           color: '#1a1a1a',
+                           letterSpacing: '0.02em',
+                         }}
+                       >
+                         {occurrence}
+                       </span>
+                     );
+                   })}
+                 </div>
+               ) : null
+             ) : (
+               // Line chart: evenly spaced occurrence labels across all data
+               data.length > 0 ? (
+                 <div className="flex justify-between items-center">
+                   {(() => {
+                     const tickCount = Math.min(data.length, 10);
+                     return Array.from({ length: tickCount }).map((_, i) => {
+                       const dataIdx = Math.round((i / (tickCount - 1)) * (data.length - 1));
+                       const point = data[dataIdx];
+                       const occurrence = point?.occurrence || dataIdx + 1;
+                       return (
+                         <span key={i} className="flex-1 text-center" style={{ fontSize: '9px', fontWeight: 500, color: '#1a1a1a', letterSpacing: '0.02em' }}>
+                           {occurrence}
+                         </span>
+                       );
+                     });
+                   })()}
+                 </div>
+               ) : null
+             )}
+           </div>
        </div>
 
        {/* Selectors + metric cards */}
