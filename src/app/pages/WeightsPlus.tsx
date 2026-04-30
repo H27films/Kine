@@ -6,6 +6,21 @@ import { RunningManIcon, CaloriesIcon } from '../components/NavIcons';
 
 const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
+interface DataPoint {
+  label: string;
+  value: number;
+}
+
+interface WeightsPlusProps {
+  onNavigate: (page: Page) => void;
+}
+
+interface NavItem {
+  label: string;
+  icon: React.ReactNode;
+  page: Page;
+}
+
 const DumbbellIconSmall = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 32 32" fill="none" style={{ transform: 'rotate(-45deg)' }}>
     <path d="M7,25c-1.7,0-3-1.3-3-3V10c0-1.7,1.3-3,3-3s3,1.3,3,3v12C10,23.7,8.7,25,7,25z" stroke="#1a1a1a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -419,8 +434,8 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
 
       {/* Selectors + metric cards */}
       <div className="px-5" style={{ paddingBottom: 'calc(12px + env(safe-area-inset-bottom))', paddingTop: '8px' }}>
-        {/* Two selectors side by side */}
-        <div className="flex gap-2 mb-2">
+         {/* Two selectors side by side */}
+         <div className="flex gap-2 mb-2">
            {/* Category selector */}
            <div className="flex-1 relative" style={{ position: 'relative' }} ref={categoryRef}>
              <button
@@ -441,6 +456,8 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
                  backgroundColor: '#f2f2f2', border: '1px solid rgba(0,0,0,0.08)',
                  borderRadius: '10px', marginBottom: '4px', overflow: 'hidden', zIndex: 50,
                  boxShadow: '0 -8px 24px rgba(0,0,0,0.12)',
+                 maxHeight: '300px',
+                 overflowY: 'auto',
                }}>
                  {['CHEST', 'BACK', 'LEGS'].map(cat => (
                    <div
@@ -461,69 +478,6 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
                </div>
              )}
            </div>
-                      {loadingExercises ? (
-                        <div style={{ padding: '12px', fontSize: '10px', color: '#999', textAlign: 'center' }}>Loading...</div>
-                      ) : (
-                        exercises.map(ex => (
-                          <div
-                            key={ex}
-                            onClick={() => { setSelectedExercise(ex); setCategoryOpen(false); setSelectedGroup(null); }}
-                            style={{
-                              width: '100%', padding: '10px 14px', textAlign: 'left',
-                              border: 'none', background: selectedExercise === ex ? 'rgba(0,0,0,0.06)' : 'transparent',
-                              fontSize: '10px', fontWeight: 500, letterSpacing: '0.08em', color: '#1a1a1a',
-                              cursor: 'pointer',
-                            }}
-                            role="button"
-                            tabIndex={0}
-                          >
-                            {ex}
-                          </div>
-                        ))
-                      )}
-                    </>
-                  ) : (
-                    ['CHEST', 'BACK', 'LEGS'].map(cat => (
-                    <div
-                      key={cat}
-                      onClick={() => { setCategory(cat); setSelectedGroup(cat); setSelectedExercise(null); }}
-                      style={{
-                        width: '100%', padding: '10px 14px', textAlign: 'left',
-                        border: 'none', background: 'rgba(0,0,0,0.04)', fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', color: '#1a1a1a',
-                        cursor: 'pointer',
-                        textTransform: 'uppercase',
-                      }}
-                      role="button"
-                      tabIndex={0}
-                    >
-                      {cat}
-                    </div>
-                    ))
-                  )}
-                </div>
-              )}
-                    </>
-                  ) : (
-                    ['CHEST', 'BACK', 'LEGS'].map(cat => (
-                      <div
-                        key={cat}
-                        onClick={() => { setSelectedGroup(cat); }}
-                        style={{
-                          width: '100%', padding: '10px 14px', textAlign: 'left',
-                          border: 'none', background: 'rgba(0,0,0,0.04)', fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', color: '#1a1a1a',
-                          cursor: 'pointer',
-                          textTransform: 'uppercase',
-                        }}
-                        role="button"
-                        tabIndex={0}
-                      >
-                        {cat}
-                      </div>
-                    ))
-                  )}
-                </div>
-              )}
-          </div>
 
            {/* Exercise selector */}
            <div className="flex-1" style={{ position: 'relative' }} ref={exerciseRef}>
@@ -580,9 +534,9 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
                </div>
              )}
            </div>
-        </div>
+          </div>
 
-        {/* Bottom metric cards */}
+         {/* Bottom metric cards */}
         <div style={{ display: 'flex', gap: '8px', alignItems: 'stretch' }}>
           {/* Total card */}
           <div style={{ ...cardStyle, flex: '1 1 0' }}>
