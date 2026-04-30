@@ -46,9 +46,10 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [exerciseOpen, setExerciseOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [exercises, setExercises] = useState<string[]>([]);
+  const [exercises, setExercises] = useState<{id: string, name: string}[]>([]);
   const [loadingExercises, setLoadingExercises] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState<string | null>(null);
+  const [selectedExerciseId, setSelectedExerciseId] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const categoryRef = useRef<HTMLDivElement>(null);
   const exerciseRef = useRef<HTMLDivElement>(null);
@@ -69,23 +70,25 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  useEffect(() => {
-    const loadExercises = async () => {
-      setLoadingExercises(true);
-      const { data } = await supabase
-        .from('exercises')
-        .select('exercise_name')
-        .eq('type', category)
-        .eq('favourite', 'yes')
-        .order('exercise_name');
+   useEffect(() => {
+     const loadExercises = async () => {
+       setLoadingExercises(true);
+       const { data } = await supabase
+         .from('exercises')
+         .select('id, exercise_name')
+         .eq('type', category)
+         .eq('favourite', 'yes')
+         .order('exercise_name');
 
-      if (data) {
-        setExercises(data.map(row => row.exercise_name as string));
-      }
-      setLoadingExercises(false);
-    };
-    loadExercises();
-  }, [category]);
+       if (data) {
+         setExercises(data.map(row => ({ id: row.id as string, name: row.exercise_name as string })));
+       } else {
+         setExercises([]);
+       }
+       setLoadingExercises(false);
+     };
+     loadExercises();
+   }, [category]);
 
   const loadChartData = async () => {
     let query = supabase
@@ -97,9 +100,9 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
     // Filter by category type from workouts table
     query = query.eq('type', category);
 
-    // Filter by selected exercise from exercises table
-    if (selectedExercise) {
-      query = query.eq('exercises.exercise_name', selectedExercise);
+    // Filter by selected exercise_id if any
+    if (selectedExerciseId) {
+      query = query.eq('exercise_id', selectedExerciseId);
     }
 
     const { data: rows } = await query;
@@ -130,12 +133,13 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
    useEffect(() => {
      // Reset to no specific exercise when category changes
      setSelectedExercise(null);
+     setSelectedExerciseId(null);
    }, [category]);
 
    useEffect(() => {
      loadChartData();
      // eslint-disable-next-line react-hooks/exhaustive-deps
-   }, [category, selectedExercise]);
+   }, [category, selectedExerciseId]);
 
   const metricLabel = 'KG';
   const displayTotal = total.toLocaleString();
@@ -489,7 +493,7 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
                 {['CHEST', 'BACK', 'LEGS'].map(cat => (
                   <div
                     key={cat}
-                    onClick={() => { setCategory(cat); setCategoryOpen(false); setSelectedExercise(null); }}
+                    onClick={() => { setCategory(cat); setCategoryOpen(false); setSelectedExercise(null); setSelectedExerciseId(null); }}
                     style={{
                       width: '100%', padding: '10px 14px', textAlign: 'left',
                       border: 'none', background: category === cat ? 'rgba(0,0,0,0.06)' : 'transparent',
@@ -525,39 +529,39 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
                 maxHeight: '300px',
                 overflowY: 'auto',
               }}>
-                <div
-                  onClick={() => { setSelectedExercise(null); setExerciseOpen(false); }}
-                  style={{
-                    width: '100%', padding: '10px 14px', textAlign: 'left',
-                    border: 'none', background: !selectedExercise ? 'rgba(0,0,0,0.06)' : 'transparent',
-                    fontSize: '10px', fontWeight: 500, letterSpacing: '0.08em', color: '#1a1a1a',
-                    cursor: 'pointer',
-                  }}
-                  role="button"
-                  tabIndex={0}
-                >
-                  EXERCISE
-                </div>
-                {loadingExercises ? (
-                  <div style={{ padding: '12px', fontSize: '10px', color: '#999', textAlign: 'center' }}>Loading...</div>
-                ) : (
-                  exercises.map(ex => (
-                    <div
-                      key={ex}
-                      onClick={() => { setSelectedExercise(ex); setExerciseOpen(false); }}
-                      style={{
-                        width: '100%', padding: '10px 14px', textAlign: 'left',
-                        border: 'none', background: selectedExercise === ex ? 'rgba(0,0,0,0.06)' : 'transparent',
-                        fontSize: '10px', fontWeight: 500, letterSpacing: '0.08em', color: '#1a1a1a',
-                        cursor: 'pointer',
-                      }}
-                      role="button"
-                      tabIndex={0}
-                    >
-                      {ex}
-                    </div>
-                  ))
-                )}
+                  <div
+                    onClick={() => { setSelectedExercise(null); setSelectedExerciseId(null); setExerciseOpen(false); }}
+                    style={{
+                      width: '100%', padding: '10px 14px', textAlign: 'left',
+                      border: 'none', background: !selectedExercise ? 'rgba(0,0,0,0.06)' : 'transparent',
+                      fontSize: '10px', fontWeight: 500, letterSpacing: '0.08em', color: '#1a1a1a',
+                      cursor: 'pointer',
+                    }}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    EXERCISE
+                  </div>
+                  {loadingExercises ? (
+                    <div style={{ padding: '12px', fontSize: '10px', color: '#999', textAlign: 'center' }}>Loading...</div>
+                  ) : (
+                    exercises.map(ex => (
+                      <div
+                        key={ex.id}
+                        onClick={() => { setSelectedExercise(ex.name); setSelectedExerciseId(ex.id); setExerciseOpen(false); }}
+                        style={{
+                          width: '100%', padding: '10px 14px', textAlign: 'left',
+                          border: 'none', background: selectedExercise === ex.name ? 'rgba(0,0,0,0.06)' : 'transparent',
+                          fontSize: '10px', fontWeight: 500, letterSpacing: '0.08em', color: '#1a1a1a',
+                          cursor: 'pointer',
+                        }}
+                        role="button"
+                        tabIndex={0}
+                      >
+                        {ex.name}
+                      </div>
+                    ))
+                  )}
               </div>
             )}
           </div>
