@@ -158,13 +158,13 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
   const metricLabel = 'KG';
   const displayTotal = total.toLocaleString();
 
-  // SVG chart dimensions
-  const chartHeight = 180;
-  const chartWidth = 340; // approximate width based on container
-  const paddingX = 8;
-  const paddingY = 20;
-  const plotWidth = chartWidth - paddingX * 2;
-  const plotHeight = chartHeight - paddingY * 2;
+   // SVG chart dimensions
+   const chartHeight = 200;
+   const chartWidth = 340; // approximate width based on container
+   const paddingX = 8;
+   const paddingY = 20;
+   const plotWidth = chartWidth - paddingX * 2;
+   const plotHeight = chartHeight - paddingY * 2;
 
   const minValue = data.length > 0 ? Math.min(...data.map(d => d.value)) : 0;
   const maxValue = data.length > 0 ? Math.max(...data.map(d => d.value)) : 100;
@@ -388,8 +388,8 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
             </div>
           </div>
 
-          {/* Bar chart (when exercise selected) or Line chart (category view) */}
-          <div style={{ height: '180px', position: 'relative', marginBottom: '4px' }}>
+           {/* Bar chart (when exercise selected) or Line chart (category view) */}
+           <div style={{ height: '200px', position: 'relative', marginBottom: '4px' }}>
             {data.length > 0 ? (
                selectedExercise ? (
                  // === BAR CHART MODE ===
@@ -436,9 +436,8 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
                          />
                          {isHovered && (
                            <g>
-                             <rect x={x + barWidth / 2 - 24} y={y - 42} width="48" height="28" rx="4" fill="rgba(0,0,0,0.9)" />
-                             <text x={x + barWidth / 2} y={y - 24} textAnchor="middle" style={{ fontSize: '11px', fontWeight: 700, color: '#fff', fontFamily: "'JetBrains Mono', monospace" }}>{d.value.toLocaleString()}</text>
-                             <text x={x + barWidth / 2} y={y - 12} textAnchor="middle" style={{ fontSize: '8px', fontWeight: 500, color: '#ccc', fontFamily: "'JetBrains Mono', monospace" }}>KG</text>
+                             <rect x={x + barWidth / 2 - 28} y={y - 46} width="56" height="36" rx="4" fill="rgba(0,0,0,0.06)" />
+                             <text x={x + barWidth / 2} y={y - 20} textAnchor="middle" style={{ fontSize: '12px', fontWeight: 900, color: '#1a1a1a', fontFamily: "'JetBrains Mono', monospace" }}>{d.value.toLocaleString()}</text>
                            </g>
                          )}
                        </g>
@@ -530,11 +529,11 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
           </div>
 
            {/* X-axis labels */}
-           <div style={{ paddingTop: '8px' }}>
+           <div style={{ paddingTop: '0px' }}>
              {selectedExercise ? (
                // Bar chart: show all occurrence numbers aligned with bars
                data.length > 0 ? (
-                 <div style={{ position: 'relative', height: '16px' }}>
+                 <div style={{ position: 'relative', height: '12px' }}>
                    {data.map((point, i) => {
                      const occurrence = point?.occurrence || i + 1;
                      const barLeft = paddingX + i * (barWidth + barSpacing);
@@ -546,6 +545,7 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
                          style={{
                            position: 'absolute',
                            left: `${leftPercent}%`,
+                           bottom: 0,
                            transform: 'translateX(-50%)',
                            fontSize: '9px',
                            fontWeight: 500,
