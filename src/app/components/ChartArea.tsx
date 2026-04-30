@@ -158,17 +158,19 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
               {Array.from({ length: Math.max(0, maxBars - data.length) }).map((_, idx) => {
                 const i = data.length + idx;
                 const x = paddingX + i * (barWidth + barSpacing);
-                const barHeight = 3; // Small height for empty bars
+                const barHeight = 2; // Small height for empty bars
                 const y = paddingY + plotHeight - barHeight;
                 const bgY = paddingY + plotHeight - maxBarHeight;
+                const bumpWidth = barWidth + 4; // Slightly wider than background
+                const bumpX = x - 2; // Center the wider bump
 
                 return (
                   <g key={`empty-${i}`}>
                     <rect x={x} y={bgY} width={barWidth} height={maxBarHeight} fill="rgba(0,0,0,0.02)" rx="4" />
                     <rect
-                      x={x}
+                      x={bumpX}
                       y={y}
-                      width={barWidth}
+                      width={bumpWidth}
                       height={barHeight}
                       fill="#cccccc" // Grey color for empty bars
                       rx="2"
