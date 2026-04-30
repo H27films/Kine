@@ -160,13 +160,16 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                 const x = paddingX + i * (barWidth + barSpacing);
                 const barHeight = 4; // Small height for empty bars
                 const y = paddingY + plotHeight - barHeight;
-                const radius = barWidth / 2;
 
                 return (
                   <g key={`empty-${i}`}>
-                    <path
-                      d={`M ${x},${y + barHeight} L ${x},${y + radius} A ${radius} ${radius} 0 0 1 ${x + barWidth},${y + radius} L ${x + barWidth},${y + barHeight} Z`}
+                    <rect
+                      x={x}
+                      y={y}
+                      width={barWidth}
+                      height={barHeight}
                       fill="#cccccc" // Grey color for empty bars
+                      rx="2"
                     />
                   </g>
                 );
