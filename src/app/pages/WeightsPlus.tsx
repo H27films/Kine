@@ -40,7 +40,7 @@ const ProfileUserIcon = ({ size = 24 }: { size?: number }) => (
 );
 
 export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
-  const [category, setCategory] = useState('ALL WEIGHTS');
+  const [category, setCategory] = useState('CHEST');
   const [timePeriod, setTimePeriod] = useState('WEEKLY');
   const [data, setData] = useState<DataPoint[]>([]);
   const [total, setTotal] = useState(0);
@@ -50,6 +50,9 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
   const [periodOpen, setPeriodOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [exercises, setExercises] = useState<string[]>([]);
+  const [loadingExercises, setLoadingExercises] = useState(false);
+  const [selectedExercise, setSelectedExercise] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const categoryRef = useRef<HTMLDivElement>(null);
   const periodRef = useRef<HTMLDivElement>(null);
@@ -82,49 +85,62 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
     return { daysInMonth, label };
   };
 
-  useEffect(() => {
-    const loadData = async () => {
-      const { data } = await supabase
-        .from('workouts')
-        .select('week, date')
-        .not('week', 'is', null)
-        .order('week');
+   useEffect(() => {
+     const handler = (e: MouseEvent) => {
+       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+         setMenuOpen(false);
+       }
+       if (categoryRef.current && !categoryRef.current.contains(e.target as Node)) {
+         setCategoryOpen(false);
+         setSelectedGroup(null);
+       }
+       if (periodRef.current && !periodRef.current.contains(e.target as Node)) {
+         setPeriodOpen(false);
+       }
+     };
+     document.addEventListener('mousedown', handler);
+     return () => document.removeEventListener('mousedown', handler);
+   }, []);
 
-      if (data && data.length > 0) {
-        const weeks = [...new Set((data as any[]).map(r => r.week as number))].sort((a, b) => a - b);
-        setMinWeek(weeks[0]);
-        setMaxWeek(weeks[weeks.length - 1]);
-        setCurrentWeek(weeks[weeks.length - 1]);
+   useEffect(() => {
+     const loadExercises = async () => {
+       if (!categoryOpen || !selectedGroup) {
+         setExercises([]);
+         return;
+       }
+       setLoadingExercises(true);
+       const { data } = await supabase
+         .from('exercises')
+         .select('exercise_name')
+         .eq('type', selectedGroup)
+         .order('exercise_name');
 
-        const dates = (data as any[]).map(r => r.date).filter(Boolean).sort();
-        if (dates.length > 0) {
-          const minDate = dates[0];
-          const maxDate = dates[dates.length - 1];
-          const toMonth = (d: string) => d.substring(0, 7);
-          setMinMonth(toMonth(minDate));
-          setMaxMonth(toMonth(maxDate));
-        }
-      }
-    };
-    loadData();
-  }, []);
+       if (data) {
+         setExercises(data.map(row => row.exercise_name as string));
+       }
+       setLoadingExercises(false);
+     };
+     loadExercises();
+   }, [categoryOpen, selectedGroup]);
 
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false);
-      }
-      if (categoryRef.current && !categoryRef.current.contains(e.target as Node)) {
-        setCategoryOpen(false);
-        setSelectedGroup(null);
-      }
-      if (periodRef.current && !periodRef.current.contains(e.target as Node)) {
-        setPeriodOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, []);
+   useEffect(() => {
+     const loadExercises = async () => {
+       if (!categoryOpen || selectedGroup) return;
+
+       setLoadingExercises(true);
+       const { data } = await supabase
+         .from('exercises')
+         .select('exercise_name')
+         .eq('type', category)
+         .order('exercise_name');
+
+       if (data) {
+         setExercises(data.map(row => row.exercise_name as string));
+       }
+       setLoadingExercises(false);
+     };
+     loadExercises();
+   }, [categoryOpen, category, selectedGroup]);
 
   const loadChartData = async () => {
     let labels: string[] = [];
@@ -147,12 +163,18 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
       labels = weekNumbers.map(w => `W${w}`);
     }
 
-    let query;
-    if (timePeriod === 'MONTHLY') {
-      query = supabase.from('workouts').select('*, exercises(exercise_name)').in('type', ['CHEST', 'BACK', 'LEGS']).gte('date', dateStart!).lte('date', dateEnd!);
-    } else {
-      query = supabase.from('workouts').select('*, exercises(exercise_name)').in('type', ['CHEST', 'BACK', 'LEGS']).in('week', weekNumbers);
-    }
+     let query = supabase.from('workouts').select('*, exercises(exercise_name)');
+     if (timePeriod === 'MONTHLY') {
+       query = query.gte('date', dateStart!).lte('date', dateEnd!);
+     } else {
+       query = query.in('week', weekNumbers);
+     }
+     // Filter by category type
+     query = query.eq('type', category);
+     // Filter by selected exercise if any
+     if (selectedExercise) {
+       query = query.eq('exercise_name', selectedExercise);
+     }
 
     const { data: rows } = await query;
 
@@ -206,7 +228,7 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [category, timePeriod, currentWeek, currentMonth]);
 
-  useEffect(() => { loadChartData(); }, [weekOffset, monthOffset, timePeriod]);
+   useEffect(() => { loadChartData(); }, [weekOffset, monthOffset, timePeriod, selectedExercise]);
 
   const minValue = Math.min(...data.map(d => d.value), 0);
   const maxValue = Math.max(...data.map(d => d.value), minValue + 1);
@@ -364,7 +386,7 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
       <div className="px-5" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', paddingTop: '16px' }}>
         {/* Period header */}
         <div style={{ fontFamily: "'Inconsolata', monospace", fontSize: '32px', fontWeight: 348, fontStretch: '175%', letterSpacing: '0.15em', color: 'rgba(0,0,0,0.2)', textTransform: 'uppercase', marginBottom: '8px' }}>
-          {timePeriod === 'WEEKLY' ? `WEEK ${selectedWeek}` : timePeriod === 'MONTHLY' ? getMonthInfo(selectedMonth).label : 'PERIOD'}
+          PROGRESS
         </div>
 
         {/* Big number */}
@@ -443,56 +465,104 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
         <div className="flex gap-2 mb-2">
           {/* Category selector */}
           <div className="flex-1 relative" style={{ position: 'relative' }} ref={categoryRef}>
-            <button
-              onClick={() => {
-                const open = !categoryOpen;
-                setCategoryOpen(open);
-                setPeriodOpen(false);
-                if (open) {
-                  setSelectedGroup('WEIGHTS');
-                } else {
-                  setSelectedGroup(null);
-                }
-              }}
-              disabled={categoryOpen}
-              style={pillStyle()}
-            >
-              {category}
-              <ChevronDown size={12} />
-            </button>
-            {categoryOpen && (
-              <div style={{
-                position: 'absolute', bottom: '100%', left: 0, right: 0,
-                backgroundColor: '#f2f2f2', border: '1px solid rgba(0,0,0,0.08)',
-                borderRadius: '10px', marginBottom: '4px', overflow: 'hidden', zIndex: 50,
-                boxShadow: '0 -8px 24px rgba(0,0,0,0.12)',
-              }}>
-                <div
-                  onClick={() => setSelectedGroup(null)}
-                  style={{ width: '100%', padding: '10px 14px', textAlign: 'left', border: 'none', background: 'rgba(0,0,0,0.04)', fontSize: '9px', fontWeight: 600, letterSpacing: '0.1em', color: '#999', cursor: 'pointer', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}
-                  role="button"
-                  tabIndex={0}
-                >
-                  <ChevronLeft size={12} /> WEIGHTS
+             <button
+               onClick={() => {
+                 const open = !categoryOpen;
+                 setCategoryOpen(open);
+                 setPeriodOpen(false);
+                 if (open) {
+                   setSelectedGroup(null);
+                 } else {
+                   setSelectedGroup(null);
+                 }
+               }}
+               disabled={categoryOpen}
+               style={pillStyle()}
+             >
+               {selectedExercise || category}
+               <ChevronDown size={12} />
+             </button>
+              {categoryOpen && (
+                <div style={{
+                  position: 'absolute', bottom: '100%', left: 0, right: 0,
+                  backgroundColor: '#f2f2f2', border: '1px solid rgba(0,0,0,0.08)',
+                  borderRadius: '10px', marginBottom: '4px', overflow: 'hidden', zIndex: 50,
+                  boxShadow: '0 -8px 24px rgba(0,0,0,0.12)',
+                  maxHeight: '300px',
+                  overflowY: 'auto',
+                }}>
+                  {selectedGroup ? (
+                    <>
+                      <div
+                        onClick={() => { setSelectedGroup(null); setExercises([]); }}
+                        style={{ width: '100%', padding: '10px 14px', textAlign: 'left', border: 'none', background: 'rgba(0,0,0,0.04)', fontSize: '9px', fontWeight: 600, letterSpacing: '0.1em', color: '#999', cursor: 'pointer', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}
+                        role="button"
+                        tabIndex={0}
+                      >
+                        <ChevronLeft size={12} /> {selectedGroup}
+                      </div>
+                      {loadingExercises ? (
+                        <div style={{ padding: '12px', fontSize: '10px', color: '#999', textAlign: 'center' }}>Loading...</div>
+                      ) : (
+                        exercises.map(ex => (
+                          <div
+                            key={ex}
+                            onClick={() => { setSelectedExercise(ex); setCategoryOpen(false); setSelectedGroup(null); }}
+                            style={{
+                              width: '100%', padding: '10px 14px', textAlign: 'left',
+                              border: 'none', background: selectedExercise === ex ? 'rgba(0,0,0,0.06)' : 'transparent',
+                              fontSize: '10px', fontWeight: 500, letterSpacing: '0.08em', color: '#1a1a1a',
+                              cursor: 'pointer',
+                            }}
+                            role="button"
+                            tabIndex={0}
+                          >
+                            {ex}
+                          </div>
+                        ))
+                      )}
+                    </>
+                  ) : (
+                    ['CHEST', 'BACK', 'LEGS'].map(cat => (
+                    <div
+                      key={cat}
+                      onClick={() => { setCategory(cat); setSelectedGroup(cat); setSelectedExercise(null); }}
+                      style={{
+                        width: '100%', padding: '10px 14px', textAlign: 'left',
+                        border: 'none', background: 'rgba(0,0,0,0.04)', fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', color: '#1a1a1a',
+                        cursor: 'pointer',
+                        textTransform: 'uppercase',
+                      }}
+                      role="button"
+                      tabIndex={0}
+                    >
+                      {cat}
+                    </div>
+                    ))
+                  )}
                 </div>
-                {['ALL WEIGHTS', 'CHEST', 'BACK', 'LEGS'].map(cat => (
-                  <div
-                    key={cat}
-                    onClick={() => { setCategory(cat); setCategoryOpen(false); setSelectedGroup(null); }}
-                    style={{
-                      width: '100%', padding: '10px 14px', textAlign: 'left',
-                      border: 'none', background: category === cat ? 'rgba(0,0,0,0.06)' : 'transparent',
-                      fontSize: '10px', fontWeight: 500, letterSpacing: '0.08em', color: '#1a1a1a',
-                      cursor: 'pointer',
-                    }}
-                    role="button"
-                    tabIndex={0}
-                  >
-                    {cat}
-                  </div>
-                ))}
-              </div>
-            )}
+              )}
+                    </>
+                  ) : (
+                    ['CHEST', 'BACK', 'LEGS'].map(cat => (
+                      <div
+                        key={cat}
+                        onClick={() => { setSelectedGroup(cat); }}
+                        style={{
+                          width: '100%', padding: '10px 14px', textAlign: 'left',
+                          border: 'none', background: 'rgba(0,0,0,0.04)', fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', color: '#1a1a1a',
+                          cursor: 'pointer',
+                          textTransform: 'uppercase',
+                        }}
+                        role="button"
+                        tabIndex={0}
+                      >
+                        {cat}
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
           </div>
 
           {/* Period selector */}
