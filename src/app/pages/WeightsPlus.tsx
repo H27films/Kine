@@ -401,17 +401,21 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
                    style={{ overflow: 'visible' }}
                  >
                    {/* Rounded-top bars with height-based colors */}
-                   {data.map((d, i) => {
-                     const x = paddingX + i * (barWidth + barSpacing);
-                     const barCenter = x + barWidth / 2;
-                     const isHovered = hoveredIdx === i;
+                    {data.map((d, i) => {
+                      const x = paddingX + i * (barWidth + barSpacing);
+                      const barHeight = Math.max(4, ((d.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
+                      const y = paddingY + plotHeight - barHeight;
+                      const radius = barWidth / 2;
+                      const color = getBarColor(d.value);
+                      const isHovered = hoveredIdx === i;
 
-                     // Background bar at max height (reference)
-                     const bgY = paddingY + plotHeight - maxBarHeight;
+                      // Background bar at max height (reference)
+                      const bgY = paddingY + plotHeight - maxBarHeight;
 
-                     // Tooltip fixed at the top (above highest bar), centered on this bar
-                     const tooltipX = barCenter;
-                     const tooltipY = paddingY + plotHeight - maxBarHeight - 46;
+                      // Tooltip fixed at the top (above highest bar), centered on this bar
+                      const barCenter = x + barWidth / 2;
+                      const tooltipX = barCenter;
+                      const tooltipY = paddingY + plotHeight - maxBarHeight - 46;
 
                      return (
                        <g key={d.workoutId}>
@@ -441,8 +445,8 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
                          />
                          {isHovered && (
                            <g>
-                             <rect x={tooltipX - 28} y={tooltipY} width="56" height="36" rx="4" fill="rgba(0,0,0,0.06)" />
-                             <text x={tooltipX} y={tooltipY + 16} textAnchor="middle" style={{ fontSize: '12px', fontWeight: 900, color: '#1a1a1a', fontFamily: "'JetBrains Mono', monospace" }}>{d.value.toLocaleString()}</text>
+                             <rect x={tooltipX - 28} y={tooltipY} width="56" height="28" rx="4" fill="rgba(0,0,0,0.06)" />
+                             <text x={tooltipX} y={tooltipY + 18} textAnchor="middle" style={{ fontSize: '12px', fontWeight: 900, color: '#1a1a1a', fontFamily: "'JetBrains Mono', monospace" }}>{d.value.toLocaleString()}</text>
                            </g>
                          )}
                        </g>
