@@ -3,6 +3,7 @@ import { Home, ChevronDown, Menu } from 'lucide-react';
 import { Page } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { RunningManIcon, CaloriesIcon } from '../components/NavIcons';
+import { ChartArea } from './ChartArea';
 
 interface DataPoint {
   occurrence: number;
@@ -161,25 +162,6 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
    }, [category, selectedExerciseId]);
 
   const metricLabel = 'KG';
-  const displayTotal = total.toLocaleString();
-
-   // SVG chart dimensions
-   const chartHeight = 200;
-   const chartWidth = 340; // approximate width based on container
-   const paddingX = 8;
-   const paddingY = 20;
-   const plotWidth = chartWidth - paddingX * 2;
-   const plotHeight = chartHeight - paddingY * 2;
-
-  const minValue = data.length > 0 ? Math.min(...data.map(d => d.value)) : 0;
-  const maxValue = data.length > 0 ? Math.max(...data.map(d => d.value)) : 100;
-
-  // Add some padding to y-scale
-  const yMin = Math.min(0, minValue - (maxValue - minValue) * 0.1);
-  const yMax = maxValue + (maxValue - minValue) * 0.1 || 10;
-
-  const getX = (idx: number) => paddingX + (idx / Math.max(data.length - 1, 1)) * plotWidth;
-  const getY = (val: number) => paddingY + plotHeight - ((val - yMin) / (yMax - yMin)) * plotHeight;
 
   const navItems: NavItem[] = [
     { label: 'Home', icon: <Home size={20} />, page: 'dashboard' },
@@ -206,49 +188,7 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
      gap: '6px',
    });
 
-    // Bar chart mode when exercise selected
-    // Fixed bar width with adjustable spacing
-    const desiredBarWidth = 22; // max width, similar to chest press pulley 3-set view
-    const minBarWidth = 8;
-    const maxBarWidth = desiredBarWidth;
 
-    let barWidth: number;
-    let barSpacing: number;
-
-    if (data.length === 0) {
-      barWidth = 0;
-      barSpacing = 0;
-    } else if (data.length === 1) {
-      barWidth = Math.min(desiredBarWidth, plotWidth);
-      barSpacing = 0;
-    } else {
-      const totalGapCount = data.length - 1;
-      const requiredWidth = desiredBarWidth * data.length + 6 * totalGapCount;
-      if (requiredWidth <= plotWidth) {
-        barWidth = desiredBarWidth;
-        const extraSpace = plotWidth - requiredWidth;
-        barSpacing = 6 + extraSpace / totalGapCount;
-      } else {
-        const minGap = 4;
-        const availableForBars = plotWidth - minGap * totalGapCount;
-        barWidth = Math.max(minBarWidth, availableForBars / data.length);
-        barSpacing = minGap;
-      }
-    }
-
-    // Height of a bar representing the max value (for background reference)
-    const maxBarHeight = data.length > 0 && maxValue > minValue
-      ? ((maxValue - yMin) / (yMax - yMin)) * plotHeight
-      : 0;
-
-    // Color based on value relative to range - gradient from light grey to black
-    const getBarColor = (val: number) => {
-      if (maxValue === minValue) return '#1a1a1a';
-      const normalized = (val - minValue) / (maxValue - minValue);
-      // Interpolate from #cccccc (light grey) to #1a1a1a (near black)
-      const intensity = Math.round(204 - (204 - 26) * normalized);
-      return `rgb(${intensity}, ${intensity}, ${intensity})`;
-    };
 
   return (
     <div
@@ -354,12 +294,9 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
         </div>
       </div>
 
-        {/* Chart area: bars when exercise selected, line chart when category view */}
         <div className="px-5" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', paddingTop: '16px' }}>
-          {/* Period header */}
-          <div style={{ fontFamily: "'Inconsolata', monospace", fontSize: '32px', fontWeight: 348, fontStretch: '175%', letterSpacing: '0.15em', color: 'rgba(0,0,0,0.2)', textTransform: 'uppercase', marginBottom: '8px' }}>
-            PROGRESS
-          </div>
+          <ChartArea mode={selectedExercise ? 'exercise' : 'aggregate'} data={data} total={total} sessionCount={sessionCount} metricLabel={metricLabel} />
+        </div>
 
           {/* Big number */}
           <div className="flex items-start justify-between" style={{ marginBottom: '16px' }}>
