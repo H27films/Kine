@@ -400,32 +400,19 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
                    preserveAspectRatio="xMidYMid meet"
                    style={{ overflow: 'visible' }}
                  >
-                   {/* Faint background bar at maximum height */}
-                   <rect
-                     x={paddingX}
-                     y={paddingY}
-                     width={plotWidth}
-                     height={plotHeight}
-                     fill="rgba(0,0,0,0.04)"
-                     rx="2"
-                   />
-
                    {/* Rounded-top bars with height-based colors */}
                    {data.map((d, i) => {
                      const x = paddingX + i * (barWidth + barSpacing);
                      const barHeight = Math.max(4, ((d.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
                      const y = paddingY + plotHeight - barHeight;
                      const radius = barWidth / 2;
-                     const color = getBarColor(d.value);
-                     const isHovered = hoveredIdx === i;
+                      const color = getBarColor(d.value);
+                      const isHovered = hoveredIdx === i;
 
-                     // Faint background bar at max value height
-                     const bgY = paddingY + plotHeight - maxBarHeight;
+                      // Background bar at max height (reference)
+                      const bgY = paddingY + plotHeight - maxBarHeight;
 
-                     // Faint background bar at max height (reference)
-                     const bgY = paddingY + plotHeight - maxBarHeight;
-
-                     return (
+                      return (
                        <g key={d.workoutId}>
                          {/* Background reference bar - faint grey at max value height */}
                          <rect
