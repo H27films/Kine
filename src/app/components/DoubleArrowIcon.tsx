@@ -5,7 +5,7 @@ interface DoubleArrowIconProps {
 }
 
 export const DoubleArrowIcon: React.FC<DoubleArrowIconProps> = ({ size = 38 }) => (
-  <svg width={size} viewBox="0 0 680 500" role="img" xmlns="http://www.w3.org/2000/svg">
+  <svg width={size} viewBox="145 40 325 380" role="img" xmlns="http://www.w3.org/2000/svg">
     <title>Double pixel arrow</title>
     <desc>Two chevron arrows made of squares — grey then black — with one square spacing between them</desc>
 

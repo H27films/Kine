@@ -602,10 +602,10 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
             style={{
               background: 'none',
               border: 'none',
-              padding: '4px 0',
+              padding: '2px 0',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
+              gap: '10px',
               cursor: 'pointer',
               fontSize: '11px',
               fontWeight: 600,
@@ -614,7 +614,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
               textTransform: 'uppercase',
             }}
           >
-            <DoubleArrowIcon size={38} />
+            <DoubleArrowIcon size={18} />
             Weights +
           </button>
         </div>
