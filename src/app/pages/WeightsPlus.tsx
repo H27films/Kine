@@ -196,9 +196,15 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
     flexDirection: 'column',
   };
 
-  // Generate X-axis tick labels (show a reasonable number)
-  const tickCount = Math.min(data.length, 10);
-  const tickIndices = data.length > 0 ? Array.from({ length: tickCount }, (_, i) => Math.round((i / (tickCount - 1)) * (data.length - 1))) : [];
+   // Bar chart mode when exercise selected
+   const barWidth = data.length > 0 ? Math.max(4, (plotWidth - (data.length - 1) * 6) / data.length) : 0;
+   const barSpacing = 6;
+
+   // Color intensity: normalized 0-1 based on value within range
+   const getBarOpacity = (val: number) => {
+     if (maxValue === minValue) return 0.9;
+     return 0.2 + ((val - minValue) / (maxValue - minValue)) * 0.8;
+   };
 
   return (
     <div
@@ -304,167 +310,225 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
         </div>
       </div>
 
-      {/* Chart area */}
-      <div className="px-5" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', paddingTop: '16px' }}>
-        {/* Period header */}
-        <div style={{ fontFamily: "'Inconsolata', monospace", fontSize: '32px', fontWeight: 348, fontStretch: '175%', letterSpacing: '0.15em', color: 'rgba(0,0,0,0.2)', textTransform: 'uppercase', marginBottom: '8px' }}>
-          PROGRESS
-        </div>
+        {/* Chart area: bars when exercise selected, line chart when category view */}
+        <div className="px-5" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', paddingTop: '16px' }}>
+          {/* Period header */}
+          <div style={{ fontFamily: "'Inconsolata', monospace", fontSize: '32px', fontWeight: 348, fontStretch: '175%', letterSpacing: '0.15em', color: 'rgba(0,0,0,0.2)', textTransform: 'uppercase', marginBottom: '8px' }}>
+            PROGRESS
+          </div>
 
-        {/* Big number */}
-        <div className="flex items-start justify-between" style={{ marginBottom: '40px' }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
-            <div style={{ fontSize: '64px', fontWeight: 900, lineHeight: 1, letterSpacing: '-0.04em', color: '#1a1a1a' }}>
-              {displayTotal}
+          {/* Big number */}
+          <div className="flex items-start justify-between" style={{ marginBottom: '40px' }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
+              <div style={{ fontSize: '64px', fontWeight: 900, lineHeight: 1, letterSpacing: '-0.04em', color: '#1a1a1a' }}>
+                {displayTotal}
+              </div>
+            </div>
+            <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+              <div style={{ fontSize: '14px', fontWeight: 500, letterSpacing: '0.15em', color: '#999', textTransform: 'uppercase' }}>
+                {metricLabel}
+              </div>
+              <div style={{
+                width: '26px', height: '26px', borderRadius: '50%',
+                backgroundColor: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                marginTop: '6px',
+              }}>
+                <span style={{ fontSize: '11px', fontWeight: 900, color: '#fff', lineHeight: 1 }}>
+                  {sessionCount}
+                </span>
+              </div>
             </div>
           </div>
-          <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-            <div style={{ fontSize: '14px', fontWeight: 500, letterSpacing: '0.15em', color: '#999', textTransform: 'uppercase' }}>
-              {metricLabel}
-            </div>
-            <div style={{
-              width: '26px', height: '26px', borderRadius: '50%',
-              backgroundColor: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              marginTop: '6px',
-            }}>
-              <span style={{ fontSize: '11px', fontWeight: 900, color: '#fff', lineHeight: 1 }}>
-                {sessionCount}
-              </span>
-            </div>
-          </div>
-        </div>
 
-        {/* SVG Line chart */}
-        <div style={{ height: '180px', position: 'relative', marginBottom: '4px' }}>
-          {data.length > 0 ? (
-            <svg
-              width="100%"
-              height="100%"
-              viewBox={`0 0 ${chartWidth} ${chartHeight}`}
-              preserveAspectRatio="xMidYMid meet"
-              style={{ overflow: 'visible' }}
-            >
-              {/* Grid lines (horizontal) */}
-              {[0, 0.25, 0.5, 0.75, 1].map((tick, i) => {
-                const y = paddingY + plotHeight * (1 - tick);
-                return (
-                  <line
-                    key={i}
-                    x1={paddingX}
-                    y1={y}
-                    x2={paddingX + plotWidth}
-                    y2={y}
-                    stroke="rgba(0,0,0,0.06)"
-                    strokeWidth="1"
-                  />
-                );
-              })}
+          {/* Bar chart (when exercise selected) or Line chart (category view) */}
+          <div style={{ height: '180px', position: 'relative', marginBottom: '4px' }}>
+            {data.length > 0 ? (
+              selectedExercise ? (
+                // === BAR CHART MODE ===
+                <svg
+                  width="100%"
+                  height="100%"
+                  viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+                  preserveAspectRatio="xMidYMid meet"
+                  style={{ overflow: 'visible' }}
+                >
+                  {/* Grid lines */}
+                  {[0, 0.25, 0.5, 0.75, 1].map((tick, i) => {
+                    const y = paddingY + plotHeight * (1 - tick);
+                    return (
+                      <line key={i} x1={paddingX} y1={y} x2={paddingX + plotWidth} y2={y} stroke="rgba(0,0,0,0.06)" strokeWidth="1" />
+                    );
+                  })}
 
-              {/* Y-axis labels */}
-              {[0, 0.25, 0.5, 0.75, 1].map((tick, i) => {
-                const val = yMin + (yMax - yMin) * tick;
-                const y = paddingY + plotHeight * (1 - tick);
-                return (
-                  <text
-                    key={i}
-                    x={paddingX - 8}
-                    y={y + 3}
-                    textAnchor="end"
-                    style={{ fontSize: '9px', fontWeight: 500, color: 'rgba(0,0,0,0.4)', fontFamily: "'JetBrains Mono', monospace" }}
-                  >
-                    {Math.round(val)}
-                  </text>
-                );
-              })}
+                  {/* Y-axis labels */}
+                  {[0, 0.25, 0.5, 0.75, 1].map((tick, i) => {
+                    const val = yMin + (yMax - yMin) * tick;
+                    const y = paddingY + plotHeight * (1 - tick);
+                    return (
+                      <text
+                        key={i}
+                        x={paddingX - 8}
+                        y={y + 3}
+                        textAnchor="end"
+                        style={{ fontSize: '9px', fontWeight: 500, color: 'rgba(0,0,0,0.4)', fontFamily: "'JetBrains Mono', monospace" }}
+                      >
+                        {Math.round(val)}
+                      </text>
+                    );
+                  })}
 
-              {/* Line path */}
-              {data.length > 1 && (
-                <polyline
-                  points={data.map((d, i) => `${getX(i)},${getY(d.value)}`).join(' ')}
-                  fill="none"
-                  stroke="#1a1a1a"
-                  strokeWidth="2"
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                />
-              )}
-
-              {/* Data points (dots) */}
-              {data.map((d, i) => {
-                const x = getX(i);
-                const y = getY(d.value);
-                const isHovered = hoveredIdx === i;
-                const radius = isHovered ? 6 : 4;
-                return (
-                  <g key={d.workoutId}>
-                    <circle
-                      cx={x}
-                      cy={y}
-                      r={radius}
-                      fill="#1a1a1a"
-                      stroke="#f2f2f2"
-                      strokeWidth="2"
-                      style={{ cursor: 'pointer', transition: 'r 0.15s ease' }}
-                      onMouseEnter={() => setHoveredIdx(i)}
-                      onMouseLeave={() => setHoveredIdx(null)}
-                    />
-                    {isHovered && (
-                      <g>
-                        {/* Tooltip background */}
+                  {/* Rounded bars */}
+                  {data.map((d, i) => {
+                    const x = paddingX + i * (barWidth + barSpacing);
+                    const barHeight = Math.max(4, ((d.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
+                    const y = paddingY + plotHeight - barHeight;
+                    const opacity = getBarOpacity(d.value);
+                    const isHovered = hoveredIdx === i;
+                    return (
+                      <g key={d.workoutId}>
                         <rect
-                          x={x - 24}
-                          y={y - 42}
-                          width="48"
-                          height="28"
-                          rx="4"
-                          fill="rgba(0,0,0,0.9)"
+                          x={x}
+                          y={y}
+                          width={barWidth}
+                          height={barHeight}
+                          rx={barWidth / 2}
+                          ry={barWidth / 2}
+                          fill="#1a1a1a"
+                          opacity={isHovered ? 1 : opacity}
+                          style={{ cursor: 'pointer', transition: 'opacity 0.15s ease' }}
+                          onMouseEnter={() => setHoveredIdx(i)}
+                          onMouseLeave={() => setHoveredIdx(null)}
                         />
-                        {/* Tooltip text */}
-                        <text
-                          x={x}
-                          y={y - 24}
-                          textAnchor="middle"
-                          style={{ fontSize: '11px', fontWeight: 700, color: '#fff', fontFamily: "'JetBrains Mono', monospace" }}
-                        >
-                          {d.value.toLocaleString()}
-                        </text>
-                        {/* Tooltip unit */}
-                        <text
-                          x={x}
-                          y={y - 12}
-                          textAnchor="middle"
-                          style={{ fontSize: '8px', fontWeight: 500, color: '#ccc', fontFamily: "'JetBrains Mono', monospace" }}
-                        >
-                          KG
-                        </text>
+                        {isHovered && (
+                          <g>
+                            <rect x={x + barWidth / 2 - 24} y={y - 42} width="48" height="28" rx="4" fill="rgba(0,0,0,0.9)" />
+                            <text x={x + barWidth / 2} y={y - 24} textAnchor="middle" style={{ fontSize: '11px', fontWeight: 700, color: '#fff', fontFamily: "'JetBrains Mono', monospace" }}>{d.value.toLocaleString()}</text>
+                            <text x={x + barWidth / 2} y={y - 12} textAnchor="middle" style={{ fontSize: '8px', fontWeight: 500, color: '#ccc', fontFamily: "'JetBrains Mono', monospace" }}>KG</text>
+                          </g>
+                        )}
                       </g>
-                    )}
-                  </g>
-                );
-              })}
-            </svg>
-          ) : (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#999', fontSize: '12px' }}>
-              No data for this selection
-            </div>
-          )}
-        </div>
+                    );
+                  })}
+                </svg>
+              ) : (
+                // === LINE CHART MODE (category aggregate) ===
+                <svg
+                  width="100%"
+                  height="100%"
+                  viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+                  preserveAspectRatio="xMidYMid meet"
+                  style={{ overflow: 'visible' }}
+                >
+                  {/* Grid lines */}
+                  {[0, 0.25, 0.5, 0.75, 1].map((tick, i) => {
+                    const y = paddingY + plotHeight * (1 - tick);
+                    return <line key={i} x1={paddingX} y1={y} x2={paddingX + plotWidth} y2={y} stroke="rgba(0,0,0,0.06)" strokeWidth="1" />;
+                  })}
 
-        {/* X-axis labels */}
-        <div className="flex justify-between items-center" style={{ paddingTop: '8px' }}>
-          {tickIndices.map((dataIdx, i) => {
-            const point = data[dataIdx];
-            const occurrence = point?.occurrence || dataIdx + 1;
-            return (
-              <span key={i} className="flex-1 text-center" style={{ fontSize: '9px', fontWeight: 500, color: '#1a1a1a', letterSpacing: '0.02em' }}>
-                {occurrence}
-              </span>
-            );
-          })}
-        </div>
-      </div>
+                  {/* Y-axis labels */}
+                  {[0, 0.25, 0.5, 0.75, 1].map((tick, i) => {
+                    const val = yMin + (yMax - yMin) * tick;
+                    const y = paddingY + plotHeight * (1 - tick);
+                    return (
+                      <text
+                        key={i}
+                        x={paddingX - 8}
+                        y={y + 3}
+                        textAnchor="end"
+                        style={{ fontSize: '9px', fontWeight: 500, color: 'rgba(0,0,0,0.4)', fontFamily: "'JetBrains Mono', monospace" }}
+                      >
+                        {Math.round(val)}
+                      </text>
+                    );
+                  })}
 
-      {/* Selectors + metric cards */}
+                  {/* Line path */}
+                  {data.length > 1 && (
+                    <polyline
+                      points={data.map((d, i) => `${getX(i)},${getY(d.value)}`).join(' ')}
+                      fill="none"
+                      stroke="#1a1a1a"
+                      strokeWidth="2"
+                      strokeLinejoin="round"
+                      strokeLinecap="round"
+                    />
+                  )}
+
+                  {/* Data points (dots) */}
+                  {data.map((d, i) => {
+                    const x = getX(i);
+                    const y = getY(d.value);
+                    const isHovered = hoveredIdx === i;
+                    const radius = isHovered ? 6 : 4;
+                    return (
+                      <g key={d.workoutId}>
+                        <circle
+                          cx={x}
+                          cy={y}
+                          r={radius}
+                          fill="#1a1a1a"
+                          stroke="#f2f2f2"
+                          strokeWidth="2"
+                          style={{ cursor: 'pointer', transition: 'r 0.15s ease' }}
+                          onMouseEnter={() => setHoveredIdx(i)}
+                          onMouseLeave={() => setHoveredIdx(null)}
+                        />
+                        {isHovered && (
+                          <g>
+                            <rect x={x - 24} y={y - 42} width="48" height="28" rx="4" fill="rgba(0,0,0,0.9)" />
+                            <text x={x} y={y - 24} textAnchor="middle" style={{ fontSize: '11px', fontWeight: 700, color: '#fff', fontFamily: "'JetBrains Mono', monospace" }}>{d.value.toLocaleString()}</text>
+                            <text x={x} y={y - 12} textAnchor="middle" style={{ fontSize: '8px', fontWeight: 500, color: '#ccc', fontFamily: "'JetBrains Mono', monospace" }}>KG</text>
+                          </g>
+                        )}
+                      </g>
+                    );
+                  })}
+                </svg>
+              )
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#999', fontSize: '12px' }}>
+                No data for this selection
+              </div>
+            )}
+          </div>
+
+          {/* X-axis labels */}
+          <div className="flex justify-between items-center" style={{ paddingTop: '8px' }}>
+            {selectedExercise ? (
+              // Bars: show first, middle, last
+              data.length > 0 ? (
+                [0, Math.floor(data.length / 2), data.length - 1].filter((v, i, a) => a.indexOf(v) === i).map((dataIdx, i) => {
+                  const point = data[dataIdx];
+                  const occurrence = point?.occurrence || dataIdx + 1;
+                  return (
+                    <span key={i} className="flex-1 text-center" style={{ fontSize: '9px', fontWeight: 500, color: '#1a1a1a', letterSpacing: '0.02em' }}>
+                      {occurrence}
+                    </span>
+                  );
+                })
+              ) : null
+            ) : (
+              // Line chart: evenly spaced occurrence labels across all data
+              data.length > 0 ? (
+                (() => {
+                  const tickCount = Math.min(data.length, 10);
+                  return Array.from({ length: tickCount }).map((_, i) => {
+                    const dataIdx = Math.round((i / (tickCount - 1)) * (data.length - 1));
+                    const point = data[dataIdx];
+                    const occurrence = point?.occurrence || dataIdx + 1;
+                    return (
+                      <span key={i} className="flex-1 text-center" style={{ fontSize: '9px', fontWeight: 500, color: '#1a1a1a', letterSpacing: '0.02em' }}>
+                        {occurrence}
+                      </span>
+                    );
+                  });
+                })()
+              ) : null
+            )}
+         </div>
+       </div>
+
+       {/* Selectors + metric cards */}
       <div className="px-5" style={{ paddingBottom: 'calc(12px + env(safe-area-inset-bottom))', paddingTop: '8px' }}>
         {/* Two selectors side by side */}
         <div className="flex gap-2 mb-2">
