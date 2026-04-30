@@ -3,7 +3,7 @@ import { Home, ChevronDown, Menu } from 'lucide-react';
 import { Page } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { RunningManIcon, CaloriesIcon } from '../components/NavIcons';
-import { ChartArea } from './ChartArea';
+import { ChartArea } from '../components/ChartArea';
 
 interface DataPoint {
   occurrence: number;
