@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Home, ChevronDown, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
+import { Home, ChevronDown, Menu } from 'lucide-react';
 import { Page } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { RunningManIcon, CaloriesIcon } from '../components/NavIcons';
 
-const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
 interface DataPoint {
-  label: string;
+  occurrence: number;
   value: number;
+  date: string;
+  workoutId: string;
 }
 
 interface WeightsPlusProps {
@@ -39,11 +39,10 @@ const ProfileUserIcon = ({ size = 24 }: { size?: number }) => (
 
 export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
   const [category, setCategory] = useState('CHEST');
-  const [timePeriod, setTimePeriod] = useState('WEEKLY');
   const [data, setData] = useState<DataPoint[]>([]);
   const [total, setTotal] = useState(0);
   const [sessionCount, setSessionCount] = useState(0);
-  const [selectedBarIdx, setSelectedBarIdx] = useState<number | null>(null);
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [exerciseOpen, setExerciseOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -53,172 +52,112 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const categoryRef = useRef<HTMLDivElement>(null);
   const exerciseRef = useRef<HTMLDivElement>(null);
-  const [currentWeek, setCurrentWeek] = useState(66);
-  const currentMonth = (() => {
-    const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  })();
-  const [weekOffset, setWeekOffset] = useState(0);
-  const [monthOffset, setMonthOffset] = useState(0);
-  const [minWeek, setMinWeek] = useState<number | null>(null);
-  const [maxWeek, setMaxWeek] = useState<number | null>(null);
-  const [minMonth, setMinMonth] = useState<string | null>(null);
-  const [maxMonth, setMaxMonth] = useState<string | null>(null);
 
-  const selectedWeek = currentWeek + weekOffset;
-
-  const getSelectedMonth = () => {
-    const [year, month] = currentMonth.split('-').map(Number);
-    const d = new Date(year, month - 1 + monthOffset, 1);
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-  };
-  const selectedMonth = getSelectedMonth();
-
-  const getMonthInfo = (monthStr: string) => {
-    const [year, month] = monthStr.split('-').map(Number);
-    const daysInMonth = new Date(year, month, 0).getDate();
-    const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-    const label = `${monthNames[month - 1]} ${year}`;
-    return { daysInMonth, label };
-  };
-
-   useEffect(() => {
-     const handler = (e: MouseEvent) => {
-       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-         setMenuOpen(false);
-       }
-       if (categoryRef.current && !categoryRef.current.contains(e.target as Node)) {
-         setCategoryOpen(false);
-       }
-       if (exerciseRef.current && !exerciseRef.current.contains(e.target as Node)) {
-         setExerciseOpen(false);
-       }
-     };
-     document.addEventListener('mousedown', handler);
-     return () => document.removeEventListener('mousedown', handler);
-   }, []);
-
-   useEffect(() => {
-     const loadExercises = async () => {
-       setLoadingExercises(true);
-       const { data } = await supabase
-         .from('exercises')
-         .select('exercise_name')
-         .eq('type', category)
-         .eq('favourite', 'yes')
-         .order('exercise_name');
-
-       if (data) {
-         setExercises(data.map(row => row.exercise_name as string));
-       }
-       setLoadingExercises(false);
-     };
-     loadExercises();
-   }, [category]);
-
-   const loadChartData = async () => {
-    let labels: string[] = [];
-    let weekNumbers: number[] = [];
-    let dateStart: string | null = null;
-    let dateEnd: string | null = null;
-
-    if (timePeriod === 'WEEKLY') {
-      labels = dayLabels.map(d => d);
-      weekNumbers = [selectedWeek];
-    } else if (timePeriod === 'MONTHLY') {
-      const { daysInMonth } = getMonthInfo(selectedMonth);
-      const [year, month] = selectedMonth.split('-').map(Number);
-      dateStart = `${year}-${String(month).padStart(2, '0')}-01`;
-      dateEnd = `${year}-${String(month).padStart(2, '0')}-${String(daysInMonth).padStart(2, '0')}`;
-      labels = Array.from({ length: daysInMonth }, (_, i) => String(i + 1));
-    } else {
-      const startWeek = selectedWeek - 7;
-      weekNumbers = Array.from({ length: 8 }, (_, i) => startWeek + i);
-      labels = weekNumbers.map(w => `W${w}`);
-    }
-
-     let query = supabase.from('workouts').select('*, exercises(exercise_name)');
-     if (timePeriod === 'MONTHLY') {
-       query = query.gte('date', dateStart!).lte('date', dateEnd!);
-     } else {
-       query = query.in('week', weekNumbers);
-     }
-      // Filter by category type
-      query = query.eq('type', category);
-      // Filter by favorite exercises only
-      query = query.eq('exercises.favourite', 'yes');
-      // Filter by selected exercise if any
-      if (selectedExercise) {
-        query = query.eq('exercise_name', selectedExercise);
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
       }
+      if (categoryRef.current && !categoryRef.current.contains(e.target as Node)) {
+        setCategoryOpen(false);
+      }
+      if (exerciseRef.current && !exerciseRef.current.contains(e.target as Node)) {
+        setExerciseOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  useEffect(() => {
+    const loadExercises = async () => {
+      setLoadingExercises(true);
+      const { data } = await supabase
+        .from('exercises')
+        .select('exercise_name')
+        .eq('type', category)
+        .eq('favourite', 'yes')
+        .order('exercise_name');
+
+      if (data) {
+        setExercises(data.map(row => row.exercise_name as string));
+      }
+      setLoadingExercises(false);
+    };
+    loadExercises();
+  }, [category]);
+
+  const loadChartData = async () => {
+    let query = supabase
+      .from('workouts')
+      .select('*, exercises(exercise_name)')
+      .eq('type', category)
+      .eq('exercises.favourite', 'yes')
+      .order('date', { ascending: true });
+
+    if (selectedExercise) {
+      query = query.eq('exercise_name', selectedExercise);
+    }
 
     const { data: rows } = await query;
 
-    const values = new Array(labels.length).fill(0);
-    const count = new Array(labels.length).fill(0);
-    let rawTotal = 0;
-    let sessionRows = 0;
+    const points: DataPoint[] = [];
+    let occurrence = 1;
 
     if (rows) {
       for (const row of rows as any[]) {
-        sessionRows++;
-
-        let idx: number;
-
-        if (timePeriod === 'MONTHLY') {
-          const dayOfMonth = parseInt(row.date.split('-')[2], 10);
-          idx = dayOfMonth - 1;
-        } else if (timePeriod === 'WEEKLY') {
-          const dayMap: Record<string, number> = {
-            'MON': 0, 'TUE': 1, 'WED': 2, 'THU': 3, 'FRI': 4, 'SAT': 5, 'SUN': 6,
-          };
-          idx = dayMap[(row.day || '').toUpperCase()] ?? 0;
-        } else {
-          idx = weekNumbers.indexOf(row.week);
-        }
-
-        if (idx >= 0 && idx < labels.length) {
-          const val = row.total_weight || 0;
-          rawTotal += val;
-          values[idx] += val;
-          count[idx]++;
-        }
+        const workoutId = row.id || `${row.date}-${row.exercise_name}`;
+        const value = row.total_weight || 0;
+        points.push({
+          occurrence,
+          value,
+          date: row.date,
+          workoutId,
+        });
+        occurrence++;
       }
     }
 
-    const points = labels.map((label, i) => ({
-      label,
-      value: Math.round(values[i]),
-    }));
     setData(points);
-    setTotal(Math.round(values.reduce((a, b) => a + b, 0)));
-    setSessionCount(sessionRows);
+    setSessionCount(points.length);
+    const sum = points.reduce((acc, p) => acc + p.value, 0);
+    setTotal(Math.round(sum));
   };
 
-   useEffect(() => {
-     setWeekOffset(0);
-     setMonthOffset(0);
-     setSelectedBarIdx(null);
-     setSessionCount(0);
-     loadChartData();
-     // eslint-disable-next-line react-hooks/exhaustive-deps
-   }, [category, timePeriod, currentWeek, currentMonth, selectedExercise]);
+  useEffect(() => {
+    setSelectedExercise(null);
+    loadChartData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [category, selectedExercise]);
 
-   useEffect(() => { loadChartData(); }, [weekOffset, monthOffset, timePeriod, selectedExercise]);
-
-  const minValue = Math.min(...data.map(d => d.value), 0);
-  const maxValue = Math.max(...data.map(d => d.value), minValue + 1);
   const metricLabel = 'KG';
-
   const displayTotal = total.toLocaleString();
 
-   const navItems: NavItem[] = [
-     { label: 'Home', icon: <Home size={20} />, page: 'dashboard' },
-     { label: 'Weights', icon: <DumbbellIconSmall size={21} />, page: 'weights' },
-     { label: 'Cardio', icon: <RunningManIcon size={24} color="#1a1a1a" />, page: 'cardio' },
-     { label: 'Calories', icon: <CaloriesIcon size={20} color="#1a1a1a" />, page: 'calories' },
-     { label: 'Profile', icon: <ProfileUserIcon size={20} />, page: 'profile' },
-   ];
+  // SVG chart dimensions
+  const chartHeight = 180;
+  const chartWidth = 340; // approximate width based on container
+  const paddingX = 8;
+  const paddingY = 20;
+  const plotWidth = chartWidth - paddingX * 2;
+  const plotHeight = chartHeight - paddingY * 2;
+
+  const minValue = data.length > 0 ? Math.min(...data.map(d => d.value)) : 0;
+  const maxValue = data.length > 0 ? Math.max(...data.map(d => d.value)) : 100;
+
+  // Add some padding to y-scale
+  const yMin = Math.min(0, minValue - (maxValue - minValue) * 0.1);
+  const yMax = maxValue + (maxValue - minValue) * 0.1 || 10;
+
+  const getX = (idx: number) => paddingX + (idx / Math.max(data.length - 1, 1)) * plotWidth;
+  const getY = (val: number) => paddingY + plotHeight - ((val - yMin) / (yMax - yMin)) * plotHeight;
+
+  const navItems: NavItem[] = [
+    { label: 'Home', icon: <Home size={20} />, page: 'dashboard' },
+    { label: 'Weights', icon: <DumbbellIconSmall size={21} />, page: 'weights' },
+    { label: 'Cardio', icon: <RunningManIcon size={24} color="#1a1a1a" />, page: 'cardio' },
+    { label: 'Calories', icon: <CaloriesIcon size={20} color="#1a1a1a" />, page: 'calories' },
+    { label: 'Profile', icon: <ProfileUserIcon size={20} />, page: 'profile' },
+  ];
 
   const pillStyle = (): React.CSSProperties => ({
     width: '100%',
@@ -244,9 +183,13 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
-   };
+  };
 
-   return (
+  // Generate X-axis tick labels (show a reasonable number)
+  const tickCount = Math.min(data.length, 10);
+  const tickIndices = data.length > 0 ? Array.from({ length: tickCount }, (_, i) => Math.round((i / (tickCount - 1)) * (data.length - 1))) : [];
+
+  return (
     <div
       style={{
         height: '100vh',
@@ -380,48 +323,131 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
           </div>
         </div>
 
-        {/* Bar chart */}
-        <div style={{ height: '180px', display: 'flex', alignItems: 'flex-end', gap: '2px', marginBottom: '4px' }}>
-          {data.map((d, i) => {
-            const pct = (d.value - minValue) / (maxValue - minValue);
-            const height = pct * 100;
-            const showBg = true;
-            const hideZeroBar = timePeriod === 'MONTHLY' && d.value === 0;
-            const isSelected = (timePeriod === 'WEEKLY' || timePeriod === 'PERIOD') && selectedBarIdx === i;
-            const showTooltip = timePeriod === 'WEEKLY' || timePeriod === 'PERIOD';
-            return (
-              <div key={i} className="flex-1" style={{ height: '100%', position: 'relative', display: 'flex', alignItems: 'flex-end', cursor: showTooltip ? 'pointer' : 'default' }}>
-                {showBg && (
-                  <div style={{ position: 'absolute', bottom: 0, left: '10%', right: '10%', top: 0, backgroundColor: 'rgba(0,0,0,0.02)', borderRadius: '2px 2px 0 0' }} />
-                )}
-                {isSelected && (
-                  <div style={{ position: 'absolute', bottom: '100%', left: '50%', transform: 'translateX(-50%)', marginBottom: '4px', whiteSpace: 'nowrap' }}>
-                    <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', fontWeight: 900, color: '#1a1a1a', backgroundColor: 'rgba(0,0,0,0.06)', padding: '3px 8px', borderRadius: '4px' }}>
-                      {d.value.toLocaleString()} {metricLabel}
-                    </span>
-                  </div>
-                )}
-                {!hideZeroBar && (
-                  <div
-                    onClick={() => showTooltip && setSelectedBarIdx(isSelected ? null : i)}
-                    style={{ position: 'relative', zIndex: 1, width: '100%', height: `${Math.max(height, 1)}%`, backgroundColor: isSelected ? '#1a1a1a' : '#1a1a1a', borderRadius: '2px 2px 0 0', opacity: isSelected ? 1 : (0.15 + (Math.max(pct, 0) * 0.85)), transition: 'height 0.4s ease' }}
+        {/* SVG Line chart */}
+        <div style={{ height: '180px', position: 'relative', marginBottom: '4px' }}>
+          {data.length > 0 ? (
+            <svg
+              width="100%"
+              height="100%"
+              viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+              preserveAspectRatio="xMidYMid meet"
+              style={{ overflow: 'visible' }}
+            >
+              {/* Grid lines (horizontal) */}
+              {[0, 0.25, 0.5, 0.75, 1].map((tick, i) => {
+                const y = paddingY + plotHeight * (1 - tick);
+                return (
+                  <line
+                    key={i}
+                    x1={paddingX}
+                    y1={y}
+                    x2={paddingX + plotWidth}
+                    y2={y}
+                    stroke="rgba(0,0,0,0.06)"
+                    strokeWidth="1"
                   />
-                )}
-              </div>
-            );
-          })}
+                );
+              })}
+
+              {/* Y-axis labels */}
+              {[0, 0.25, 0.5, 0.75, 1].map((tick, i) => {
+                const val = yMin + (yMax - yMin) * tick;
+                const y = paddingY + plotHeight * (1 - tick);
+                return (
+                  <text
+                    key={i}
+                    x={paddingX - 8}
+                    y={y + 3}
+                    textAnchor="end"
+                    style={{ fontSize: '9px', fontWeight: 500, color: 'rgba(0,0,0,0.4)', fontFamily: "'JetBrains Mono', monospace" }}
+                  >
+                    {Math.round(val)}
+                  </text>
+                );
+              })}
+
+              {/* Line path */}
+              {data.length > 1 && (
+                <polyline
+                  points={data.map((d, i) => `${getX(i)},${getY(d.value)}`).join(' ')}
+                  fill="none"
+                  stroke="#1a1a1a"
+                  strokeWidth="2"
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                />
+              )}
+
+              {/* Data points (dots) */}
+              {data.map((d, i) => {
+                const x = getX(i);
+                const y = getY(d.value);
+                const isHovered = hoveredIdx === i;
+                const radius = isHovered ? 6 : 4;
+                return (
+                  <g key={d.workoutId}>
+                    <circle
+                      cx={x}
+                      cy={y}
+                      r={radius}
+                      fill="#1a1a1a"
+                      stroke="#f2f2f2"
+                      strokeWidth="2"
+                      style={{ cursor: 'pointer', transition: 'r 0.15s ease' }}
+                      onMouseEnter={() => setHoveredIdx(i)}
+                      onMouseLeave={() => setHoveredIdx(null)}
+                    />
+                    {isHovered && (
+                      <g>
+                        {/* Tooltip background */}
+                        <rect
+                          x={x - 24}
+                          y={y - 42}
+                          width="48"
+                          height="28"
+                          rx="4"
+                          fill="rgba(0,0,0,0.9)"
+                        />
+                        {/* Tooltip text */}
+                        <text
+                          x={x}
+                          y={y - 24}
+                          textAnchor="middle"
+                          style={{ fontSize: '11px', fontWeight: 700, color: '#fff', fontFamily: "'JetBrains Mono', monospace" }}
+                        >
+                          {d.value.toLocaleString()}
+                        </text>
+                        {/* Tooltip unit */}
+                        <text
+                          x={x}
+                          y={y - 12}
+                          textAnchor="middle"
+                          style={{ fontSize: '8px', fontWeight: 500, color: '#ccc', fontFamily: "'JetBrains Mono', monospace" }}
+                        >
+                          KG
+                        </text>
+                      </g>
+                    )}
+                  </g>
+                );
+              })}
+            </svg>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#999', fontSize: '12px' }}>
+              No data for this selection
+            </div>
+          )}
         </div>
 
         {/* X-axis labels */}
         <div className="flex justify-between items-center" style={{ paddingTop: '8px' }}>
-          {data.map((d, i) => {
-            const dayNum = parseInt(d.label, 10);
-            const weekStarts = [1, 8, 15, 22, 29];
-            const showLabel = timePeriod === 'MONTHLY'
-              ? weekStarts.includes(dayNum)
-              : true;
+          {tickIndices.map((dataIdx, i) => {
+            const point = data[dataIdx];
+            const occurrence = point?.occurrence || dataIdx + 1;
             return (
-              <span key={i} className="flex-1 text-center" style={{ fontSize: '9px', fontWeight: 500, color: showLabel ? '#1a1a1a' : 'transparent', letterSpacing: '0.02em' }}>{showLabel ? d.label : ''}</span>
+              <span key={i} className="flex-1 text-center" style={{ fontSize: '9px', fontWeight: 500, color: '#1a1a1a', letterSpacing: '0.02em' }}>
+                {occurrence}
+              </span>
             );
           })}
         </div>
@@ -429,114 +455,114 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
 
       {/* Selectors + metric cards */}
       <div className="px-5" style={{ paddingBottom: 'calc(12px + env(safe-area-inset-bottom))', paddingTop: '8px' }}>
-         {/* Two selectors side by side */}
-         <div className="flex gap-2 mb-2">
-           {/* Category selector */}
-           <div className="flex-1 relative" style={{ position: 'relative' }} ref={categoryRef}>
-              <button
-                onClick={() => {
-                  setCategoryOpen(!categoryOpen);
-                  setExerciseOpen(false);
-                }}
-                disabled={categoryOpen}
-                style={pillStyle()}
-              >
-               {category}
-               <ChevronDown size={12} />
-             </button>
-             {categoryOpen && (
-               <div style={{
-                 position: 'absolute', bottom: '100%', left: 0, right: 0,
-                 backgroundColor: '#f2f2f2', border: '1px solid rgba(0,0,0,0.08)',
-                 borderRadius: '10px', marginBottom: '4px', overflow: 'hidden', zIndex: 50,
-                 boxShadow: '0 -8px 24px rgba(0,0,0,0.12)',
-                 maxHeight: '300px',
-                 overflowY: 'auto',
-               }}>
-                 {['CHEST', 'BACK', 'LEGS'].map(cat => (
-                   <div
-                     key={cat}
-                     onClick={() => { setCategory(cat); setCategoryOpen(false); setSelectedExercise(null); }}
-                     style={{
-                       width: '100%', padding: '10px 14px', textAlign: 'left',
-                       border: 'none', background: category === cat ? 'rgba(0,0,0,0.06)' : 'transparent',
-                       fontSize: '10px', fontWeight: 500, letterSpacing: '0.08em', color: '#1a1a1a',
-                       cursor: 'pointer',
-                     }}
-                     role="button"
-                     tabIndex={0}
-                   >
-                     {cat}
-                   </div>
-                 ))}
-               </div>
-             )}
-           </div>
-
-           {/* Exercise selector */}
-           <div className="flex-1" style={{ position: 'relative' }} ref={exerciseRef}>
-               <button
-                 onClick={() => { setExerciseOpen(!exerciseOpen); setCategoryOpen(false); }}
-                 disabled={exerciseOpen}
-                 style={pillStyle()}
-               >
-                 {selectedExercise || 'EXERCISE'}
-                 <ChevronDown size={12} />
-               </button>
-             {exerciseOpen && (
-               <div style={{
-                 position: 'absolute', bottom: '100%', left: 0, right: 0,
-                 backgroundColor: '#f2f2f2', border: '1px solid rgba(0,0,0,0.08)',
-                 borderRadius: '10px', marginBottom: '4px', overflow: 'hidden', zIndex: 50,
-                 boxShadow: '0 -8px 24px rgba(0,0,0,0.12)',
-                 maxHeight: '300px',
-                 overflowY: 'auto',
-               }}>
+        {/* Two selectors side by side */}
+        <div className="flex gap-2 mb-2">
+          {/* Category selector */}
+          <div className="flex-1 relative" style={{ position: 'relative' }} ref={categoryRef}>
+            <button
+              onClick={() => {
+                setCategoryOpen(!categoryOpen);
+                setExerciseOpen(false);
+              }}
+              disabled={categoryOpen}
+              style={pillStyle()}
+            >
+              {category}
+              <ChevronDown size={12} />
+            </button>
+            {categoryOpen && (
+              <div style={{
+                position: 'absolute', bottom: '100%', left: 0, right: 0,
+                backgroundColor: '#f2f2f2', border: '1px solid rgba(0,0,0,0.08)',
+                borderRadius: '10px', marginBottom: '4px', overflow: 'hidden', zIndex: 50,
+                boxShadow: '0 -8px 24px rgba(0,0,0,0.12)',
+                maxHeight: '300px',
+                overflowY: 'auto',
+              }}>
+                {['CHEST', 'BACK', 'LEGS'].map(cat => (
                   <div
-                    onClick={() => { setSelectedExercise(null); setExerciseOpen(false); }}
+                    key={cat}
+                    onClick={() => { setCategory(cat); setCategoryOpen(false); setSelectedExercise(null); }}
                     style={{
                       width: '100%', padding: '10px 14px', textAlign: 'left',
-                      border: 'none', background: !selectedExercise ? 'rgba(0,0,0,0.06)' : 'transparent',
+                      border: 'none', background: category === cat ? 'rgba(0,0,0,0.06)' : 'transparent',
                       fontSize: '10px', fontWeight: 500, letterSpacing: '0.08em', color: '#1a1a1a',
                       cursor: 'pointer',
                     }}
                     role="button"
                     tabIndex={0}
                   >
-                    EXERCISE
+                    {cat}
                   </div>
-                 {loadingExercises ? (
-                   <div style={{ padding: '12px', fontSize: '10px', color: '#999', textAlign: 'center' }}>Loading...</div>
-                 ) : (
-                   exercises.map(ex => (
-                     <div
-                       key={ex}
-                       onClick={() => { setSelectedExercise(ex); setExerciseOpen(false); }}
-                       style={{
-                         width: '100%', padding: '10px 14px', textAlign: 'left',
-                         border: 'none', background: selectedExercise === ex ? 'rgba(0,0,0,0.06)' : 'transparent',
-                         fontSize: '10px', fontWeight: 500, letterSpacing: '0.08em', color: '#1a1a1a',
-                         cursor: 'pointer',
-                       }}
-                       role="button"
-                       tabIndex={0}
-                     >
-                       {ex}
-                     </div>
-                   ))
-                 )}
-               </div>
-             )}
-           </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Bottom metric cards - reserved space for future use */}
-         <div style={{ display: 'flex', gap: '8px', alignItems: 'stretch' }}>
-           {/* Left card - empty placeholder */}
-           <div style={{ ...cardStyle, flex: '1 1 0' }} />
-           {/* Right card - empty placeholder */}
-           <div style={{ ...cardStyle, flex: '1 1 0' }} />
-         </div>
+          {/* Exercise selector */}
+          <div className="flex-1" style={{ position: 'relative' }} ref={exerciseRef}>
+            <button
+              onClick={() => { setExerciseOpen(!exerciseOpen); setCategoryOpen(false); }}
+              disabled={exerciseOpen}
+              style={pillStyle()}
+            >
+              {selectedExercise || 'EXERCISE'}
+              <ChevronDown size={12} />
+            </button>
+            {exerciseOpen && (
+              <div style={{
+                position: 'absolute', bottom: '100%', left: 0, right: 0,
+                backgroundColor: '#f2f2f2', border: '1px solid rgba(0,0,0,0.08)',
+                borderRadius: '10px', marginBottom: '4px', overflow: 'hidden', zIndex: 50,
+                boxShadow: '0 -8px 24px rgba(0,0,0,0.12)',
+                maxHeight: '300px',
+                overflowY: 'auto',
+              }}>
+                <div
+                  onClick={() => { setSelectedExercise(null); setExerciseOpen(false); }}
+                  style={{
+                    width: '100%', padding: '10px 14px', textAlign: 'left',
+                    border: 'none', background: !selectedExercise ? 'rgba(0,0,0,0.06)' : 'transparent',
+                    fontSize: '10px', fontWeight: 500, letterSpacing: '0.08em', color: '#1a1a1a',
+                    cursor: 'pointer',
+                  }}
+                  role="button"
+                  tabIndex={0}
+                >
+                  EXERCISE
+                </div>
+                {loadingExercises ? (
+                  <div style={{ padding: '12px', fontSize: '10px', color: '#999', textAlign: 'center' }}>Loading...</div>
+                ) : (
+                  exercises.map(ex => (
+                    <div
+                      key={ex}
+                      onClick={() => { setSelectedExercise(ex); setExerciseOpen(false); }}
+                      style={{
+                        width: '100%', padding: '10px 14px', textAlign: 'left',
+                        border: 'none', background: selectedExercise === ex ? 'rgba(0,0,0,0.06)' : 'transparent',
+                        fontSize: '10px', fontWeight: 500, letterSpacing: '0.08em', color: '#1a1a1a',
+                        cursor: 'pointer',
+                      }}
+                      role="button"
+                      tabIndex={0}
+                    >
+                      {ex}
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Bottom metric cards - reserved space for future use */}
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'stretch' }}>
+          {/* Left card - empty placeholder */}
+          <div style={{ ...cardStyle, flex: '1 1 0' }} />
+          {/* Right card - empty placeholder */}
+          <div style={{ ...cardStyle, flex: '1 1 0' }} />
+        </div>
       </div>
 
       <style>{`
