@@ -4,23 +4,6 @@ import { Page } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { RunningManIcon, CaloriesIcon } from '../components/NavIcons';
 
-const TIME_PERIODS = ['WEEKLY', 'MONTHLY', 'PERIOD'];
-
-interface DataPoint {
-  label: string;
-  value: number;
-}
-
-interface WeightsPlusProps {
-  onNavigate: (page: Page) => void;
-}
-
-interface NavItem {
-  label: string;
-  icon: React.ReactNode;
-  page: Page;
-}
-
 const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 const DumbbellIconSmall = ({ size = 20 }: { size?: number }) => (
@@ -47,15 +30,14 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
   const [sessionCount, setSessionCount] = useState(0);
   const [selectedBarIdx, setSelectedBarIdx] = useState<number | null>(null);
   const [categoryOpen, setCategoryOpen] = useState(false);
-  const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
-  const [periodOpen, setPeriodOpen] = useState(false);
+  const [exerciseOpen, setExerciseOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [exercises, setExercises] = useState<string[]>([]);
   const [loadingExercises, setLoadingExercises] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const categoryRef = useRef<HTMLDivElement>(null);
-  const periodRef = useRef<HTMLDivElement>(null);
+  const exerciseRef = useRef<HTMLDivElement>(null);
   const [currentWeek, setCurrentWeek] = useState(66);
   const currentMonth = (() => {
     const now = new Date();
@@ -92,10 +74,9 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
        }
        if (categoryRef.current && !categoryRef.current.contains(e.target as Node)) {
          setCategoryOpen(false);
-         setSelectedGroup(null);
        }
-       if (periodRef.current && !periodRef.current.contains(e.target as Node)) {
-         setPeriodOpen(false);
+       if (exerciseRef.current && !exerciseRef.current.contains(e.target as Node)) {
+         setExerciseOpen(false);
        }
      };
      document.addEventListener('mousedown', handler);
@@ -104,29 +85,6 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
 
    useEffect(() => {
      const loadExercises = async () => {
-       if (!categoryOpen || !selectedGroup) {
-         setExercises([]);
-         return;
-       }
-       setLoadingExercises(true);
-       const { data } = await supabase
-         .from('exercises')
-         .select('exercise_name')
-         .eq('type', selectedGroup)
-         .order('exercise_name');
-
-       if (data) {
-         setExercises(data.map(row => row.exercise_name as string));
-       }
-       setLoadingExercises(false);
-     };
-     loadExercises();
-   }, [categoryOpen, selectedGroup]);
-
-   useEffect(() => {
-     const loadExercises = async () => {
-       if (!categoryOpen || selectedGroup) return;
-
        setLoadingExercises(true);
        const { data } = await supabase
          .from('exercises')
@@ -140,9 +98,9 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
        setLoadingExercises(false);
      };
      loadExercises();
-   }, [categoryOpen, category, selectedGroup]);
+    }, [category]);
 
-  const loadChartData = async () => {
+   const loadChartData = async () => {
     let labels: string[] = [];
     let weekNumbers: number[] = [];
     let dateStart: string | null = null;
@@ -219,14 +177,14 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
     setSessionCount(sessionRows);
   };
 
-  useEffect(() => {
-    setWeekOffset(0);
-    setMonthOffset(0);
-    setSelectedBarIdx(null);
-    setSessionCount(0);
-    loadChartData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [category, timePeriod, currentWeek, currentMonth]);
+   useEffect(() => {
+     setWeekOffset(0);
+     setMonthOffset(0);
+     setSelectedBarIdx(null);
+     setSessionCount(0);
+     loadChartData();
+     // eslint-disable-next-line react-hooks/exhaustive-deps
+   }, [category, timePeriod, currentWeek, currentMonth, selectedExercise]);
 
    useEffect(() => { loadChartData(); }, [weekOffset, monthOffset, timePeriod, selectedExercise]);
 
@@ -463,44 +421,46 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
       <div className="px-5" style={{ paddingBottom: 'calc(12px + env(safe-area-inset-bottom))', paddingTop: '8px' }}>
         {/* Two selectors side by side */}
         <div className="flex gap-2 mb-2">
-          {/* Category selector */}
-          <div className="flex-1 relative" style={{ position: 'relative' }} ref={categoryRef}>
+           {/* Category selector */}
+           <div className="flex-1 relative" style={{ position: 'relative' }} ref={categoryRef}>
              <button
                onClick={() => {
                  const open = !categoryOpen;
                  setCategoryOpen(open);
-                 setPeriodOpen(false);
-                 if (open) {
-                   setSelectedGroup(null);
-                 } else {
-                   setSelectedGroup(null);
-                 }
+                 setExerciseOpen(false);
                }}
                disabled={categoryOpen}
                style={pillStyle()}
              >
-               {selectedExercise || category}
+               {category}
                <ChevronDown size={12} />
              </button>
-              {categoryOpen && (
-                <div style={{
-                  position: 'absolute', bottom: '100%', left: 0, right: 0,
-                  backgroundColor: '#f2f2f2', border: '1px solid rgba(0,0,0,0.08)',
-                  borderRadius: '10px', marginBottom: '4px', overflow: 'hidden', zIndex: 50,
-                  boxShadow: '0 -8px 24px rgba(0,0,0,0.12)',
-                  maxHeight: '300px',
-                  overflowY: 'auto',
-                }}>
-                  {selectedGroup ? (
-                    <>
-                      <div
-                        onClick={() => { setSelectedGroup(null); setExercises([]); }}
-                        style={{ width: '100%', padding: '10px 14px', textAlign: 'left', border: 'none', background: 'rgba(0,0,0,0.04)', fontSize: '9px', fontWeight: 600, letterSpacing: '0.1em', color: '#999', cursor: 'pointer', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}
-                        role="button"
-                        tabIndex={0}
-                      >
-                        <ChevronLeft size={12} /> {selectedGroup}
-                      </div>
+             {categoryOpen && (
+               <div style={{
+                 position: 'absolute', bottom: '100%', left: 0, right: 0,
+                 backgroundColor: '#f2f2f2', border: '1px solid rgba(0,0,0,0.08)',
+                 borderRadius: '10px', marginBottom: '4px', overflow: 'hidden', zIndex: 50,
+                 boxShadow: '0 -8px 24px rgba(0,0,0,0.12)',
+               }}>
+                 {['CHEST', 'BACK', 'LEGS'].map(cat => (
+                   <div
+                     key={cat}
+                     onClick={() => { setCategory(cat); setCategoryOpen(false); setSelectedExercise(null); }}
+                     style={{
+                       width: '100%', padding: '10px 14px', textAlign: 'left',
+                       border: 'none', background: category === cat ? 'rgba(0,0,0,0.06)' : 'transparent',
+                       fontSize: '10px', fontWeight: 500, letterSpacing: '0.08em', color: '#1a1a1a',
+                       cursor: 'pointer',
+                     }}
+                     role="button"
+                     tabIndex={0}
+                   >
+                     {cat}
+                   </div>
+                 ))}
+               </div>
+             )}
+           </div>
                       {loadingExercises ? (
                         <div style={{ padding: '12px', fontSize: '10px', color: '#999', textAlign: 'center' }}>Loading...</div>
                       ) : (
@@ -565,40 +525,61 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
               )}
           </div>
 
-          {/* Period selector */}
-          <div className="flex-1" style={{ position: 'relative' }} ref={periodRef}>
-            <button
-              onClick={() => { setPeriodOpen(!periodOpen); setCategoryOpen(false); setSelectedGroup(null); }}
-              disabled={periodOpen}
-              style={pillStyle()}
-            >
-              {timePeriod}
-              <ChevronDown size={12} />
-            </button>
-            {periodOpen && (
-              <div style={{
-                position: 'absolute', bottom: '100%', left: 0, right: 0,
-                backgroundColor: '#f2f2f2', border: '1px solid rgba(0,0,0,0.08)',
-                borderRadius: '10px', marginBottom: '4px', overflow: 'hidden', zIndex: 50,
-                boxShadow: '0 -8px 24px rgba(0,0,0,0.12)',
-              }}>
-                {TIME_PERIODS.map(period => (
-                  <button
-                    key={period}
-                    onClick={() => { setTimePeriod(period); setPeriodOpen(false); }}
-                    style={{
-                      width: '100%', padding: '10px 14px', textAlign: 'left',
-                      border: 'none', background: timePeriod === period ? 'rgba(0,0,0,0.06)' : 'transparent',
-                      fontSize: '10px', fontWeight: 500, letterSpacing: '0.08em', color: '#1a1a1a',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    {period}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+           {/* Exercise selector */}
+           <div className="flex-1" style={{ position: 'relative' }} ref={exerciseRef}>
+             <button
+               onClick={() => { setExerciseOpen(!exerciseOpen); setCategoryOpen(false); }}
+               disabled={exerciseOpen}
+               style={pillStyle()}
+             >
+               {selectedExercise || 'ALL'}
+               <ChevronDown size={12} />
+             </button>
+             {exerciseOpen && (
+               <div style={{
+                 position: 'absolute', bottom: '100%', left: 0, right: 0,
+                 backgroundColor: '#f2f2f2', border: '1px solid rgba(0,0,0,0.08)',
+                 borderRadius: '10px', marginBottom: '4px', overflow: 'hidden', zIndex: 50,
+                 boxShadow: '0 -8px 24px rgba(0,0,0,0.12)',
+                 maxHeight: '300px',
+                 overflowY: 'auto',
+               }}>
+                 <div
+                   onClick={() => { setSelectedExercise(null); setExerciseOpen(false); }}
+                   style={{
+                     width: '100%', padding: '10px 14px', textAlign: 'left',
+                     border: 'none', background: !selectedExercise ? 'rgba(0,0,0,0.06)' : 'transparent',
+                     fontSize: '10px', fontWeight: 500, letterSpacing: '0.08em', color: '#1a1a1a',
+                     cursor: 'pointer',
+                   }}
+                   role="button"
+                   tabIndex={0}
+                 >
+                   ALL
+                 </div>
+                 {loadingExercises ? (
+                   <div style={{ padding: '12px', fontSize: '10px', color: '#999', textAlign: 'center' }}>Loading...</div>
+                 ) : (
+                   exercises.map(ex => (
+                     <div
+                       key={ex}
+                       onClick={() => { setSelectedExercise(ex); setExerciseOpen(false); }}
+                       style={{
+                         width: '100%', padding: '10px 14px', textAlign: 'left',
+                         border: 'none', background: selectedExercise === ex ? 'rgba(0,0,0,0.06)' : 'transparent',
+                         fontSize: '10px', fontWeight: 500, letterSpacing: '0.08em', color: '#1a1a1a',
+                         cursor: 'pointer',
+                       }}
+                       role="button"
+                       tabIndex={0}
+                     >
+                       {ex}
+                     </div>
+                   ))
+                 )}
+               </div>
+             )}
+           </div>
         </div>
 
         {/* Bottom metric cards */}
