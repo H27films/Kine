@@ -357,7 +357,7 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
           </div>
 
           {/* Big number */}
-          <div className="flex items-start justify-between" style={{ marginBottom: '40px' }}>
+          <div className="flex items-start justify-between" style={{ marginBottom: '16px' }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
               <div style={{ fontSize: '64px', fontWeight: 900, lineHeight: 1, letterSpacing: '-0.04em', color: '#1a1a1a' }}>
                 {displayTotal}
