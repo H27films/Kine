@@ -138,10 +138,15 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
        }
      }
 
-     setData(points);
-     setSessionCount(points.length);
-     const sum = points.reduce((acc, p) => acc + p.value, 0);
-     setTotal(Math.round(sum));
+      setData(points);
+      setSessionCount(points.length);
+      if (selectedExerciseId) {
+        const maxVal = points.length > 0 ? Math.max(...points.map(p => p.value)) : 0;
+        setTotal(Math.round(maxVal));
+      } else {
+        const sum = points.reduce((acc, p) => acc + p.value, 0);
+        setTotal(Math.round(sum));
+      }
    };
 
    useEffect(() => {
