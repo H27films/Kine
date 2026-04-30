@@ -154,6 +154,23 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                   </g>
                 );
               })}
+              {/* Empty bars for missing positions up to maxBars */}
+              {Array.from({ length: Math.max(0, maxBars - data.length) }).map((_, idx) => {
+                const i = data.length + idx;
+                const x = paddingX + i * (barWidth + barSpacing);
+                const barHeight = 4; // Small height for empty bars
+                const y = paddingY + plotHeight - barHeight;
+                const radius = barWidth / 2;
+
+                return (
+                  <g key={`empty-${i}`}>
+                    <path
+                      d={`M ${x},${y + barHeight} L ${x},${y + radius} A ${radius} ${radius} 0 0 1 ${x + barWidth},${y + radius} L ${x + barWidth},${y + barHeight} Z`}
+                      fill="#cccccc" // Grey color for empty bars
+                    />
+                  </g>
+                );
+              })}
             </svg>
           ) : (
             // Aggregate chart (bar chart)
@@ -218,10 +235,9 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
 
       {/* X-axis labels */}
       {mode === 'exercise' && data.length > 0 ? (
-        // Bar chart: show all occurrence numbers aligned with bars
+        // Bar chart: show occurrence numbers for all 10 positions
         <div style={{ position: 'relative', height: '12px' }}>
-          {data.map((point, i) => {
-            const occurrence = point?.occurrence || i + 1;
+          {Array.from({ length: maxBars }).map((_, i) => {
             const barLeft = paddingX + i * (barWidth + barSpacing);
             const barCenter = barLeft + barWidth / 2;
             const leftPercent = (barCenter / chartWidth) * 100;
@@ -239,7 +255,7 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                   letterSpacing: '0.02em',
                 }}
               >
-                {occurrence}
+                {i + 1}
               </span>
             );
           })}
