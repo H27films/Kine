@@ -244,17 +244,9 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
-  };
+   };
 
-  const isMonthMode = timePeriod === 'MONTHLY';
-  const canGoPrev = isMonthMode
-    ? minMonth === null || selectedMonth > minMonth
-    : minWeek === null || selectedWeek > minWeek;
-  const canGoNext = isMonthMode
-    ? maxMonth === null || selectedMonth < maxMonth
-    : maxWeek === null || selectedWeek < maxWeek;
-
-  return (
+   return (
     <div
       style={{
         height: '100vh',
@@ -538,60 +530,13 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
            </div>
           </div>
 
-         {/* Bottom metric cards */}
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'stretch' }}>
-          {/* Total card */}
-          <div style={{ ...cardStyle, flex: '1 1 0' }}>
-            <span style={{ fontSize: '8px', fontWeight: 500, color: '#999', letterSpacing: '0.1em', textTransform: 'uppercase', alignSelf: 'flex-start' }}>
-              {metricLabel}
-            </span>
-            <span style={{ fontSize: '28px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', marginTop: 'auto' }}>
-              {displayTotal}
-            </span>
-          </div>
-
-          {/* Week/Month number card with chevrons */}
-          <div style={{ ...cardStyle, flex: '1 1 0', position: 'relative' }}>
-            <span style={{ fontSize: '8px', fontWeight: 500, color: '#999', letterSpacing: '0.1em', textTransform: 'uppercase', position: 'absolute', top: '12px', left: '16px' }}>
-              {timePeriod === 'WEEKLY' ? 'WK' : timePeriod === 'MONTHLY' ? 'MT' : 'P'}
-            </span>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '100%' }}>
-              <button
-                onClick={() => {
-                  if (isMonthMode) setMonthOffset(o => o - 1);
-                  else setWeekOffset(o => o - 1);
-                }}
-                disabled={!canGoPrev}
-                style={{
-                  background: 'none', border: 'none', padding: '8px',
-                  cursor: canGoPrev ? 'pointer' : 'default',
-                  color: canGoPrev ? '#1a1a1a' : '#ccc',
-                  display: 'flex', alignItems: 'center', flexShrink: 0,
-                }}
-              >
-                <ChevronLeft size={18} />
-              </button>
-              <span style={{ fontSize: '16px', fontWeight: 900, letterSpacing: '-0.02em', color: '#1a1a1a', textAlign: 'center', flex: 1, lineHeight: 1.2 }}>
-                {timePeriod === 'MONTHLY' ? getMonthInfo(selectedMonth).label : selectedWeek}
-              </span>
-              <button
-                onClick={() => {
-                  if (isMonthMode) setMonthOffset(o => o + 1);
-                  else setWeekOffset(o => o + 1);
-                }}
-                disabled={!canGoNext}
-                style={{
-                  background: 'none', border: 'none', padding: '8px',
-                  cursor: canGoNext ? 'pointer' : 'default',
-                  color: canGoNext ? '#1a1a1a' : '#ccc',
-                  display: 'flex', alignItems: 'center', flexShrink: 0,
-                }}
-              >
-                <ChevronRight size={18} />
-              </button>
-            </div>
-          </div>
-        </div>
+          {/* Bottom metric cards - reserved space for future use */}
+         <div style={{ display: 'flex', gap: '8px', alignItems: 'stretch' }}>
+           {/* Left card - empty placeholder */}
+           <div style={{ ...cardStyle, flex: '1 1 0' }} />
+           {/* Right card - empty placeholder */}
+           <div style={{ ...cardStyle, flex: '1 1 0' }} />
+         </div>
       </div>
 
       <style>{`
