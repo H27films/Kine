@@ -158,7 +158,7 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
               {Array.from({ length: Math.max(0, maxBars - data.length) }).map((_, idx) => {
                 const i = data.length + idx;
                 const x = paddingX + i * (barWidth + barSpacing);
-                const barHeight = 4; // Small height for empty bars
+                const barHeight = 3; // Small height for empty bars
                 const y = paddingY + plotHeight - barHeight;
 
                 return (
