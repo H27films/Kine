@@ -238,9 +238,9 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
 
       {/* X-axis labels */}
       {mode === 'exercise' && data.length > 0 ? (
-        // Bar chart: show occurrence numbers for all 10 positions
+        // Bar chart: show occurrence numbers for all data positions
         <div style={{ position: 'relative', height: '12px' }}>
-          {Array.from({ length: maxBars }).map((_, i) => {
+          {Array.from({ length: data.length > maxBars ? data.length : maxBars }).map((_, i) => {
             const barLeft = paddingX + i * (barWidth + barSpacing);
             const barCenter = barLeft + barWidth / 2;
             const leftPercent = (barCenter / chartWidth) * 100;
