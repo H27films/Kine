@@ -484,14 +484,14 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
 
            {/* Exercise selector */}
            <div className="flex-1" style={{ position: 'relative' }} ref={exerciseRef}>
-             <button
-               onClick={() => { setExerciseOpen(!exerciseOpen); setCategoryOpen(false); }}
-               disabled={exerciseOpen}
-               style={pillStyle()}
-             >
-               {selectedExercise || 'ALL'}
-               <ChevronDown size={12} />
-             </button>
+               <button
+                 onClick={() => { setExerciseOpen(!exerciseOpen); setCategoryOpen(false); }}
+                 disabled={exerciseOpen}
+                 style={pillStyle()}
+               >
+                 {selectedExercise || 'EXERCISE'}
+                 <ChevronDown size={12} />
+               </button>
              {exerciseOpen && (
                <div style={{
                  position: 'absolute', bottom: '100%', left: 0, right: 0,
@@ -501,19 +501,19 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
                  maxHeight: '300px',
                  overflowY: 'auto',
                }}>
-                 <div
-                   onClick={() => { setSelectedExercise(null); setExerciseOpen(false); }}
-                   style={{
-                     width: '100%', padding: '10px 14px', textAlign: 'left',
-                     border: 'none', background: !selectedExercise ? 'rgba(0,0,0,0.06)' : 'transparent',
-                     fontSize: '10px', fontWeight: 500, letterSpacing: '0.08em', color: '#1a1a1a',
-                     cursor: 'pointer',
-                   }}
-                   role="button"
-                   tabIndex={0}
-                 >
-                   ALL
-                 </div>
+                  <div
+                    onClick={() => { setSelectedExercise(null); setExerciseOpen(false); }}
+                    style={{
+                      width: '100%', padding: '10px 14px', textAlign: 'left',
+                      border: 'none', background: !selectedExercise ? 'rgba(0,0,0,0.06)' : 'transparent',
+                      fontSize: '10px', fontWeight: 500, letterSpacing: '0.08em', color: '#1a1a1a',
+                      cursor: 'pointer',
+                    }}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    EXERCISE
+                  </div>
                  {loadingExercises ? (
                    <div style={{ padding: '12px', fontSize: '10px', color: '#999', textAlign: 'center' }}>Loading...</div>
                  ) : (
