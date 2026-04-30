@@ -61,9 +61,9 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
     barWidth = Math.max(minBarWidth, availableForBars / data.length);
     barSpacing = minGap;
   } else {
-    // Up to 10 points: fixed 5px spacing
+    // Up to 10 points: spacing to fit 10 bars across the width
     barWidth = desiredBarWidth;
-    barSpacing = 5;
+    barSpacing = (plotWidth - maxBars * barWidth) / (maxBars - 1);
   }
 
   // Height of a bar representing the max value (for background reference)
