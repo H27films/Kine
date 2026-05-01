@@ -31,9 +31,15 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
   const minValue = data.length > 0 ? Math.min(...data.map(d => d.value)) : 0;
   const maxValue = data.length > 0 ? Math.max(...data.map(d => d.value)) : 100;
 
-  // Add some padding to y-scale
-  const yMin = Math.min(0, minValue - (maxValue - minValue) * 0.1);
-  const yMax = maxValue + (maxValue - minValue) * 0.1 || 10;
+  // Y-scale based on mode
+  let yMin: number, yMax: number;
+  if (mode === 'exercise') {
+    yMin = minValue - (maxValue - minValue) * 0.3;
+    yMax = maxValue;
+  } else {
+    yMin = Math.min(0, minValue - (maxValue - minValue) * 0.1);
+    yMax = maxValue + (maxValue - minValue) * 0.1 || 10;
+  }
 
   const getX = (idx: number) => paddingX + (idx / Math.max(data.length - 1, 1)) * plotWidth;
   const getY = (val: number) => paddingY + plotHeight - ((val - yMin) / (yMax - yMin)) * plotHeight;
