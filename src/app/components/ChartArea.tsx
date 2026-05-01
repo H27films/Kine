@@ -223,7 +223,14 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                     const barHeight = Math.max(4, ((ma - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
                     const y = paddingY + plotHeight - barHeight;
                     const y_line = y + barHeight * 0.05;
-                    const x = paddingX + i * (barWidth + barSpacing) + barWidth / 2;
+                    let x;
+                    if (i === 0) {
+                      x = paddingX; // left edge of first bar
+                    } else if (i === maValues.length - 1) {
+                      x = paddingX + i * (barWidth + barSpacing) + barWidth; // right edge of last bar
+                    } else {
+                      x = paddingX + i * (barWidth + barSpacing) + barWidth / 2; // center for middle
+                    }
                     return { x, y: y_line };
                   });
                   // Build smooth path using cubic Bezier
