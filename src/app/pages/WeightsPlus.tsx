@@ -108,7 +108,7 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
 
      const { data: rows } = await query;
 
-     const points: DataPoint[] = [];
+      let points: DataPoint[] = [];
      let occurrence = 1;
 
      if (rows) {
