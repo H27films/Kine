@@ -119,7 +119,7 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
               width="100%"
               height="100%"
               viewBox={`0 0 ${chartWidth} ${chartHeight}`}
-              preserveAspectRatio="xMidYMid meet"
+              preserveAspectRatio="none"
               style={{ overflow: 'visible' }}
             >
               {/* Bars for exercise */}
@@ -185,7 +185,7 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
               width="100%"
               height="100%"
               viewBox={`0 0 ${chartWidth} ${chartHeight}`}
-              preserveAspectRatio="xMidYMid meet"
+              preserveAspectRatio="none"
               style={{ overflow: 'visible' }}
             >
               {/* Bars */}
