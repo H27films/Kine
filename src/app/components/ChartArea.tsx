@@ -222,7 +222,7 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                   const points = maValues.map((ma, i) => {
                     const barHeight = Math.max(4, ((ma - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
                     const y = paddingY + plotHeight - barHeight;
-                    const y_line = y + barHeight * 0.01;
+                    const y_line = y + barHeight * 0.05;
                     let x;
                     if (i === 0) {
                       x = paddingX; // left edge of first bar
@@ -249,7 +249,7 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                     linePath += ` C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${p2.x} ${p2.y}`;
                   }
                 }
-                return data.length > 1 ? <path d={linePath} stroke="rgba(220,220,220,0.3)" strokeWidth="4" fill="none" /> : null;
+                return data.length > 1 ? <path d={linePath} stroke="rgba(220,220,220,0.4)" strokeWidth="4" fill="none" /> : null;
               })()}
             </svg>
           )
