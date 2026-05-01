@@ -112,14 +112,18 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
      let occurrence = 1;
 
      if (rows) {
-       if (selectedExerciseId) {
-         // Individual exercise mode: each workout = one point
-         for (const row of rows as any[]) {
-           const workoutId = row.id || `${row.date}-${row.exercise_name}`;
-           const value = row.total_weight || 0;
-           points.push({ occurrence, value, date: row.date, workoutId });
-           occurrence++;
-         }
+        if (selectedExerciseId) {
+          // Individual exercise mode: each workout = one point
+          for (const row of rows as any[]) {
+            const workoutId = row.id || `${row.date}-${row.exercise_name}`;
+            const value = row.total_weight || 0;
+            points.push({ occurrence, value, date: row.date, workoutId });
+            occurrence++;
+          }
+          // If more than 15 points, show only the most recent 10
+          if (points.length > 15) {
+            points = points.slice(-10);
+          }
         } else {
           // Aggregate mode: group by week, sum total_weight per week (only non-zero weeks)
           const weeklySums: Record<number, number> = {};
