@@ -164,15 +164,21 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
               preserveAspectRatio="none"
               style={{ overflow: 'visible' }}
             >
-              {/* Bars */}
+              {/* Background bars */}
+              {data.map((d, i) => (
+                <path
+                  key={`bg-${d.workoutId}`}
+                  d={`M ${paddingX + i * (barWidth + barSpacing)},${paddingY + maxBarHeight} L ${paddingX + i * (barWidth + barSpacing)},${paddingY + 2} A 2 2 0 0 1 ${paddingX + i * (barWidth + barSpacing) + barWidth},${paddingY + 2} L ${paddingX + i * (barWidth + barSpacing) + barWidth},${paddingY + maxBarHeight} Z`}
+                  fill="rgba(0,0,0,0.02)"
+                />
+              ))}
+              {/* Foreground bars and tooltips */}
               {data.map((d, i) => {
                 const x = paddingX + i * (barWidth + barSpacing);
                 const barHeight = Math.max(4, ((d.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
                 const y = paddingY + plotHeight - barHeight;
                 const isHovered = hoveredIdx === i;
 
-                const bgY = paddingY;
-                const bgHeight = plotHeight;
                 const minVal = Math.min(...data.map(dd => dd.value), 0);
                 const maxVal = Math.max(...data.map(dd => dd.value), minVal + 1);
                 const pct = (d.value - minVal) / (maxVal - minVal);
@@ -182,12 +188,7 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                 const tooltipY = -10;
 
                 return (
-                  <g key={d.workoutId}>
-                    {/* Background bar */}
-                    <path
-                      d={`M ${x},${bgY + maxBarHeight} L ${x},${bgY + 2} A 2 2 0 0 1 ${x + barWidth},${bgY + 2} L ${x + barWidth},${bgY + maxBarHeight} Z`}
-                      fill="rgba(0,0,0,0.02)"
-                    />
+                  <g key={`fg-${d.workoutId}`}>
                     {/* Foreground bar */}
                     <path
                       d={`M ${x},${y + barHeight} L ${x},${y + 2} A 2 2 0 0 1 ${x + barWidth},${y + 2} L ${x + barWidth},${y + barHeight} Z`}
@@ -222,7 +223,7 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                   const points = maValues.map((ma, i) => {
                     const barHeight = Math.max(4, ((ma - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
                     const y = paddingY + plotHeight - barHeight;
-                    const y_line = y + barHeight * 0.05;
+                    const y_line = y - barHeight * 0.05;
                     let x;
                     if (i === 0) {
                       x = paddingX; // left edge of first bar
@@ -249,7 +250,7 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                     linePath += ` C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${p2.x} ${p2.y}`;
                   }
                 }
-                return data.length > 1 ? <path d={linePath} stroke="rgba(220,220,220,0.4)" strokeWidth="4" fill="none" /> : null;
+                return data.length > 1 ? <path d={linePath} stroke="rgba(0,0,0,0.6)" strokeWidth="4" fill="none" /> : null;
               })()}
             </svg>
           )
