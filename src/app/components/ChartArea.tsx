@@ -203,7 +203,7 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                 const opacity = isHovered ? 1 : (0.15 + (Math.max(pct, 0) * 0.85));
 
                 const tooltipX = x + barWidth / 2;
-                const tooltipY = 10;
+                const tooltipY = bgY;
 
                 return (
                   <g key={d.workoutId}>
