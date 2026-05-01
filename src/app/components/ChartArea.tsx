@@ -222,14 +222,7 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                     const y = paddingY + plotHeight - barHeight;
                     const y_line = y + barHeight * 0.1;
                     const x = paddingX + i * (barWidth + barSpacing) + barWidth / 2;
-                    const prev_d = data[i-1];
-                    const prev_barHeight = Math.max(4, ((prev_d.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
-                    const prev_y = paddingY + plotHeight - prev_barHeight;
-                    const prev_y_line = prev_y + prev_barHeight * 0.1;
-                    const prev_x = paddingX + (i-1) * (barWidth + barSpacing) + barWidth / 2;
-                    const mid_x = (prev_x + x) / 2;
-                    const mid_y = (prev_y_line + y_line) / 2;
-                    linePath += ` Q ${mid_x} ${mid_y} ${x} ${y_line}`;
+                    linePath += ` L ${x} ${y_line}`;
                   }
                 }
                 return data.length > 1 ? <path d={linePath} stroke="#ccc" strokeWidth="4" fill="none" /> : null;
