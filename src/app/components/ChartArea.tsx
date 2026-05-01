@@ -206,13 +206,21 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                   </g>
                 );
               })}
-              {/* Line chart */}
+              {/* Moving average line chart */}
               {(() => {
                 let linePath = '';
                 if (data.length > 1) {
-                  // Calculate all points
-                  const points = data.map((d, i) => {
-                    const barHeight = Math.max(4, ((d.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
+                  // Calculate moving average (3-point)
+                  const maValues = data.map((_, i) => {
+                    const start = Math.max(0, i - 1);
+                    const end = Math.min(data.length - 1, i + 1);
+                    const sum = data.slice(start, end + 1).reduce((s, dd) => s + dd.value, 0);
+                    const count = end - start + 1;
+                    return sum / count;
+                  });
+                  // Calculate points based on MA
+                  const points = maValues.map((ma, i) => {
+                    const barHeight = Math.max(4, ((ma - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
                     const y = paddingY + plotHeight - barHeight;
                     const y_line = y + barHeight * 0.1;
                     const x = paddingX + i * (barWidth + barSpacing) + barWidth / 2;
