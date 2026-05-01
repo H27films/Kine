@@ -14,9 +14,10 @@ interface ChartAreaProps {
   sessionCount: number;
   metricLabel: string;
   selectedExercise?: string | null;
+  category: string;
 }
 
-export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, sessionCount, metricLabel, selectedExercise }) => {
+export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, sessionCount, metricLabel, selectedExercise, category }) => {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const displayTotal = total.toLocaleString();
 
@@ -92,15 +93,15 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
       {/* Period header */}
       <div style={{
         fontFamily: "'Inconsolata', monospace",
-        fontSize: mode === 'exercise' && selectedExercise ? '24px' : '32px',
+        fontSize: mode === 'exercise' && selectedExercise ? '24px' : '24px',
         fontWeight: 348,
         fontStretch: '175%',
-        letterSpacing: mode === 'exercise' && selectedExercise ? '0.08em' : '0.15em',
-        color: mode === 'exercise' && selectedExercise ? 'rgba(0,0,0,0.75)' : 'rgba(0,0,0,0.2)',
+        letterSpacing: mode === 'exercise' && selectedExercise ? '0.08em' : '0.08em',
+        color: 'rgba(0,0,0,0.2)',
         textTransform: 'uppercase',
-        marginBottom: '8px'
+        marginBottom: '4px'
       }}>
-        {mode === 'exercise' && selectedExercise ? selectedExercise : 'PROGRESS'}
+        {mode === 'exercise' && selectedExercise ? selectedExercise : <><span style={{color: '#1a1a1a'}}>{category}</span> PROGRESS</>}
       </div>
 
       {/* Big number */}

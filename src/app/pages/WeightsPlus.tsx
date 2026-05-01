@@ -297,7 +297,7 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
       </div>
 
         <div className="px-5" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', paddingTop: '16px' }}>
-          <ChartArea mode={selectedExercise ? 'exercise' : 'aggregate'} data={data} total={total} sessionCount={sessionCount} metricLabel={metricLabel} selectedExercise={selectedExercise} />
+          <ChartArea mode={selectedExercise ? 'exercise' : 'aggregate'} data={data} total={total} sessionCount={sessionCount} metricLabel={metricLabel} selectedExercise={selectedExercise} category={category} />
         </div>
 
 
