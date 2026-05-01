@@ -133,7 +133,7 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
 
                 const bgY = paddingY + plotHeight - maxBarHeight;
                 const tooltipX = x + barWidth / 2;
-                const tooltipY = paddingY + plotHeight - maxBarHeight - 46;
+                const tooltipY = 0;
 
                 return (
                   <g key={d.workoutId}>
