@@ -192,8 +192,8 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                     {/* Foreground bar */}
                     <path
                       d={`M ${x},${y + barHeight} L ${x},${y + 2} A 2 2 0 0 1 ${x + barWidth},${y + 2} L ${x + barWidth},${y + barHeight} Z`}
-                      fill="#1a1a1a"
-                      fillOpacity={opacity}
+                      fill={getBarColor(d.value)}
+                      fillOpacity={1}
                       style={{ cursor: 'pointer', transition: 'fill-opacity 0.15s ease' }}
                       onMouseEnter={() => setHoveredIdx(i)}
                       onMouseLeave={() => setHoveredIdx(null)}
