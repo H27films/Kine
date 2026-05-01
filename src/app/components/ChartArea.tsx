@@ -203,7 +203,7 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                 const opacity = isHovered ? 1 : (0.15 + (Math.max(pct, 0) * 0.85));
 
                 const tooltipX = x + barWidth / 2;
-                const tooltipY = y - 46;
+                const tooltipY = paddingY + 10;
 
                 return (
                   <g key={d.workoutId}>
@@ -224,7 +224,7 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                     {isHovered && (
                       <g>
                         <rect x={tooltipX - 28} y={tooltipY} width="56" height="28" rx="4" fill="rgba(0,0,0,0.06)" />
-                        <text x={tooltipX} y={tooltipY + 18} textAnchor="middle" style={{ fontSize: '12px', fontWeight: 900, color: '#1a1a1a', fontFamily: "'JetBrains Mono', monospace" }}>{d.value.toLocaleString()}</text>
+                        <text x={tooltipX} y={tooltipY + 18} textAnchor="middle" style={{ fontSize: '12px', fontWeight: 900, color: '#1a1a1a', fontFamily: "'JetBrains Mono', monospace" }}>{Math.round(d.value).toLocaleString()}</text>
                       </g>
                     )}
                   </g>
