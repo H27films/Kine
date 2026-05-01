@@ -223,7 +223,7 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                   const points = maValues.map((ma, i) => {
                     const barHeight = Math.max(4, ((ma - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
                     const y = paddingY + plotHeight - barHeight;
-                    const y_line = y - barHeight * 0.05;
+                    const y_line = y + barHeight * 0.1;
                     let x;
                     if (i === 0) {
                       x = paddingX; // left edge of first bar
