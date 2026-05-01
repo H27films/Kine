@@ -249,7 +249,7 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                     linePath += ` C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${p2.x} ${p2.y}`;
                   }
                 }
-                return data.length > 1 ? <path d={linePath} stroke="rgba(220,220,220,0.4)" strokeWidth="4" fill="none" /> : null;
+                return data.length > 1 ? <path d={linePath} stroke="rgba(220,220,220,0.4)" strokeWidth="3" fill="none" /> : null;
               })()}
             </svg>
           )
