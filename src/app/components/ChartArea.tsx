@@ -84,7 +84,16 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
   return (
     <>
       {/* Period header */}
-      <div style={{ fontFamily: "'Inconsolata', monospace", fontSize: '32px', fontWeight: 348, fontStretch: '175%', letterSpacing: '0.15em', color: 'rgba(0,0,0,0.2)', textTransform: 'uppercase', marginBottom: '8px' }}>
+      <div style={{
+        fontFamily: "'Inconsolata', monospace",
+        fontSize: mode === 'exercise' && selectedExercise ? '24px' : '32px',
+        fontWeight: 348,
+        fontStretch: '175%',
+        letterSpacing: mode === 'exercise' && selectedExercise ? '0.1em' : '0.15em',
+        color: mode === 'exercise' && selectedExercise ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.2)',
+        textTransform: 'uppercase',
+        marginBottom: '8px'
+      }}>
         {mode === 'exercise' && selectedExercise ? selectedExercise : 'PROGRESS'}
       </div>
 
