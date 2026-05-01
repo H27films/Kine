@@ -228,10 +228,11 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                     const prev_y_line = prev_y + prev_barHeight * 0.1;
                     const prev_x = paddingX + (i-1) * (barWidth + barSpacing) + barWidth / 2;
                     const mid_x = (prev_x + x) / 2;
-                    linePath += ` Q ${mid_x} ${prev_y_line} ${x} ${y_line}`;
+                    const mid_y = (prev_y_line + y_line) / 2;
+                    linePath += ` Q ${mid_x} ${mid_y} ${x} ${y_line}`;
                   }
                 }
-                return data.length > 1 ? <path d={linePath} stroke="#888" strokeWidth="4" fill="none" /> : null;
+                return data.length > 1 ? <path d={linePath} stroke="#ccc" strokeWidth="4" fill="none" /> : null;
               })()}
             </svg>
           )
