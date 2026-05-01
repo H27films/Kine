@@ -139,7 +139,13 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
               preserveAspectRatio="none"
               style={{ overflow: 'visible' }}
             >
-              {/* Bars for exercise */}
+              {/* Background bars for exercise - always show for maxBars positions */}
+              {Array.from({ length: maxBars }).map((_, i) => {
+                const x = paddingX + i * (barWidth + barSpacing);
+                const bgY = paddingY + plotHeight - maxBarHeight;
+                return <rect key={`bg-${i}`} x={x} y={bgY} width={barWidth} height={maxBarHeight} fill="rgba(0,0,0,0.02)" rx="4" />;
+              })}
+              {/* Foreground bars for exercise */}
               {data.map((d, i) => {
                 const x = paddingX + i * (barWidth + barSpacing);
                 const barHeight = Math.max(4, ((d.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
@@ -148,13 +154,11 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                 const color = getBarColor(d.value);
                 const isHovered = hoveredIdx === i;
 
-                const bgY = paddingY + plotHeight - maxBarHeight;
                 const tooltipX = x + barWidth / 2;
                 const tooltipY = -10;
 
                 return (
                   <g key={d.workoutId}>
-                    <rect x={x} y={bgY} width={barWidth} height={maxBarHeight} fill="rgba(0,0,0,0.02)" rx="4" />
                     <path
                       d={`M ${x},${y + barHeight} L ${x},${y + radius} A ${radius} ${radius} 0 0 1 ${x + barWidth},${y + radius} L ${x + barWidth},${y + barHeight} Z`}
                       fill={color}
