@@ -182,7 +182,7 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                 const minVal = Math.min(...data.map(dd => dd.value), 0);
                 const maxVal = Math.max(...data.map(dd => dd.value), minVal + 1);
                 const pct = (d.value - minVal) / (maxVal - minVal);
-                const opacity = isHovered ? 1 : (0.15 + (Math.max(pct, 0) * 0.85));
+                const opacity = 1;
 
                 const tooltipX = x + barWidth / 2;
                 const tooltipY = -10;
