@@ -89,8 +89,8 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
         fontSize: mode === 'exercise' && selectedExercise ? '24px' : '32px',
         fontWeight: 348,
         fontStretch: '175%',
-        letterSpacing: mode === 'exercise' && selectedExercise ? '0.1em' : '0.15em',
-        color: mode === 'exercise' && selectedExercise ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.2)',
+        letterSpacing: mode === 'exercise' && selectedExercise ? '0.08em' : '0.15em',
+        color: mode === 'exercise' && selectedExercise ? 'rgba(0,0,0,0.75)' : 'rgba(0,0,0,0.2)',
         textTransform: 'uppercase',
         marginBottom: '8px'
       }}>
