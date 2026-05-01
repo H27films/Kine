@@ -154,33 +154,6 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                   </g>
                 );
               })}
-              {/* Line chart */}
-              {(() => {
-                let linePath = '';
-                if (data.length > 1) {
-                  const first = data[0];
-                  const barHeight0 = Math.max(4, ((first.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
-                  const y0 = paddingY + plotHeight - barHeight0;
-                  const y_line0 = y0 + barHeight0 * 0.1;
-                  const x0 = paddingX + 0 * (barWidth + barSpacing) + barWidth / 2;
-                  linePath = `M ${x0} ${y_line0}`;
-                  for (let i = 1; i < data.length; i++) {
-                    const d = data[i];
-                    const barHeight = Math.max(4, ((d.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
-                    const y = paddingY + plotHeight - barHeight;
-                    const y_line = y + barHeight * 0.1;
-                    const x = paddingX + i * (barWidth + barSpacing) + barWidth / 2;
-                    const prev_d = data[i-1];
-                    const prev_barHeight = Math.max(4, ((prev_d.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
-                    const prev_y = paddingY + plotHeight - prev_barHeight;
-                    const prev_y_line = prev_y + prev_barHeight * 0.1;
-                    const prev_x = paddingX + (i-1) * (barWidth + barSpacing) + barWidth / 2;
-                    const mid_x = (prev_x + x) / 2;
-                    linePath += ` Q ${mid_x} ${prev_y_line} ${x} ${y_line}`;
-                  }
-                }
-                return data.length > 1 ? <path d={linePath} stroke="#888" strokeWidth="4" fill="none" /> : null;
-              })()}
             </svg>
           ) : (
             // Aggregate chart (bar chart)
@@ -233,6 +206,33 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                   </g>
                 );
               })}
+              {/* Line chart */}
+              {(() => {
+                let linePath = '';
+                if (data.length > 1) {
+                  const first = data[0];
+                  const barHeight0 = Math.max(4, ((first.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
+                  const y0 = paddingY + plotHeight - barHeight0;
+                  const y_line0 = y0 + barHeight0 * 0.1;
+                  const x0 = paddingX + 0 * (barWidth + barSpacing) + barWidth / 2;
+                  linePath = `M ${x0} ${y_line0}`;
+                  for (let i = 1; i < data.length; i++) {
+                    const d = data[i];
+                    const barHeight = Math.max(4, ((d.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
+                    const y = paddingY + plotHeight - barHeight;
+                    const y_line = y + barHeight * 0.1;
+                    const x = paddingX + i * (barWidth + barSpacing) + barWidth / 2;
+                    const prev_d = data[i-1];
+                    const prev_barHeight = Math.max(4, ((prev_d.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
+                    const prev_y = paddingY + plotHeight - prev_barHeight;
+                    const prev_y_line = prev_y + prev_barHeight * 0.1;
+                    const prev_x = paddingX + (i-1) * (barWidth + barSpacing) + barWidth / 2;
+                    const mid_x = (prev_x + x) / 2;
+                    linePath += ` Q ${mid_x} ${prev_y_line} ${x} ${y_line}`;
+                  }
+                }
+                return data.length > 1 ? <path d={linePath} stroke="#888" strokeWidth="4" fill="none" /> : null;
+              })()}
             </svg>
           )
         ) : (
