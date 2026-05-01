@@ -210,19 +210,28 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
               {(() => {
                 let linePath = '';
                 if (data.length > 1) {
-                  const first = data[0];
-                  const barHeight0 = Math.max(4, ((first.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
-                  const y0 = paddingY + plotHeight - barHeight0;
-                  const y_line0 = y0 + barHeight0 * 0.1;
-                  const x0 = paddingX + 0 * (barWidth + barSpacing) + barWidth / 2;
-                  linePath = `M ${x0} ${y_line0}`;
-                  for (let i = 1; i < data.length; i++) {
-                    const d = data[i];
+                  // Calculate all points
+                  const points = data.map((d, i) => {
                     const barHeight = Math.max(4, ((d.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
                     const y = paddingY + plotHeight - barHeight;
                     const y_line = y + barHeight * 0.1;
                     const x = paddingX + i * (barWidth + barSpacing) + barWidth / 2;
-                    linePath += ` L ${x} ${y_line}`;
+                    return { x, y: y_line };
+                  });
+                  // Build smooth path using cubic Bezier
+                  for (let i = 0; i < points.length - 1; i++) {
+                    const p0 = i > 0 ? points[i - 1] : points[i];
+                    const p1 = points[i];
+                    const p2 = points[i + 1];
+                    const p3 = i < points.length - 2 ? points[i + 2] : points[i + 1];
+                    const cp1x = p1.x + (p2.x - p0.x) / 6;
+                    const cp1y = p1.y + (p2.y - p0.y) / 6;
+                    const cp2x = p2.x - (p3.x - p1.x) / 6;
+                    const cp2y = p2.y - (p3.y - p1.y) / 6;
+                    if (i === 0) {
+                      linePath = `M ${p1.x} ${p1.y}`;
+                    }
+                    linePath += ` C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${p2.x} ${p2.y}`;
                   }
                 }
                 return data.length > 1 ? <path d={linePath} stroke="#ccc" strokeWidth="4" fill="none" /> : null;
