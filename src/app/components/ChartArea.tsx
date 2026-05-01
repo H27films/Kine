@@ -13,9 +13,10 @@ interface ChartAreaProps {
   total: number;
   sessionCount: number;
   metricLabel: string;
+  selectedExercise?: string | null;
 }
 
-export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, sessionCount, metricLabel }) => {
+export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, sessionCount, metricLabel, selectedExercise }) => {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const displayTotal = total.toLocaleString();
 
@@ -84,7 +85,7 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
     <>
       {/* Period header */}
       <div style={{ fontFamily: "'Inconsolata', monospace", fontSize: '32px', fontWeight: 348, fontStretch: '175%', letterSpacing: '0.15em', color: 'rgba(0,0,0,0.2)', textTransform: 'uppercase', marginBottom: '8px' }}>
-        PROGRESS
+        {mode === 'exercise' && selectedExercise ? selectedExercise : 'PROGRESS'}
       </div>
 
       {/* Big number */}
