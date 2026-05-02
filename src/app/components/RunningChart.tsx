@@ -209,7 +209,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
     }));
     const total = view.type === 'month' ? data.reduce((sum, d) => d.originalKm > 0 ? sum + d.originalKm : sum, 0) : points.reduce((sum, p) => sum + p.value, 0);
     const sessionCount = data.reduce((sum, d) => sum + d.sessions, 0);
-    const avgDenominator = view.type === 'all' ? 16 : points.length; // Hardcode 16 weeks for all time avg
+    const avgDenominator = points.length;
     const metricLabel = 'KM';
 
     // Simple bar chart
