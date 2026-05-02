@@ -450,34 +450,32 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                   }}>
                     AVG
                   </div>
-                  <div style={{ position: 'relative', display: 'inline-block' }}>
-                    <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1, display: 'inline' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px' }}>
+                    <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
                       {totalPb}
                     </div>
-                    <span style={{ fontSize: '18px', fontWeight: 600, color: '#1a1a1a', marginLeft: '7px', marginRight: '12px' }}>/</span>
-                    <div style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', marginLeft: '8px' }}>
-                      <svg width={36} height={36} viewBox="0 0 36 36">
-                        {Array.from({ length: 20 }, (_, i) => {
-                          const angle = (i / 20) * 2 * Math.PI - Math.PI / 2;
-                          const cx = 18;
-                          const cy = 18;
-                          const r = 13;
-                          const x = cx + r * Math.cos(angle);
-                          const y = cy + r * Math.sin(angle);
-                          const filled = Math.round((pbPercentage / 100) * 20);
-                          return (
-                            <circle
-                              key={i}
-                              cx={x} cy={y} r={1.5}
-                              fill={i < filled ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.1)'}
-                            />
-                          );
-                        })}
-                        <text x={18} y={21} textAnchor="middle" fill="rgba(0,0,0,0.8)" fontSize="7" fontWeight="700">
-                          {pbPercentage}%
-                        </text>
-                      </svg>
-                    </div>
+                    <span style={{ fontSize: '18px', fontWeight: 600, color: '#1a1a1a' }}>/</span>
+                    <svg width={36} height={36} viewBox="0 0 36 36">
+                      {Array.from({ length: 20 }, (_, i) => {
+                        const angle = (i / 20) * 2 * Math.PI - Math.PI / 2;
+                        const cx = 18;
+                        const cy = 18;
+                        const r = 13;
+                        const x = cx + r * Math.cos(angle);
+                        const y = cy + r * Math.sin(angle);
+                        const filled = Math.round((pbPercentage / 100) * 20);
+                        return (
+                          <circle
+                            key={i}
+                            cx={x} cy={y} r={1.5}
+                            fill={i < filled ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.1)'}
+                          />
+                        );
+                      })}
+                      <text x={18} y={21} textAnchor="middle" fill="rgba(0,0,0,0.8)" fontSize="7" fontWeight="700">
+                        {pbPercentage}%
+                      </text>
+                    </svg>
                   </div>
                 </div>
               ) : null;
