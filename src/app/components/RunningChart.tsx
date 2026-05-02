@@ -28,6 +28,14 @@ const parseTimeToHours = (time: string | null): number | null => {
   return hours;
 };
 
+const getMonthInfo = (monthStr: string) => {
+  const [year, month] = monthStr.split('-').map(Number);
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+  const label = `${monthNames[month - 1]} ${year}`;
+  return { daysInMonth, label };
+};
+
 const calculateSpeed = (km: number, time: string | null): number | null => {
   const hours = parseTimeToHours(time);
   if (!hours || hours === 0) return null;
@@ -203,7 +211,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
 
     return (
       <div>
-        {/* Period header */}
+          {/* Period header */}
         <div style={{
           fontFamily: "'Inconsolata', monospace",
           fontSize: '24px',
@@ -214,7 +222,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
           textTransform: 'uppercase',
           marginBottom: '4px'
         }}>
-          {view.label}
+          {view.type === 'week' ? `WEEK ${getCurrentWeek()}` : view.type === 'month' ? `MONTH ${getMonthInfo(getCurrentMonth()).label}` : 'ALL TIME'}
         </div>
 
         {/* Big number */}
