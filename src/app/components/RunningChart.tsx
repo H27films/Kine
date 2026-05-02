@@ -213,7 +213,8 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
       const weeks = data.map(d => parseInt(d.label.replace('W', '')));
       const minWeek = Math.min(...weeks);
       const maxWeek = Math.max(...weeks);
-      return maxWeek - minWeek + 1;
+      const effectiveMin = Math.max(minWeek, 54); // Start from week 54 as per user data
+      return maxWeek - effectiveMin + 1;
     })() : points.length;
     const metricLabel = 'KM';
 
