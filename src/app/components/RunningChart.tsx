@@ -252,7 +252,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
             >
                   {points.map((d, i) => {
                 const x = paddingX + i * (barWidth + barSpacing);
-                const barHeight = d.value === 0 ? 1 : Math.max(4, ((d.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
+                const barHeight = d.value === 0 ? 1.5 : Math.max(4, ((d.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
                 const y = paddingY + plotHeight - barHeight;
                 const pct = (d.value - minValue) / (maxValue - minValue);
                 const opacity = 0.15 + (Math.max(pct, 0) * 0.85);
@@ -357,7 +357,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                 MAX
               </div>
               <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
-                {Math.max(...points.map(d => d.value)).toLocaleString()}<span style={{ fontSize: '16px', fontWeight: 200, color: '#999', marginLeft: '1px' }}>KM</span>
+                {Math.max(...points.map(d => d.value)).toLocaleString()}<span style={{ fontSize: '16px', fontWeight: 200, color: '#999', marginLeft: '2px' }}>KM</span>
               </div>
               <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em', color: '#1a1a1a', marginTop: '2px', textTransform: 'uppercase' }}>
                 {view.type === 'week' ? 'Day' : view.type === 'month' ? 'Day' : 'Week'} {points.reduce((max, d) => d.value > max.value ? d : max).occurrence}
@@ -399,7 +399,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                 AVG
               </div>
               <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
-                {sessionCount > 0 ? Math.round(total / sessionCount) : 0}<span style={{ fontSize: '16px', fontWeight: 200, color: '#999', marginLeft: '1px' }}>KM</span>
+                {sessionCount > 0 ? Math.round(total / sessionCount) : 0}<span style={{ fontSize: '16px', fontWeight: 200, color: '#999', marginLeft: '2px' }}>KM</span>
               </div>
               <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em', color: '#1a1a1a', marginTop: '2px', textTransform: 'uppercase' }}>
                 All {view.type === 'week' ? 'days' : view.type === 'month' ? 'days' : 'weeks'}
