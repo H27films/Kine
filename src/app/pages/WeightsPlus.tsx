@@ -40,6 +40,7 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
   const [total, setTotal] = useState(0);
   const [sessionCount, setSessionCount] = useState(0);
   const [pbCounts, setPbCounts] = useState<Record<number, number>>({});
+  const [exerciseCounts, setExerciseCounts] = useState<Record<number, number>>({});
 
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [exerciseOpen, setExerciseOpen] = useState(false);
@@ -105,9 +106,11 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
 
       const { data: rows } = await query;
 
-      // Fetch PB counts per week for aggregate mode
+      // Fetch PB counts and total exercise counts per week for aggregate mode
       let pbCountsData: Record<number, number> = {};
+      let exerciseCountsData: Record<number, number> = {};
       if (!selectedExerciseId) {
+        // PB counts
         const { data: pbRows } = await supabase
           .from('workouts')
           .select('week')
@@ -121,8 +124,23 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
             pbCountsData[week] = (pbCountsData[week] || 0) + 1;
           });
         }
+
+        // Total exercise counts
+        const { data: exerciseRows } = await supabase
+          .from('workouts')
+          .select('week')
+          .eq('type', category)
+          .not('week', 'is', null);
+
+        if (exerciseRows) {
+          exerciseRows.forEach((row: any) => {
+            const week = row.week;
+            exerciseCountsData[week] = (exerciseCountsData[week] || 0) + 1;
+          });
+        }
       }
       setPbCounts(pbCountsData);
+      setExerciseCounts(exerciseCountsData);
 
        let points: DataPoint[] = [];
       let occurrence = 1;
@@ -317,7 +335,7 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
       </div>
 
         <div className="px-5" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', paddingTop: '16px' }}>
-          <ChartArea mode={selectedExercise ? 'exercise' : 'aggregate'} data={data} total={total} sessionCount={sessionCount} metricLabel={metricLabel} selectedExercise={selectedExercise} category={category} pbCounts={pbCounts} />
+          <ChartArea mode={selectedExercise ? 'exercise' : 'aggregate'} data={data} total={total} sessionCount={sessionCount} metricLabel={metricLabel} selectedExercise={selectedExercise} category={category} pbCounts={pbCounts} exerciseCounts={exerciseCounts} />
         </div>
 
 

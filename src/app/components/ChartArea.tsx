@@ -16,9 +16,10 @@ interface ChartAreaProps {
   selectedExercise?: string | null;
   category: string;
   pbCounts?: Record<number, number>;
+  exerciseCounts?: Record<number, number>;
 }
 
-export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, sessionCount, metricLabel, selectedExercise, category, pbCounts = {} }) => {
+export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, sessionCount, metricLabel, selectedExercise, category, pbCounts = {}, exerciseCounts = {} }) => {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const displayTotal = total.toLocaleString();
 
@@ -362,6 +363,8 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
             {(() => {
               const maxWeek = data.reduce((max, d) => d.value > max.value ? d : max).occurrence;
               const pbCount = pbCounts[maxWeek] || 0;
+              const totalExercises = exerciseCounts[maxWeek] || 0;
+              const pbPercentage = totalExercises > 0 ? Math.round((pbCount / totalExercises) * 100) : 0;
               return pbCount > 0 ? (
                 <div style={{ marginTop: '8px' }}>
                   <div style={{
@@ -375,8 +378,33 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                   }}>
                     PB
                   </div>
-                  <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
-                    {pbCount}
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
+                    <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
+                      {pbCount}
+                    </div>
+                    {pbPercentage > 0 && (
+                      <svg width={40} height={40} viewBox="0 0 40 40">
+                        {Array.from({ length: 20 }, (_, i) => {
+                          const angle = (i / 20) * 2 * Math.PI - Math.PI / 2;
+                          const cx = 20;
+                          const cy = 20;
+                          const r = 15;
+                          const x = cx + r * Math.cos(angle);
+                          const y = cy + r * Math.sin(angle);
+                          const filled = Math.round((pbPercentage / 100) * 20);
+                          return (
+                            <circle
+                              key={i}
+                              cx={x} cy={y} r={1.8}
+                              fill={i < filled ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.1)'}
+                            />
+                          );
+                        })}
+                        <text x={20} y={23} textAnchor="middle" fill="rgba(0,0,0,0.8)" fontSize="8" fontWeight="700">
+                          {pbPercentage}%
+                        </text>
+                      </svg>
+                    )}
                   </div>
                 </div>
               ) : null;
