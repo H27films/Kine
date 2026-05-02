@@ -378,6 +378,28 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
             <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em', color: '#1a1a1a', marginTop: '2px', textTransform: 'uppercase' }}>
               Week {data.reduce((max, d) => d.value > max.value ? d : max).occurrence}
             </div>
+            {(() => {
+              const maxWeek = data.reduce((max, d) => d.value > max.value ? d : max).occurrence;
+              const pbCount = pbCounts[maxWeek] || 0;
+              return pbCount > 0 ? (
+                <div style={{ marginTop: '8px' }}>
+                  <div style={{
+                    fontFamily: "'Inconsolata', monospace",
+                    fontSize: '22px',
+                    fontWeight: 348,
+                    fontStretch: '175%',
+                    letterSpacing: '0.06em',
+                    color: 'rgba(0,0,0,0.35)',
+                    textTransform: 'uppercase',
+                  }}>
+                    PB
+                  </div>
+                  <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
+                    {pbCount}
+                  </div>
+                </div>
+              ) : null;
+            })()}
           </div>
           <div style={{ textAlign: 'right' }}>
             <div style={{
