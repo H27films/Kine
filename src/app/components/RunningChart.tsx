@@ -209,13 +209,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
     }));
     const total = view.type === 'month' ? data.reduce((sum, d) => d.originalKm > 0 ? sum + d.originalKm : sum, 0) : points.reduce((sum, p) => sum + p.value, 0);
     const sessionCount = data.reduce((sum, d) => sum + d.sessions, 0);
-    const avgDenominator = view.type === 'all' ? (() => {
-      const weeks = data.map(d => parseInt(d.label.replace('W', '')));
-      const minWeek = Math.min(...weeks);
-      const maxWeek = Math.max(...weeks);
-      const effectiveMin = Math.max(minWeek, 54); // Start from week 54 as per user data
-      return maxWeek - effectiveMin + 1;
-    })() : points.length;
+    const avgDenominator = view.type === 'all' ? 16 : points.length; // Hardcode 16 weeks for all time avg
     const metricLabel = 'KM';
 
     // Simple bar chart
