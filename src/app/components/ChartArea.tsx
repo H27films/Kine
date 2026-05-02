@@ -225,25 +225,6 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                         <text x={tooltipX} y={tooltipY + 18} textAnchor="middle" style={{ fontSize: '12px', fontWeight: 900, color: '#1a1a1a', fontFamily: "'JetBrains Mono', monospace" }}>{Math.round(d.value).toLocaleString()}</text>
                       </g>
                     )}
-                    {/* PB count circle */}
-                    {pbCounts[d.occurrence] && pbCounts[d.occurrence] > 0 && (
-                      <circle
-                        cx={x + barWidth / 2}
-                        cy={y + barHeight - 8}
-                        r="5"
-                        fill="white"
-                      />
-                    )}
-                    {pbCounts[d.occurrence] && pbCounts[d.occurrence] > 0 && (
-                      <text
-                        x={x + barWidth / 2}
-                        y={y + barHeight - 4}
-                        textAnchor="middle"
-                        style={{ fontSize: '7px', fontWeight: 900, fill: '#1a1a1a', fontFamily: "'JetBrains Mono', monospace" }}
-                      >
-                        {pbCounts[d.occurrence]}
-                      </text>
-                    )}
                   </g>
                 );
               })}
