@@ -239,7 +239,7 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                         x={x + barWidth / 2}
                         y={y + barHeight - 4}
                         textAnchor="middle"
-                        style={{ fontSize: '9px', fontWeight: 900, fill: '#1a1a1a', fontFamily: "'JetBrains Mono', monospace" }}
+                        style={{ fontSize: '7px', fontWeight: 900, fill: '#1a1a1a', fontFamily: "'JetBrains Mono', monospace" }}
                       >
                         {pbCounts[d.occurrence]}
                       </text>
