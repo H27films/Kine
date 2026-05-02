@@ -218,11 +218,11 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
           fontWeight: 348,
           fontStretch: '175%',
           letterSpacing: '0.08em',
-          color: 'rgba(0,0,0,0.4)',
+          color: 'rgba(0,0,0,0.7)',
           textTransform: 'uppercase',
           marginBottom: '4px'
         }}>
-          {view.type === 'week' ? `WEEK ${getCurrentWeek()}` : view.type === 'month' ? `MONTH ${getMonthInfo(getCurrentMonth()).label}` : 'ALL TIME'}
+          {view.type === 'week' ? `WEEK ${getCurrentWeek()}` : view.type === 'month' ? `${getMonthInfo(getCurrentMonth()).label}` : 'ALL TIME'}
         </div>
 
         {/* Big number */}
