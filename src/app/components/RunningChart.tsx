@@ -379,7 +379,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                       SPEED
                     </div>
                     <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
-                      {maxSpeed.toFixed(1)} KM/H
+                      {maxSpeed.toFixed(1)} <span style={{ fontSize: '16px', fontWeight: 500, color: '#999' }}>KM/H</span>
                     </div>
                   </div>
                 ) : null;
@@ -422,7 +422,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                       SPEED
                     </div>
                     <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
-                      {avgSpeed.toFixed(1)} KM/H
+                      {avgSpeed.toFixed(1)} <span style={{ fontSize: '16px', fontWeight: 500, color: '#999' }}>KM/H</span>
                     </div>
                   </div>
                 ) : null;
