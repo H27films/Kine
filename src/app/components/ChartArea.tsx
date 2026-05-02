@@ -451,7 +451,7 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                   }}>
                     AVG
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px' }}>
                     <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
                       {avgPb}
                     </div>
