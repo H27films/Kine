@@ -268,24 +268,24 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                 return (
                   <g key={d.workoutId}>
                     {view.type === 'month' ? (
-                      d.value > 0 ? (
-                        <>
-                          <line
-                            x1={x + barWidth / 2}
-                            y1={paddingY + plotHeight}
-                            x2={x + barWidth / 2}
-                            y2={y}
-                            stroke="#1a1a1a"
-                            strokeWidth="1"
-                          />
+                      <>
+                        <line
+                          x1={x + barWidth / 2}
+                          y1={paddingY + plotHeight}
+                          x2={x + barWidth / 2}
+                          y2={y}
+                          stroke={d.value > 0 ? "#1a1a1a" : "#ccc"}
+                          strokeWidth="1"
+                        />
+                        {d.value > 0 && (
                           <circle
                             cx={x + barWidth / 2}
                             cy={y}
                             r={Math.max(2, Math.min(8, 2 + (d.value / maxValue) * 6))}
                             fill="#1a1a1a"
                           />
-                        </>
-                      ) : null
+                        )}
+                      </>
                     ) : (
                       <>
                         <path
