@@ -382,27 +382,27 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                     <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1, display: 'inline' }}>
                       {pbCount}
                     </div>
-                    <span style={{ fontSize: '18px', fontWeight: 600, color: '#1a1a1a', marginLeft: '6px', marginRight: '4px' }}>/</span>
+                    <span style={{ fontSize: '18px', fontWeight: 600, color: '#1a1a1a', marginLeft: '7px', marginRight: '4px' }}>/</span>
                     {pbPercentage > 0 && (
                       <div style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)' }}>
-                        <svg width={32} height={32} viewBox="0 0 32 32">
+                        <svg width={36} height={36} viewBox="0 0 36 36">
                           {Array.from({ length: 20 }, (_, i) => {
                             const angle = (i / 20) * 2 * Math.PI - Math.PI / 2;
-                            const cx = 16;
-                            const cy = 16;
-                            const r = 12;
+                            const cx = 18;
+                            const cy = 18;
+                            const r = 13;
                             const x = cx + r * Math.cos(angle);
                             const y = cy + r * Math.sin(angle);
                             const filled = Math.round((pbPercentage / 100) * 20);
                             return (
                               <circle
                                 key={i}
-                                cx={x} cy={y} r={1.4}
+                                cx={x} cy={y} r={1.5}
                                 fill={i < filled ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.1)'}
                               />
                             );
                           })}
-                          <text x={16} y={19} textAnchor="middle" fill="rgba(0,0,0,0.8)" fontSize="6" fontWeight="700">
+                          <text x={18} y={21} textAnchor="middle" fill="rgba(0,0,0,0.8)" fontSize="7" fontWeight="700">
                             {pbPercentage}%
                           </text>
                         </svg>
