@@ -379,9 +379,10 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                     PB
                   </div>
                   <div style={{ position: 'relative' }}>
-                    <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
-                      {pbCount} /
+                    <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1, display: 'inline' }}>
+                      {pbCount}
                     </div>
+                    <span style={{ fontSize: '18px', fontWeight: 600, color: '#1a1a1a', marginLeft: '2px', marginRight: '4px' }}>/</span>
                     {pbPercentage > 0 && (
                       <div style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)' }}>
                         <svg width={32} height={32} viewBox="0 0 32 32">
