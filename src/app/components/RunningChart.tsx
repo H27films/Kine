@@ -298,31 +298,33 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
         </div>
 
         {/* X-axis labels */}
-        <div style={{ position: 'relative', height: '10px' }}>
-          {points.map((point, i) => {
-            const showLabel = view.type === 'all' ? i % 2 === 0 : true;
-            const barLeft = paddingX + i * (barWidth + barSpacing);
-            const barCenter = barLeft + barWidth / 2;
-            const leftPercent = (barCenter / chartWidth) * 100;
-            return showLabel ? (
-              <span
-                key={i}
-                style={{
-                  position: 'absolute',
-                  left: `${leftPercent}%`,
-                  bottom: 0,
-                  transform: 'translateX(-50%)',
-                  fontSize: '9px',
-                  fontWeight: 500,
-                  color: '#1a1a1a',
-                  letterSpacing: '0.02em',
-                }}
-              >
-                {point.date}
-              </span>
-            ) : null;
-          })}
-        </div>
+        {view.type !== 'month' && (
+          <div style={{ position: 'relative', height: '10px' }}>
+            {points.map((point, i) => {
+              const showLabel = view.type === 'all' ? i % 2 === 0 : true;
+              const barLeft = paddingX + i * (barWidth + barSpacing);
+              const barCenter = barLeft + barWidth / 2;
+              const leftPercent = (barCenter / chartWidth) * 100;
+              return showLabel ? (
+                <span
+                  key={i}
+                  style={{
+                    position: 'absolute',
+                    left: `${leftPercent}%`,
+                    bottom: 0,
+                    transform: 'translateX(-50%)',
+                    fontSize: '9px',
+                    fontWeight: 500,
+                    color: '#1a1a1a',
+                    letterSpacing: '0.02em',
+                  }}
+                >
+                  {point.date}
+                </span>
+              ) : null;
+            })}
+          </div>
+        )}
 
         {/* Navigation dots */}
         <div style={{
