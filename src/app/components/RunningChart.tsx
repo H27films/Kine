@@ -252,7 +252,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
             >
                   {points.map((d, i) => {
                 const x = paddingX + i * (barWidth + barSpacing);
-                const barHeight = Math.max(d.value === 0 ? 1 : 4, ((d.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
+                const barHeight = d.value === 0 ? 0.5 : Math.max(4, ((d.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
                 const y = paddingY + plotHeight - barHeight;
                 const pct = (d.value - minValue) / (maxValue - minValue);
                 const opacity = 0.15 + (Math.max(pct, 0) * 0.85);
