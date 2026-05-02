@@ -54,6 +54,8 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
     { label: 'Cardio',   icon: ({ size }: { size?: number }) => <NewRunningManIcon size={size} />, page: 'cardio'    },
     { label: 'Calories', icon: ({ size }: { size?: number }) => <NewCaloriesIcon size={size} />,  page: 'calories'  },
     { label: 'Data+',    icon: BarChart3,                                                       page: 'analytics' },
+    { label: 'Weights+', icon: DumbbellIcon,                                                    page: 'weights-plus' },
+    { label: 'Run+',     icon: ({ size }: { size?: number }) => <NewRunningManIcon size={size} />, page: 'running-plus' },
   ];
 
   const isDashboard = !title;
