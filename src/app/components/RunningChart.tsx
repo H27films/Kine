@@ -383,7 +383,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                 AVG
               </div>
               <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
-                {Math.round(points.reduce((sum, d) => sum + d.value, 0) / points.length).toLocaleString()}
+                {sessionCount > 0 ? Math.round(total / sessionCount) : 0}
               </div>
               <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em', color: '#1a1a1a', marginTop: '2px', textTransform: 'uppercase' }}>
                 All {view.type === 'week' ? 'days' : view.type === 'month' ? 'days' : 'weeks'}
