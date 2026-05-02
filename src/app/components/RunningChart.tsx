@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 interface RunningWorkout {
@@ -421,25 +420,31 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
         })}
       </div>
 
-      {/* Navigation arrows */}
-      <button
-        onClick={() => currentIndex > 0 && setCurrentIndex(currentIndex - 1)}
-        style={{
-          position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)',
-          background: 'none', border: 'none', color: currentIndex > 0 ? '#1a1a1a' : '#ccc', fontSize: '24px'
-        }}
-      >
-        <ChevronLeft />
-      </button>
-      <button
-        onClick={() => currentIndex < chartViews.length - 1 && setCurrentIndex(currentIndex + 1)}
-        style={{
-          position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)',
-          background: 'none', border: 'none', color: currentIndex < chartViews.length - 1 ? '#1a1a1a' : '#ccc', fontSize: '24px'
-        }}
-      >
-        <ChevronRight />
-      </button>
+      {/* Navigation dots */}
+      <div style={{
+        position: 'absolute',
+        bottom: '20px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        display: 'flex',
+        gap: '12px'
+      }}>
+        {chartViews.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentIndex(index)}
+            style={{
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              border: 'none',
+              backgroundColor: currentIndex === index ? '#1a1a1a' : '#ccc',
+              cursor: 'pointer',
+              transition: 'background-color 0.2s'
+            }}
+          />
+        ))}
+      </div>
 
 
     </div>
