@@ -1,0 +1,447 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
+
+interface RunningWorkout {
+  id: string;
+  date: string;
+  total_cardio: number;
+  time: string | null;
+  week: number;
+}
+
+interface DataPoint {
+  occurrence: number;
+  value: number;
+  date: string;
+  workoutId: string;
+}
+
+interface RunningChartProps {
+  // No props needed, data loaded internally
+}
+
+const parseTimeToHours = (time: string | null): number | null => {
+  if (!time) return null;
+  const parts = time.split(':');
+  if (parts.length !== 3) return null;
+  const hours = parseFloat(parts[0]) + parseFloat(parts[1]) / 60 + parseFloat(parts[2]) / 3600;
+  return hours;
+};
+
+const calculateSpeed = (km: number, time: string | null): number | null => {
+  const hours = parseTimeToHours(time);
+  if (!hours || hours === 0) return null;
+  return km / hours;
+};
+
+export const RunningChart: React.FC<RunningChartProps> = () => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [workouts, setWorkouts] = useState<RunningWorkout[]>([]);
+  const [loading, setLoading] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+  const chartViews = [
+    { label: 'CURRENT WEEK', type: 'week' },
+    { label: 'CURRENT MONTH', type: 'month' },
+    { label: 'ALL DATA', type: 'all' },
+  ];
+
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+    const { data } = await supabase
+      .from('workouts')
+      .select('id, date, total_cardio, time, week')
+      .eq('exercise_id', 84)
+      .not('total_cardio', 'is', null)
+      .order('date', { ascending: true });
+
+      if (data) {
+        setWorkouts(data as RunningWorkout[]);
+      }
+      setLoading(false);
+    };
+    loadData();
+  }, []);
+
+  const getCurrentWeek = () => {
+    const now = new Date();
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+    const days = Math.floor((now.getTime() - startOfYear.getTime()) / (24 * 60 * 60 * 1000));
+    return Math.ceil((days + startOfYear.getDay() + 1) / 7);
+  };
+
+  const getCurrentMonth = () => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  };
+
+  const prepareWeekData = () => {
+    const currentWeek = getCurrentWeek();
+    const weekWorkouts = workouts.filter(w => w.week === currentWeek);
+    const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const dayData = dayLabels.map((label, index) => {
+      const dayWorkouts = weekWorkouts.filter(w => {
+        const d = new Date(w.date + 'T00:00:00');
+        return d.getDay() === (index === 6 ? 0 : index + 1); // Mon=1, Sun=0
+      });
+      const totalKm = dayWorkouts.reduce((sum, w) => sum + (w.total_cardio || 0), 0);
+      const speeds = dayWorkouts.map(w => calculateSpeed(w.total_cardio || 0, w.time)).filter(s => s !== null) as number[];
+      const avgSpeed = speeds.length > 0 ? speeds.reduce((a, b) => a + b, 0) / speeds.length : null;
+      return { label, km: totalKm, avgSpeed, sessions: dayWorkouts.length };
+    });
+    return dayData;
+  };
+
+  const prepareMonthData = () => {
+    const currentMonth = getCurrentMonth();
+    const monthWorkouts = workouts.filter(w => w.date.startsWith(currentMonth));
+    const daysInMonth = new Date(parseInt(currentMonth.split('-')[0]), parseInt(currentMonth.split('-')[1]), 0).getDate();
+    const dayData = Array.from({ length: daysInMonth }, (_, i) => {
+      const day = i + 1;
+      const dayStr = `${currentMonth}-${String(day).padStart(2, '0')}`;
+      const dayWorkouts = monthWorkouts.filter(w => w.date === dayStr);
+      const totalKm = dayWorkouts.reduce((sum, w) => sum + (w.total_cardio || 0), 0);
+      const speeds = dayWorkouts.map(w => calculateSpeed(w.total_cardio || 0, w.time)).filter(s => s !== null) as number[];
+      const avgSpeed = speeds.length > 0 ? speeds.reduce((a, b) => a + b, 0) / speeds.length : null;
+      return { label: String(day), km: totalKm, avgSpeed, sessions: dayWorkouts.length };
+    });
+    return dayData;
+  };
+
+  const prepareAllData = () => {
+    // Group by week for all data
+    const weekGroups: Record<number, { km: number; speeds: number[]; sessions: number }> = {};
+    workouts.forEach(w => {
+      const week = w.week;
+      if (!weekGroups[week]) weekGroups[week] = { km: 0, speeds: [], sessions: 0 };
+      weekGroups[week].km += w.total_cardio || 0;
+      const speed = calculateSpeed(w.total_cardio || 0, w.time);
+      if (speed !== null) weekGroups[week].speeds.push(speed);
+      weekGroups[week].sessions++;
+    });
+    const sortedWeeks = Object.keys(weekGroups).map(Number).sort((a, b) => a - b);
+    return sortedWeeks.map(week => {
+      const data = weekGroups[week];
+      const avgSpeed = data.speeds.length > 0 ? data.speeds.reduce((a, b) => a + b, 0) / data.speeds.length : null;
+      return { label: `W${week}`, km: data.km, avgSpeed, sessions: data.sessions };
+    });
+  };
+
+  const getDataForView = (type: string) => {
+    switch (type) {
+      case 'week': return prepareWeekData();
+      case 'month': return prepareMonthData();
+      case 'all': return prepareAllData();
+      default: return [];
+    }
+  };
+
+  const getStats = () => {
+    const allSpeeds = workouts.map(w => calculateSpeed(w.total_cardio || 0, w.time)).filter(s => s !== null) as number[];
+    const allKm = workouts.map(w => w.total_cardio || 0);
+    const maxKm = allKm.length > 0 ? Math.max(...allKm) : 0;
+    const avgKm = allKm.length > 0 ? allKm.reduce((a, b) => a + b, 0) / allKm.length : 0;
+    const maxSpeed = allSpeeds.length > 0 ? Math.max(...allSpeeds) : 0;
+    const avgSpeed = allSpeeds.length > 0 ? allSpeeds.reduce((a, b) => a + b, 0) / allSpeeds.length : 0;
+    const totalKm = allKm.reduce((a, b) => a + b, 0);
+    return { maxKm, avgKm, maxSpeed, avgSpeed, totalKm, totalSessions: workouts.length };
+  };
+
+  const stats = getStats();
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+    if (isLeftSwipe && currentIndex < chartViews.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    }
+    if (isRightSwipe && currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+    }
+  };
+
+  const renderChartArea = (view: { label: string; type: string }, data: any[]) => {
+    const points: DataPoint[] = data.map((d, i) => ({
+      occurrence: view.type === 'week' ? i + 1 : view.type === 'month' ? parseInt(d.label) : parseInt(d.label.replace('W', '')),
+      value: d.km,
+      date: d.label,
+      workoutId: `${view.type}-${i}`
+    }));
+    const total = points.reduce((sum, p) => sum + p.value, 0);
+    const sessionCount = data.reduce((sum, d) => sum + d.sessions, 0);
+    const metricLabel = 'KM';
+
+    // Simple bar chart
+    const chartHeight = 220;
+    const chartWidth = 340;
+    const paddingX = 8;
+    const paddingY = 20;
+    const plotWidth = chartWidth - paddingX * 2;
+    const plotHeight = chartHeight - paddingY * 2;
+
+    const minValue = points.length > 0 ? Math.min(...points.map(d => d.value)) : 0;
+    const maxValue = points.length > 0 ? Math.max(...points.map(d => d.value)) : 100;
+    const yMin = Math.min(0, minValue - (maxValue - minValue) * 0.1);
+    const yMax = maxValue + (maxValue - minValue) * 0.1 || 10;
+
+    const barWidth = points.length > 0 ? Math.max(8, plotWidth / points.length - 4) : 0;
+    const barSpacing = 4;
+
+    return (
+      <div>
+        {/* Period header */}
+        <div style={{
+          fontFamily: "'Inconsolata', monospace",
+          fontSize: '24px',
+          fontWeight: 348,
+          fontStretch: '175%',
+          letterSpacing: '0.08em',
+          color: 'rgba(0,0,0,0.2)',
+          textTransform: 'uppercase',
+          marginBottom: '4px'
+        }}>
+          {view.label}
+        </div>
+
+        {/* Big number */}
+        <div className="flex items-start justify-between" style={{ marginBottom: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
+            <div style={{ fontSize: '64px', fontWeight: 900, lineHeight: 1, letterSpacing: '-0.04em', color: '#1a1a1a' }}>
+              {total.toLocaleString()}
+            </div>
+          </div>
+          <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+            <div style={{ fontSize: '14px', fontWeight: 500, letterSpacing: '0.15em', color: '#999', textTransform: 'uppercase' }}>
+              {metricLabel}
+            </div>
+            <div style={{
+              width: '26px', height: '26px', borderRadius: '50%',
+              backgroundColor: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              marginTop: '6px',
+            }}>
+              <span style={{ fontSize: '11px', fontWeight: 900, color: '#fff', lineHeight: 1 }}>
+                {sessionCount}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Chart */}
+        <div style={{ height: '220px', position: 'relative', marginBottom: '2px' }}>
+          {points.length > 0 ? (
+            <svg
+              width="100%"
+              height="100%"
+              viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+              preserveAspectRatio="none"
+              style={{ overflow: 'visible' }}
+            >
+              {points.map((d, i) => {
+                const x = paddingX + i * (barWidth + barSpacing);
+                const barHeight = Math.max(4, ((d.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
+                const y = paddingY + plotHeight - barHeight;
+                const pct = (d.value - minValue) / (maxValue - minValue);
+                const opacity = 0.15 + (Math.max(pct, 0) * 0.85);
+                return (
+                  <path
+                    key={d.workoutId}
+                    d={`M ${x},${y + barHeight} L ${x},${y + 2} A 2 2 0 0 1 ${x + barWidth},${y + 2} L ${x + barWidth},${y + barHeight} Z`}
+                    fill="#1a1a1a"
+                    fillOpacity={opacity}
+                  />
+                );
+              })}
+            </svg>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#999', fontSize: '12px' }}>
+              No data
+            </div>
+          )}
+        </div>
+
+        {/* X-axis labels */}
+        <div style={{ position: 'relative', height: '10px' }}>
+          {points.map((point, i) => {
+            const showLabel = view.type === 'all' ? i % 2 === 0 : true;
+            const barLeft = paddingX + i * (barWidth + barSpacing);
+            const barCenter = barLeft + barWidth / 2;
+            const leftPercent = (barCenter / chartWidth) * 100;
+            return showLabel ? (
+              <span
+                key={i}
+                style={{
+                  position: 'absolute',
+                  left: `${leftPercent}%`,
+                  bottom: 0,
+                  transform: 'translateX(-50%)',
+                  fontSize: '9px',
+                  fontWeight: 500,
+                  color: '#1a1a1a',
+                  letterSpacing: '0.02em',
+                }}
+              >
+                {point.date}
+              </span>
+            ) : null;
+          })}
+        </div>
+
+        {/* MAX/AVG stats */}
+        {points.length > 0 && (
+          <div style={{ marginTop: '28px', display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+            <div>
+              <div style={{
+                fontFamily: "'Inconsolata', monospace",
+                fontSize: '22px',
+                fontWeight: 348,
+                fontStretch: '175%',
+                letterSpacing: '0.06em',
+                color: 'rgba(0,0,0,0.35)',
+                textTransform: 'uppercase',
+              }}>
+                MAX
+              </div>
+              <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
+                {Math.max(...points.map(d => d.value)).toLocaleString()}
+              </div>
+              <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em', color: '#1a1a1a', marginTop: '2px', textTransform: 'uppercase' }}>
+                {view.type === 'week' ? 'Day' : view.type === 'month' ? 'Day' : 'Week'} {points.reduce((max, d) => d.value > max.value ? d : max).occurrence}
+              </div>
+              {(() => {
+                const speeds = data.map(d => d.avgSpeed).filter(s => s !== null) as number[];
+                const maxSpeed = speeds.length > 0 ? Math.max(...speeds) : 0;
+                return maxSpeed > 0 ? (
+                  <div style={{ marginTop: '8px' }}>
+                    <div style={{
+                      fontFamily: "'Inconsolata', monospace",
+                      fontSize: '22px',
+                      fontWeight: 348,
+                      fontStretch: '175%',
+                      letterSpacing: '0.06em',
+                      color: 'rgba(0,0,0,0.35)',
+                      textTransform: 'uppercase',
+                    }}>
+                      SPEED
+                    </div>
+                    <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
+                      {maxSpeed.toFixed(1)} KM/H
+                    </div>
+                  </div>
+                ) : null;
+              })()}
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <div style={{
+                fontFamily: "'Inconsolata', monospace",
+                fontSize: '22px',
+                fontWeight: 348,
+                fontStretch: '175%',
+                letterSpacing: '0.06em',
+                color: 'rgba(0,0,0,0.35)',
+                textTransform: 'uppercase',
+                textAlign: 'right',
+              }}>
+                AVG
+              </div>
+              <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
+                {Math.round(points.reduce((sum, d) => sum + d.value, 0) / points.length).toLocaleString()}
+              </div>
+              <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em', color: '#1a1a1a', marginTop: '2px', textTransform: 'uppercase' }}>
+                All {view.type === 'week' ? 'days' : view.type === 'month' ? 'days' : 'weeks'}
+              </div>
+              {(() => {
+                const speeds = data.map(d => d.avgSpeed).filter(s => s !== null) as number[];
+                const avgSpeed = speeds.length > 0 ? speeds.reduce((a, b) => a + b, 0) / speeds.length : 0;
+                return avgSpeed > 0 ? (
+                  <div style={{ marginTop: '8px', textAlign: 'right' }}>
+                    <div style={{
+                      fontFamily: "'Inconsolata', monospace",
+                      fontSize: '22px',
+                      fontWeight: 348,
+                      fontStretch: '175%',
+                      letterSpacing: '0.06em',
+                      color: 'rgba(0,0,0,0.35)',
+                      textTransform: 'uppercase',
+                      textAlign: 'right',
+                    }}>
+                      SPEED
+                    </div>
+                    <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
+                      {avgSpeed.toFixed(1)} KM/H
+                    </div>
+                  </div>
+                ) : null;
+              })()}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  if (loading) return <div>Loading...</div>;
+
+  return (
+    <div style={{ position: 'relative', overflow: 'hidden' }}>
+      {/* Swipeable container */}
+      <div
+        ref={containerRef}
+        style={{
+          display: 'flex',
+          width: `${chartViews.length * 100}%`,
+          transform: `translateX(-${currentIndex * (100 / chartViews.length)}%)`,
+          transition: 'transform 0.3s ease',
+        }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        {chartViews.map((view, index) => {
+          const data = getDataForView(view.type);
+          return (
+            <div key={index} style={{ width: `${100 / chartViews.length}%`, padding: '0 20px' }}>
+              {renderChartArea(view, data)}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Navigation arrows */}
+      <button
+        onClick={() => currentIndex > 0 && setCurrentIndex(currentIndex - 1)}
+        style={{
+          position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)',
+          background: 'none', border: 'none', color: currentIndex > 0 ? '#1a1a1a' : '#ccc', fontSize: '24px'
+        }}
+      >
+        <ChevronLeft />
+      </button>
+      <button
+        onClick={() => currentIndex < chartViews.length - 1 && setCurrentIndex(currentIndex + 1)}
+        style={{
+          position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)',
+          background: 'none', border: 'none', color: currentIndex < chartViews.length - 1 ? '#1a1a1a' : '#ccc', fontSize: '24px'
+        }}
+      >
+        <ChevronRight />
+      </button>
+
+
+    </div>
+  );
+};
