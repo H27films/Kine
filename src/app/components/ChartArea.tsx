@@ -380,7 +380,7 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                   </div>
                   <div style={{ position: 'relative' }}>
                     <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
-                      {pbCount}
+                      {pbCount} /
                     </div>
                     {pbPercentage > 0 && (
                       <div style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)' }}>
