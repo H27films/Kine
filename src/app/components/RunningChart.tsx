@@ -68,9 +68,9 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
 
   const getCurrentWeek = () => {
     const now = new Date();
-    const startOfYear = new Date(now.getFullYear(), 0, 1);
-    const days = Math.floor((now.getTime() - startOfYear.getTime()) / (24 * 60 * 60 * 1000));
-    return Math.ceil((days + startOfYear.getDay() + 1) / 7);
+    const startDate = new Date('2025-01-06T00:00:00');
+    const msPerWeek = 7 * 24 * 60 * 60 * 1000;
+    return Math.floor((now.getTime() - startDate.getTime()) / msPerWeek) + 1;
   };
 
   const getCurrentMonth = () => {
