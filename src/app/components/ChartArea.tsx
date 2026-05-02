@@ -401,6 +401,29 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
             <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em', color: '#1a1a1a', marginTop: '2px', textTransform: 'uppercase' }}>
               All weeks
             </div>
+            {(() => {
+              const totalPb = Object.values(pbCounts).reduce((sum, count) => sum + count, 0);
+              const avgPb = data.length > 0 ? Math.round(totalPb / data.length) : 0;
+              return totalPb > 0 ? (
+                <div style={{ marginTop: '8px', textAlign: 'right' }}>
+                  <div style={{
+                    fontFamily: "'Inconsolata', monospace",
+                    fontSize: '22px',
+                    fontWeight: 348,
+                    fontStretch: '175%',
+                    letterSpacing: '0.06em',
+                    color: 'rgba(0,0,0,0.35)',
+                    textTransform: 'uppercase',
+                    textAlign: 'right',
+                  }}>
+                    AVG
+                  </div>
+                  <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
+                    {avgPb}
+                  </div>
+                </div>
+              ) : null;
+            })()}
           </div>
         </div>
       )}
