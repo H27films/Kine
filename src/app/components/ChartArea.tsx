@@ -436,6 +436,7 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
               const totalPb = Object.values(pbCounts).reduce((sum, count) => sum + count, 0);
               const totalExercises = Object.values(exerciseCounts).reduce((sum, count) => sum + count, 0);
               const pbPercentage = totalExercises > 0 ? Math.round((totalPb / totalExercises) * 100) : 0;
+              const avgPb = data.length > 0 ? Math.round(totalPb / data.length) : 0;
               return totalPb > 0 ? (
                 <div style={{ marginTop: '8px', textAlign: 'right' }}>
                   <div style={{
@@ -452,7 +453,7 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px' }}>
                     <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
-                      {totalPb}
+                      {avgPb}
                     </div>
                     <span style={{ fontSize: '18px', fontWeight: 600, color: '#1a1a1a' }}>/</span>
                     <svg width={36} height={36} viewBox="0 0 36 36">
