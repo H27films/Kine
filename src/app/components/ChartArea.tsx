@@ -378,32 +378,34 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                   }}>
                     PB
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
+                  <div style={{ position: 'relative' }}>
                     <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
                       {pbCount}
                     </div>
                     {pbPercentage > 0 && (
-                      <svg width={40} height={40} viewBox="0 0 40 40">
-                        {Array.from({ length: 20 }, (_, i) => {
-                          const angle = (i / 20) * 2 * Math.PI - Math.PI / 2;
-                          const cx = 20;
-                          const cy = 20;
-                          const r = 15;
-                          const x = cx + r * Math.cos(angle);
-                          const y = cy + r * Math.sin(angle);
-                          const filled = Math.round((pbPercentage / 100) * 20);
-                          return (
-                            <circle
-                              key={i}
-                              cx={x} cy={y} r={1.8}
-                              fill={i < filled ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.1)'}
-                            />
-                          );
-                        })}
-                        <text x={20} y={23} textAnchor="middle" fill="rgba(0,0,0,0.8)" fontSize="8" fontWeight="700">
-                          {pbPercentage}%
-                        </text>
-                      </svg>
+                      <div style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)' }}>
+                        <svg width={40} height={40} viewBox="0 0 40 40">
+                          {Array.from({ length: 20 }, (_, i) => {
+                            const angle = (i / 20) * 2 * Math.PI - Math.PI / 2;
+                            const cx = 20;
+                            const cy = 20;
+                            const r = 15;
+                            const x = cx + r * Math.cos(angle);
+                            const y = cy + r * Math.sin(angle);
+                            const filled = Math.round((pbPercentage / 100) * 20);
+                            return (
+                              <circle
+                                key={i}
+                                cx={x} cy={y} r={1.8}
+                                fill={i < filled ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.1)'}
+                              />
+                            );
+                          })}
+                          <text x={20} y={23} textAnchor="middle" fill="rgba(0,0,0,0.8)" fontSize="8" fontWeight="700">
+                            {pbPercentage}%
+                          </text>
+                        </svg>
+                      </div>
                     )}
                   </div>
                 </div>
