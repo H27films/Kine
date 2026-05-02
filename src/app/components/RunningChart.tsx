@@ -264,18 +264,20 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                       fill="#1a1a1a"
                       fillOpacity={opacity}
                     />
-                    <text
-                      x={x + barWidth / 2}
-                      y={y + barHeight / 2}
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      fill="#f2f2f2"
-                      fontSize="10px"
-                      fontWeight="600"
-                      fontFamily="'JetBrains Mono', monospace"
-                    >
-                      {label}
-                    </text>
+                    {d.value > 0 && (
+                      <text
+                        x={x + barWidth / 2}
+                        y={y + barHeight / 2}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        fill="#f2f2f2"
+                        fontSize="10px"
+                        fontWeight="600"
+                        fontFamily="'JetBrains Mono', monospace"
+                      >
+                        {d.value.toFixed(1)}
+                      </text>
+                    )}
                   </g>
                 );
               })}
