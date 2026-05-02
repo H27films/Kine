@@ -267,24 +267,47 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                 const label = d.value === 0 ? '0.0' : d.value.toFixed(1);
                 return (
                   <g key={d.workoutId}>
-                    <path
-                      d={`M ${x},${y + barHeight} L ${x},${y} L ${x + barWidth},${y} L ${x + barWidth},${y + barHeight} Z`}
-                      fill="#1a1a1a"
-                      fillOpacity={opacity}
-                    />
-                    {d.value > 0 && view.type === 'week' && (
-                      <text
-                        x={x + barWidth / 2}
-                        y={y + barHeight / 2}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                        fill="#f2f2f2"
-                        fontSize="10px"
-                        fontWeight="600"
-                        fontFamily="'JetBrains Mono', monospace"
-                      >
-                        {d.value.toFixed(1)}
-                      </text>
+                    {view.type === 'month' ? (
+                      d.value > 0 ? (
+                        <>
+                          <line
+                            x1={x + barWidth / 2}
+                            y1={paddingY + plotHeight}
+                            x2={x + barWidth / 2}
+                            y2={y}
+                            stroke="#1a1a1a"
+                            strokeWidth="1"
+                          />
+                          <circle
+                            cx={x + barWidth / 2}
+                            cy={y}
+                            r={Math.max(2, Math.min(8, 2 + (d.value / maxValue) * 6))}
+                            fill="#1a1a1a"
+                          />
+                        </>
+                      ) : null
+                    ) : (
+                      <>
+                        <path
+                          d={`M ${x},${y + barHeight} L ${x},${y} L ${x + barWidth},${y} L ${x + barWidth},${y + barHeight} Z`}
+                          fill="#1a1a1a"
+                          fillOpacity={opacity}
+                        />
+                        {d.value > 0 && view.type === 'week' && (
+                          <text
+                            x={x + barWidth / 2}
+                            y={y + barHeight / 2}
+                            textAnchor="middle"
+                            dominantBaseline="middle"
+                            fill="#f2f2f2"
+                            fontSize="10px"
+                            fontWeight="600"
+                            fontFamily="'JetBrains Mono', monospace"
+                          >
+                            {d.value.toFixed(1)}
+                          </text>
+                        )}
+                      </>
                     )}
                   </g>
                 );
