@@ -12,6 +12,7 @@ interface RunningWorkout {
 interface DataPoint {
   occurrence: number;
   value: number;
+  originalValue: number;
   date: string;
   workoutId: string;
 }
@@ -98,7 +99,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
       const totalKm = dayWorkouts.reduce((sum, w) => sum + (w.total_cardio || 0), 0);
       const speeds = dayWorkouts.map(w => calculateSpeed(w.total_cardio || 0, w.time)).filter(s => s !== null) as number[];
       const avgSpeed = speeds.length > 0 ? speeds.reduce((a, b) => a + b, 0) / speeds.length : null;
-      return { label, km: totalKm, avgSpeed, sessions: dayWorkouts.length };
+      return { label, km: totalKm, displayKm: totalKm, originalKm: totalKm, avgSpeed, sessions: dayWorkouts.length };
     });
     return dayData;
   };
@@ -114,8 +115,24 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
       const totalKm = dayWorkouts.reduce((sum, w) => sum + (w.total_cardio || 0), 0);
       const speeds = dayWorkouts.map(w => calculateSpeed(w.total_cardio || 0, w.time)).filter(s => s !== null) as number[];
       const avgSpeed = speeds.length > 0 ? speeds.reduce((a, b) => a + b, 0) / speeds.length : null;
-      return { label: String(day), km: totalKm, avgSpeed, sessions: dayWorkouts.length };
+      return { label: String(day), km: totalKm, displayKm: totalKm, originalKm: totalKm, avgSpeed, sessions: dayWorkouts.length };
     });
+
+    // Apply decaying height for zero values
+    let lastNonZeroKm = 0;
+    let lastNonZeroIndex = -1;
+    for (let i = 0; i < dayData.length; i++) {
+      if (dayData[i].km > 0) {
+        lastNonZeroKm = dayData[i].km;
+        lastNonZeroIndex = i;
+      } else if (lastNonZeroIndex >= 0) {
+        const distance = i - lastNonZeroIndex;
+        dayData[i].displayKm = lastNonZeroKm * Math.pow(0.75, distance);
+      } else {
+        dayData[i].displayKm = 0;
+      }
+    }
+
     return dayData;
   };
 
@@ -134,7 +151,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
     return sortedWeeks.map(week => {
       const data = weekGroups[week];
       const avgSpeed = data.speeds.length > 0 ? data.speeds.reduce((a, b) => a + b, 0) / data.speeds.length : null;
-      return { label: `W${week}`, km: data.km, avgSpeed, sessions: data.sessions };
+      return { label: `W${week}`, km: data.km, displayKm: data.km, originalKm: data.km, avgSpeed, sessions: data.sessions };
     });
   };
 
@@ -185,7 +202,8 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
   const renderChartArea = (view: { label: string; type: string }, data: any[]) => {
     const points: DataPoint[] = data.map((d, i) => ({
       occurrence: view.type === 'week' ? i + 1 : view.type === 'month' ? parseInt(d.label) : parseInt(d.label.replace('W', '')),
-      value: d.km,
+      value: d.displayKm,
+      originalValue: d.originalKm,
       date: d.label,
       workoutId: `${view.type}-${i}`
     }));
@@ -203,6 +221,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
 
     const minValue = points.length > 0 ? Math.min(...points.map(d => d.value)) : 0;
     const maxValue = points.length > 0 ? Math.max(...points.map(d => d.value)) : 100;
+    const originalMax = data.length > 0 ? Math.max(...data.map(d => d.km)) : 0;
     const yMin = Math.min(0, minValue - (maxValue - minValue) * 0.1);
     const yMax = maxValue + (maxValue - minValue) * 0.1 || 10;
 
@@ -273,15 +292,15 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                           x1={x + barWidth / 2}
                           y1={paddingY + plotHeight}
                           x2={x + barWidth / 2}
-                          y2={d.value > 0 ? y : paddingY + plotHeight - 5}
-                          stroke={d.value > 0 ? "#1a1a1a" : "#ccc"}
+                          y2={d.originalValue > 0 ? y : paddingY + plotHeight - 5}
+                          stroke={d.originalValue === 0 ? "#ccc" : "#1a1a1a"}
                           strokeWidth="1"
                         />
-                        {d.value > 0 && (
+                        {d.originalValue > 0 && (
                           <circle
                             cx={x + barWidth / 2}
                             cy={y}
-                            r={Math.max(2, Math.min(8, 2 + (d.value / maxValue) * 6))}
+                            r={Math.max(2, Math.min(8, 2 + (d.originalValue / originalMax) * 6))}
                             fill="#1a1a1a"
                           />
                         )}
