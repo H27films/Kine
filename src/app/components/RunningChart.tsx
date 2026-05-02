@@ -257,12 +257,11 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                 const pct = (d.value - minValue) / (maxValue - minValue);
                 const opacity = 0.15 + (Math.max(pct, 0) * 0.85);
                 return (
-                  <path
-                    key={d.workoutId}
-                    d={`M ${x},${y + barHeight} L ${x},${y + 2} A 2 2 0 0 1 ${x + barWidth},${y + 2} L ${x + barWidth},${y + barHeight} Z`}
-                    fill="#1a1a1a"
-                    fillOpacity={opacity}
-                  />
+                    <path
+                      d={`M ${x},${y + barHeight} L ${x},${y} L ${x + barWidth},${y} L ${x + barWidth},${y + barHeight} Z`}
+                      fill="#1a1a1a"
+                      fillOpacity={opacity}
+                    />
                 );
               })}
             </svg>
