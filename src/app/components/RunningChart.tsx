@@ -272,7 +272,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                       fill="#1a1a1a"
                       fillOpacity={opacity}
                     />
-                    {d.value > 0 && (
+                    {d.value > 0 && view.type === 'week' && (
                       <text
                         x={x + barWidth / 2}
                         y={y + barHeight / 2}
