@@ -207,7 +207,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
       date: d.label,
       workoutId: `${view.type}-${i}`
     }));
-    const total = points.reduce((sum, p) => sum + p.value, 0);
+    const total = view.type === 'month' ? data.reduce((sum, d) => d.originalKm > 0 ? sum + d.originalKm : sum, 0) : points.reduce((sum, p) => sum + p.value, 0);
     const sessionCount = data.reduce((sum, d) => sum + d.sessions, 0);
     const metricLabel = 'KM';
 
