@@ -292,7 +292,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                           x1={x + barWidth / 2}
                           y1={paddingY + plotHeight}
                           x2={x + barWidth / 2}
-                          y2={d.originalValue > 0 ? y : paddingY + plotHeight - 5}
+                          y2={y}
                           stroke={d.originalValue === 0 ? "#ccc" : "#1a1a1a"}
                           strokeWidth="1"
                         />
