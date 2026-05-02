@@ -15,9 +15,10 @@ interface ChartAreaProps {
   metricLabel: string;
   selectedExercise?: string | null;
   category: string;
+  pbCounts?: Record<number, number>;
 }
 
-export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, sessionCount, metricLabel, selectedExercise, category }) => {
+export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, sessionCount, metricLabel, selectedExercise, category, pbCounts = {} }) => {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const displayTotal = total.toLocaleString();
 
@@ -223,6 +224,27 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                         <rect x={tooltipX - 28} y={tooltipY} width="56" height="28" rx="4" fill="rgba(0,0,0,0.06)" />
                         <text x={tooltipX} y={tooltipY + 18} textAnchor="middle" style={{ fontSize: '12px', fontWeight: 900, color: '#1a1a1a', fontFamily: "'JetBrains Mono', monospace" }}>{Math.round(d.value).toLocaleString()}</text>
                       </g>
+                    )}
+                    {/* PB count circle */}
+                    {pbCounts[d.occurrence] && pbCounts[d.occurrence] > 0 && (
+                      <circle
+                        cx={x + barWidth / 2}
+                        cy={paddingY + plotHeight + 12}
+                        r="8"
+                        fill="white"
+                        stroke="#1a1a1a"
+                        strokeWidth="1"
+                      />
+                    )}
+                    {pbCounts[d.occurrence] && pbCounts[d.occurrence] > 0 && (
+                      <text
+                        x={x + barWidth / 2}
+                        y={paddingY + plotHeight + 16}
+                        textAnchor="middle"
+                        style={{ fontSize: '10px', fontWeight: 900, fill: '#1a1a1a', fontFamily: "'JetBrains Mono', monospace" }}
+                      >
+                        {pbCounts[d.occurrence]}
+                      </text>
                     )}
                   </g>
                 );

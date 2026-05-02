@@ -39,6 +39,7 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
   const [data, setData] = useState<DataPoint[]>([]);
   const [total, setTotal] = useState(0);
   const [sessionCount, setSessionCount] = useState(0);
+  const [pbCounts, setPbCounts] = useState<Record<number, number>>({});
 
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [exerciseOpen, setExerciseOpen] = useState(false);
@@ -102,10 +103,29 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
        query = query.eq('exercise_id', selectedExerciseId);
      }
 
-     const { data: rows } = await query;
+      const { data: rows } = await query;
 
-      let points: DataPoint[] = [];
-     let occurrence = 1;
+      // Fetch PB counts per week for aggregate mode
+      let pbCountsData: Record<number, number> = {};
+      if (!selectedExerciseId) {
+        const { data: pbRows } = await supabase
+          .from('workouts')
+          .select('week')
+          .eq('type', category)
+          .eq('pb', 'PB')
+          .not('week', 'is', null);
+
+        if (pbRows) {
+          pbRows.forEach((row: any) => {
+            const week = row.week;
+            pbCountsData[week] = (pbCountsData[week] || 0) + 1;
+          });
+        }
+      }
+      setPbCounts(pbCountsData);
+
+       let points: DataPoint[] = [];
+      let occurrence = 1;
 
      if (rows) {
         if (selectedExerciseId) {
@@ -297,7 +317,7 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
       </div>
 
         <div className="px-5" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', paddingTop: '16px' }}>
-          <ChartArea mode={selectedExercise ? 'exercise' : 'aggregate'} data={data} total={total} sessionCount={sessionCount} metricLabel={metricLabel} selectedExercise={selectedExercise} category={category} />
+          <ChartArea mode={selectedExercise ? 'exercise' : 'aggregate'} data={data} total={total} sessionCount={sessionCount} metricLabel={metricLabel} selectedExercise={selectedExercise} category={category} pbCounts={pbCounts} />
         </div>
 
 
