@@ -250,18 +250,33 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
               preserveAspectRatio="none"
               style={{ overflow: 'visible' }}
             >
-              {points.map((d, i) => {
+                  {points.map((d, i) => {
                 const x = paddingX + i * (barWidth + barSpacing);
                 const barHeight = Math.max(4, ((d.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
                 const y = paddingY + plotHeight - barHeight;
                 const pct = (d.value - minValue) / (maxValue - minValue);
                 const opacity = 0.15 + (Math.max(pct, 0) * 0.85);
+                const label = d.value === 0 ? '0.0' : d.value.toFixed(1);
                 return (
+                  <g key={d.workoutId}>
                     <path
                       d={`M ${x},${y + barHeight} L ${x},${y} L ${x + barWidth},${y} L ${x + barWidth},${y + barHeight} Z`}
                       fill="#1a1a1a"
                       fillOpacity={opacity}
                     />
+                    <text
+                      x={x + barWidth / 2}
+                      y={y + barHeight / 2}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fill="#f2f2f2"
+                      fontSize="10px"
+                      fontWeight="600"
+                      fontFamily="'JetBrains Mono', monospace"
+                    >
+                      {label}
+                    </text>
+                  </g>
                 );
               })}
             </svg>
