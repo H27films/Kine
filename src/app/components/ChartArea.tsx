@@ -384,24 +384,24 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                     </div>
                     {pbPercentage > 0 && (
                       <div style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)' }}>
-                        <svg width={40} height={40} viewBox="0 0 40 40">
+                        <svg width={32} height={32} viewBox="0 0 32 32">
                           {Array.from({ length: 20 }, (_, i) => {
                             const angle = (i / 20) * 2 * Math.PI - Math.PI / 2;
-                            const cx = 20;
-                            const cy = 20;
-                            const r = 15;
+                            const cx = 16;
+                            const cy = 16;
+                            const r = 12;
                             const x = cx + r * Math.cos(angle);
                             const y = cy + r * Math.sin(angle);
                             const filled = Math.round((pbPercentage / 100) * 20);
                             return (
                               <circle
                                 key={i}
-                                cx={x} cy={y} r={1.8}
+                                cx={x} cy={y} r={1.4}
                                 fill={i < filled ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.1)'}
                               />
                             );
                           })}
-                          <text x={20} y={23} textAnchor="middle" fill="rgba(0,0,0,0.8)" fontSize="8" fontWeight="700">
+                          <text x={16} y={19} textAnchor="middle" fill="rgba(0,0,0,0.8)" fontSize="6" fontWeight="700">
                             {pbPercentage}%
                           </text>
                         </svg>
