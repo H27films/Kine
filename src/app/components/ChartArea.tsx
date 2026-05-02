@@ -336,6 +336,51 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
           })}
         </div>
       ) : null}
+
+      {/* MAX/AVG stats for aggregate mode */}
+      {mode === 'aggregate' && data.length > 0 && (
+        <div style={{ marginTop: '28px', display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{
+              fontFamily: "'Inconsolata', monospace",
+              fontSize: '22px',
+              fontWeight: 348,
+              fontStretch: '175%',
+              letterSpacing: '0.06em',
+              color: 'rgba(0,0,0,0.35)',
+              textTransform: 'uppercase',
+            }}>
+              MAX
+            </div>
+            <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
+              {Math.max(...data.map(d => d.value)).toLocaleString()}
+            </div>
+            <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em', color: '#1a1a1a', marginTop: '2px', textTransform: 'uppercase' }}>
+              Week {data.reduce((max, d) => d.value > max.value ? d : max).occurrence}
+            </div>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{
+              fontFamily: "'Inconsolata', monospace",
+              fontSize: '22px',
+              fontWeight: 348,
+              fontStretch: '175%',
+              letterSpacing: '0.06em',
+              color: 'rgba(0,0,0,0.35)',
+              textTransform: 'uppercase',
+              textAlign: 'right',
+            }}>
+              AVG
+            </div>
+            <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
+              {Math.round(data.reduce((sum, d) => sum + d.value, 0) / data.length).toLocaleString()}
+            </div>
+            <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em', color: '#1a1a1a', marginTop: '2px', textTransform: 'uppercase' }}>
+              All weeks
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
