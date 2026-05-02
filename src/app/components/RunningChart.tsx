@@ -300,6 +300,31 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
           })}
         </div>
 
+        {/* Navigation dots */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          gap: '12px',
+          marginTop: '16px',
+          marginBottom: '16px'
+        }}>
+          {chartViews.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentIndex(index)}
+              style={{
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                border: 'none',
+                backgroundColor: currentIndex === index ? '#1a1a1a' : '#ccc',
+                cursor: 'pointer',
+                transition: 'background-color 0.2s'
+              }}
+            />
+          ))}
+        </div>
+
         {/* MAX/AVG stats */}
         {points.length > 0 && (
           <div style={{ marginTop: '28px', display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
@@ -420,31 +445,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
         })}
       </div>
 
-      {/* Navigation dots */}
-      <div style={{
-        position: 'absolute',
-        bottom: '20px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        display: 'flex',
-        gap: '12px'
-      }}>
-        {chartViews.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => setCurrentIndex(index)}
-            style={{
-              width: '8px',
-              height: '8px',
-              borderRadius: '50%',
-              border: 'none',
-              backgroundColor: currentIndex === index ? '#1a1a1a' : '#ccc',
-              cursor: 'pointer',
-              transition: 'background-color 0.2s'
-            }}
-          />
-        ))}
-      </div>
+
 
 
     </div>
