@@ -382,9 +382,9 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                     <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1, display: 'inline' }}>
                       {pbCount}
                     </div>
-                    <span style={{ fontSize: '18px', fontWeight: 600, color: '#1a1a1a', marginLeft: '7px', marginRight: '4px' }}>/</span>
+                    <span style={{ fontSize: '18px', fontWeight: 600, color: '#1a1a1a', marginLeft: '7px', marginRight: '12px' }}>/</span>
                     {pbPercentage > 0 && (
-                      <div style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)' }}>
+                      <div style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', marginLeft: '8px' }}>
                         <svg width={36} height={36} viewBox="0 0 36 36">
                           {Array.from({ length: 20 }, (_, i) => {
                             const angle = (i / 20) * 2 * Math.PI - Math.PI / 2;
@@ -454,8 +454,8 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                     <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1, display: 'inline' }}>
                       {totalPb}
                     </div>
-                    <span style={{ fontSize: '18px', fontWeight: 600, color: '#1a1a1a', marginLeft: '7px', marginRight: '4px' }}>/</span>
-                    <div style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', marginLeft: '4px' }}>
+                    <span style={{ fontSize: '18px', fontWeight: 600, color: '#1a1a1a', marginLeft: '7px', marginRight: '12px' }}>/</span>
+                    <div style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', marginLeft: '8px' }}>
                       <svg width={36} height={36} viewBox="0 0 36 36">
                         {Array.from({ length: 20 }, (_, i) => {
                           const angle = (i / 20) * 2 * Math.PI - Math.PI / 2;
