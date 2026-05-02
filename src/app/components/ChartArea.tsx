@@ -229,19 +229,17 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                     {pbCounts[d.occurrence] && pbCounts[d.occurrence] > 0 && (
                       <circle
                         cx={x + barWidth / 2}
-                        cy={paddingY + plotHeight + 12}
-                        r="8"
+                        cy={y + barHeight - 8}
+                        r="5"
                         fill="white"
-                        stroke="#1a1a1a"
-                        strokeWidth="1"
                       />
                     )}
                     {pbCounts[d.occurrence] && pbCounts[d.occurrence] > 0 && (
                       <text
                         x={x + barWidth / 2}
-                        y={paddingY + plotHeight + 16}
+                        y={y + barHeight - 4}
                         textAnchor="middle"
-                        style={{ fontSize: '10px', fontWeight: 900, fill: '#1a1a1a', fontFamily: "'JetBrains Mono', monospace" }}
+                        style={{ fontSize: '9px', fontWeight: 900, fill: '#1a1a1a', fontFamily: "'JetBrains Mono', monospace" }}
                       >
                         {pbCounts[d.occurrence]}
                       </text>
