@@ -209,6 +209,12 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
     }));
     const total = view.type === 'month' ? data.reduce((sum, d) => d.originalKm > 0 ? sum + d.originalKm : sum, 0) : points.reduce((sum, p) => sum + p.value, 0);
     const sessionCount = data.reduce((sum, d) => sum + d.sessions, 0);
+    const avgDenominator = view.type === 'all' ? (() => {
+      const weeks = data.map(d => parseInt(d.label.replace('W', '')));
+      const minWeek = Math.min(...weeks);
+      const maxWeek = Math.max(...weeks);
+      return maxWeek - minWeek + 1;
+    })() : points.length;
     const metricLabel = 'KM';
 
     // Simple bar chart
@@ -408,8 +414,8 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
               }}>
                 MAX
               </div>
-              <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
-                {Math.max(...points.map(d => d.value)).toLocaleString()}<span style={{ fontSize: '16px', fontWeight: 200, color: '#999', marginLeft: '2px' }}>KM</span>
+            <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
+                {Math.round(points.reduce((sum, d) => sum + d.value, 0) / avgDenominator).toLocaleString()}<span style={{ fontSize: '16px', fontWeight: 200, color: '#999', marginLeft: '1px' }}>KM</span>
               </div>
               <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em', color: '#1a1a1a', marginTop: '2px', textTransform: 'uppercase' }}>
                 {view.type === 'week' ? 'Day' : view.type === 'month' ? 'Day' : 'Week'} {points.reduce((max, d) => d.value > max.value ? d : max).occurrence}
