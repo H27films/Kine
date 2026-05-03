@@ -152,7 +152,7 @@ export const RunningPlus: React.FC<RunningPlusProps> = ({ onNavigate }) => {
       </div>
 
       {/* Chart area */}
-      <div className="px-5" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', paddingTop: '16px' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', paddingTop: '16px', paddingLeft: '5px', paddingRight: '5px' }}>
         <RunningChart />
       </div>
 
