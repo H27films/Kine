@@ -366,7 +366,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                               fontWeight="900"
                               fill="#1a1a1a"
                             >
-                              {d.originalValue.toFixed(1)} KM
+                              {d.originalValue.toFixed(1)}
                             </text>
                           </g>
                         )}
