@@ -44,12 +44,13 @@ const calculateSpeed = (km: number, time: string | null): number | null => {
 };
 
 export const RunningChart: React.FC<RunningChartProps> = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [workouts, setWorkouts] = useState<RunningWorkout[]>([]);
-  const [loading, setLoading] = useState(true);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+   const [currentIndex, setCurrentIndex] = useState(0);
+   const [workouts, setWorkouts] = useState<RunningWorkout[]>([]);
+   const [loading, setLoading] = useState(true);
+   const containerRef = useRef<HTMLDivElement>(null);
+   const [touchStart, setTouchStart] = useState<number | null>(null);
+   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+   const [selectedBarIdx, setSelectedBarIdx] = useState<number | null>(null);
 
   const chartViews = [
     { label: 'CURRENT WEEK', type: 'week' },
@@ -177,10 +178,10 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
 
   const stats = getStats();
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
-  };
+   useEffect(() => {
+     // Reset selected bar when view changes
+     setSelectedBarIdx(null);
+   }, [currentIndex]);
 
   const handleTouchMove = (e: React.TouchEvent) => {
     setTouchEnd(e.targetTouches[0].clientX);
@@ -285,6 +286,8 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                 const pct = (d.value - minValue) / (maxValue - minValue);
                 const opacity = 0.15 + (Math.max(pct, 0) * 0.85);
                 const label = d.value === 0 ? '0.0' : d.value.toFixed(1);
+                const isAllView = view.type === 'all';
+                const isSelected = selectedBarIdx === i;
                 return (
                   <g key={d.workoutId}>
                     {view.type === 'month' ? (
@@ -312,6 +315,8 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                           d={`M ${x},${y + barHeight} L ${x},${y} L ${x + barWidth},${y} L ${x + barWidth},${y + barHeight} Z`}
                           fill="#1a1a1a"
                           fillOpacity={opacity}
+                          onClick={() => isAllView && setSelectedBarIdx(isSelected ? null : i)}
+                          style={{ cursor: isAllView ? 'pointer' : 'default' }}
                         />
                         {d.value > 0 && view.type === 'week' && (
                           <text
@@ -326,6 +331,30 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                           >
                             {d.value.toFixed(1)}
                           </text>
+                        )}
+                        {isSelected && isAllView && (
+                          <g>
+                            <rect
+                              x={x + barWidth / 2 - 24}
+                              y={y - 28}
+                              width="48"
+                              height="22"
+                              rx="4"
+                              fill="rgba(0,0,0,0.06)"
+                            />
+                            <text
+                              x={x + barWidth / 2}
+                              y={y - 16}
+                              textAnchor="middle"
+                              dominantBaseline="middle"
+                              fontFamily="'JetBrains Mono', monospace"
+                              fontSize="12px"
+                              fontWeight="900"
+                              fill="#1a1a1a"
+                            >
+                              {d.originalKm.toFixed(1)} KM
+                            </text>
+                          </g>
                         )}
                       </>
                     )}
