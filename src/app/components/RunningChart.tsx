@@ -341,10 +341,10 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                            onClick={() => isAllView && setSelectedBarIdx(isSelected ? null : i)}
                            style={{ cursor: isAllView ? 'pointer' : 'default' }}
                          />
-                         {/* Overlay pattern bars (ALL DATA only, 20% height at top) */}
+                         {/* Overlay pattern bars (ALL DATA only, 20% height extending upward from bar top) */}
                          {isAllView && overlayBarHeight > 0 && (
                            <path
-                             d={`M ${x},${y + overlayBarHeight} L ${x},${y} L ${x + barWidth},${y} L ${x + barWidth},${y + overlayBarHeight} Z`}
+                             d={`M ${x},${y} L ${x},${y - overlayBarHeight} L ${x + barWidth},${y - overlayBarHeight} L ${x + barWidth},${y} Z`}
                              fill="url(#squarePattern)"
                              fillOpacity={opacity * 0.6}
                              style={{ pointerEvents: 'none' }}
