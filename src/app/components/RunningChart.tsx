@@ -322,7 +322,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                    const overlayBarHeight = isAllView && d.value > 0 ? barHeight * 0.20 : 0;
 
                    // Paths for WEEK view bars with rounded top corners only (bottom corners flat)
-                   const weekBarRadius = 2;
+                   const weekBarRadius = 1;
                    const bgBarPath = view.type === 'week' ? `M ${bgBarX},${bgBarY + bgBarFullHeight} L ${bgBarX},${bgBarY + weekBarRadius} L ${bgBarX + weekBarRadius},${bgBarY} L ${bgBarX + bgBarWidth - weekBarRadius},${bgBarY} L ${bgBarX + bgBarWidth},${bgBarY + weekBarRadius} L ${bgBarX + bgBarWidth},${bgBarY + bgBarFullHeight} Z` : '';
                    const fgBarPath = view.type === 'week' ? `M ${x},${y + barHeight} L ${x},${y + weekBarRadius} L ${x + weekBarRadius},${y} L ${x + barWidth - weekBarRadius},${y} L ${x + barWidth},${y + weekBarRadius} L ${x + barWidth},${y + barHeight} Z` : '';
 
