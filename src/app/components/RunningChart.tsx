@@ -308,9 +308,8 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                   const isAllView = view.type === 'all';
                   const isSelected = selectedBarIdx === i;
 
-                  // For ALL DATA: background bars with pattern fill, 20% of foreground height, same top
-                  const bgBarHeight = isAllView && d.value > 0 && view.type === 'all' ? barHeight * 0.20 : 0;
-                  const bgBarY = bgBarHeight > 0 ? y : y;
+                  // For ALL DATA: overlay pattern bar on top (20% of bar height)
+                  const overlayBarHeight = isAllView && d.value > 0 ? barHeight * 0.20 : 0;
                 return (
                   <g key={d.workoutId}>
                     {view.type === 'month' ? (
@@ -342,10 +341,10 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                            onClick={() => isAllView && setSelectedBarIdx(isSelected ? null : i)}
                            style={{ cursor: isAllView ? 'pointer' : 'default' }}
                          />
-                         {/* Background pattern bars (ALL DATA only, 20% of foreground height) */}
-                         {isAllView && bgBarHeight > 0 && (
+                         {/* Overlay pattern bars (ALL DATA only, 20% height at top) */}
+                         {isAllView && overlayBarHeight > 0 && (
                            <path
-                             d={`M ${x},${bgBarY + bgBarHeight} L ${x},${bgBarY} L ${x + barWidth},${bgBarY} L ${x + barWidth},${bgBarY + bgBarHeight} Z`}
+                             d={`M ${x},${y + overlayBarHeight} L ${x},${y} L ${x + barWidth},${y} L ${x + barWidth},${y + overlayBarHeight} Z`}
                              fill="url(#squarePattern)"
                              fillOpacity={opacity * 0.6}
                              style={{ pointerEvents: 'none' }}
