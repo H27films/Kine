@@ -232,6 +232,10 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
     const yMin = Math.min(0, minValue - (maxValue - minValue) * 0.1);
     const yMax = maxValue + (maxValue - minValue) * 0.1 || 10;
 
+    // Max bar height in pixels (for background bars)
+    const maxBarHeight = maxValue > 0 ? Math.max(4, ((maxValue - yMin) / Math.max(yMax - yMin, 1)) * plotHeight) : 0;
+    const baselineY = paddingY + plotHeight;
+
     const DEFAULT_BAR_SPACING = 4;
     // Adjust bar spacing dynamically for month view to fit all days
     let dynamicBarSpacing = DEFAULT_BAR_SPACING;
@@ -301,18 +305,18 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                     {points.map((d, i) => {
                   const x = paddingX + i * (barWidth + dynamicBarSpacing);
                   const barHeight = d.value === 0 ? 1.5 : Math.max(4, ((d.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
-                  const y = paddingY + plotHeight - barHeight;
+                  const y = baselineY - barHeight;
                   const pct = (d.value - minValue) / (maxValue - minValue);
                   const opacity = 0.15 + (Math.max(pct, 0) * 0.85);
                   const label = d.value === 0 ? '0.0' : d.value.toFixed(1);
                   const isAllView = view.type === 'all';
                   const isSelected = selectedBarIdx === i;
 
-                  // Background bar for week/month: extends from baseline to max height
-                  const bgBarFullHeight = (view.type === 'week' || view.type === 'month') ? plotHeight : 0;
-                  const bgBarY = paddingY + plotHeight - bgBarFullHeight;
+                  // Background bar for week/month: extends from baseline up to maxBarHeight
+                  const bgBarFullHeight = (view.type === 'week' || view.type === 'month') ? maxBarHeight : 0;
+                  const bgBarY = baselineY - bgBarFullHeight;
 
-                  // For ALL DATA: overlay pattern bar on top (20% of bar height)
+                  // For ALL DATA: overlay pattern bar on top (20% of bar height, extends upward)
                   const overlayBarHeight = isAllView && d.value > 0 ? barHeight * 0.20 : 0;
                 return (
                   <g key={d.workoutId}>
@@ -341,8 +345,8 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                           {(view.type === 'week' || view.type === 'month') && (
                             <path
                               d={`M ${x},${bgBarY + bgBarFullHeight} L ${x},${bgBarY} L ${x + barWidth},${bgBarY} L ${x + barWidth},${bgBarY + bgBarFullHeight} Z`}
-                              fill="#1a1a1a"
-                              fillOpacity={0.08}
+                              fill="#ffffff"
+                              fillOpacity={0.3}
                             />
                           )}
                           {/* Foreground solid bars */}
