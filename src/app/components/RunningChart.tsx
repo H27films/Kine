@@ -345,8 +345,8 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                           {(view.type === 'week' || view.type === 'month') && (
                             <path
                               d={`M ${x},${bgBarY + bgBarFullHeight} L ${x},${bgBarY} L ${x + barWidth},${bgBarY} L ${x + barWidth},${bgBarY + bgBarFullHeight} Z`}
-                              fill="#1a1a1a"
-                              fillOpacity={0.06}
+                              fill="#000000"
+                              fillOpacity={0.02}
                             />
                           )}
                           {/* Foreground solid bars */}
