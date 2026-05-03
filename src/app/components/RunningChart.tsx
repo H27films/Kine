@@ -451,8 +451,12 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
               }}>
                 AVG
               </div>
-              <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
-                {sessionCount > 0 ? Math.round(total / sessionCount) : 0}<span style={{ fontSize: '16px', fontWeight: 200, color: '#999', marginLeft: '2px' }}>KM</span>
+               <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
+                {view.type === 'all' && points.length > 0
+                  ? Math.round(total / points.length)
+                  : sessionCount > 0
+                  ? Math.round(total / sessionCount)
+                  : 0}<span style={{ fontSize: '16px', fontWeight: 200, color: '#999', marginLeft: '2px' }}>KM</span>
               </div>
               <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em', color: '#1a1a1a', marginTop: '2px', textTransform: 'uppercase' }}>
                 All {view.type === 'week' ? 'days' : view.type === 'month' ? 'days' : 'weeks'}
