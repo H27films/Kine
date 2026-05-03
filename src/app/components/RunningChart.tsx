@@ -346,7 +346,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                            <path
                              d={`M ${x},${y} L ${x},${y - overlayBarHeight} L ${x + barWidth},${y - overlayBarHeight} L ${x + barWidth},${y} Z`}
                              fill="url(#squarePattern)"
-                             fillOpacity={opacity * 0.6}
+                             fillOpacity={opacity * 0.7}
                              style={{ pointerEvents: 'none' }}
                            />
                          )}
