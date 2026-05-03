@@ -349,9 +349,9 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                         {isSelected && isAllView && (
                           <g>
                             <rect
-                              x={x + barWidth / 2 - 30}
+                              x={x + barWidth / 2 - 25}
                               y={4}
-                              width="60"
+                              width="50"
                               height="22"
                               rx="4"
                               fill="rgba(0,0,0,0.06)"
