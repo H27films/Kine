@@ -176,29 +176,34 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
     return { maxKm, avgKm, maxSpeed, avgSpeed, totalKm, totalSessions: workouts.length };
   };
 
-  const stats = getStats();
+   const stats = getStats();
+
+   const handleTouchStart = (e: React.TouchEvent) => {
+     setTouchEnd(null);
+     setTouchStart(e.targetTouches[0].clientX);
+   };
+
+   const handleTouchMove = (e: React.TouchEvent) => {
+     setTouchEnd(e.targetTouches[0].clientX);
+   };
+
+   const handleTouchEnd = () => {
+     if (!touchStart || !touchEnd) return;
+     const distance = touchStart - touchEnd;
+     const isLeftSwipe = distance > 50;
+     const isRightSwipe = distance < -50;
+     if (isLeftSwipe && currentIndex < chartViews.length - 1) {
+       setCurrentIndex(currentIndex + 1);
+     }
+     if (isRightSwipe && currentIndex > 0) {
+       setCurrentIndex(currentIndex - 1);
+     }
+   };
 
    useEffect(() => {
      // Reset selected bar when view changes
      setSelectedBarIdx(null);
    }, [currentIndex]);
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
-  };
-
-  const handleTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > 50;
-    const isRightSwipe = distance < -50;
-    if (isLeftSwipe && currentIndex < chartViews.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-    }
-    if (isRightSwipe && currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-    }
-  };
 
   const renderChartArea = (view: { label: string; type: string }, data: any[]) => {
     const points: DataPoint[] = data.map((d, i) => ({
@@ -352,7 +357,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                               fontWeight="900"
                               fill="#1a1a1a"
                             >
-                              {d.originalKm.toFixed(1)} KM
+                              {d.originalValue.toFixed(1)} KM
                             </text>
                           </g>
                         )}
