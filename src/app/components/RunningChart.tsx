@@ -422,34 +422,83 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
           )}
         </div>
 
-        {/* X-axis labels */}
-        {view.type !== 'month' && (
-          <div style={{ position: 'relative', height: '10px' }}>
-             {points.map((point, i) => {
-               const showLabel = view.type === 'all' ? i % 2 === 0 : true;
-               const barLeft = paddingX + i * (barWidth + dynamicBarSpacing);
-               const barCenter = barLeft + barWidth / 2;
-              const leftPercent = (barCenter / chartWidth) * 100;
-              return showLabel ? (
-                <span
-                  key={i}
-                  style={{
-                    position: 'absolute',
-                    left: `${leftPercent}%`,
-                    bottom: 0,
-                    transform: 'translateX(-50%)',
-                    fontSize: '9px',
-                    fontWeight: 500,
-                    color: '#1a1a1a',
-                    letterSpacing: '0.02em',
-                  }}
-                >
-                  {point.date}
-                </span>
-              ) : null;
-            })}
-          </div>
-        )}
+         {/* X-axis labels */}
+         {view.type !== 'month' && (
+           <div style={{ position: 'relative', height: '10px' }}>
+              {points.map((point, i) => {
+                const showLabel = view.type === 'all' ? i % 2 === 0 : true;
+                const barLeft = paddingX + i * (barWidth + dynamicBarSpacing);
+                const barCenter = barLeft + barWidth / 2;
+                const leftPercent = (barCenter / chartWidth) * 100;
+                return showLabel ? (
+                  <span
+                    key={i}
+                    style={{
+                      position: 'absolute',
+                      left: `${leftPercent}%`,
+                      bottom: 0,
+                      transform: 'translateX(-50%)',
+                      fontSize: '9px',
+                      fontWeight: 500,
+                      color: '#1a1a1a',
+                      letterSpacing: '0.02em',
+                    }}
+                  >
+                    {point.date}
+                  </span>
+                ) : null;
+              })}
+            </div>
+          )}
+
+          {/* Weekly comparison bar chart (CURRENT WEEK only) */}
+          {view.type === 'week' && (() => {
+            const allWeeksData = prepareAllData();
+            if (allWeeksData.length === 0) return null;
+            const sortedWeeks = [...allWeeksData].sort((a, b) => a.km - b.km);
+            const maxWeekKm = Math.max(...sortedWeeks.map(w => w.km));
+            const currentWeekLabel = `W${getCurrentWeek()}`;
+            // Fit all weeks within plot area: bar width 2px + 1px spacing minimum, scale down if needed
+            const availableWidth = plotWidth;
+            const minSlotWidth = 3; // bar(2) + gap(1)
+            const slotWidth = Math.max(2, Math.floor(availableWidth / sortedWeeks.length));
+            const barWidthPx = Math.max(1, slotWidth - 1);
+            const containerHeight = 60;
+            const maxBarHeight = 50; // leave 10px padding
+
+            return (
+              <div style={{ marginTop: '16px' }}>
+                <div style={{ fontSize: '10px', fontWeight: 600, color: '#999', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                  WEEKLY RANK
+                </div>
+                <div style={{ height: containerHeight, position: 'relative' }}>
+                  <svg
+                    width="100%"
+                    height={containerHeight}
+                    viewBox={`0 0 ${chartWidth} ${containerHeight}`}
+                    preserveAspectRatio="none"
+                    style={{ overflow: 'visible' }}
+                  >
+                    {sortedWeeks.map((week, idx) => {
+                      const barH = week.km > 0 ? Math.max(2, (week.km / maxWeekKm) * maxBarHeight) : 1;
+                      const x = paddingX + idx * slotWidth;
+                      const isCurrent = week.label === currentWeekLabel;
+                      return (
+                        <rect
+                          key={week.label}
+                          x={x}
+                          y={containerHeight - barH}
+                          width={barWidthPx}
+                          height={barH}
+                          fill={isCurrent ? '#1a1a1a' : 'rgba(0,0,0,0.15)'}
+                        />
+                      );
+                    })}
+                  </svg>
+                </div>
+              </div>
+            );
+          })()}
 
         {/* Navigation dots */}
         <div style={{
