@@ -570,7 +570,6 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
            </div>
 
          )}
-       </div>
 
        {/* Weekly comparison bar chart (CURRENT WEEK only) */}
        {view.type === 'week' && (() => {
@@ -618,6 +617,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
            </div>
          );
        })()}
+      </div>
     );
   };
 
