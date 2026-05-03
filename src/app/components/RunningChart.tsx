@@ -286,13 +286,18 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
         {/* Chart */}
         <div style={{ height: '220px', position: 'relative', marginBottom: '2px' }}>
           {points.length > 0 ? (
-            <svg
-              width="100%"
-              height="100%"
-              viewBox={`0 0 ${chartWidth} ${chartHeight}`}
-              preserveAspectRatio="none"
-              style={{ overflow: 'visible' }}
-             >
+             <svg
+               width="100%"
+               height="100%"
+               viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+               preserveAspectRatio="none"
+               style={{ overflow: 'visible' }}
+              >
+               <defs>
+                 <pattern id="squarePattern" patternUnits="userSpaceOnUse" width="5" height="5">
+                   <rect width="2.5" height="2.5" fill="#1a1a1a"/>
+                 </pattern>
+               </defs>
                    {points.map((d, i) => {
                  const x = paddingX + i * (barWidth + dynamicBarSpacing);
                  const barHeight = d.value === 0 ? 1.5 : Math.max(4, ((d.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
@@ -327,7 +332,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                       <>
                         <path
                           d={`M ${x},${y + barHeight} L ${x},${y} L ${x + barWidth},${y} L ${x + barWidth},${y + barHeight} Z`}
-                          fill="#1a1a1a"
+                          fill={isAllView ? 'url(#squarePattern)' : '#1a1a1a'}
                           fillOpacity={opacity}
                           onClick={() => isAllView && setSelectedBarIdx(isSelected ? null : i)}
                           style={{ cursor: isAllView ? 'pointer' : 'default' }}
