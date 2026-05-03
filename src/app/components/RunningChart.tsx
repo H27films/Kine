@@ -232,8 +232,16 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
     const yMin = Math.min(0, minValue - (maxValue - minValue) * 0.1);
     const yMax = maxValue + (maxValue - minValue) * 0.1 || 10;
 
-    const barWidth = points.length > 0 ? Math.max(8, plotWidth / points.length - 4) : 0;
-    const barSpacing = 4;
+    // Adjust bar spacing dynamically for month view to fit all days
+    let dynamicBarSpacing = barSpacing;
+    if (view.type === 'month') {
+      const totalBarWidth = plotWidth - (points.length - 1) * barSpacing;
+      const calculatedWidth = totalBarWidth / points.length;
+      if (calculatedWidth < 8) {
+        dynamicBarSpacing = Math.max(1, (plotWidth - points.length * 8) / (points.length - 1));
+      }
+    }
+    const barWidth = points.length > 0 ? Math.max(8, (plotWidth - (points.length - 1) * dynamicBarSpacing) / points.length) : 0;
 
     return (
       <div>
@@ -283,10 +291,10 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
               viewBox={`0 0 ${chartWidth} ${chartHeight}`}
               preserveAspectRatio="none"
               style={{ overflow: 'visible' }}
-            >
-                  {points.map((d, i) => {
-                const x = paddingX + i * (barWidth + barSpacing);
-                const barHeight = d.value === 0 ? 1.5 : Math.max(4, ((d.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
+             >
+                   {points.map((d, i) => {
+                 const x = paddingX + i * (barWidth + dynamicBarSpacing);
+                 const barHeight = d.value === 0 ? 1.5 : Math.max(4, ((d.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
                 const y = paddingY + plotHeight - barHeight;
                 const pct = (d.value - minValue) / (maxValue - minValue);
                 const opacity = 0.15 + (Math.max(pct, 0) * 0.85);
