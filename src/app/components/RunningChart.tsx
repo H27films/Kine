@@ -232,10 +232,11 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
     const yMin = Math.min(0, minValue - (maxValue - minValue) * 0.1);
     const yMax = maxValue + (maxValue - minValue) * 0.1 || 10;
 
+    const DEFAULT_BAR_SPACING = 4;
     // Adjust bar spacing dynamically for month view to fit all days
-    let dynamicBarSpacing = barSpacing;
+    let dynamicBarSpacing = DEFAULT_BAR_SPACING;
     if (view.type === 'month') {
-      const totalBarWidth = plotWidth - (points.length - 1) * barSpacing;
+      const totalBarWidth = plotWidth - (points.length - 1) * DEFAULT_BAR_SPACING;
       const calculatedWidth = totalBarWidth / points.length;
       if (calculatedWidth < 8) {
         dynamicBarSpacing = Math.max(1, (plotWidth - points.length * 8) / (points.length - 1));
@@ -385,10 +386,10 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
         {/* X-axis labels */}
         {view.type !== 'month' && (
           <div style={{ position: 'relative', height: '10px' }}>
-            {points.map((point, i) => {
-              const showLabel = view.type === 'all' ? i % 2 === 0 : true;
-              const barLeft = paddingX + i * (barWidth + barSpacing);
-              const barCenter = barLeft + barWidth / 2;
+             {points.map((point, i) => {
+               const showLabel = view.type === 'all' ? i % 2 === 0 : true;
+               const barLeft = paddingX + i * (barWidth + dynamicBarSpacing);
+               const barCenter = barLeft + barWidth / 2;
               const leftPercent = (barCenter / chartWidth) * 100;
               return showLabel ? (
                 <span
