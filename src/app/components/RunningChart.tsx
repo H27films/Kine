@@ -345,29 +345,41 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                         <>
                           {/* Background light grey bars (week/month only) */}
                           {(view.type === 'week' || view.type === 'month') && (
-                            <path
-                              d={`M ${bgBarX},${bgBarY + bgBarFullHeight} L ${bgBarX},${bgBarY} L ${bgBarX + bgBarWidth},${bgBarY} L ${bgBarX + bgBarWidth},${bgBarY + bgBarFullHeight} Z`}
+                            <rect
+                              x={bgBarX}
+                              y={bgBarY}
+                              width={bgBarWidth}
+                              height={bgBarFullHeight}
                               fill="#000000"
                               fillOpacity={0.02}
+                              rx="2"
                             />
                           )}
-                          {/* Foreground solid bars */}
-                          <path
-                            d={`M ${x},${y + barHeight} L ${x},${y} L ${x + barWidth},${y} L ${x + barWidth},${y + barHeight} Z`}
-                            fill="#1a1a1a"
-                            fillOpacity={opacity}
-                            onClick={() => isAllView && setSelectedBarIdx(isSelected ? null : i)}
-                            style={{ cursor: isAllView ? 'pointer' : 'default' }}
-                          />
-                          {/* Overlay pattern bars (ALL DATA only, 20% height extending upward from bar top) */}
-                          {isAllView && overlayBarHeight > 0 && (
-                            <path
-                              d={`M ${x},${y} L ${x},${y - overlayBarHeight} L ${x + barWidth},${y - overlayBarHeight} L ${x + barWidth},${y} Z`}
-                              fill="url(#squarePattern)"
-                              fillOpacity={opacity * 0.7}
-                              style={{ pointerEvents: 'none' }}
-                            />
-                          )}
+                         {/* Foreground solid bars */}
+                         <rect
+                           x={x}
+                           y={y}
+                           width={barWidth}
+                           height={barHeight}
+                           fill="#1a1a1a"
+                           fillOpacity={opacity}
+                           rx="2"
+                           onClick={() => isAllView && setSelectedBarIdx(isSelected ? null : i)}
+                           style={{ cursor: isAllView ? 'pointer' : 'default' }}
+                         />
+                         {/* Overlay pattern bars (ALL DATA only, 20% height extending upward from bar top) */}
+                         {isAllView && overlayBarHeight > 0 && (
+                           <rect
+                             x={x}
+                             y={y - overlayBarHeight}
+                             width={barWidth}
+                             height={overlayBarHeight}
+                             fill="url(#squarePattern)"
+                             fillOpacity={opacity * 0.7}
+                             rx="2"
+                             style={{ pointerEvents: 'none' }}
+                           />
+                         )}
                          {d.value > 0 && view.type === 'week' && (
                           <text
                             x={x + barWidth / 2}
