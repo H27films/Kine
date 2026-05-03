@@ -298,15 +298,19 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                    <rect width="2.5" height="2.5" fill="#1a1a1a"/>
                  </pattern>
                </defs>
-                   {points.map((d, i) => {
-                 const x = paddingX + i * (barWidth + dynamicBarSpacing);
-                 const barHeight = d.value === 0 ? 1.5 : Math.max(4, ((d.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
-                const y = paddingY + plotHeight - barHeight;
-                const pct = (d.value - minValue) / (maxValue - minValue);
-                const opacity = 0.15 + (Math.max(pct, 0) * 0.85);
-                const label = d.value === 0 ? '0.0' : d.value.toFixed(1);
-                const isAllView = view.type === 'all';
-                const isSelected = selectedBarIdx === i;
+                    {points.map((d, i) => {
+                  const x = paddingX + i * (barWidth + dynamicBarSpacing);
+                  const barHeight = d.value === 0 ? 1.5 : Math.max(4, ((d.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
+                  const y = paddingY + plotHeight - barHeight;
+                  const pct = (d.value - minValue) / (maxValue - minValue);
+                  const opacity = 0.15 + (Math.max(pct, 0) * 0.85);
+                  const label = d.value === 0 ? '0.0' : d.value.toFixed(1);
+                  const isAllView = view.type === 'all';
+                  const isSelected = selectedBarIdx === i;
+
+                  // For ALL DATA: background bars with pattern fill, 10% taller
+                  const bgBarHeight = isAllView && d.value > 0 && view.type === 'all' ? Math.min(barHeight * 1.10, plotHeight) : 0;
+                  const bgBarY = bgBarHeight > 0 ? y - (bgBarHeight - barHeight) : y;
                 return (
                   <g key={d.workoutId}>
                     {view.type === 'month' ? (
@@ -328,15 +332,25 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                           />
                         )}
                       </>
-                    ) : (
-                      <>
-                        <path
-                          d={`M ${x},${y + barHeight} L ${x},${y} L ${x + barWidth},${y} L ${x + barWidth},${y + barHeight} Z`}
-                          fill={isAllView ? 'url(#squarePattern)' : '#1a1a1a'}
-                          fillOpacity={opacity}
-                          onClick={() => isAllView && setSelectedBarIdx(isSelected ? null : i)}
-                          style={{ cursor: isAllView ? 'pointer' : 'default' }}
-                        />
+                     ) : (
+                       <>
+                         {/* Background pattern bars (ALL DATA only, 10% taller) */}
+                         {isAllView && bgBarHeight > 0 && (
+                           <path
+                             d={`M ${x},${bgBarY + bgBarHeight} L ${x},${bgBarY} L ${x + barWidth},${bgBarY} L ${x + barWidth},${bgBarY + bgBarHeight} Z`}
+                             fill="url(#squarePattern)"
+                             fillOpacity={opacity * 0.6}
+                             style={{ pointerEvents: 'none' }}
+                           />
+                         )}
+                         {/* Foreground solid bars */}
+                         <path
+                           d={`M ${x},${y + barHeight} L ${x},${y} L ${x + barWidth},${y} L ${x + barWidth},${y + barHeight} Z`}
+                           fill="#1a1a1a"
+                           fillOpacity={opacity}
+                           onClick={() => isAllView && setSelectedBarIdx(isSelected ? null : i)}
+                           style={{ cursor: isAllView ? 'pointer' : 'default' }}
+                         />
                         {d.value > 0 && view.type === 'week' && (
                           <text
                             x={x + barWidth / 2}
