@@ -312,7 +312,9 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                   const isAllView = view.type === 'all';
                   const isSelected = selectedBarIdx === i;
 
-                  // Background bar for week/month: extends from baseline up to maxBarHeight
+                  // Background bar for week/month: slightly narrower (2px less wide)
+                  const bgBarWidth = barWidth - 2;
+                  const bgBarX = x + 1;
                   const bgBarFullHeight = (view.type === 'week' || view.type === 'month') ? maxBarHeight : 0;
                   const bgBarY = baselineY - bgBarFullHeight;
 
@@ -344,7 +346,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                           {/* Background light grey bars (week/month only) */}
                           {(view.type === 'week' || view.type === 'month') && (
                             <path
-                              d={`M ${x},${bgBarY + bgBarFullHeight} L ${x},${bgBarY} L ${x + barWidth},${bgBarY} L ${x + barWidth},${bgBarY + bgBarFullHeight} Z`}
+                              d={`M ${bgBarX},${bgBarY + bgBarFullHeight} L ${bgBarX},${bgBarY} L ${bgBarX + bgBarWidth},${bgBarY} L ${bgBarX + bgBarWidth},${bgBarY + bgBarFullHeight} Z`}
                               fill="#000000"
                               fillOpacity={0.02}
                             />
