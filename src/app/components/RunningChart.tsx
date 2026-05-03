@@ -308,9 +308,9 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                   const isAllView = view.type === 'all';
                   const isSelected = selectedBarIdx === i;
 
-                  // For ALL DATA: background bars with pattern fill, 10% taller
-                  const bgBarHeight = isAllView && d.value > 0 && view.type === 'all' ? Math.min(barHeight * 1.10, plotHeight) : 0;
-                  const bgBarY = bgBarHeight > 0 ? y - (bgBarHeight - barHeight) : y;
+                  // For ALL DATA: background bars with pattern fill, 20% of foreground height, same top
+                  const bgBarHeight = isAllView && d.value > 0 && view.type === 'all' ? barHeight * 0.20 : 0;
+                  const bgBarY = bgBarHeight > 0 ? y : y;
                 return (
                   <g key={d.workoutId}>
                     {view.type === 'month' ? (
@@ -331,18 +331,9 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                             fill="#1a1a1a"
                           />
                         )}
-                      </>
+                       </>
                      ) : (
                        <>
-                         {/* Background pattern bars (ALL DATA only, 10% taller) */}
-                         {isAllView && bgBarHeight > 0 && (
-                           <path
-                             d={`M ${x},${bgBarY + bgBarHeight} L ${x},${bgBarY} L ${x + barWidth},${bgBarY} L ${x + barWidth},${bgBarY + bgBarHeight} Z`}
-                             fill="url(#squarePattern)"
-                             fillOpacity={opacity * 0.6}
-                             style={{ pointerEvents: 'none' }}
-                           />
-                         )}
                          {/* Foreground solid bars */}
                          <path
                            d={`M ${x},${y + barHeight} L ${x},${y} L ${x + barWidth},${y} L ${x + barWidth},${y + barHeight} Z`}
@@ -351,7 +342,16 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                            onClick={() => isAllView && setSelectedBarIdx(isSelected ? null : i)}
                            style={{ cursor: isAllView ? 'pointer' : 'default' }}
                          />
-                        {d.value > 0 && view.type === 'week' && (
+                         {/* Background pattern bars (ALL DATA only, 20% of foreground height) */}
+                         {isAllView && bgBarHeight > 0 && (
+                           <path
+                             d={`M ${x},${bgBarY + bgBarHeight} L ${x},${bgBarY} L ${x + barWidth},${bgBarY} L ${x + barWidth},${bgBarY + bgBarHeight} Z`}
+                             fill="url(#squarePattern)"
+                             fillOpacity={opacity * 0.6}
+                             style={{ pointerEvents: 'none' }}
+                           />
+                         )}
+                         {d.value > 0 && view.type === 'week' && (
                           <text
                             x={x + barWidth / 2}
                             y={y + barHeight / 2}
