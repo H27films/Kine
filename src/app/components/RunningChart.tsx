@@ -340,16 +340,16 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                         {isSelected && isAllView && (
                           <g>
                             <rect
-                              x={x + barWidth / 2 - 24}
-                              y={y - 28}
-                              width="48"
-                              height="22"
+                              x={x + barWidth / 2 - 40}
+                              y={4}
+                              width="80"
+                              height="24"
                               rx="4"
                               fill="rgba(0,0,0,0.06)"
                             />
                             <text
                               x={x + barWidth / 2}
-                              y={y - 16}
+                              y={16}
                               textAnchor="middle"
                               dominantBaseline="middle"
                               fontFamily="'JetBrains Mono', monospace"
