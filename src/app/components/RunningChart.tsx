@@ -458,8 +458,8 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                   ? Math.round(total / sessionCount)
                   : 0}<span style={{ fontSize: '16px', fontWeight: 200, color: '#999', marginLeft: '2px' }}>KM</span>
               </div>
-              <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em', color: '#1a1a1a', marginTop: '2px', textTransform: 'uppercase' }}>
-                All {view.type === 'week' ? 'days' : view.type === 'month' ? 'days' : 'weeks'}
+               <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em', color: '#1a1a1a', marginTop: '2px', textTransform: 'uppercase' }}>
+                {view.type === 'week' ? 'THIS WEEK' : view.type === 'month' ? 'ALL DAYS' : 'ALL WEEKS'}
               </div>
               {(() => {
                 const speeds = data.map(d => d.avgSpeed).filter(s => s !== null) as number[];
