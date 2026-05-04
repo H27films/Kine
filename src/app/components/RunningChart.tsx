@@ -285,92 +285,65 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
 
      return (
        <div>
-           {/* Period header with navigation */}
-         <div style={{
-           fontFamily: "'Inconsolata', monospace",
-           fontSize: '24px',
-           fontWeight: 348,
-           fontStretch: '175%',
-           letterSpacing: '0.08em',
-           color: 'rgba(0,0,0,0.7)',
-           textTransform: 'uppercase',
-           marginBottom: '4px',
-           display: 'flex',
-           alignItems: 'center',
-           justifyContent: 'center',
-           gap: view.type === 'all' ? '0' : '16px'
-         }}>
-           {view.type === 'week' && (
-             <>
-               <button
-                 onClick={() => setWeekOffset(prev => prev - 1)}
-                 style={{
-                   background: 'none',
-                   border: 'none',
-                   padding: 0,
-                   cursor: 'pointer',
-                   display: 'flex',
-                   alignItems: 'center',
-                   justifyContent: 'center'
-                 }}
-               >
-                 <ChevronLeft size={28} strokeWidth={2.5} />
-               </button>
-               <button
-                 onClick={() => setWeekOffset(prev => prev + 1)}
-                 disabled={weekOffset >= 0}
-                 style={{
-                   background: 'none',
-                   border: 'none',
-                   padding: 0,
-                   cursor: weekOffset >= 0 ? 'default' : 'pointer',
-                   opacity: weekOffset >= 0 ? 0.3 : 1,
-                   display: 'flex',
-                   alignItems: 'center',
-                   justifyContent: 'center'
-                 }}
-               >
-                 <ChevronRight size={28} strokeWidth={2.5} />
-               </button>
-             </>
-           )}
+            {/* Period header with navigation */}
+          <div style={{
+            fontFamily: "'Inconsolata', monospace",
+            fontSize: '24px',
+            fontWeight: 348,
+            fontStretch: '175%',
+            letterSpacing: '0.08em',
+            color: 'rgba(0,0,0,0.7)',
+            textTransform: 'uppercase',
+            marginBottom: '4px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px'
+          }}>
+            {(view.type === 'week' || view.type === 'month') && (
+              <button
+                onClick={() => {
+                  if (view.type === 'week') setWeekOffset(prev => prev - 1);
+                  else setMonthOffset(prev => prev - 1);
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: 0,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <ChevronLeft size={16} strokeWidth={2.5} />
+              </button>
+            )}
 
-           {view.type === 'month' && (
-             <>
-               <button
-                 onClick={() => setMonthOffset(prev => prev + 1)}
-                 disabled={monthOffset >= 0}
-                 style={{
-                   background: 'none',
-                   border: 'none',
-                   padding: 0,
-                   cursor: monthOffset >= 0 ? 'default' : 'pointer',
-                   opacity: monthOffset >= 0 ? 0.3 : 1,
-                   display: 'flex',
-                   alignItems: 'center',
-                   justifyContent: 'center'
-                 }}
-               >
-                 <ChevronLeft size={28} strokeWidth={2.5} />
-               </button>
-               <button
-                 onClick={() => setMonthOffset(prev => prev - 1)}
-                 disabled={false}
-                 style={{
-                   background: 'none',
-                   border: 'none',
-                   padding: 0,
-                   cursor: 'pointer',
-                   display: 'flex',
-                   alignItems: 'center',
-                   justifyContent: 'center'
-                 }}
-               >
-                 <ChevronRight size={28} strokeWidth={2.5} />
-               </button>
-             </>
-           )}
-         </div>
+            <span>{getPeriodLabel(view.type)}</span>
+
+            {(view.type === 'week' || view.type === 'month') && (
+              <button
+                onClick={() => {
+                  if (view.type === 'week') setWeekOffset(prev => prev + 1);
+                  else setMonthOffset(prev => prev + 1);
+                }}
+                disabled={view.type === 'week' ? weekOffset >= 0 : monthOffset >= 0}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: 0,
+                  cursor: view.type === 'week' ? (weekOffset >= 0 ? 'default' : 'pointer') : (monthOffset >= 0 ? 'default' : 'pointer'),
+                  opacity: view.type === 'week' ? (weekOffset >= 0 ? 0.3 : 1) : (monthOffset >= 0 ? 0.3 : 1),
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <ChevronRight size={16} strokeWidth={2.5} />
+              </button>
+            )}
+          </div>
 
         {/* Big number */}
         <div className="flex items-start justify-between" style={{ marginBottom: '16px' }}>
@@ -588,93 +561,17 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
            {points.length > 0 && (
              <div style={{ marginTop: '8px', display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
             <div>
-         <div style={{
-           fontFamily: "'Inconsolata', monospace",
-           fontSize: '24px',
-           fontWeight: 348,
-           fontStretch: '175%',
-           letterSpacing: '0.08em',
-           color: 'rgba(0,0,0,0.7)',
-           textTransform: 'uppercase',
-           marginBottom: '4px',
-           display: 'flex',
-           alignItems: 'center',
-           justifyContent: 'center',
-           gap: view.type === 'all' ? '0' : '16px'
-         }}>
-           {view.type === 'week' && (
-             <button
-               onClick={() => setWeekOffset(prev => prev - 1)}
-               style={{
-                 background: 'none',
-                 border: 'none',
-                 padding: 0,
-                 cursor: 'pointer',
-                 display: 'flex',
-                 alignItems: 'center',
-                 justifyContent: 'center'
-               }}
-             >
-               <ChevronLeft size={28} strokeWidth={2.5} />
-             </button>
-           )}
-
-           <span>{getPeriodLabel(view.type)}</span>
-
-           {view.type === 'week' && (
-             <button
-               onClick={() => setWeekOffset(prev => prev + 1)}
-               disabled={weekOffset >= 0}
-               style={{
-                 background: 'none',
-                 border: 'none',
-                 padding: 0,
-                 cursor: weekOffset >= 0 ? 'default' : 'pointer',
-                 opacity: weekOffset >= 0 ? 0.3 : 1,
-                 display: 'flex',
-                 alignItems: 'center',
-                 justifyContent: 'center'
-               }}
-             >
-               <ChevronRight size={28} strokeWidth={2.5} />
-             </button>
-           )}
-
-           {view.type === 'month' && (
-             <>
-               <button
-                 onClick={() => setMonthOffset(prev => prev - 1)}
-                 style={{
-                   background: 'none',
-                   border: 'none',
-                   padding: 0,
-                   cursor: 'pointer',
-                   display: 'flex',
-                   alignItems: 'center',
-                   justifyContent: 'center'
-                 }}
-               >
-                 <ChevronLeft size={28} strokeWidth={2.5} />
-               </button>
-               <button
-                 onClick={() => setMonthOffset(prev => prev + 1)}
-                 disabled={monthOffset >= 0}
-                 style={{
-                   background: 'none',
-                   border: 'none',
-                   padding: 0,
-                   cursor: monthOffset >= 0 ? 'default' : 'pointer',
-                   opacity: monthOffset >= 0 ? 0.3 : 1,
-                   display: 'flex',
-                   alignItems: 'center',
-                   justifyContent: 'center'
-                 }}
-               >
-                 <ChevronRight size={28} strokeWidth={2.5} />
-               </button>
-             </>
-           )}
-         </div>
+          <div style={{
+            fontFamily: "'Inconsolata', monospace",
+            fontSize: '22px',
+            fontWeight: 348,
+            fontStretch: '175%',
+            letterSpacing: '0.06em',
+            color: 'rgba(0,0,0,0.35)',
+            textTransform: 'uppercase',
+          }}>
+            MAX
+          </div>
               <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
                 {Math.max(...data.map(d => d.originalKm)).toLocaleString()}<span style={{ fontSize: '16px', fontWeight: 200, color: '#999', marginLeft: '1px' }}>KM</span>
               </div>
