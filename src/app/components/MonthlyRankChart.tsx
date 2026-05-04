@@ -16,7 +16,7 @@ interface MonthlyRankChartProps {
 }
 
 const MONTH_NAMES = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-const ACCENT_COLOR = '#ff6b35'; // coral/orange accent
+const ACCENT_COLOR = '#ff6b35';
 
 export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
   allMonthData,
@@ -28,23 +28,19 @@ export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
 }) => {
   if (allMonthData.length === 0) return null;
 
-  // Build map of data by month index (0-11)
   const dataMap = new Map<number, MonthlyRankData>();
   allMonthData.forEach(d => {
     const [year, month] = d.label.split('-').map(Number);
     dataMap.set(month - 1, d);
   });
 
-  // Create all 12 months in chronological order
   const allMonths = Array.from({ length: 12 }, (_, i) => ({
     monthIndex: i,
     label: MONTH_NAMES[i],
-    data: dataMap.get(i),
     hasData: dataMap.has(i),
     km: dataMap.get(i)?.originalKm || 0,
   }));
 
-  // Compute rank based on km values
   const monthsWithData = allMonths.filter(m => m.hasData);
   const sortedDesc = [...monthsWithData].sort((a, b) => b.km - a.km);
   const totalMonths = monthsWithData.length;
@@ -52,13 +48,14 @@ export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
   const currentRank = sortedDesc.findIndex(m => m.monthIndex === selectedMonthIdx) + 1;
   const maxKm = Math.max(...monthsWithData.map(m => m.km));
 
-  // Layout dimensions
-  const containerHeight = 140; // total height including space for month labels below baseline
-  const baselineY = 110; // y-coordinate where drop lines meet x-axis
-  const topPadding = 15; // top margin for tallest circle
-  const maxDropHeight = baselineY - topPadding; // max vertical space for drop line
+  // Layout: give more vertical room, push baseline down
+  const headerSpace = 0; // space reserved for header
+  const topMargin = 20; // space above highest circle — pushes peak away from header
+  const baselineY = 105; // baseline position from top of chart area
+  const maxBarHeight = 55; // max height of drop line from baseline upward
+  const containerHeight = 150; // total height including month labels below
   const slotWidth = plotWidth / allMonths.length;
-  const labelSpacingBelow = 14; // distance below baseline for month labels
+  const labelY = baselineY + 18; // month labels below baseline
 
   return (
     <div style={{ marginTop: '28px' }}>
@@ -70,6 +67,7 @@ export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
           {currentRank > 0 ? `${currentRank}${getOrdinalSuffix(currentRank)} / ${totalMonths}` : `— / ${totalMonths}`}
         </div>
       </div>
+
       <div style={{ height: containerHeight, position: 'relative' }}>
         <svg
           width="100%"
@@ -79,21 +77,22 @@ export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
           style={{ overflow: 'visible' }}
         >
           {(() => {
-            const monthPoints = allMonths.map((month, idx) => {
+            const points = allMonths.map((month, idx) => {
               const x = paddingX + idx * slotWidth + slotWidth / 2;
-              const dropH = month.km > 0 && maxKm > 0 ? (month.km / maxKm) * maxDropHeight : 0;
+              const normalizedH = month.km > 0 && maxKm > 0 ? month.km / maxKm : 0;
+              const dropH = normalizedH * maxBarHeight;
               const circleY = baselineY - dropH;
               const isPeak = month.km === maxKm && month.km > 0;
-              const circleRadius = isPeak ? 8 : 5; // peak: 16px dia, normal: 10px dia
+              const circleRadius = isPeak ? 8 : 5; // 16px / 10px diameter
               const isCurrent = month.monthIndex === selectedMonthIdx;
-              return { month, idx, x, circleY, dropH, circleRadius, isPeak, isCurrent, hasData: month.hasData };
+              return { month, idx, x, circleY, dropH, circleRadius, isPeak, isCurrent, normalizedH };
             });
 
             return (
               <>
                 {/* Vertical drop lines */}
-                {monthPoints.map((pt, i) => (
-                  pt.hasData ? (
+                {points.map((pt, i) => (
+                  pt.month.hasData && pt.normalizedH > 0 ? (
                     <line
                       key={`drop-${i}`}
                       x1={pt.x}
@@ -107,23 +106,23 @@ export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
                   ) : null
                 ))}
 
-                {/* Data point circles */}
-                {monthPoints.map((pt, i) => (
-                  pt.hasData ? (
+                {/* Data circles */}
+                {points.map((pt, i) => (
+                  pt.month.hasData && pt.normalizedH > 0 ? (
                     <circle
                       key={`circle-${i}`}
                       cx={pt.x}
                       cy={pt.circleY}
                       r={pt.circleRadius}
                       fill={ACCENT_COLOR}
-                      style={{ filter: pt.isPeak ? 'drop-shadow(0 0 4px rgba(255, 107, 53, 0.5))' : undefined }}
+                      style={{ filter: pt.isPeak ? 'drop-shadow(0 0 5px rgba(255, 107, 53, 0.6))' : undefined }}
                     />
                   ) : null
                 ))}
 
-                {/* Value labels (rotated 90° clockwise) */}
-                {monthPoints.map((pt, i) => (
-                  pt.hasData ? (
+                {/* Value labels - above circle, rotated 90° clockwise to read top-to-bottom */}
+                {points.map((pt, i) => (
+                  pt.month.hasData && pt.normalizedH > 0 ? (
                     <text
                       key={`val-${i}`}
                       x={pt.x}
@@ -142,10 +141,9 @@ export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
                   ) : null
                 ))}
 
-                {/* X-axis month labels (rotated 90° clockwise) */}
+                {/* X-axis month labels — rotated 90° clockwise for vertical reading */}
                 {allMonths.map((month, idx) => {
                   const x = paddingX + idx * slotWidth + slotWidth / 2;
-                  const labelY = baselineY + labelSpacingBelow;
                   return (
                     <text
                       key={`label-${idx}`}
