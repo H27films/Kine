@@ -550,9 +550,9 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                       </>
                     )}
                   </g>
-                );
-              })}
-            </svg>
+                 );
+                      })}
+                   </svg>
           ) : (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#999', fontSize: '12px' }}>
               No data
@@ -772,6 +772,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                         </g>
                       );
                     })}
+                    <line x1={paddingX} y1={containerHeight} x2={chartWidth - paddingX} y2={containerHeight} stroke="#1a1a1a" strokeWidth="1" />
                  </svg>
                </div>
             </div>
