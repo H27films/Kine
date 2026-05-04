@@ -585,7 +585,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
           const currentWeekLabel = `W${getCurrentWeek()}`;
           const availableWidth = plotWidth;
           const slotWidth = Math.max(4, Math.floor(availableWidth / sortedWeeks.length));
-          const barWidthPx = 2;
+          const barWidthPx = 1.5;
           const containerHeight = 60;
           const maxBarHeight = 50;
 
@@ -606,6 +606,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                     const barH = week.km > 0 ? Math.max(2, (week.km / maxWeekKm) * maxBarHeight) : 1;
                     const x = paddingX + idx * slotWidth + (slotWidth - barWidthPx) / 2;
                     const isCurrent = week.label === currentWeekLabel;
+                    const radius = barWidthPx / 2;
                     return (
                       <g key={week.label}>
                         <rect
@@ -613,6 +614,8 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                           y={containerHeight - barH}
                           width={barWidthPx}
                           height={barH}
+                          rx={radius}
+                          ry={radius}
                           fill={isCurrent ? '#1a1a1a' : 'rgba(0,0,0,0.4)'}
                         />
                         {isCurrent && (
