@@ -723,8 +723,8 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
             const availableWidth = plotWidth;
             const slotWidth = Math.max(4, Math.floor(availableWidth / sortedWeeks.length));
              const barWidthPx = 1.3;
-            const containerHeight = 60;
-            const maxBarHeight = 50;
+             const containerHeight = 70;
+             const maxBarHeight = 58;
 
              return (
                <div style={{ marginTop: '12px' }}>
@@ -756,13 +756,13 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                      </defs>
                      {(() => {
                        // Precompute week data including positions
-                       const weekData = sortedWeeks.map((week, idx) => {
-                         const barH = week.km > 0 ? Math.max(2, (week.km / maxWeekKm) * maxBarHeight) : 1;
-                         const x = paddingX + idx * slotWidth + (slotWidth - barWidthPx) / 2;
-                         const topY = containerHeight - barH;
-                         const elevatedY = topY - barH * 0.2; // 20% above bar top
-                         return { week, idx, x, barH, topY, elevatedY, isCurrent: week.label === selectedWeekLabel };
-                       });
+                        const weekData = sortedWeeks.map((week, idx) => {
+                          const barH = week.km > 0 ? Math.max(2, (week.km / maxWeekKm) * maxBarHeight) : 1;
+                          const x = paddingX + idx * slotWidth + (slotWidth - barWidthPx) / 2;
+                          const topY = containerHeight - barH;
+                          const elevatedY = topY - 8; // fixed offset above bar top
+                          return { week, idx, x, barH, topY, elevatedY, isCurrent: week.label === selectedWeekLabel };
+                        });
 
                        // Generate smooth cubic Bezier path through elevated points
                        const buildSmoothPath = (pts: {x: number, y: number}[]) => {
@@ -814,7 +814,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                               {isCurrent && (
                                 <circle
                                   cx={x + barWidthPx / 2}
-                                  cy={topY - 6}
+                                  cy={topY - 8}
                                   r="4"
                                   fill="#1a1a1a"
                                 />
