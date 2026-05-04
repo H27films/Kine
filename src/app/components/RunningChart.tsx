@@ -697,11 +697,11 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                    <div style={{ fontSize: '20px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
                      {(() => {
                        const avgValue = view.type === 'all' && points.length > 0
-                         ? Math.round(total / points.length)
+                         ? (total / points.length)
                          : sessionCount > 0
-                         ? Math.round(total / sessionCount)
+                         ? (total / sessionCount)
                          : 0;
-                       return avgValue;
+                       return avgValue.toFixed(1);
                      })()}<span style={{ fontSize: '14px', fontWeight: 200, color: '#999', marginLeft: '2px' }}>KM</span>
                    </div>
                    <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em', color: '#1a1a1a', marginTop: '2px', textTransform: 'uppercase' }}>
