@@ -283,8 +283,8 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
     }
     const barWidth = points.length > 0 ? Math.max(8, (plotWidth - (points.length - 1) * dynamicBarSpacing) / points.length) : 0;
 
-     return (
-       <div>
+      return (
+        <div>
             {/* Period header with navigation */}
           <div style={{
             fontFamily: "'Inconsolata', monospace",
@@ -297,8 +297,9 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
             marginBottom: '4px',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px'
+            justifyContent: 'flex-start',
+            gap: '8px',
+            paddingLeft: '8px'
           }}>
             {(view.type === 'week' || view.type === 'month') && (
               <button
