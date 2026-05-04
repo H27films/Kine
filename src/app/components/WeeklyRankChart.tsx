@@ -34,8 +34,8 @@ export const WeeklyRankChart: React.FC<WeeklyRankChartProps> = ({
   const availableWidth = plotWidth;
   const slotWidth = Math.max(4, Math.floor(availableWidth / sortedWeeks.length));
   const barWidthPx = 1.3;
-  const containerHeight = 100;
-  const maxBarHeight = 88;
+  const containerHeight = 120;
+  const maxBarHeight = 108;
 
   return (
     <div>

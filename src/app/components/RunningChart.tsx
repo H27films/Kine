@@ -779,7 +779,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                         </div>
                       </div>
                       <div style={{
-                        height: '100px',
+                        height: '120px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -812,7 +812,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                   display: 'flex',
                   justifyContent: 'center',
                   gap: '12px',
-                  marginTop: '8px',
+                  marginTop: '10px',
                   marginBottom: '16px'
                 }}>
                   <button
