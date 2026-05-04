@@ -577,28 +577,28 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
               <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em', color: '#1a1a1a', marginTop: '2px', textTransform: 'uppercase' }}>
                 {view.type === 'week' ? 'Day' : view.type === 'month' ? 'Day' : 'Week'} {points.reduce((max, d) => d.value > max.value ? d : max).occurrence}
               </div>
-              {(() => {
-                const speeds = data.map(d => d.avgSpeed).filter(s => s !== null) as number[];
-                const maxSpeed = speeds.length > 0 ? Math.max(...speeds) : 0;
-                return maxSpeed > 0 ? (
-                  <div style={{ marginTop: '8px' }}>
-                    <div style={{
-                      fontFamily: "'Inconsolata', monospace",
-                      fontSize: '22px',
-                      fontWeight: 348,
-                      fontStretch: '175%',
-                      letterSpacing: '0.06em',
-                      color: 'rgba(0,0,0,0.35)',
-                      textTransform: 'uppercase',
-                    }}>
-                      SPEED
-                    </div>
-                    <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
-                      {maxSpeed.toFixed(1)}<span style={{ fontSize: '16px', fontWeight: 200, color: '#999', marginLeft: '2px' }}>KM/H</span>
-                    </div>
-                  </div>
-                ) : null;
-              })()}
+               {(() => {
+                 const speeds = data.map(d => d.avgSpeed).filter(s => s !== null) as number[];
+                 const maxSpeed = speeds.length > 0 ? Math.max(...speeds) : 0;
+                 return (
+                   <div style={{ marginTop: '8px' }}>
+                     <div style={{
+                       fontFamily: "'Inconsolata', monospace",
+                       fontSize: '22px',
+                       fontWeight: 348,
+                       fontStretch: '175%',
+                       letterSpacing: '0.06em',
+                       color: 'rgba(0,0,0,0.35)',
+                       textTransform: 'uppercase',
+                     }}>
+                       SPEED
+                     </div>
+                     <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
+                       {maxSpeed > 0 ? maxSpeed.toFixed(1) : '—'}<span style={{ fontSize: '16px', fontWeight: 200, color: '#999', marginLeft: '2px' }}>KM/H</span>
+                     </div>
+                   </div>
+                 );
+               })()}
             </div>
             <div style={{ textAlign: 'right' }}>
               <div style={{
@@ -623,28 +623,28 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em', color: '#1a1a1a', marginTop: '2px', textTransform: 'uppercase' }}>
                 {view.type === 'week' ? 'THIS WEEK' : view.type === 'month' ? 'ALL DAYS' : 'ALL WEEKS'}
               </div>
-              {(() => {
-                const speeds = data.map(d => d.avgSpeed).filter(s => s !== null) as number[];
-                const avgSpeed = speeds.length > 0 ? speeds.reduce((a, b) => a + b, 0) / speeds.length : 0;
-                return avgSpeed > 0 ? (
-                  <div style={{ marginTop: '8px', textAlign: 'right' }}>
-                    <div style={{
-                      fontFamily: "'Inconsolata', monospace",
-                      fontSize: '22px',
-                      fontWeight: 348,
-                      fontStretch: '175%',
-                      letterSpacing: '0.06em',
-                      color: 'rgba(0,0,0,0.35)',
-                      textTransform: 'uppercase',
-                      textAlign: 'right',
-                    }}>
-                      SPEED
-                    </div>
-                    <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
-                      {avgSpeed.toFixed(1)}<span style={{ fontSize: '16px', fontWeight: 200, color: '#999', marginLeft: '2px' }}>KM/H</span>
-                    </div>
-                  </div>
-                ) : null;
+               {(() => {
+                 const speeds = data.map(d => d.avgSpeed).filter(s => s !== null) as number[];
+                 const avgSpeed = speeds.length > 0 ? speeds.reduce((a, b) => a + b, 0) / speeds.length : 0;
+                 return (
+                   <div style={{ marginTop: '8px', textAlign: 'right' }}>
+                     <div style={{
+                       fontFamily: "'Inconsolata', monospace",
+                       fontSize: '22px',
+                       fontWeight: 348,
+                       fontStretch: '175%',
+                       letterSpacing: '0.06em',
+                       color: 'rgba(0,0,0,0.35)',
+                       textTransform: 'uppercase',
+                       textAlign: 'right',
+                     }}>
+                       SPEED
+                     </div>
+                     <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
+                       {avgSpeed > 0 ? avgSpeed.toFixed(1) : '—'}<span style={{ fontSize: '16px', fontWeight: 200, color: '#999', marginLeft: '2px' }}>KM/H</span>
+                     </div>
+                   </div>
+                 );
                })()}
              </div>
            </div>
