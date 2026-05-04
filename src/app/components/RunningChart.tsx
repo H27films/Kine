@@ -595,7 +595,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
              justifyContent: 'center',
              gap: '12px',
              marginTop: '4px',
-             marginBottom: '4px'
+             marginBottom: '16px'
            }}>
             {chartViews.map((_, index) => (
               <button
