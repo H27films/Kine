@@ -337,8 +337,8 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
     }
     const barWidth = points.length > 0 ? Math.max(8, (plotWidth - (points.length - 1) * dynamicBarSpacing) / points.length) : 0;
 
-      return (
-        <div>
+       return (
+         <div key={`${view.type}-${weekOffset}-${monthOffset}-${currentIndex}`}>
             {/* Period header with navigation */}
           <div style={{
             fontFamily: "'Inconsolata', monospace",
@@ -489,12 +489,12 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                           {view.type === 'week' && (
                             <path d={bgBarPath} fill="#000000" fillOpacity={0.02} />
                           )}
-                          {/* Foreground solid bars */}
-                          {view.type === 'week' ? (
-                            <path d={fgBarPath} fill="#1a1a1a" fillOpacity={opacity} onClick={() => isAllView && setSelectedBarIdx(isSelected ? null : i)} style={{ cursor: isAllView ? 'pointer' : 'default' }} />
-                          ) : (
-                            <rect x={x} y={y} width={barWidth} height={barHeight} fill="#1a1a1a" fillOpacity={opacity} onClick={() => isAllView && setSelectedBarIdx(isSelected ? null : i)} style={{ cursor: isAllView ? 'pointer' : 'default' }} />
-                          )}
+                           {/* Foreground solid bars */}
+                           {view.type === 'week' ? (
+                             <path className="bar-animate" d={fgBarPath} fill="#1a1a1a" fillOpacity={opacity} onClick={() => isAllView && setSelectedBarIdx(isSelected ? null : i)} style={{ cursor: isAllView ? 'pointer' : 'default' }} />
+                           ) : (
+                             <rect className="bar-animate" x={x} y={y} width={barWidth} height={barHeight} fill="#1a1a1a" fillOpacity={opacity} onClick={() => isAllView && setSelectedBarIdx(isSelected ? null : i)} style={{ cursor: isAllView ? 'pointer' : 'default' }} />
+                           )}
                           {/* Overlay pattern bars (ALL DATA only) */}
                           {isAllView && overlayBarHeight > 0 && (
                             <rect
@@ -748,15 +748,16 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                       const isCurrent = week.label === selectedWeekLabel;
                       const radius = barWidthPx / 2;
                       return (
-                        <g key={week.label}>
-                          <rect
-                            x={x}
-                            y={containerHeight - barH}
-                            width={barWidthPx}
-                            height={barH}
-                            rx={radius}
-                            ry={radius}
-                            fill={isCurrent ? '#1a1a1a' : 'rgba(0,0,0,0.4)'}
+                         <g key={week.label}>
+                           <rect
+                             className="bar-animate"
+                             x={x}
+                             y={containerHeight - barH}
+                             width={barWidthPx}
+                             height={barH}
+                             rx={radius}
+                             ry={radius}
+                             fill={isCurrent ? '#1a1a1a' : 'rgba(0,0,0,0.4)'}
                           />
                           {isCurrent && (
                             <circle
@@ -778,10 +779,21 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
     );
   };
 
-  if (loading) return <div>Loading...</div>;
+   if (loading) return <div>Loading...</div>;
 
-  return (
-    <div style={{ position: 'relative', overflow: 'hidden' }}>
+   return (
+     <div style={{ position: 'relative', overflow: 'hidden' }}>
+       <style>{`
+       @keyframes barGrow {
+         from { transform: scaleY(0); }
+         to { transform: scaleY(1); }
+       }
+       .bar-animate {
+         transform-origin: bottom;
+         transform-box: fill-box;
+         animation: barGrow 0.2s ease-out forwards;
+       }
+       `}</style>
       {/* Swipeable container */}
       <div
         ref={containerRef}
