@@ -751,6 +751,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                        </linearGradient>
                        <filter id="circleBlur" x="-50%" y="-50%" width="200%" height="200%">
                          <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" />
+                         <feColorMatrix type="matrix" values="0 0 0 0 0.949 0 0 0 0 0.949 0 0 0 0 0.949 0 0 0 1 0" />
                        </filter>
                      </defs>
                      {(() => {
@@ -811,13 +812,23 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                                strokeOpacity={isCurrent ? 1 : 0.9}
                              />
                               {isCurrent && (
-                                <circle
-                                  cx={x + barWidthPx / 2}
-                                  cy={topY - 6}
-                                  r="4"
-                                  fill="#1a1a1a"
-                                  filter="url(#circleBlur)"
-                                />
+                                <>
+                                  {/* Blurred halo matching background color */}
+                                  <circle
+                                    cx={x + barWidthPx / 2}
+                                    cy={topY - 6}
+                                    r="7"
+                                    fill="#f2f2f2"
+                                    filter="url(#circleBlur)"
+                                  />
+                                  {/* Solid black circle on top */}
+                                  <circle
+                                    cx={x + barWidthPx / 2}
+                                    cy={topY - 6}
+                                    r="4"
+                                    fill="#1a1a1a"
+                                  />
+                                </>
                               )}
                            </g>
                          );
