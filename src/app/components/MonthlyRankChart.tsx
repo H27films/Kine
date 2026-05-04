@@ -53,12 +53,12 @@ export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
   const maxKm = Math.max(...monthsWithData.map(m => m.km));
 
   // Layout dimensions
-  const containerHeight = 95; // total height including space for month labels below baseline
-  const baselineY = 75; // y-coordinate where drop lines meet x-axis
-  const topPadding = 10; // top margin for tallest circle
+  const containerHeight = 140; // total height including space for month labels below baseline
+  const baselineY = 110; // y-coordinate where drop lines meet x-axis
+  const topPadding = 15; // top margin for tallest circle
   const maxDropHeight = baselineY - topPadding; // max vertical space for drop line
   const slotWidth = plotWidth / allMonths.length;
-  const labelSpacingBelow = 12; // distance below baseline for month labels
+  const labelSpacingBelow = 14; // distance below baseline for month labels
 
   return (
     <div style={{ marginTop: '28px' }}>
@@ -135,9 +135,9 @@ export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
                       fontWeight="600"
                       fontFamily="'JetBrains Mono', monospace"
                     >
-                        <tspan transform={`rotate(90, ${pt.x}, ${pt.circleY - pt.circleRadius - 6})`}>
-                          {pt.month.km.toFixed(1)}
-                        </tspan>
+                      <tspan transform={`rotate(-90, ${pt.x}, ${pt.circleY - pt.circleRadius - 6})`}>
+                        {pt.month.km.toFixed(1)}
+                      </tspan>
                     </text>
                   ) : null
                 ))}
@@ -158,7 +158,7 @@ export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
                       fontWeight="500"
                       fontFamily="'JetBrains Mono', monospace"
                     >
-                      <tspan transform={`rotate(90, ${x}, ${labelY})`}>
+                      <tspan transform={`rotate(-90, ${x}, ${labelY})`}>
                         {month.label}
                       </tspan>
                     </text>
