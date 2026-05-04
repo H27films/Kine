@@ -745,10 +745,13 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                    style={{ overflow: 'visible' }}
                   >
                      <defs>
-                       <linearGradient id="weeklyRankConnectorGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                       <linearGradient id="weeklyRankConnectorGradient" gradientUnits="userSpaceOnUse" x1="0" y1={containerHeight - 50} x2="0" y2={containerHeight}>
                          <stop offset="0%" stop-color="rgba(0,0,0,0.5)" />
                          <stop offset="100%" stop-color="rgba(0,0,0,0.05)" />
                        </linearGradient>
+                       <filter id="circleBlur" x="-50%" y="-50%" width="200%" height="200%">
+                         <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" />
+                       </filter>
                      </defs>
                      {(() => {
                        // Precompute week data including positions
@@ -807,14 +810,15 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                                strokeLinecap="round"
                                strokeOpacity={isCurrent ? 1 : 0.9}
                              />
-                             {isCurrent && (
-                               <circle
-                                 cx={x + barWidthPx / 2}
-                                 cy={topY - 6}
-                                 r="4"
-                                 fill="#1a1a1a"
-                               />
-                             )}
+                              {isCurrent && (
+                                <circle
+                                  cx={x + barWidthPx / 2}
+                                  cy={topY - 6}
+                                  r="4"
+                                  fill="#1a1a1a"
+                                  filter="url(#circleBlur)"
+                                />
+                              )}
                            </g>
                          );
                        });
