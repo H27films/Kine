@@ -464,25 +464,27 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
 
                  return (
                   <g key={d.workoutId}>
-                    {view.type === 'month' ? (
-                      <>
-                        <line
-                          x1={x + barWidth / 2}
-                          y1={paddingY + plotHeight}
-                          x2={x + barWidth / 2}
-                          y2={y}
-                          stroke={d.originalValue === 0 ? "#ccc" : "#1a1a1a"}
-                          strokeWidth="1"
-                        />
-                        {d.originalValue > 0 && (
-                          <circle
-                            cx={x + barWidth / 2}
-                            cy={y}
-                            r={Math.max(2, Math.min(8, 2 + (d.originalValue / originalMax) * 6))}
-                            fill="#1a1a1a"
-                          />
-                        )}
-                       </>
+                     {view.type === 'month' ? (
+                       <>
+                         <line
+                           className="month-animate"
+                           x1={x + barWidth / 2}
+                           y1={paddingY + plotHeight}
+                           x2={x + barWidth / 2}
+                           y2={y}
+                           stroke={d.originalValue === 0 ? "#ccc" : "#1a1a1a"}
+                           strokeWidth="1"
+                         />
+                         {d.originalValue > 0 && (
+                           <circle
+                             className="month-animate"
+                             cx={x + barWidth / 2}
+                             cy={y}
+                             r={Math.max(2, Math.min(8, 2 + (d.originalValue / originalMax) * 6))}
+                             fill="#1a1a1a"
+                           />
+                         )}
+                        </>
                       ) : (
                         <>
                           {/* Background light grey bars (week only) */}
@@ -785,13 +787,20 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
      <div style={{ position: 'relative', overflow: 'hidden' }}>
        <style>{`
        @keyframes barGrow {
-         from { transform: scaleY(0); }
+         from { transform: scaleY(0.45); }
          to { transform: scaleY(1); }
+       }
+       @keyframes fadeIn {
+         from { opacity: 0; }
+         to { opacity: 1; }
        }
        .bar-animate {
          transform-origin: bottom;
          transform-box: fill-box;
-         animation: barGrow 0.2s ease-out forwards;
+         animation: barGrow 0.3s ease-out forwards;
+       }
+       .month-animate {
+         animation: fadeIn 0.3s ease-out forwards;
        }
        `}</style>
       {/* Swipeable container */}
