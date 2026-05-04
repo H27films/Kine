@@ -744,35 +744,54 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                    preserveAspectRatio="none"
                    style={{ overflow: 'visible' }}
                  >
-                    {sortedWeeks.map((week, idx) => {
-                      const barH = week.km > 0 ? Math.max(2, (week.km / maxWeekKm) * maxBarHeight) : 1;
-                      const x = paddingX + idx * slotWidth + (slotWidth - barWidthPx) / 2;
-                      const isCurrent = week.label === selectedWeekLabel;
-                      const radius = barWidthPx / 2;
-                      return (
-                         <g key={week.label}>
-                           <line
-                             className="bar-animate"
-                             x1={x + barWidthPx / 2}
-                             y1={containerHeight}
-                             x2={x + barWidthPx / 2}
-                             y2={containerHeight - barH}
-                             stroke="#1a1a1a"
-                             strokeWidth={barWidthPx}
-                             strokeLinecap="round"
-                             strokeOpacity={isCurrent ? 1 : 0.9}
-                           />
-                           {isCurrent && (
-                             <circle
-                               cx={x + barWidthPx / 2}
-                               cy={containerHeight - barH - 6}
-                               r="4"
-                               fill="#1a1a1a"
-                             />
-                           )}
-                         </g>
-                      );
-                    })}
+                     {(() => {
+                       // Build array of points for the background line (connecting bar tops)
+                       const points = sortedWeeks.map((week, idx) => {
+                         const barH = week.km > 0 ? Math.max(2, (week.km / maxWeekKm) * maxBarHeight) : 1;
+                         const x = paddingX + idx * slotWidth + (slotWidth - barWidthPx) / 2;
+                         return { x, y: containerHeight - barH };
+                       });
+                       return sortedWeeks.map((week, idx) => {
+                         const barH = week.km > 0 ? Math.max(2, (week.km / maxWeekKm) * maxBarHeight) : 1;
+                         const x = paddingX + idx * slotWidth + (slotWidth - barWidthPx) / 2;
+                         const isCurrent = week.label === selectedWeekLabel;
+                         const radius = barWidthPx / 2;
+                         const topY = containerHeight - barH;
+                         return (
+                            <g key={week.label}>
+                              {/* Segment of background line connecting this bar to previous */}
+                              {idx > 0 && (
+                                <line
+                                  x1={points[idx - 1].x}
+                                  y1={points[idx - 1].y}
+                                  x2={x}
+                                  y2={topY}
+                                  stroke="rgba(0,0,0,0.15)"
+                                  strokeWidth="1"
+                                />
+                              )}
+                              <line
+                                className="bar-animate"
+                                x1={x + barWidthPx / 2}
+                                y1={containerHeight}
+                                x2={x + barWidthPx / 2}
+                                y2={containerHeight - barH}
+                                stroke="#1a1a1a"
+                                strokeWidth={barWidthPx}
+                                strokeLinecap="round"
+                                strokeOpacity={isCurrent ? 1 : 0.9}
+                              />
+                              {isCurrent && (
+                                <circle
+                                  cx={x + barWidthPx / 2}
+                                  cy={containerHeight - barH - 6}
+                                  r="4"
+                                  fill="#1a1a1a"
+                                />
+                              )}
+                            </g>
+                          );
+                      })})()}
                     <line x1={paddingX} y1={containerHeight} x2={chartWidth - paddingX} y2={containerHeight} stroke="#1a1a1a" strokeWidth="1" />
                  </svg>
                </div>
