@@ -145,7 +145,42 @@ export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
                       r="4"
                       fill="#1a1a1a"
                     />
-          )}
+                  )}
+                </g>
+              );
+            });
+
+            return (
+              <>
+                {connector}
+                {bars}
+                {/* X-axis month labels */}
+                {allMonths.map((month, idx) => {
+                  const x = paddingX + idx * slotWidth + (slotWidth - barWidthPx) / 2;
+                  const barCenter = x + barWidthPx / 2;
+                  const leftPercent = (barCenter / chartWidth) * 100;
+                  return (
+                    <span
+                      key={idx}
+                      style={{
+                        position: 'absolute',
+                        left: `${leftPercent}%`,
+                        bottom: 0,
+                        transform: 'translateX(-50%)',
+                        fontSize: '9px',
+                        fontWeight: 500,
+                        color: '#1a1a1a',
+                        letterSpacing: '0.02em',
+                        opacity: month.hasData ? 1 : 0.4,
+                      }}
+                    >
+                      {month.label}
+                    </span>
+                  );
+                })}
+              </>
+            );
+          })()}
         </svg>
       </div>
     </div>
