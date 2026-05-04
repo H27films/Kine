@@ -74,12 +74,12 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
      return getCurrentWeek() + offset;
    };
 
-    const getMonthOffsetFromString = (monthStr: string) => {
-      const [year, month] = monthStr.split('-').map(Number);
+    const getMonthByOffset = (offset: number) => {
       const now = new Date();
-      const target = new Date(year, month - 1);
-      const current = new Date(now.getFullYear(), now.getMonth());
-      return (target.getFullYear() - current.getFullYear()) * 12 + (target.getMonth() - current.getMonth());
+      const targetMonth = now.getMonth() + offset; // offset negative = past, positive = future
+      const targetYear = now.getFullYear() - Math.floor((12 - targetMonth) / 12); // adjust year if needed
+      const normalizedMonth = ((targetMonth % 12) + 12) % 12;
+      return `${targetYear}-${String(normalizedMonth + 1).padStart(2, '0')}`;
     };
 
    const getMonthLabel = (monthStr: string) => {
@@ -88,19 +88,29 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
      return `${monthNames[month - 1]} ${year}`;
    };
 
-   const getPeriodLabel = (viewType: string) => {
-     if (viewType === 'week') {
-       const weekNum = getWeekByOffset(weekOffset);
-       return `WEEK ${weekNum}`;
-     }
-     if (viewType === 'month') {
-       const monthStr = getMonthByOffset(monthOffset);
-       return getMonthLabel(monthStr).toUpperCase();
-     }
-     return 'ALL TIME';
-   };
+    const getPeriodLabel = (viewType: string) => {
+      if (viewType === 'week') {
+        const weekNum = getWeekByOffset(weekOffset);
+        return `WEEK ${weekNum}`;
+      }
+      if (viewType === 'month') {
+        const monthStr = getMonthByOffset(monthOffset);
+        return getMonthLabel(monthStr).toUpperCase();
+      }
+      return 'ALL TIME';
+    };
 
-   const prepareWeekData = (weekNum: number) => {
+    const getOrdinalSuffix = (n: number) => {
+      if (n % 100 >= 11 && n % 100 <= 13) return 'th';
+      switch (n % 10) {
+        case 1: return 'st';
+        case 2: return 'nd';
+        case 3: return 'rd';
+        default: return 'th';
+      }
+    };
+
+    const prepareWeekData = (weekNum: number) => {
      const weekWorkouts = workouts.filter(w => w.week === weekNum);
      const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
      const dayData = dayLabels.map((label, index) => {
@@ -677,79 +687,70 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
 
          )}
 
-         {/* Weekly comparison bar chart (CURRENT WEEK only) */}
-         {view.type === 'week' && (() => {
-           const allWeeksData = prepareAllData();
-           if (allWeeksData.length === 0) return null;
-           const selectedWeekNum = getWeekByOffset(weekOffset);
-           const selectedWeekLabel = `W${selectedWeekNum}`;
-           const sortedWeeks = [...allWeeksData].sort((a, b) => a.km - b.km);
-           const totalWeeks = sortedWeeks.length;
+          {/* Weekly comparison bar chart (CURRENT WEEK only) */}
+          {view.type === 'week' && (() => {
+            const allWeeksData = prepareAllData();
+            if (allWeeksData.length === 0) return null;
+            const selectedWeekNum = getWeekByOffset(weekOffset);
+            const selectedWeekLabel = `W${selectedWeekNum}`;
+            const sortedWeeks = [...allWeeksData].sort((a, b) => a.km - b.km);
+            const totalWeeks = sortedWeeks.length;
+            const sortedDesc = [...allWeeksData].sort((a, b) => b.originalKm - a.originalKm);
+            const currentRank = sortedDesc.findIndex(w => w.label === selectedWeekLabel) + 1;
+            const maxWeekKm = Math.max(...sortedWeeks.map(w => w.km));
+            const availableWidth = plotWidth;
+            const slotWidth = Math.max(4, Math.floor(availableWidth / sortedWeeks.length));
+            const barWidthPx = 1.5;
+            const containerHeight = 60;
+            const maxBarHeight = 50;
 
-           const getWeeklyRankData = () => {
-             const selectedWeekNum = getWeekByOffset(weekOffset);
-             const selectedWeekLabel = `W${selectedWeekNum}`;
-             const sortedDesc = [...allWeeksData].sort((a, b) => b.originalKm - a.originalKm);
-             const currentRank = sortedDesc.findIndex(w => w.label === selectedWeekLabel) + 1;
-             const sortedForBar = [...allWeeksData].sort((a, b) => a.km - b.km);
-             return { selectedWeekLabel, currentRank, sortedForBar };
-           };
-
-           const { selectedWeekLabel, currentRank, sortedWeeks: sortedWeeksData } = getWeeklyRankData();
-           const maxWeekKm = Math.max(...sortedWeeksData.map(w => w.km));
-           const availableWidth = plotWidth;
-           const slotWidth = Math.max(4, Math.floor(availableWidth / sortedWeeks.length));
-           const barWidthPx = 1.5;
-           const containerHeight = 60;
-           const maxBarHeight = 50;
-
-           return (
-             <div style={{ marginTop: '24px' }}>
-             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0px' }}>
-               <div style={{ fontSize: '12px', fontWeight: 700, color: '#1a1a1a', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                 WEEKLY RANK
-               </div>
-               <div style={{ fontSize: '12px', fontWeight: 600, color: '#1a1a1a', fontFamily: "'JetBrains Mono', monospace" }}>
-                 {currentRank > 0 ? `${currentRank}${getOrdinalSuffix(currentRank)} / ${totalWeeks}` : `— / ${totalWeeks}`}
-               </div>
-             </div>
-              <div style={{ height: containerHeight, position: 'relative' }}>
-                <svg
-                  width="100%"
-                  height={containerHeight}
-                  viewBox={`0 0 ${chartWidth} ${containerHeight}`}
-                  preserveAspectRatio="none"
-                  style={{ overflow: 'visible' }}
-                >
-                   {sortedWeeks.map((week, idx) => {
-                     const barH = week.km > 0 ? Math.max(2, (week.km / maxWeekKm) * maxBarHeight) : 1;
-                     const x = paddingX + idx * slotWidth + (slotWidth - barWidthPx) / 2;
-                     const isCurrent = week.label === selectedWeekLabel;
-                     const radius = barWidthPx / 2;
-                     return (
-                       <g key={week.label}>
-                         <rect
-                           x={x}
-                           y={containerHeight - barH}
-                           width={barWidthPx}
-                           height={barH}
-                           rx={radius}
-                           ry={radius}
-                           fill={isCurrent ? '#1a1a1a' : 'rgba(0,0,0,0.4)'}
-                         />
-                         {isCurrent && (
-                           <circle
-                             cx={x + barWidthPx / 2}
-                             cy={containerHeight - barH - 4}
-                             r="3"
-                             fill="#1a1a1a"
-                           />
-                         )}
-                       </g>
-                     );
-                   })}
-                </svg>
+            return (
+              <div style={{ marginTop: '24px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0px' }}>
+                <div style={{ fontSize: '12px', fontWeight: 700, color: '#1a1a1a', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                  WEEKLY RANK
+                </div>
+                <div style={{ fontSize: '12px', fontWeight: 600, color: '#1a1a1a', fontFamily: "'JetBrains Mono', monospace" }}>
+                  {currentRank > 0 ? `${currentRank}${getOrdinalSuffix(currentRank)} / ${totalWeeks}` : `— / ${totalWeeks}`}
+                </div>
               </div>
+               <div style={{ height: containerHeight, position: 'relative' }}>
+                 <svg
+                   width="100%"
+                   height={containerHeight}
+                   viewBox={`0 0 ${chartWidth} ${containerHeight}`}
+                   preserveAspectRatio="none"
+                   style={{ overflow: 'visible' }}
+                 >
+                    {sortedWeeks.map((week, idx) => {
+                      const barH = week.km > 0 ? Math.max(2, (week.km / maxWeekKm) * maxBarHeight) : 1;
+                      const x = paddingX + idx * slotWidth + (slotWidth - barWidthPx) / 2;
+                      const isCurrent = week.label === selectedWeekLabel;
+                      const radius = barWidthPx / 2;
+                      return (
+                        <g key={week.label}>
+                          <rect
+                            x={x}
+                            y={containerHeight - barH}
+                            width={barWidthPx}
+                            height={barH}
+                            rx={radius}
+                            ry={radius}
+                            fill={isCurrent ? '#1a1a1a' : 'rgba(0,0,0,0.4)'}
+                          />
+                          {isCurrent && (
+                            <circle
+                              cx={x + barWidthPx / 2}
+                              cy={containerHeight - barH - 4}
+                              r="3"
+                              fill="#1a1a1a"
+                            />
+                          )}
+                        </g>
+                      );
+                    })}
+                 </svg>
+               </div>
             </div>
           );
         })()}
