@@ -15,6 +15,8 @@ interface MonthlyRankChartProps {
   plotWidth: number;
 }
 
+const MONTH_LABELS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+
 export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
   allMonthData,
   selectedMonthLabel,
@@ -25,14 +27,36 @@ export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
 }) => {
   if (allMonthData.length === 0) return null;
 
-  const sortedMonths = [...allMonthData].sort((a, b) => a.km - b.km);
-  const sortedDesc = [...allMonthData].sort((a, b) => b.originalKm - a.originalKm);
-  const totalMonths = sortedMonths.length;
-  const currentRank = sortedDesc.findIndex(w => w.label === selectedMonthLabel) + 1;
-  const maxMonthKm = Math.max(...sortedMonths.map(w => w.km));
+  // Build a map of existing data by month index (0-11)
+  const dataMap = new Map<number, MonthlyRankData>();
+  allMonthData.forEach(d => {
+    const [year, month] = d.label.split('-').map(Number);
+    const monthIdx = month - 1;
+    dataMap.set(monthIdx, d);
+  });
+
+  // Create all 12 months array (chronological, not sorted by value)
+  const allMonths = Array.from({ length: 12 }, (_, i) => {
+    const existing = dataMap.get(i);
+    return {
+      label: MONTH_LABELS[i],
+      km: existing?.km || 0,
+      originalKm: existing?.originalKm || 0,
+      monthIndex: i,
+      hasData: existing !== undefined,
+    };
+  });
+
+  // Compute rank based on originalKm values
+  const monthsWithData = allMonths.filter(m => m.hasData);
+  const sortedDesc = [...monthsWithData].sort((a, b) => b.originalKm - a.originalKm);
+  const totalMonths = monthsWithData.length;
+  const selectedMonthIdx = parseInt(selectedMonthLabel.split('-')[1]) - 1;
+  const currentRank = sortedDesc.findIndex(m => m.monthIndex === selectedMonthIdx) + 1;
+  const maxMonthKm = Math.max(...monthsWithData.map(m => m.originalKm));
 
   const availableWidth = plotWidth;
-  const slotWidth = Math.max(4, Math.floor(availableWidth / sortedMonths.length));
+  const slotWidth = Math.max(4, Math.floor(availableWidth / allMonths.length));
   const barWidthPx = 1.3;
   const containerHeight = 70;
   const maxBarHeight = 58;
@@ -62,12 +86,12 @@ export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
             </linearGradient>
           </defs>
           {(() => {
-            const monthData = sortedMonths.map((month, idx) => {
-              const barH = month.km > 0 ? Math.max(2, (month.km / maxMonthKm) * maxBarHeight) : 1;
+            const monthDataPoints = allMonths.map((month, idx) => {
+              const barH = month.originalKm > 0 ? Math.max(2, (month.originalKm / maxMonthKm) * maxBarHeight) : 1;
               const x = paddingX + idx * slotWidth + (slotWidth - barWidthPx) / 2;
               const topY = containerHeight - barH;
               const elevatedY = topY - 8;
-              return { month, idx, x, barH, topY, elevatedY, isCurrent: month.label === selectedMonthLabel };
+              return { month, idx, x, barH, topY, elevatedY, isCurrent: month.monthIndex === selectedMonthIdx };
             });
 
             const buildSmoothPath = (pts: {x: number, y: number}[]) => {
@@ -87,9 +111,9 @@ export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
               return d;
             };
 
-            const connectorPath = buildSmoothPath(monthData.map(w => ({ x: w.x, y: w.elevatedY })));
+            const connectorPath = buildSmoothPath(monthDataPoints.map(w => ({ x: w.x, y: w.elevatedY })));
 
-            const connector = monthData.length > 1 && (
+            const connector = monthDataPoints.length > 1 && (
               <path
                 d={connectorPath}
                 fill="none"
@@ -100,9 +124,9 @@ export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
               />
             );
 
-            const bars = monthData.map(({ month, x, topY, isCurrent }) => {
+            const bars = monthDataPoints.map(({ month, x, topY, isCurrent }) => {
               return (
-                <g key={month.label}>
+                <g key={month.monthIndex}>
                   <line
                     className="bar-animate"
                     x1={x + barWidthPx / 2}
@@ -112,9 +136,9 @@ export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
                     stroke="#1a1a1a"
                     strokeWidth={barWidthPx}
                     strokeLinecap="round"
-                    strokeOpacity={1}
+                    strokeOpacity={month.hasData ? 1 : 0.3}
                   />
-                  {isCurrent && (
+                  {isCurrent && month.hasData && (
                     <circle
                       cx={x + barWidthPx / 2}
                       cy={topY - 8}
@@ -134,6 +158,30 @@ export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
             );
           })()}
           <line x1={paddingX} y1={containerHeight} x2={chartWidth - paddingX} y2={containerHeight} stroke="#1a1a1a" strokeWidth="1" />
+          {/* X-axis month labels */}
+          {allMonths.map((month, idx) => {
+            const barLeft = paddingX + idx * (slotWidth + (slotWidth - barWidthPx) / 2);
+            const barCenter = barLeft + barWidthPx / 2;
+            const leftPercent = (barCenter / chartWidth) * 100;
+            return (
+              <span
+                key={idx}
+                style={{
+                  position: 'absolute',
+                  left: `${leftPercent}%`,
+                  bottom: 0,
+                  transform: 'translateX(-50%)',
+                  fontSize: '9px',
+                  fontWeight: 500,
+                  color: '#1a1a1a',
+                  letterSpacing: '0.02em',
+                  opacity: month.hasData ? 1 : 0.4,
+                }}
+              >
+                {month.label}
+              </span>
+            );
+          })}
         </svg>
       </div>
     </div>
