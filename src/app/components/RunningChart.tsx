@@ -589,14 +589,14 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
             </div>
           )}
 
-          {/* Navigation dots */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: '12px',
-            marginTop: '16px',
-            marginBottom: '16px'
-          }}>
+           {/* Navigation dots */}
+           <div style={{
+             display: 'flex',
+             justifyContent: 'center',
+             gap: '12px',
+             marginTop: '4px',
+             marginBottom: '4px'
+           }}>
             {chartViews.map((_, index) => (
               <button
                 key={index}
@@ -614,9 +614,9 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
             ))}
           </div>
 
-           {/* MAX/AVG stats */}
-           {points.length > 0 && (
-             <div style={{ marginTop: '2px', display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+            {/* MAX/AVG stats */}
+            {points.length > 0 && (
+              <div style={{ marginTop: '0', display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
               <div>
             <div style={{
               fontFamily: "'Inconsolata', monospace",
@@ -726,8 +726,8 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
             const containerHeight = 60;
             const maxBarHeight = 50;
 
-            return (
-              <div style={{ marginTop: '24px' }}>
+             return (
+               <div style={{ marginTop: '12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0px' }}>
                 <div style={{ fontSize: '12px', fontWeight: 700, color: '#1a1a1a', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                   WEEKLY RANK
