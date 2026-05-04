@@ -796,43 +796,32 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                          />
                        );
 
-                       // Draw bars and current week marker
-                       const bars = weekData.map(({ week, x, topY, isCurrent }) => {
-                         return (
-                           <g key={week.label}>
-                             <line
-                               className="bar-animate"
-                               x1={x + barWidthPx / 2}
-                               y1={containerHeight}
-                               x2={x + barWidthPx / 2}
-                               y2={topY}
-                               stroke="#1a1a1a"
-                               strokeWidth={barWidthPx}
-                               strokeLinecap="round"
-                               strokeOpacity={1}
-                             />
+                        // Draw bars and current week marker
+                        const bars = weekData.map(({ week, x, topY, isCurrent }) => {
+                          return (
+                            <g key={week.label}>
+                              <line
+                                className="bar-animate"
+                                x1={x + barWidthPx / 2}
+                                y1={containerHeight}
+                                x2={x + barWidthPx / 2}
+                                y2={topY}
+                                stroke="#1a1a1a"
+                                strokeWidth={barWidthPx}
+                                strokeLinecap="round"
+                                strokeOpacity={1}
+                              />
                               {isCurrent && (
-                                <>
-                                  {/* Blurred halo matching background color */}
-                                  <circle
-                                    cx={x + barWidthPx / 2}
-                                    cy={topY - 6}
-                                    r="7"
-                                    fill="#f2f2f2"
-                                    filter="url(#circleBlur)"
-                                  />
-                                  {/* Solid black circle on top */}
-                                  <circle
-                                    cx={x + barWidthPx / 2}
-                                    cy={topY - 6}
-                                    r="4"
-                                    fill="#1a1a1a"
-                                  />
-                                </>
+                                <circle
+                                  cx={x + barWidthPx / 2}
+                                  cy={topY - 6}
+                                  r="4"
+                                  fill="#1a1a1a"
+                                />
                               )}
-                           </g>
-                         );
-                       });
+                            </g>
+                          );
+                        });
 
                        return (
                          <>
