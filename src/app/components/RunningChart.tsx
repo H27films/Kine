@@ -54,6 +54,8 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
    const [selectedBarIdx, setSelectedBarIdx] = useState<number | null>(null);
    const [weekOffset, setWeekOffset] = useState(0); // 0 = current week, -1 = previous, etc.
    const [monthOffset, setMonthOffset] = useState(0); // 0 = current month, -1 = previous, etc.
+   const [minWeek, setMinWeek] = useState<number | null>(null);
+   const [minMonth, setMinMonth] = useState<string | null>(null);
 
    const chartViews = [
      { label: 'CURRENT WEEK', type: 'week' },
@@ -72,13 +74,13 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
      return getCurrentWeek() + offset;
    };
 
-   const getMonthByOffset = (offset: number) => {
-     const now = new Date();
-     const targetMonth = now.getMonth() + offset; // offset negative = past, positive = future
-     const targetYear = now.getFullYear() - Math.floor((12 - targetMonth) / 12); // adjust year if needed
-     const normalizedMonth = ((targetMonth % 12) + 12) % 12;
-     return `${targetYear}-${String(normalizedMonth + 1).padStart(2, '0')}`;
-   };
+    const getMonthOffsetFromString = (monthStr: string) => {
+      const [year, month] = monthStr.split('-').map(Number);
+      const now = new Date();
+      const target = new Date(year, month - 1);
+      const current = new Date(now.getFullYear(), now.getMonth());
+      return (target.getFullYear() - current.getFullYear()) * 12 + (target.getMonth() - current.getMonth());
+    };
 
    const getMonthLabel = (monthStr: string) => {
      const [year, month] = monthStr.split('-').map(Number);
@@ -114,23 +116,33 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
      return dayData;
    };
 
-  useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-    const { data } = await supabase
-      .from('workouts')
-      .select('id, date, total_cardio, time, week')
-      .eq('exercise_id', 84)
-      .not('total_cardio', 'is', null)
-      .order('date', { ascending: true });
+   useEffect(() => {
+     const loadData = async () => {
+       setLoading(true);
+     const { data } = await supabase
+       .from('workouts')
+       .select('id, date, total_cardio, time, week')
+       .eq('exercise_id', 84)
+       .not('total_cardio', 'is', null)
+       .order('date', { ascending: true });
 
-      if (data) {
-        setWorkouts(data as RunningWorkout[]);
-      }
-      setLoading(false);
-    };
-    loadData();
-  }, []);
+       if (data) {
+         setWorkouts(data as RunningWorkout[]);
+         // Calculate minWeek
+         const weeks = data.map(w => w.week).filter(w => w !== null) as number[];
+         if (weeks.length > 0) {
+           setMinWeek(Math.min(...weeks));
+         }
+         // Calculate minMonth (earliest month string YYYY-MM)
+         const months = data.map(w => w.date.substring(0, 7)).filter(m => m);
+         if (months.length > 0) {
+           setMinMonth(months.sort()[0]);
+         }
+       }
+       setLoading(false);
+     };
+     loadData();
+   }, []);
 
    const prepareMonthData = (monthStr: string) => {
      const monthWorkouts = workouts.filter(w => w.date.startsWith(monthStr));
@@ -309,11 +321,19 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                     if (view.type === 'week') setWeekOffset(prev => prev - 1);
                     else setMonthOffset(prev => prev - 1);
                   }}
+                  disabled={view.type === 'week'
+                    ? minWeek !== null && weekOffset <= minWeek - getCurrentWeek()
+                    : minMonth !== null && monthOffset <= getMonthOffsetFromString(minMonth!)}
                   style={{
                     background: 'none',
                     border: 'none',
                     padding: 0,
-                    cursor: 'pointer',
+                    cursor: view.type === 'week'
+                      ? (minWeek !== null && weekOffset <= minWeek - getCurrentWeek()) ? 'default' : 'pointer'
+                      : (minMonth !== null && monthOffset <= getMonthOffsetFromString(minMonth!)) ? 'default' : 'pointer',
+                    opacity: view.type === 'week'
+                      ? (minWeek !== null && weekOffset <= minWeek - getCurrentWeek()) ? 0.3 : 1
+                      : (minMonth !== null && monthOffset <= getMonthOffsetFromString(minMonth!)) ? 0.3 : 1,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center'
@@ -326,13 +346,19 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                     if (view.type === 'week') setWeekOffset(prev => prev + 1);
                     else setMonthOffset(prev => prev + 1);
                   }}
-                  disabled={view.type === 'week' ? weekOffset >= 0 : monthOffset >= 0}
+                  disabled={view.type === 'week'
+                    ? minWeek !== null && weekOffset <= minWeek - getCurrentWeek()
+                    : minMonth !== null && monthOffset <= getMonthOffsetFromString(minMonth!)}
                   style={{
                     background: 'none',
                     border: 'none',
                     padding: 0,
-                    cursor: view.type === 'week' ? (weekOffset >= 0 ? 'default' : 'pointer') : (monthOffset >= 0 ? 'default' : 'pointer'),
-                    opacity: view.type === 'week' ? (weekOffset >= 0 ? 0.3 : 1) : (monthOffset >= 0 ? 0.3 : 1),
+                    cursor: view.type === 'week'
+                      ? (minWeek !== null && weekOffset <= minWeek - getCurrentWeek()) ? 'default' : 'pointer'
+                      : (minMonth !== null && monthOffset <= getMonthOffsetFromString(minMonth!)) ? 'default' : 'pointer',
+                    opacity: view.type === 'week'
+                      ? (minWeek !== null && weekOffset <= minWeek - getCurrentWeek()) ? 0.3 : 1
+                      : (minMonth !== null && monthOffset <= getMonthOffsetFromString(minMonth!)) ? 0.3 : 1,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center'
@@ -659,20 +685,18 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
            const selectedWeekLabel = `W${selectedWeekNum}`;
            const sortedWeeks = [...allWeeksData].sort((a, b) => a.km - b.km);
            const totalWeeks = sortedWeeks.length;
-           const sortedDesc = [...allWeeksData].sort((a, b) => b.originalKm - a.originalKm);
-           const currentRank = sortedDesc.findIndex(w => w.label === selectedWeekLabel) + 1;
 
-           const getOrdinalSuffix = (n: number) => {
-             if (n % 100 >= 11 && n % 100 <= 13) return 'th';
-             switch (n % 10) {
-               case 1: return 'st';
-               case 2: return 'nd';
-               case 3: return 'rd';
-               default: return 'th';
-             }
+           const getWeeklyRankData = () => {
+             const selectedWeekNum = getWeekByOffset(weekOffset);
+             const selectedWeekLabel = `W${selectedWeekNum}`;
+             const sortedDesc = [...allWeeksData].sort((a, b) => b.originalKm - a.originalKm);
+             const currentRank = sortedDesc.findIndex(w => w.label === selectedWeekLabel) + 1;
+             const sortedForBar = [...allWeeksData].sort((a, b) => a.km - b.km);
+             return { selectedWeekLabel, currentRank, sortedForBar };
            };
 
-           const maxWeekKm = Math.max(...sortedWeeks.map(w => w.km));
+           const { selectedWeekLabel, currentRank, sortedWeeks: sortedWeeksData } = getWeeklyRankData();
+           const maxWeekKm = Math.max(...sortedWeeksData.map(w => w.km));
            const availableWidth = plotWidth;
            const slotWidth = Math.max(4, Math.floor(availableWidth / sortedWeeks.length));
            const barWidthPx = 1.5;
