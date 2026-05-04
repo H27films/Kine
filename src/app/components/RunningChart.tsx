@@ -85,44 +85,14 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
    // Compute minimum allowed offsets based on loaded data
    const getMinWeekOffset = () => {
      if (minWeek === null) return 0;
-     return minWeek - getCurrentWeek(); // negative number, e.g., -16 for week 54 when current is 70
+     return minWeek - getCurrentWeek(); // negative or 0
    };
 
    const getMinMonthOffset = () => {
      return minMonthOffset ?? 0;
    };
 
-   const getWeekByOffset = (offset: number) => {
-     return getCurrentWeek() + offset;
-   };
 
-   // Returns how many months ago the earliest month is (negative number)
-   const getMinMonthOffset = () => {
-     if (minMonthOffset !== null) return minMonthOffset;
-     const now = new Date();
-     const current = new Date(now.getFullYear(), now.getMonth(), 1);
-     // This will be calculated once data loads; return 0 as fallback
-     return 0;
-   };
-
-   const getCurrentWeek = () => {
-     const now = new Date();
-     const startDate = new Date('2025-01-06T00:00:00');
-     const msPerWeek = 7 * 24 * 60 * 60 * 1000;
-     return Math.floor((now.getTime() - startDate.getTime()) / msPerWeek) + 1;
-   };
-
-   const getWeekByOffset = (offset: number) => {
-     return getCurrentWeek() + offset;
-   };
-
-    const getMonthByOffset = (offset: number) => {
-      const now = new Date();
-      const targetMonth = now.getMonth() + offset; // offset negative = past, positive = future
-      const targetYear = now.getFullYear() - Math.floor((12 - targetMonth) / 12); // adjust year if needed
-      const normalizedMonth = ((targetMonth % 12) + 12) % 12;
-      return `${targetYear}-${String(normalizedMonth + 1).padStart(2, '0')}`;
-    };
 
    const getMonthLabel = (monthStr: string) => {
      const [year, month] = monthStr.split('-').map(Number);
@@ -329,6 +299,14 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
     const avgDenominator = points.length;
     const metricLabel = 'KM';
 
+    // Navigation availability for chevrons
+    const canGoLeft = view.type === 'week'
+      ? weekOffset > getMinWeekOffset()
+      : monthOffset > getMinMonthOffset();
+    const canGoRight = view.type === 'week'
+      ? weekOffset < 0
+      : monthOffset < 0;
+
     // Simple bar chart
     const chartHeight = 220;
     const chartWidth = 340;
@@ -385,19 +363,13 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                     if (view.type === 'week') setWeekOffset(prev => prev - 1);
                     else setMonthOffset(prev => prev - 1);
                   }}
-                  disabled={view.type === 'week'
-                    ? weekOffset === getMinWeekOffset()
-                    : monthOffset === getMinMonthOffset()}
+                  disabled={!canGoLeft}
                   style={{
                     background: 'none',
                     border: 'none',
                     padding: 0,
-                    cursor: view.type === 'week'
-                      ? weekOffset === getMinWeekOffset() ? 'default' : 'pointer'
-                      : monthOffset === getMinMonthOffset() ? 'default' : 'pointer',
-                    opacity: view.type === 'week'
-                      ? weekOffset === getMinWeekOffset() ? 0.3 : 1
-                      : monthOffset === getMinMonthOffset() ? 0.3 : 1,
+                    cursor: canGoLeft ? 'pointer' : 'default',
+                    opacity: canGoLeft ? 1 : 0.3,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center'
@@ -410,13 +382,13 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                     if (view.type === 'week') setWeekOffset(prev => prev + 1);
                     else setMonthOffset(prev => prev + 1);
                   }}
-                  disabled={view.type === 'week' ? weekOffset >= 0 : monthOffset >= 0}
+                  disabled={!canGoRight}
                   style={{
                     background: 'none',
                     border: 'none',
                     padding: 0,
-                    cursor: view.type === 'week' ? (weekOffset >= 0 ? 'default' : 'pointer') : (monthOffset >= 0 ? 'default' : 'pointer'),
-                    opacity: view.type === 'week' ? (weekOffset >= 0 ? 0.3 : 1) : (monthOffset >= 0 ? 0.3 : 1),
+                    cursor: canGoRight ? 'pointer' : 'default',
+                    opacity: canGoRight ? 1 : 0.3,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center'
