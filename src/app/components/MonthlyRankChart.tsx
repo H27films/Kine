@@ -16,7 +16,7 @@ interface MonthlyRankChartProps {
 }
 
 const MONTH_NAMES = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-const ACCENT_COLOR = '#ff6b35';
+const ACCENT_COLOR = 'black';
 
 export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
   allMonthData,
@@ -115,7 +115,7 @@ export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
                       cy={pt.circleY}
                       r={pt.circleRadius}
                       fill={ACCENT_COLOR}
-                      style={{ filter: pt.isPeak ? 'drop-shadow(0 0 5px rgba(255, 107, 53, 0.6))' : undefined }}
+                       style={{ filter: pt.isPeak ? 'drop-shadow(0 0 5px rgba(0, 0, 0, 0.6))' : undefined }}
                     />
                   ) : null
                 ))}
@@ -126,16 +126,16 @@ export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
                     <text
                       key={`val-${i}`}
                       x={pt.x}
-                      y={pt.circleY - pt.circleRadius - 6}
+                      y={pt.circleY - pt.circleRadius - 10}
                       textAnchor="middle"
                       dominantBaseline="middle"
                       fill={ACCENT_COLOR}
-                      fontSize="12px"
+                      fontSize="10px"
                       fontWeight="600"
                       fontFamily="'JetBrains Mono', monospace"
-                      transform={`rotate(-90, ${pt.x}, ${pt.circleY - pt.circleRadius - 6})`}
+                      transform={`rotate(-90, ${pt.x}, ${pt.circleY - pt.circleRadius - 10})`}
                     >
-                      {pt.month.km.toFixed(1)}
+                      {Math.round(pt.month.km)}
                     </text>
                   ) : null
                 ))}
