@@ -16,7 +16,7 @@ interface MonthlyRankChartProps {
 }
 
 const MONTH_NAMES = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-const ACCENT_COLOR = '#ff6b35'; // coral/orange
+const ACCENT_COLOR = '#ff6b35'; // coral/orange accent
 
 export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
   allMonthData,
@@ -52,10 +52,13 @@ export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
   const currentRank = sortedDesc.findIndex(m => m.monthIndex === selectedMonthIdx) + 1;
   const maxKm = Math.max(...monthsWithData.map(m => m.km));
 
+  // Layout dimensions
+  const containerHeight = 95; // total height including space for month labels below baseline
+  const baselineY = 75; // y-coordinate where drop lines meet x-axis
+  const topPadding = 10; // top margin for tallest circle
+  const maxDropHeight = baselineY - topPadding; // max vertical space for drop line
   const slotWidth = plotWidth / allMonths.length;
-  const barWidthPx = 1.3;
-  const containerHeight = 70;
-  const maxDropHeight = 58;
+  const labelSpacingBelow = 12; // distance below baseline for month labels
 
   return (
     <div style={{ marginTop: '28px' }}>
@@ -78,24 +81,23 @@ export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
           {(() => {
             const monthPoints = allMonths.map((month, idx) => {
               const x = paddingX + idx * slotWidth + slotWidth / 2;
-              const dropHeight = month.km > 0 && maxKm > 0 ? (month.km / maxKm) * maxDropHeight : 0;
-              const circleY = containerHeight - dropHeight;
+              const dropH = month.km > 0 && maxKm > 0 ? (month.km / maxKm) * maxDropHeight : 0;
+              const circleY = baselineY - dropH;
               const isPeak = month.km === maxKm && month.km > 0;
-              const circleRadius = isPeak ? 8 : 5; // 16px dia peak, 10px normal
+              const circleRadius = isPeak ? 8 : 5; // peak: 16px dia, normal: 10px dia
               const isCurrent = month.monthIndex === selectedMonthIdx;
-              return { month, idx, x, circleY, dropHeight, circleRadius, isPeak, isCurrent, hasData: month.hasData };
+              return { month, idx, x, circleY, dropH, circleRadius, isPeak, isCurrent, hasData: month.hasData };
             });
 
             return (
               <>
-                {/* Drop lines first (behind circles) */}
+                {/* Vertical drop lines */}
                 {monthPoints.map((pt, i) => (
                   pt.hasData ? (
                     <line
                       key={`drop-${i}`}
-                      className="bar-animate"
                       x1={pt.x}
-                      y1={containerHeight}
+                      y1={baselineY}
                       x2={pt.x}
                       y2={pt.circleY}
                       stroke={ACCENT_COLOR}
@@ -105,7 +107,7 @@ export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
                   ) : null
                 ))}
 
-                {/* Circles */}
+                {/* Data point circles */}
                 {monthPoints.map((pt, i) => (
                   pt.hasData ? (
                     <circle
@@ -119,7 +121,7 @@ export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
                   ) : null
                 ))}
 
-                {/* Value labels (rotated 90° CW, above circle) */}
+                {/* Value labels (rotated 90° clockwise) */}
                 {monthPoints.map((pt, i) => (
                   pt.hasData ? (
                     <text
@@ -132,7 +134,6 @@ export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
                       fontSize="12px"
                       fontWeight="600"
                       fontFamily="'JetBrains Mono', monospace"
-                      style={{ transformOrigin: `${pt.x}px ${pt.circleY - pt.circleRadius - 6}px` }}
                     >
                       <tspan transform={`rotate(90, ${pt.x}, ${pt.circleY - pt.circleRadius - 6})`}>
                         {pt.km.toFixed(1)}
@@ -141,10 +142,10 @@ export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
                   ) : null
                 ))}
 
-                {/* X-axis month labels (rotated 90° CW, centered under each slot) */}
+                {/* X-axis month labels (rotated 90° clockwise) */}
                 {allMonths.map((month, idx) => {
                   const x = paddingX + idx * slotWidth + slotWidth / 2;
-                  const labelY = containerHeight + 12;
+                  const labelY = baselineY + labelSpacingBelow;
                   return (
                     <text
                       key={`label-${idx}`}
@@ -156,7 +157,6 @@ export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
                       fontSize="11px"
                       fontWeight="500"
                       fontFamily="'JetBrains Mono', monospace"
-                      style={{ transformOrigin: `${x}px ${labelY}px` }}
                     >
                       <tspan transform={`rotate(90, ${x}, ${labelY})`}>
                         {month.label}
