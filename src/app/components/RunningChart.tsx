@@ -757,9 +757,10 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                              y1={containerHeight}
                              x2={x + barWidthPx / 2}
                              y2={containerHeight - barH}
-                             stroke={isCurrent ? '#1a1a1a' : 'rgba(0,0,0,0.4)'}
+                             stroke="#1a1a1a"
                              strokeWidth={barWidthPx}
                              strokeLinecap="round"
+                             strokeOpacity={isCurrent ? 1 : 0.9}
                            />
                            {isCurrent && (
                              <circle
