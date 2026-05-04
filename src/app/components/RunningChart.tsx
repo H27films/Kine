@@ -589,8 +589,8 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
           const containerHeight = 60;
           const maxBarHeight = 50;
 
-         return (
-           <div style={{ marginTop: '16px' }}>
+          return (
+            <div style={{ marginTop: '24px' }}>
             <div style={{ fontSize: '12px', fontWeight: 700, color: '#1a1a1a', marginBottom: '0px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
               WEEKLY RANK
             </div>
