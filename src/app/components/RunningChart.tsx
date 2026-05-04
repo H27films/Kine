@@ -746,8 +746,8 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                   >
                      <defs>
                        <linearGradient id="weeklyRankConnectorGradient" gradientUnits="userSpaceOnUse" x1="0" y1={containerHeight - 50} x2="0" y2={containerHeight}>
-                         <stop offset="0%" stop-color="rgba(0,0,0,0.7)" />
-                         <stop offset="100%" stop-color="rgba(0,0,0,0.15)" />
+                         <stop offset="0%" stop-color="rgba(0,0,0,0.2)" />
+                         <stop offset="100%" stop-color="rgba(0,0,0,0.01)" />
                        </linearGradient>
                        <filter id="circleBlur" x="-50%" y="-50%" width="200%" height="200%">
                          <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" />
