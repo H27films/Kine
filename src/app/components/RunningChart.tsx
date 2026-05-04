@@ -722,7 +722,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
             const maxWeekKm = Math.max(...sortedWeeks.map(w => w.km));
             const availableWidth = plotWidth;
             const slotWidth = Math.max(4, Math.floor(availableWidth / sortedWeeks.length));
-            const barWidthPx = 1.5;
+             const barWidthPx = 2.5;
             const containerHeight = 60;
             const maxBarHeight = 50;
 
