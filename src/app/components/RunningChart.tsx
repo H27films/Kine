@@ -298,8 +298,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'flex-start',
-            gap: '8px',
-            paddingLeft: '8px'
+            gap: '8px'
           }}>
             <span>{getPeriodLabel(view.type)}</span>
 
