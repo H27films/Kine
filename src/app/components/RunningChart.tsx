@@ -301,48 +301,47 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
             gap: '8px',
             paddingLeft: '8px'
           }}>
-            {(view.type === 'week' || view.type === 'month') && (
-              <button
-                onClick={() => {
-                  if (view.type === 'week') setWeekOffset(prev => prev - 1);
-                  else setMonthOffset(prev => prev - 1);
-                }}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  padding: 0,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                <ChevronLeft size={16} strokeWidth={2.5} />
-              </button>
-            )}
-
             <span>{getPeriodLabel(view.type)}</span>
 
             {(view.type === 'week' || view.type === 'month') && (
-              <button
-                onClick={() => {
-                  if (view.type === 'week') setWeekOffset(prev => prev + 1);
-                  else setMonthOffset(prev => prev + 1);
-                }}
-                disabled={view.type === 'week' ? weekOffset >= 0 : monthOffset >= 0}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  padding: 0,
-                  cursor: view.type === 'week' ? (weekOffset >= 0 ? 'default' : 'pointer') : (monthOffset >= 0 ? 'default' : 'pointer'),
-                  opacity: view.type === 'week' ? (weekOffset >= 0 ? 0.3 : 1) : (monthOffset >= 0 ? 0.3 : 1),
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                <ChevronRight size={16} strokeWidth={2.5} />
-              </button>
+              <>
+                <button
+                  onClick={() => {
+                    if (view.type === 'week') setWeekOffset(prev => prev - 1);
+                    else setMonthOffset(prev => prev - 1);
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    padding: 0,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <ChevronLeft size={16} strokeWidth={2.5} />
+                </button>
+                <button
+                  onClick={() => {
+                    if (view.type === 'week') setWeekOffset(prev => prev + 1);
+                    else setMonthOffset(prev => prev + 1);
+                  }}
+                  disabled={view.type === 'week' ? weekOffset >= 0 : monthOffset >= 0}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    padding: 0,
+                    cursor: view.type === 'week' ? (weekOffset >= 0 ? 'default' : 'pointer') : (monthOffset >= 0 ? 'default' : 'pointer'),
+                    opacity: view.type === 'week' ? (weekOffset >= 0 ? 0.3 : 1) : (monthOffset >= 0 ? 0.3 : 1),
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <ChevronRight size={16} strokeWidth={2.5} />
+                </button>
+              </>
             )}
           </div>
 
