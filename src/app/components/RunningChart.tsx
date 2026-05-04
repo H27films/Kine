@@ -751,25 +751,25 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                       const radius = barWidthPx / 2;
                       return (
                          <g key={week.label}>
-                           <rect
+                           <line
                              className="bar-animate"
-                             x={x}
-                             y={containerHeight - barH}
-                             width={barWidthPx}
-                             height={barH}
-                             rx={radius}
-                             ry={radius}
-                             fill={isCurrent ? '#1a1a1a' : 'rgba(0,0,0,0.4)'}
-                          />
-                          {isCurrent && (
-                            <circle
-                              cx={x + barWidthPx / 2}
-                              cy={containerHeight - barH - 4}
-                              r="3"
-                              fill="#1a1a1a"
-                            />
-                          )}
-                        </g>
+                             x1={x + barWidthPx / 2}
+                             y1={containerHeight}
+                             x2={x + barWidthPx / 2}
+                             y2={containerHeight - barH}
+                             stroke={isCurrent ? 'rgba(0,0,0,0.4)' : '#1a1a1a'}
+                             strokeWidth={barWidthPx}
+                             strokeLinecap="round"
+                           />
+                           {isCurrent && (
+                             <circle
+                               cx={x + barWidthPx / 2}
+                               cy={containerHeight - barH - 4}
+                               r="3"
+                               fill="#1a1a1a"
+                             />
+                           )}
+                         </g>
                       );
                     })}
                     <line x1={paddingX} y1={containerHeight} x2={chartWidth - paddingX} y2={containerHeight} stroke="#1a1a1a" strokeWidth="1" />
