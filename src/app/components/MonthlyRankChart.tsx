@@ -154,7 +154,7 @@ export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
                        fontSize="11px"
                        fontWeight="500"
                        fontFamily="'JetBrains Mono', monospace"
-                       letterSpacing="0.15em"
+                       letterSpacing="0.10em"
                        transform={`rotate(-90, ${x}, ${labelY})`}
                     >
                       {month.label}
