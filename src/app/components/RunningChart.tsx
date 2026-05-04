@@ -743,64 +743,89 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                    viewBox={`0 0 ${chartWidth} ${containerHeight}`}
                    preserveAspectRatio="none"
                    style={{ overflow: 'visible' }}
-                 >
-                      {(() => {
-                        // Precompute week data including positions
-                        const weekData = sortedWeeks.map((week, idx) => {
-                          const barH = week.km > 0 ? Math.max(2, (week.km / maxWeekKm) * maxBarHeight) : 1;
-                          const x = paddingX + idx * slotWidth + (slotWidth - barWidthPx) / 2;
-                          const topY = containerHeight - barH;
-                          const elevatedY = topY - barH * 0.2; // 20% above bar top
-                          return { week, idx, x, barH, topY, elevatedY, isCurrent: week.label === selectedWeekLabel };
-                        });
+                  >
+                     <defs>
+                       <linearGradient id="weeklyRankConnectorGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                         <stop offset="0%" stop-color="rgba(0,0,0,0.5)" />
+                         <stop offset="100%" stop-color="rgba(0,0,0,0.05)" />
+                       </linearGradient>
+                     </defs>
+                     {(() => {
+                       // Precompute week data including positions
+                       const weekData = sortedWeeks.map((week, idx) => {
+                         const barH = week.km > 0 ? Math.max(2, (week.km / maxWeekKm) * maxBarHeight) : 1;
+                         const x = paddingX + idx * slotWidth + (slotWidth - barWidthPx) / 2;
+                         const topY = containerHeight - barH;
+                         const elevatedY = topY - barH * 0.2; // 20% above bar top
+                         return { week, idx, x, barH, topY, elevatedY, isCurrent: week.label === selectedWeekLabel };
+                       });
 
-                        // Draw smooth connector polyline (above bars)
-                        const connector = weekData.length > 1 && (
-                          <polyline
-                            points={weekData.map(w => `${w.x},${w.elevatedY}`).join(' ')}
-                            fill="none"
-                            stroke="rgba(0,0,0,0.5)"
-                            strokeWidth="2"
-                            strokeLinejoin="round"
-                            strokeLinecap="round"
-                          />
-                        );
+                       // Generate smooth cubic Bezier path through elevated points
+                       const buildSmoothPath = (pts: {x: number, y: number}[]) => {
+                         if (pts.length < 2) return '';
+                         let d = `M ${pts[0].x} ${pts[0].y}`;
+                         for (let i = 0; i < pts.length - 1; i++) {
+                           const p0 = pts[i === 0 ? i : i - 1];
+                           const p1 = pts[i];
+                           const p2 = pts[i + 1];
+                           const p3 = pts[i + 2] || p2;
+                           const cp1x = p1.x + (p2.x - p0.x) / 6;
+                           const cp1y = p1.y + (p2.y - p0.y) / 6;
+                           const cp2x = p2.x - (p3.x - p1.x) / 6;
+                           const cp2y = p2.y - (p3.y - p1.y) / 6;
+                           d += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`;
+                         }
+                         return d;
+                       };
 
-                        // Draw bars and current week marker
-                        const bars = weekData.map(({ week, x, topY, isCurrent }) => {
-                          const radius = barWidthPx / 2;
-                          return (
-                            <g key={week.label}>
-                              <line
-                                className="bar-animate"
-                                x1={x + barWidthPx / 2}
-                                y1={containerHeight}
-                                x2={x + barWidthPx / 2}
-                                y2={topY}
-                                stroke="#1a1a1a"
-                                strokeWidth={barWidthPx}
-                                strokeLinecap="round"
-                                strokeOpacity={isCurrent ? 1 : 0.9}
-                              />
-                              {isCurrent && (
-                                <circle
-                                  cx={x + barWidthPx / 2}
-                                  cy={topY - 6}
-                                  r="4"
-                                  fill="#1a1a1a"
-                                />
-                              )}
-                            </g>
-                          );
-                        });
+                       const connectorPath = buildSmoothPath(weekData.map(w => ({ x: w.x, y: w.elevatedY })));
 
-                        return (
-                          <>
-                            {connector}
-                            {bars}
-                          </>
-                        );
-                      })()}
+                       // Draw smooth connector polyline above bars
+                       const connector = weekData.length > 1 && (
+                         <path
+                           d={connectorPath}
+                           fill="none"
+                           stroke="url(#weeklyRankConnectorGradient)"
+                           strokeWidth="2"
+                           strokeLinecap="round"
+                           strokeLinejoin="round"
+                         />
+                       );
+
+                       // Draw bars and current week marker
+                       const bars = weekData.map(({ week, x, topY, isCurrent }) => {
+                         return (
+                           <g key={week.label}>
+                             <line
+                               className="bar-animate"
+                               x1={x + barWidthPx / 2}
+                               y1={containerHeight}
+                               x2={x + barWidthPx / 2}
+                               y2={topY}
+                               stroke="#1a1a1a"
+                               strokeWidth={barWidthPx}
+                               strokeLinecap="round"
+                               strokeOpacity={isCurrent ? 1 : 0.9}
+                             />
+                             {isCurrent && (
+                               <circle
+                                 cx={x + barWidthPx / 2}
+                                 cy={topY - 6}
+                                 r="4"
+                                 fill="#1a1a1a"
+                               />
+                             )}
+                           </g>
+                         );
+                       });
+
+                       return (
+                         <>
+                           {connector}
+                           {bars}
+                         </>
+                       );
+                     })()}
                     <line x1={paddingX} y1={containerHeight} x2={chartWidth - paddingX} y2={containerHeight} stroke="#1a1a1a" strokeWidth="1" />
                  </svg>
                </div>
