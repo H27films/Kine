@@ -576,25 +576,44 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
 
          )}
 
-       {/* Weekly comparison bar chart (CURRENT WEEK only) */}
-       {view.type === 'week' && (() => {
-         const allWeeksData = prepareAllData();
-         if (allWeeksData.length === 0) return null;
-          const sortedWeeks = [...allWeeksData].sort((a, b) => a.km - b.km);
-          const maxWeekKm = Math.max(...sortedWeeks.map(w => w.km));
-          const currentWeekLabel = `W${getCurrentWeek()}`;
-          const availableWidth = plotWidth;
-          const slotWidth = Math.max(4, Math.floor(availableWidth / sortedWeeks.length));
-          const barWidthPx = 1.5;
-          const containerHeight = 60;
-          const maxBarHeight = 50;
+        {/* Weekly comparison bar chart (CURRENT WEEK only) */}
+        {view.type === 'week' && (() => {
+          const allWeeksData = prepareAllData();
+          if (allWeeksData.length === 0) return null;
+           const sortedWeeks = [...allWeeksData].sort((a, b) => a.km - b.km);
+           const currentWeekLabel = `W${getCurrentWeek()}`;
+           const totalWeeks = sortedWeeks.length;
+           const sortedDesc = [...allWeeksData].sort((a, b) => b.originalKm - a.originalKm);
+           const currentRank = sortedDesc.findIndex(w => w.label === currentWeekLabel) + 1;
 
-          return (
-            <div style={{ marginTop: '24px' }}>
-            <div style={{ fontSize: '12px', fontWeight: 700, color: '#1a1a1a', marginBottom: '0px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-              WEEKLY RANK
-            </div>
-             <div style={{ height: containerHeight, position: 'relative' }}>
+           const getOrdinalSuffix = (n: number) => {
+             if (n % 100 >= 11 && n % 100 <= 13) return 'th';
+             switch (n % 10) {
+               case 1: return 'st';
+               case 2: return 'nd';
+               case 3: return 'rd';
+               default: return 'th';
+             }
+           };
+
+           const maxWeekKm = Math.max(...sortedWeeks.map(w => w.km));
+           const availableWidth = plotWidth;
+           const slotWidth = Math.max(4, Math.floor(availableWidth / sortedWeeks.length));
+           const barWidthPx = 1.5;
+           const containerHeight = 60;
+           const maxBarHeight = 50;
+
+           return (
+             <div style={{ marginTop: '24px' }}>
+             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0px' }}>
+               <div style={{ fontSize: '12px', fontWeight: 700, color: '#1a1a1a', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                 WEEKLY RANK
+               </div>
+               <div style={{ fontSize: '12px', fontWeight: 600, color: '#1a1a1a', fontFamily: "'JetBrains Mono', monospace" }}>
+                 {getOrdinalSuffix(currentRank)} / {totalWeeks}
+               </div>
+             </div>
+              <div style={{ height: containerHeight, position: 'relative' }}>
                <svg
                  width="100%"
                  height={containerHeight}
