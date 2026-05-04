@@ -34,8 +34,8 @@ export const WeeklyRankChart: React.FC<WeeklyRankChartProps> = ({
   const availableWidth = plotWidth;
   const slotWidth = Math.max(4, Math.floor(availableWidth / sortedWeeks.length));
   const barWidthPx = 1.3;
-  const containerHeight = 70;
-  const maxBarHeight = 58;
+  const containerHeight = 100;
+  const maxBarHeight = 88;
 
   return (
     <div style={{ marginTop: '28px' }}>
@@ -55,8 +55,8 @@ export const WeeklyRankChart: React.FC<WeeklyRankChartProps> = ({
           preserveAspectRatio="none"
           style={{ overflow: 'visible' }}
         >
-          <defs>
-            <linearGradient id="weeklyRankConnectorGradient" gradientUnits="userSpaceOnUse" x1="0" y1={containerHeight - 50} x2="0" y2={containerHeight}>
+           <defs>
+             <linearGradient id="weeklyRankConnectorGradient" gradientUnits="userSpaceOnUse" x1="0" y1={containerHeight - 80} x2="0" y2={containerHeight}>
               <stop offset="0%" stop-color="rgba(0,0,0,0.2)" />
               <stop offset="100%" stop-color="rgba(0,0,0,0.01)" />
             </linearGradient>
