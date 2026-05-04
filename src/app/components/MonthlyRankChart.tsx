@@ -15,7 +15,8 @@ interface MonthlyRankChartProps {
   plotWidth: number;
 }
 
-const MONTH_LABELS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+const MONTH_NAMES = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+const ACCENT_COLOR = '#ff6b35'; // coral/orange
 
 export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
   allMonthData,
@@ -27,39 +28,34 @@ export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
 }) => {
   if (allMonthData.length === 0) return null;
 
-  // Build a map of existing data by month index (0-11)
+  // Build map of data by month index (0-11)
   const dataMap = new Map<number, MonthlyRankData>();
   allMonthData.forEach(d => {
     const [year, month] = d.label.split('-').map(Number);
-    const monthIdx = month - 1;
-    dataMap.set(monthIdx, d);
+    dataMap.set(month - 1, d);
   });
 
-  // Create all 12 months array (chronological, not sorted by value)
-  const allMonths = Array.from({ length: 12 }, (_, i) => {
-    const existing = dataMap.get(i);
-    return {
-      label: MONTH_LABELS[i],
-      km: existing?.km || 0,
-      originalKm: existing?.originalKm || 0,
-      monthIndex: i,
-      hasData: existing !== undefined,
-    };
-  });
+  // Create all 12 months in chronological order
+  const allMonths = Array.from({ length: 12 }, (_, i) => ({
+    monthIndex: i,
+    label: MONTH_NAMES[i],
+    data: dataMap.get(i),
+    hasData: dataMap.has(i),
+    km: dataMap.get(i)?.originalKm || 0,
+  }));
 
-  // Compute rank based on originalKm values
+  // Compute rank based on km values
   const monthsWithData = allMonths.filter(m => m.hasData);
-  const sortedDesc = [...monthsWithData].sort((a, b) => b.originalKm - a.originalKm);
+  const sortedDesc = [...monthsWithData].sort((a, b) => b.km - a.km);
   const totalMonths = monthsWithData.length;
   const selectedMonthIdx = parseInt(selectedMonthLabel.split('-')[1]) - 1;
   const currentRank = sortedDesc.findIndex(m => m.monthIndex === selectedMonthIdx) + 1;
-  const maxMonthKm = Math.max(...monthsWithData.map(m => m.originalKm));
+  const maxKm = Math.max(...monthsWithData.map(m => m.km));
 
-  const availableWidth = plotWidth;
-  const slotWidth = Math.max(4, Math.floor(availableWidth / allMonths.length));
+  const slotWidth = plotWidth / allMonths.length;
   const barWidthPx = 1.3;
   const containerHeight = 70;
-  const maxBarHeight = 58;
+  const maxDropHeight = 58;
 
   return (
     <div style={{ marginTop: '28px' }}>
@@ -79,103 +75,93 @@ export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
           preserveAspectRatio="none"
           style={{ overflow: 'visible' }}
         >
-          <defs>
-            <linearGradient id="monthlyRankConnectorGradient" gradientUnits="userSpaceOnUse" x1="0" y1={containerHeight - 50} x2="0" y2={containerHeight}>
-              <stop offset="0%" stop-color="rgba(0,0,0,0.2)" />
-              <stop offset="100%" stop-color="rgba(0,0,0,0.01)" />
-            </linearGradient>
-          </defs>
           {(() => {
-            const monthDataPoints = allMonths.map((month, idx) => {
-              const barH = month.originalKm > 0 ? Math.max(2, (month.originalKm / maxMonthKm) * maxBarHeight) : 1;
-              const x = paddingX + idx * slotWidth + (slotWidth - barWidthPx) / 2;
-              const topY = containerHeight - barH;
-              const elevatedY = topY - 8;
-              return { month, idx, x, barH, topY, elevatedY, isCurrent: month.monthIndex === selectedMonthIdx };
-            });
-
-            const buildSmoothPath = (pts: {x: number, y: number}[]) => {
-              if (pts.length < 2) return '';
-              let d = `M ${pts[0].x} ${pts[0].y}`;
-              for (let i = 0; i < pts.length - 1; i++) {
-                const p0 = pts[i === 0 ? i : i - 1];
-                const p1 = pts[i];
-                const p2 = pts[i + 1];
-                const p3 = pts[i + 2] || p2;
-                const cp1x = p1.x + (p2.x - p0.x) / 6;
-                const cp1y = p1.y + (p2.y - p0.y) / 6;
-                const cp2x = p2.x - (p3.x - p1.x) / 6;
-                const cp2y = p2.y - (p3.y - p1.y) / 6;
-                d += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`;
-              }
-              return d;
-            };
-
-            const connectorPath = buildSmoothPath(monthDataPoints.map(w => ({ x: w.x, y: w.elevatedY })));
-
-            const connector = monthDataPoints.length > 1 && (
-              <path
-                d={connectorPath}
-                fill="none"
-                stroke="url(#monthlyRankConnectorGradient)"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            );
-
-            const bars = monthDataPoints.map(({ month, x, topY, isCurrent }) => {
-              return (
-                <g key={month.monthIndex}>
-                  <line
-                    className="bar-animate"
-                    x1={x + barWidthPx / 2}
-                    y1={containerHeight}
-                    x2={x + barWidthPx / 2}
-                    y2={topY}
-                    stroke="#1a1a1a"
-                    strokeWidth={barWidthPx}
-                    strokeLinecap="round"
-                    strokeOpacity={month.hasData ? 1 : 0.3}
-                  />
-                  {isCurrent && month.hasData && (
-                    <circle
-                      cx={x + barWidthPx / 2}
-                      cy={topY - 8}
-                      r="4"
-                      fill="#1a1a1a"
-                    />
-                  )}
-                </g>
-              );
+            const monthPoints = allMonths.map((month, idx) => {
+              const x = paddingX + idx * slotWidth + slotWidth / 2;
+              const dropHeight = month.km > 0 && maxKm > 0 ? (month.km / maxKm) * maxDropHeight : 0;
+              const circleY = containerHeight - dropHeight;
+              const isPeak = month.km === maxKm && month.km > 0;
+              const circleRadius = isPeak ? 8 : 5; // 16px dia peak, 10px normal
+              const isCurrent = month.monthIndex === selectedMonthIdx;
+              return { month, idx, x, circleY, dropHeight, circleRadius, isPeak, isCurrent, hasData: month.hasData };
             });
 
             return (
               <>
-                {connector}
-                {bars}
-                {/* X-axis month labels */}
-                {allMonths.map((month, idx) => {
-                  const x = paddingX + idx * slotWidth + (slotWidth - barWidthPx) / 2;
-                  const barCenter = x + barWidthPx / 2;
-                  const leftPercent = (barCenter / chartWidth) * 100;
-                  return (
-                    <span
-                      key={idx}
-                      style={{
-                        position: 'absolute',
-                        left: `${leftPercent}%`,
-                        bottom: 0,
-                        transform: 'translateX(-50%)',
-                        fontSize: '9px',
-                        fontWeight: 500,
-                        color: '#1a1a1a',
-                        letterSpacing: '0.02em',
-                        opacity: month.hasData ? 1 : 0.4,
-                      }}
+                {/* Drop lines first (behind circles) */}
+                {monthPoints.map((pt, i) => (
+                  pt.hasData ? (
+                    <line
+                      key={`drop-${i}`}
+                      className="bar-animate"
+                      x1={pt.x}
+                      y1={containerHeight}
+                      x2={pt.x}
+                      y2={pt.circleY}
+                      stroke={ACCENT_COLOR}
+                      strokeWidth="1"
+                      strokeLinecap="round"
+                    />
+                  ) : null
+                ))}
+
+                {/* Circles */}
+                {monthPoints.map((pt, i) => (
+                  pt.hasData ? (
+                    <circle
+                      key={`circle-${i}`}
+                      cx={pt.x}
+                      cy={pt.circleY}
+                      r={pt.circleRadius}
+                      fill={ACCENT_COLOR}
+                      style={{ filter: pt.isPeak ? 'drop-shadow(0 0 4px rgba(255, 107, 53, 0.5))' : undefined }}
+                    />
+                  ) : null
+                ))}
+
+                {/* Value labels (rotated 90° CW, above circle) */}
+                {monthPoints.map((pt, i) => (
+                  pt.hasData ? (
+                    <text
+                      key={`val-${i}`}
+                      x={pt.x}
+                      y={pt.circleY - pt.circleRadius - 6}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fill={ACCENT_COLOR}
+                      fontSize="12px"
+                      fontWeight="600"
+                      fontFamily="'JetBrains Mono', monospace"
+                      style={{ transformOrigin: `${pt.x}px ${pt.circleY - pt.circleRadius - 6}px` }}
                     >
-                      {month.label}
-                    </span>
+                      <tspan transform={`rotate(90, ${pt.x}, ${pt.circleY - pt.circleRadius - 6})`}>
+                        {pt.km.toFixed(1)}
+                      </tspan>
+                    </text>
+                  ) : null
+                ))}
+
+                {/* X-axis month labels (rotated 90° CW, centered under each slot) */}
+                {allMonths.map((month, idx) => {
+                  const x = paddingX + idx * slotWidth + slotWidth / 2;
+                  const labelY = containerHeight + 12;
+                  return (
+                    <text
+                      key={`label-${idx}`}
+                      x={x}
+                      y={labelY}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fill={month.hasData ? '#666' : '#ccc'}
+                      fontSize="11px"
+                      fontWeight="500"
+                      fontFamily="'JetBrains Mono', monospace"
+                      style={{ transformOrigin: `${x}px ${labelY}px` }}
+                    >
+                      <tspan transform={`rotate(90, ${x}, ${labelY})`}>
+                        {month.label}
+                      </tspan>
+                    </text>
                   );
                 })}
               </>
