@@ -481,9 +481,9 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
             ))}
           </div>
 
-          {/* MAX/AVG stats */}
-          {points.length > 0 && (
-            <div style={{ marginTop: '28px', display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+           {/* MAX/AVG stats */}
+           {points.length > 0 && (
+             <div style={{ marginTop: '8px', display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
             <div>
               <div style={{
                 fontFamily: "'Inconsolata', monospace",
