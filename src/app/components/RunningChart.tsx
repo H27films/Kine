@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../lib/supabase';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { WeeklyRankChart } from './WeeklyRankChart';
+import { MonthlyRankChart } from './MonthlyRankChart';
 
 interface RunningWorkout {
   id: string;
@@ -233,16 +234,36 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
       const avgSpeed = data.speeds.length > 0 ? data.speeds.reduce((a, b) => a + b, 0) / data.speeds.length : null;
       return { label: `W${week}`, km: data.km, displayKm: data.km, originalKm: data.km, avgSpeed, sessions: data.sessions };
     });
-  };
-
-   const getDataForView = (type: string) => {
-     switch (type) {
-       case 'week': return prepareWeekData(getWeekByOffset(weekOffset));
-       case 'month': return prepareMonthData(getMonthByOffset(monthOffset));
-       case 'all': return prepareAllData();
-       default: return [];
-     }
    };
+
+   const prepareAllMonthsData = () => {
+     // Group by month (YYYY-MM) for all data
+     const monthGroups: Record<string, { km: number; sessions: number }> = {};
+     workouts.forEach(w => {
+       const month = w.date.substring(0, 7); // YYYY-MM
+       if (!monthGroups[month]) monthGroups[month] = { km: 0, sessions: 0 };
+       monthGroups[month].km += w.total_cardio || 0;
+       monthGroups[month].sessions++;
+     });
+     // Sort months chronologically
+     const monthLabels = Object.keys(monthGroups).sort();
+     return monthLabels.map(label => ({
+       label,
+       km: monthGroups[label].km,
+       displayKm: monthGroups[label].km,
+       originalKm: monthGroups[label].km,
+       sessions: monthGroups[label].sessions,
+     }));
+   };
+
+    const getDataForView = (type: string) => {
+      switch (type) {
+        case 'week': return prepareWeekData(getWeekByOffset(weekOffset));
+        case 'month': return prepareMonthData(getMonthByOffset(monthOffset));
+        case 'all': return prepareAllData();
+        default: return [];
+      }
+    };
 
   const getStats = () => {
     const allSpeeds = workouts.map(w => calculateSpeed(w.total_cardio || 0, w.time)).filter(s => s !== null) as number[];
@@ -692,17 +713,29 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
               </div>
             )}
 
-           {/* Weekly comparison bar chart (CURRENT WEEK only) */}
-           {view.type === 'week' && (
-             <WeeklyRankChart
-               allWeekData={prepareAllData()}
-               selectedWeekLabel={`W${getWeekByOffset(weekOffset)}`}
-               getOrdinalSuffix={getOrdinalSuffix}
-               chartWidth={chartWidth}
-               paddingX={paddingX}
-               plotWidth={plotWidth}
-             />
-           )}
+            {/* Weekly comparison bar chart (CURRENT WEEK only) */}
+            {view.type === 'week' && (
+              <WeeklyRankChart
+                allWeekData={prepareAllData()}
+                selectedWeekLabel={`W${getWeekByOffset(weekOffset)}`}
+                getOrdinalSuffix={getOrdinalSuffix}
+                chartWidth={chartWidth}
+                paddingX={paddingX}
+                plotWidth={plotWidth}
+              />
+            )}
+
+            {/* Monthly comparison bar chart (CURRENT MONTH only) */}
+            {view.type === 'month' && (
+              <MonthlyRankChart
+                allMonthData={prepareAllMonthsData()}
+                selectedMonthLabel={getMonthByOffset(monthOffset)}
+                getOrdinalSuffix={getOrdinalSuffix}
+                chartWidth={chartWidth}
+                paddingX={paddingX}
+                plotWidth={plotWidth}
+              />
+            )}
       </div>
     );
   };
