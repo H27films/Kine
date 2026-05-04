@@ -151,10 +151,10 @@ export const RunningPlus: React.FC<RunningPlusProps> = ({ onNavigate }) => {
         </div>
       </div>
 
-      {/* Chart area */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', paddingTop: '16px', paddingLeft: '5px', paddingRight: '5px' }}>
-        <RunningChart />
-      </div>
+       {/* Chart area */}
+       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', paddingTop: '8px', paddingLeft: '5px', paddingRight: '5px' }}>
+         <RunningChart />
+       </div>
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;900&family=Inconsolata:wght@200..900&display=swap');
