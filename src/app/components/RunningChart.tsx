@@ -616,98 +616,98 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
 
            {/* MAX/AVG stats */}
            {points.length > 0 && (
-             <div style={{ marginTop: '8px', display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-            <div>
-          <div style={{
-            fontFamily: "'Inconsolata', monospace",
-            fontSize: '22px',
-            fontWeight: 348,
-            fontStretch: '175%',
-            letterSpacing: '0.06em',
-            color: 'rgba(0,0,0,0.35)',
-            textTransform: 'uppercase',
-          }}>
-            MAX
-          </div>
-              <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
-                {Math.max(...data.map(d => d.originalKm)).toLocaleString()}<span style={{ fontSize: '16px', fontWeight: 200, color: '#999', marginLeft: '1px' }}>KM</span>
-              </div>
-              <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em', color: '#1a1a1a', marginTop: '2px', textTransform: 'uppercase' }}>
-                {view.type === 'week' ? 'Day' : view.type === 'month' ? 'Day' : 'Week'} {points.reduce((max, d) => d.value > max.value ? d : max).occurrence}
-              </div>
-               {(() => {
-                 const speeds = data.map(d => d.avgSpeed).filter(s => s !== null) as number[];
-                 const maxSpeed = speeds.length > 0 ? Math.max(...speeds) : 0;
-                 return (
-                   <div style={{ marginTop: '8px' }}>
-                     <div style={{
-                       fontFamily: "'Inconsolata', monospace",
-                       fontSize: '22px',
-                       fontWeight: 348,
-                       fontStretch: '175%',
-                       letterSpacing: '0.06em',
-                       color: 'rgba(0,0,0,0.35)',
-                       textTransform: 'uppercase',
-                     }}>
-                       SPEED
-                     </div>
-                     <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
-                       {maxSpeed > 0 ? maxSpeed.toFixed(1) : '—'}<span style={{ fontSize: '16px', fontWeight: 200, color: '#999', marginLeft: '2px' }}>KM/H</span>
-                     </div>
-                   </div>
-                 );
-               })()}
+             <div style={{ marginTop: '2px', display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+              <div>
+            <div style={{
+              fontFamily: "'Inconsolata', monospace",
+              fontSize: '18px',
+              fontWeight: 348,
+              fontStretch: '175%',
+              letterSpacing: '0.06em',
+              color: 'rgba(0,0,0,0.35)',
+              textTransform: 'uppercase',
+            }}>
+              MAX
             </div>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{
-                fontFamily: "'Inconsolata', monospace",
-                fontSize: '22px',
-                fontWeight: 348,
-                fontStretch: '175%',
-                letterSpacing: '0.06em',
-                color: 'rgba(0,0,0,0.35)',
-                textTransform: 'uppercase',
-                textAlign: 'right',
-              }}>
-                AVG
-              </div>
-               <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
-                {view.type === 'all' && points.length > 0
-                  ? Math.round(total / points.length)
-                  : sessionCount > 0
-                  ? Math.round(total / sessionCount)
-                  : 0}<span style={{ fontSize: '16px', fontWeight: 200, color: '#999', marginLeft: '2px' }}>KM</span>
-              </div>
+                <div style={{ fontSize: '20px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
+                  {Math.max(...data.map(d => d.originalKm)).toLocaleString()}<span style={{ fontSize: '14px', fontWeight: 200, color: '#999', marginLeft: '1px' }}>KM</span>
+                </div>
                <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em', color: '#1a1a1a', marginTop: '2px', textTransform: 'uppercase' }}>
-                {view.type === 'week' ? 'THIS WEEK' : view.type === 'month' ? 'ALL DAYS' : 'ALL WEEKS'}
-              </div>
-               {(() => {
-                 const speeds = data.map(d => d.avgSpeed).filter(s => s !== null) as number[];
-                 const avgSpeed = speeds.length > 0 ? speeds.reduce((a, b) => a + b, 0) / speeds.length : 0;
-                 return (
-                   <div style={{ marginTop: '8px', textAlign: 'right' }}>
-                     <div style={{
-                       fontFamily: "'Inconsolata', monospace",
-                       fontSize: '22px',
-                       fontWeight: 348,
-                       fontStretch: '175%',
-                       letterSpacing: '0.06em',
-                       color: 'rgba(0,0,0,0.35)',
-                       textTransform: 'uppercase',
-                       textAlign: 'right',
-                     }}>
-                       SPEED
-                     </div>
-                     <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
-                       {avgSpeed > 0 ? avgSpeed.toFixed(1) : '—'}<span style={{ fontSize: '16px', fontWeight: 200, color: '#999', marginLeft: '2px' }}>KM/H</span>
-                     </div>
-                   </div>
-                 );
-               })()}
+                 {view.type === 'week' ? 'Day' : view.type === 'month' ? 'Day' : 'Week'} {points.reduce((max, d) => d.value > max.value ? d : max).occurrence}
+               </div>
+                {(() => {
+                  const speeds = data.map(d => d.avgSpeed).filter(s => s !== null) as number[];
+                  const maxSpeed = speeds.length > 0 ? Math.max(...speeds) : 0;
+                  return (
+                    <div style={{ marginTop: '6px' }}>
+                      <div style={{
+                        fontFamily: "'Inconsolata', monospace",
+                        fontSize: '18px',
+                        fontWeight: 348,
+                        fontStretch: '175%',
+                        letterSpacing: '0.06em',
+                        color: 'rgba(0,0,0,0.35)',
+                        textTransform: 'uppercase',
+                      }}>
+                        SPEED
+                      </div>
+                      <div style={{ fontSize: '20px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
+                        {maxSpeed > 0 ? maxSpeed.toFixed(1) : '—'}<span style={{ fontSize: '14px', fontWeight: 200, color: '#999', marginLeft: '2px' }}>KM/H</span>
+                      </div>
+                    </div>
+                  );
+                })()}
              </div>
-           </div>
+             <div style={{ textAlign: 'right' }}>
+               <div style={{
+                 fontFamily: "'Inconsolata', monospace",
+                 fontSize: '18px',
+                 fontWeight: 348,
+                 fontStretch: '175%',
+                 letterSpacing: '0.06em',
+                 color: 'rgba(0,0,0,0.35)',
+                 textTransform: 'uppercase',
+                 textAlign: 'right',
+               }}>
+                 AVG
+               </div>
+                <div style={{ fontSize: '20px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
+                 {view.type === 'all' && points.length > 0
+                   ? Math.round(total / points.length)
+                   : sessionCount > 0
+                   ? Math.round(total / sessionCount)
+                   : 0}<span style={{ fontSize: '14px', fontWeight: 200, color: '#999', marginLeft: '2px' }}>KM</span>
+               </div>
+               <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em', color: '#1a1a1a', marginTop: '2px', textTransform: 'uppercase' }}>
+                 {view.type === 'week' ? 'THIS WEEK' : view.type === 'month' ? 'ALL DAYS' : 'ALL WEEKS'}
+               </div>
+                {(() => {
+                  const speeds = data.map(d => d.avgSpeed).filter(s => s !== null) as number[];
+                  const avgSpeed = speeds.length > 0 ? speeds.reduce((a, b) => a + b, 0) / speeds.length : 0;
+                  return (
+                    <div style={{ marginTop: '6px', textAlign: 'right' }}>
+                      <div style={{
+                        fontFamily: "'Inconsolata', monospace",
+                        fontSize: '18px',
+                        fontWeight: 348,
+                        fontStretch: '175%',
+                        letterSpacing: '0.06em',
+                        color: 'rgba(0,0,0,0.35)',
+                        textTransform: 'uppercase',
+                        textAlign: 'right',
+                      }}>
+                        SPEED
+                      </div>
+                      <div style={{ fontSize: '20px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
+                        {avgSpeed > 0 ? avgSpeed.toFixed(1) : '—'}<span style={{ fontSize: '14px', fontWeight: 200, color: '#999', marginLeft: '2px' }}>KM/H</span>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
 
-         )}
+          )}
 
           {/* Weekly comparison bar chart (CURRENT WEEK only) */}
           {view.type === 'week' && (() => {
