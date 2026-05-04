@@ -38,8 +38,14 @@ export const WeeklyRankChart: React.FC<WeeklyRankChartProps> = ({
   const maxBarHeight = 88;
 
   return (
-    <div style={{ marginTop: '28px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '8px' }}>
+    <div>
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'baseline', 
+        marginBottom: '8px',
+        paddingTop: '4px'
+      }}>
         <div style={{ fontSize: '12px', fontWeight: 700, color: '#1a1a1a', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
           WEEKLY RANK
         </div>

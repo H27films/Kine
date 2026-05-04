@@ -58,6 +58,11 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
    const [monthOffset, setMonthOffset] = useState(0); // 0 = current month, -1 = previous, etc.
    const [minWeek, setMinWeek] = useState<number | null>(null);
    const [minMonthOffset, setMinMonthOffset] = useState<number | null>(null);
+   
+   // Bottom tab state for week view
+   const [bottomTabIndex, setBottomTabIndex] = useState(0);
+   const [bottomTouchStart, setBottomTouchStart] = useState<number | null>(null);
+   const [bottomTouchEnd, setBottomTouchEnd] = useState<number | null>(null);
 
    const chartViews = [
      { label: 'CURRENT WEEK', type: 'week' },
@@ -295,6 +300,29 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
      }
      if (isRightSwipe && currentIndex > 0) {
        setCurrentIndex(currentIndex - 1);
+     }
+   };
+
+   // Bottom tab touch handlers
+   const handleBottomTouchStart = (e: React.TouchEvent) => {
+     setBottomTouchEnd(null);
+     setBottomTouchStart(e.targetTouches[0].clientX);
+   };
+
+   const handleBottomTouchMove = (e: React.TouchEvent) => {
+     setBottomTouchEnd(e.targetTouches[0].clientX);
+   };
+
+   const handleBottomTouchEnd = () => {
+     if (!bottomTouchStart || !bottomTouchEnd) return;
+     const distance = bottomTouchStart - bottomTouchEnd;
+     const isLeftSwipe = distance > 50;
+     const isRightSwipe = distance < -50;
+     if (isLeftSwipe && bottomTabIndex < 1) {
+       setBottomTabIndex(bottomTabIndex + 1);
+     }
+     if (isRightSwipe && bottomTabIndex > 0) {
+       setBottomTabIndex(bottomTabIndex - 1);
      }
    };
 
@@ -711,16 +739,108 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
               </div>
             )}
 
-            {/* Weekly comparison bar chart (CURRENT WEEK only) */}
+            {/* Weekly bottom tabbed container (CURRENT WEEK only) */}
             {view.type === 'week' && (
-              <WeeklyRankChart
-                allWeekData={prepareAllData()}
-                selectedWeekLabel={`W${getWeekByOffset(weekOffset)}`}
-                getOrdinalSuffix={getOrdinalSuffix}
-                chartWidth={chartWidth}
-                paddingX={paddingX}
-                plotWidth={plotWidth}
-              />
+              <div style={{ marginTop: '20px' }}>
+                {/* Swipeable bottom container */}
+                <div
+                  style={{
+                    overflow: 'hidden',
+                    width: '100%'
+                  }}
+                  onTouchStart={handleBottomTouchStart}
+                  onTouchMove={handleBottomTouchMove}
+                  onTouchEnd={handleBottomTouchEnd}
+                >
+                  <div style={{
+                    display: 'flex',
+                    width: '200%',
+                    transform: `translateX(-${bottomTabIndex * 50}%)`,
+                    transition: 'transform 0.3s ease',
+                  }}>
+                    
+                    {/* Tab 1: PROGRESS CHART */}
+                    <div style={{ width: '50%' }}>
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'baseline',
+                        marginBottom: '8px',
+                        paddingTop: '4px'
+                      }}>
+                        <div style={{
+                          fontSize: '12px',
+                          fontWeight: 700,
+                          color: '#1a1a1a',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.08em',
+                        }}>
+                          PROGRESS CHART
+                        </div>
+                      </div>
+                      <div style={{
+                        height: '100px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: 'rgba(0,0,0,0.02)',
+                        borderRadius: '8px',
+                        color: '#999',
+                        fontSize: '12px'
+                      }}>
+                        Progress Chart will be implemented here
+                      </div>
+                    </div>
+                    
+                    {/* Tab 2: WEEKLY RANK */}
+                    <div style={{ width: '50%' }}>
+                      <WeeklyRankChart
+                        allWeekData={prepareAllData()}
+                        selectedWeekLabel={`W${getWeekByOffset(weekOffset)}`}
+                        getOrdinalSuffix={getOrdinalSuffix}
+                        chartWidth={chartWidth}
+                        paddingX={paddingX}
+                        plotWidth={plotWidth}
+                      />
+                    </div>
+                    
+                  </div>
+                </div>
+
+                {/* Bottom tab navigation dots */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  gap: '12px',
+                  marginTop: '8px',
+                  marginBottom: '16px'
+                }}>
+                  <button
+                    onClick={() => setBottomTabIndex(0)}
+                    style={{
+                      width: '7px',
+                      height: '7px',
+                      borderRadius: '50%',
+                      border: 'none',
+                      backgroundColor: bottomTabIndex === 0 ? '#1a1a1a' : '#ccc',
+                      cursor: 'pointer',
+                      transition: 'background-color 0.2s'
+                    }}
+                  />
+                  <button
+                    onClick={() => setBottomTabIndex(1)}
+                    style={{
+                      width: '7px',
+                      height: '7px',
+                      borderRadius: '50%',
+                      border: 'none',
+                      backgroundColor: bottomTabIndex === 1 ? '#1a1a1a' : '#ccc',
+                      cursor: 'pointer',
+                      transition: 'background-color 0.2s'
+                    }}
+                  />
+                </div>
+              </div>
             )}
 
             {/* Monthly comparison bar chart (CURRENT MONTH only) */}
