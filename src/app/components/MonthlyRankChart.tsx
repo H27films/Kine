@@ -115,7 +115,7 @@ export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
                       cy={pt.circleY}
                       r={pt.circleRadius}
                       fill={ACCENT_COLOR}
-                       style={{ filter: pt.isPeak ? 'drop-shadow(0 0 5px rgba(0, 0, 0, 0.6))' : undefined }}
+                       style={{ filter: pt.isPeak ? 'drop-shadow(0 0 5px rgba(0, 0, 0, 0.4))' : undefined }}
                     />
                   ) : null
                 ))}
@@ -126,14 +126,14 @@ export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
                     <text
                       key={`val-${i}`}
                       x={pt.x}
-                      y={pt.circleY - pt.circleRadius - 10}
+                       y={pt.circleY - pt.circleRadius - 16}
                       textAnchor="middle"
                       dominantBaseline="middle"
                       fill={ACCENT_COLOR}
                       fontSize="10px"
                       fontWeight="600"
                       fontFamily="'JetBrains Mono', monospace"
-                      transform={`rotate(-90, ${pt.x}, ${pt.circleY - pt.circleRadius - 10})`}
+                      transform={`rotate(-90, ${pt.x}, ${pt.circleY - pt.circleRadius - 16})`}
                     >
                       {Math.round(pt.month.km)}
                     </text>
@@ -151,10 +151,11 @@ export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
                       textAnchor="middle"
                       dominantBaseline="middle"
                       fill={month.hasData ? '#666' : '#ccc'}
-                      fontSize="11px"
-                      fontWeight="500"
-                      fontFamily="'JetBrains Mono', monospace"
-                      transform={`rotate(-90, ${x}, ${labelY})`}
+                       fontSize="11px"
+                       fontWeight="500"
+                       fontFamily="'JetBrains Mono', monospace"
+                       letterSpacing="0.15em"
+                       transform={`rotate(-90, ${x}, ${labelY})`}
                     >
                       {month.label}
                     </text>
