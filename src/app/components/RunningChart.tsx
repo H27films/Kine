@@ -722,7 +722,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
             const maxWeekKm = Math.max(...sortedWeeks.map(w => w.km));
             const availableWidth = plotWidth;
             const slotWidth = Math.max(4, Math.floor(availableWidth / sortedWeeks.length));
-             const barWidthPx = 2.5;
+             const barWidthPx = 1.3;
             const containerHeight = 60;
             const maxBarHeight = 50;
 
@@ -757,15 +757,15 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                              y1={containerHeight}
                              x2={x + barWidthPx / 2}
                              y2={containerHeight - barH}
-                             stroke={isCurrent ? 'rgba(0,0,0,0.4)' : '#1a1a1a'}
+                             stroke={isCurrent ? '#1a1a1a' : 'rgba(0,0,0,0.4)'}
                              strokeWidth={barWidthPx}
                              strokeLinecap="round"
                            />
                            {isCurrent && (
                              <circle
                                cx={x + barWidthPx / 2}
-                               cy={containerHeight - barH - 4}
-                               r="3"
+                               cy={containerHeight - barH - 6}
+                               r="4"
                                fill="#1a1a1a"
                              />
                            )}
