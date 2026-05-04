@@ -148,9 +148,14 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
       if (speed !== null) weekGroups[week].speeds.push(speed);
       weekGroups[week].sessions++;
     });
-    const sortedWeeks = Object.keys(weekGroups).map(Number).sort((a, b) => a - b);
-    return sortedWeeks.map(week => {
-      const data = weekGroups[week];
+    const weekNumbers = Object.keys(weekGroups).map(Number);
+    if (weekNumbers.length === 0) return [];
+    const minWeek = Math.min(...weekNumbers);
+    const maxWeek = getCurrentWeek();
+    // Include all weeks from minWeek to currentWeek, fill missing with 0
+    const allWeeks = Array.from({ length: maxWeek - minWeek + 1 }, (_, i) => minWeek + i);
+    return allWeeks.map(week => {
+      const data = weekGroups[week] || { km: 0, speeds: [], sessions: 0 };
       const avgSpeed = data.speeds.length > 0 ? data.speeds.reduce((a, b) => a + b, 0) / data.speeds.length : null;
       return { label: `W${week}`, km: data.km, displayKm: data.km, originalKm: data.km, avgSpeed, sessions: data.sessions };
     });
@@ -575,20 +580,20 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
        {view.type === 'week' && (() => {
          const allWeeksData = prepareAllData();
          if (allWeeksData.length === 0) return null;
-         const sortedWeeks = [...allWeeksData].sort((a, b) => a.km - b.km);
-         const maxWeekKm = Math.max(...sortedWeeks.map(w => w.km));
-         const currentWeekLabel = `W${getCurrentWeek()}`;
-         const availableWidth = plotWidth;
-         const slotWidth = Math.max(1, Math.floor(availableWidth / sortedWeeks.length));
-         const barWidthPx = Math.max(1, slotWidth - 1);
-         const containerHeight = 60;
-         const maxBarHeight = 50;
+          const sortedWeeks = [...allWeeksData].sort((a, b) => a.km - b.km);
+          const maxWeekKm = Math.max(...sortedWeeks.map(w => w.km));
+          const currentWeekLabel = `W${getCurrentWeek()}`;
+          const availableWidth = plotWidth;
+          const slotWidth = Math.max(4, Math.floor(availableWidth / sortedWeeks.length));
+          const barWidthPx = 2;
+          const containerHeight = 60;
+          const maxBarHeight = 50;
 
          return (
            <div style={{ marginTop: '16px' }}>
-             <div style={{ fontSize: '10px', fontWeight: 600, color: '#999', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-               WEEKLY RANK
-             </div>
+            <div style={{ fontSize: '12px', fontWeight: 700, color: '#1a1a1a', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              WEEKLY RANK
+            </div>
              <div style={{ height: containerHeight, position: 'relative' }}>
                <svg
                  width="100%"
@@ -597,21 +602,30 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                  preserveAspectRatio="none"
                  style={{ overflow: 'visible' }}
                >
-                 {sortedWeeks.map((week, idx) => {
-                   const barH = week.km > 0 ? Math.max(2, (week.km / maxWeekKm) * maxBarHeight) : 1;
-                   const x = paddingX + idx * slotWidth;
-                   const isCurrent = week.label === currentWeekLabel;
-                   return (
-                     <rect
-                       key={week.label}
-                       x={x}
-                       y={containerHeight - barH}
-                       width={barWidthPx}
-                       height={barH}
-                       fill={isCurrent ? '#1a1a1a' : 'rgba(0,0,0,0.15)'}
-                     />
-                   );
-                 })}
+                  {sortedWeeks.map((week, idx) => {
+                    const barH = week.km > 0 ? Math.max(2, (week.km / maxWeekKm) * maxBarHeight) : 1;
+                    const x = paddingX + idx * slotWidth + (slotWidth - barWidthPx) / 2;
+                    const isCurrent = week.label === currentWeekLabel;
+                    return (
+                      <g key={week.label}>
+                        <rect
+                          x={x}
+                          y={containerHeight - barH}
+                          width={barWidthPx}
+                          height={barH}
+                          fill={isCurrent ? '#1a1a1a' : 'rgba(0,0,0,0.4)'}
+                        />
+                        {isCurrent && (
+                          <circle
+                            cx={x + barWidthPx / 2}
+                            cy={containerHeight - barH - 4}
+                            r="3"
+                            fill="#1a1a1a"
+                          />
+                        )}
+                      </g>
+                    );
+                  })}
                </svg>
              </div>
            </div>
