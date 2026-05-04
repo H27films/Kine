@@ -76,13 +76,11 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
      return getCurrentWeek() + offset;
    };
 
-   const getMonthByOffset = (offset: number) => {
-     const now = new Date();
-     const targetMonth = now.getMonth() + offset;
-     const targetYear = now.getFullYear() - Math.floor((12 - targetMonth) / 12);
-     const normalizedMonth = ((targetMonth % 12) + 12) % 12;
-     return `${targetYear}-${String(normalizedMonth + 1).padStart(2, '0')}`;
-   };
+    const getMonthByOffset = (offset: number) => {
+      const now = new Date();
+      const date = new Date(now.getFullYear(), now.getMonth() + offset, 1);
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    };
 
    // Compute minimum allowed offsets based on loaded data
    const getMinWeekOffset = () => {
