@@ -610,7 +610,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                  WEEKLY RANK
                </div>
                <div style={{ fontSize: '12px', fontWeight: 600, color: '#1a1a1a', fontFamily: "'JetBrains Mono', monospace" }}>
-                 {getOrdinalSuffix(currentRank)} / {totalWeeks}
+                 {currentRank > 0 ? `${currentRank}${getOrdinalSuffix(currentRank)} / ${totalWeeks}` : `— / ${totalWeeks}`}
                </div>
              </div>
               <div style={{ height: containerHeight, position: 'relative' }}>
