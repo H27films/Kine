@@ -55,7 +55,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
    const [weekOffset, setWeekOffset] = useState(0); // 0 = current week, -1 = previous, etc.
    const [monthOffset, setMonthOffset] = useState(0); // 0 = current month, -1 = previous, etc.
    const [minWeek, setMinWeek] = useState<number | null>(null);
-   const [minMonth, setMinMonth] = useState<string | null>(null);
+   const [minMonthOffset, setMinMonthOffset] = useState<number | null>(null);
 
    const chartViews = [
      { label: 'CURRENT WEEK', type: 'week' },
@@ -143,10 +143,22 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
          if (weeks.length > 0) {
            setMinWeek(Math.min(...weeks));
          }
-         // Calculate minMonth (earliest month string YYYY-MM)
-         const months = data.map(w => w.date.substring(0, 7)).filter(m => m);
+         // Calculate minMonthOffset (in months, negative = past)
+         const now = new Date();
+         const months = data.map(w => {
+           const [year, month] = w.date.split('-').map(Number);
+           return { year, month };
+         });
          if (months.length > 0) {
-           setMinMonth(months.sort()[0]);
+           const earliest = months.reduce((min, m) => {
+             const date = new Date(m.year, m.month - 1);
+             const minDate = new Date(min.year, min.month - 1);
+             return date < minDate ? m : min;
+           }, months[0]);
+           const earliestDate = new Date(earliest.year, earliest.month - 1);
+           const currentDate = new Date(now.getFullYear(), now.getMonth() + 1, 1); // use next month as anchor to ensure correct month diff
+           const monthDiff = (earliestDate.getFullYear() - currentDate.getFullYear()) * 12 + (earliestDate.getMonth() - currentDate.getMonth());
+           setMinMonthOffset(monthDiff);
          }
        }
        setLoading(false);
@@ -333,17 +345,17 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                   }}
                   disabled={view.type === 'week'
                     ? minWeek !== null && weekOffset <= minWeek - getCurrentWeek()
-                    : minMonth !== null && monthOffset <= getMonthOffsetFromString(minMonth!)}
+                    : minMonthOffset !== null && monthOffset <= minMonthOffset}
                   style={{
                     background: 'none',
                     border: 'none',
                     padding: 0,
                     cursor: view.type === 'week'
                       ? (minWeek !== null && weekOffset <= minWeek - getCurrentWeek()) ? 'default' : 'pointer'
-                      : (minMonth !== null && monthOffset <= getMonthOffsetFromString(minMonth!)) ? 'default' : 'pointer',
+                      : (minMonthOffset !== null && monthOffset <= minMonthOffset) ? 'default' : 'pointer',
                     opacity: view.type === 'week'
                       ? (minWeek !== null && weekOffset <= minWeek - getCurrentWeek()) ? 0.3 : 1
-                      : (minMonth !== null && monthOffset <= getMonthOffsetFromString(minMonth!)) ? 0.3 : 1,
+                      : (minMonthOffset !== null && monthOffset <= minMonthOffset) ? 0.3 : 1,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center'
@@ -358,17 +370,17 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                   }}
                   disabled={view.type === 'week'
                     ? minWeek !== null && weekOffset <= minWeek - getCurrentWeek()
-                    : minMonth !== null && monthOffset <= getMonthOffsetFromString(minMonth!)}
+                    : minMonthOffset !== null && monthOffset <= minMonthOffset}
                   style={{
                     background: 'none',
                     border: 'none',
                     padding: 0,
                     cursor: view.type === 'week'
                       ? (minWeek !== null && weekOffset <= minWeek - getCurrentWeek()) ? 'default' : 'pointer'
-                      : (minMonth !== null && monthOffset <= getMonthOffsetFromString(minMonth!)) ? 'default' : 'pointer',
+                      : (minMonthOffset !== null && monthOffset <= minMonthOffset) ? 'default' : 'pointer',
                     opacity: view.type === 'week'
                       ? (minWeek !== null && weekOffset <= minWeek - getCurrentWeek()) ? 0.3 : 1
-                      : (minMonth !== null && monthOffset <= getMonthOffsetFromString(minMonth!)) ? 0.3 : 1,
+                      : (minMonthOffset !== null && monthOffset <= minMonthOffset) ? 0.3 : 1,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center'
