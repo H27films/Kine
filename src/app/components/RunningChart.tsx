@@ -809,7 +809,7 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                                stroke="#1a1a1a"
                                strokeWidth={barWidthPx}
                                strokeLinecap="round"
-                               strokeOpacity={isCurrent ? 1 : 0.9}
+                               strokeOpacity={1}
                              />
                               {isCurrent && (
                                 <>
