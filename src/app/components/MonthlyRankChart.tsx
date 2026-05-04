@@ -135,9 +135,9 @@ export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
                       fontWeight="600"
                       fontFamily="'JetBrains Mono', monospace"
                     >
-                      <tspan transform={`rotate(90, ${pt.x}, ${pt.circleY - pt.circleRadius - 6})`}>
-                        {pt.km.toFixed(1)}
-                      </tspan>
+                        <tspan transform={`rotate(90, ${pt.x}, ${pt.circleY - pt.circleRadius - 6})`}>
+                          {pt.month.km.toFixed(1)}
+                        </tspan>
                     </text>
                   ) : null
                 ))}
