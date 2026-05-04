@@ -133,10 +133,9 @@ export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
                       fontSize="12px"
                       fontWeight="600"
                       fontFamily="'JetBrains Mono', monospace"
+                      transform={`rotate(-90, ${pt.x}, ${pt.circleY - pt.circleRadius - 6})`}
                     >
-                      <tspan transform={`rotate(-90, ${pt.x}, ${pt.circleY - pt.circleRadius - 6})`}>
-                        {pt.month.km.toFixed(1)}
-                      </tspan>
+                      {pt.month.km.toFixed(1)}
                     </text>
                   ) : null
                 ))}
@@ -155,10 +154,9 @@ export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
                       fontSize="11px"
                       fontWeight="500"
                       fontFamily="'JetBrains Mono', monospace"
+                      transform={`rotate(-90, ${x}, ${labelY})`}
                     >
-                      <tspan transform={`rotate(-90, ${x}, ${labelY})`}>
-                        {month.label}
-                      </tspan>
+                      {month.label}
                     </text>
                   );
                 })}
