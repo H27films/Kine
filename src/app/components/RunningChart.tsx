@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../lib/supabase';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface RunningWorkout {
   id: string;
@@ -51,12 +52,67 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
    const [touchStart, setTouchStart] = useState<number | null>(null);
    const [touchEnd, setTouchEnd] = useState<number | null>(null);
    const [selectedBarIdx, setSelectedBarIdx] = useState<number | null>(null);
+   const [weekOffset, setWeekOffset] = useState(0); // 0 = current week, -1 = previous, etc.
+   const [monthOffset, setMonthOffset] = useState(0); // 0 = current month, -1 = previous, etc.
 
-  const chartViews = [
-    { label: 'CURRENT WEEK', type: 'week' },
-    { label: 'CURRENT MONTH', type: 'month' },
-    { label: 'ALL DATA', type: 'all' },
-  ];
+   const chartViews = [
+     { label: 'CURRENT WEEK', type: 'week' },
+     { label: 'CURRENT MONTH', type: 'month' },
+     { label: 'ALL DATA', type: 'all' },
+   ];
+
+   const getCurrentWeek = () => {
+     const now = new Date();
+     const startDate = new Date('2025-01-06T00:00:00');
+     const msPerWeek = 7 * 24 * 60 * 60 * 1000;
+     return Math.floor((now.getTime() - startDate.getTime()) / msPerWeek) + 1;
+   };
+
+   const getWeekByOffset = (offset: number) => {
+     return getCurrentWeek() + offset;
+   };
+
+   const getMonthByOffset = (offset: number) => {
+     const now = new Date();
+     const targetMonth = now.getMonth() + offset; // offset negative = past, positive = future
+     const targetYear = now.getFullYear() - Math.floor((12 - targetMonth) / 12); // adjust year if needed
+     const normalizedMonth = ((targetMonth % 12) + 12) % 12;
+     return `${targetYear}-${String(normalizedMonth + 1).padStart(2, '0')}`;
+   };
+
+   const getMonthLabel = (monthStr: string) => {
+     const [year, month] = monthStr.split('-').map(Number);
+     const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+     return `${monthNames[month - 1]} ${year}`;
+   };
+
+   const getPeriodLabel = (viewType: string) => {
+     if (viewType === 'week') {
+       const weekNum = getWeekByOffset(weekOffset);
+       return `WEEK ${weekNum}`;
+     }
+     if (viewType === 'month') {
+       const monthStr = getMonthByOffset(monthOffset);
+       return getMonthLabel(monthStr).toUpperCase();
+     }
+     return 'ALL TIME';
+   };
+
+   const prepareWeekData = (weekNum: number) => {
+     const weekWorkouts = workouts.filter(w => w.week === weekNum);
+     const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+     const dayData = dayLabels.map((label, index) => {
+       const dayWorkouts = weekWorkouts.filter(w => {
+         const d = new Date(w.date + 'T00:00:00');
+         return d.getDay() === (index === 6 ? 0 : index + 1);
+       });
+       const totalKm = dayWorkouts.reduce((sum, w) => sum + (w.total_cardio || 0), 0);
+       const speeds = dayWorkouts.map(w => calculateSpeed(w.total_cardio || 0, w.time)).filter(s => s !== null) as number[];
+       const avgSpeed = speeds.length > 0 ? speeds.reduce((a, b) => a + b, 0) / speeds.length : null;
+       return { label, km: totalKm, displayKm: totalKm, originalKm: totalKm, avgSpeed, sessions: dayWorkouts.length };
+     });
+     return dayData;
+   };
 
   useEffect(() => {
     const loadData = async () => {
@@ -76,66 +132,37 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
     loadData();
   }, []);
 
-  const getCurrentWeek = () => {
-    const now = new Date();
-    const startDate = new Date('2025-01-06T00:00:00');
-    const msPerWeek = 7 * 24 * 60 * 60 * 1000;
-    return Math.floor((now.getTime() - startDate.getTime()) / msPerWeek) + 1;
-  };
+   const prepareMonthData = (monthStr: string) => {
+     const monthWorkouts = workouts.filter(w => w.date.startsWith(monthStr));
+     const [year, month] = monthStr.split('-').map(Number);
+     const daysInMonth = new Date(year, month, 0).getDate();
+     const dayData = Array.from({ length: daysInMonth }, (_, i) => {
+       const day = i + 1;
+       const dayStr = `${monthStr}-${String(day).padStart(2, '0')}`;
+       const dayWorkouts = monthWorkouts.filter(w => w.date === dayStr);
+       const totalKm = dayWorkouts.reduce((sum, w) => sum + (w.total_cardio || 0), 0);
+       const speeds = dayWorkouts.map(w => calculateSpeed(w.total_cardio || 0, w.time)).filter(s => s !== null) as number[];
+       const avgSpeed = speeds.length > 0 ? speeds.reduce((a, b) => a + b, 0) / speeds.length : null;
+       return { label: String(day), km: totalKm, displayKm: totalKm, originalKm: totalKm, avgSpeed, sessions: dayWorkouts.length };
+     });
 
-  const getCurrentMonth = () => {
-    const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  };
+     // Apply decaying height for zero values
+     let lastNonZeroKm = 0;
+     let lastNonZeroIndex = -1;
+     for (let i = 0; i < dayData.length; i++) {
+       if (dayData[i].km > 0) {
+         lastNonZeroKm = dayData[i].km;
+         lastNonZeroIndex = i;
+       } else if (lastNonZeroIndex >= 0) {
+         const distance = i - lastNonZeroIndex;
+         dayData[i].displayKm = lastNonZeroKm * Math.pow(0.75, distance);
+       } else {
+         dayData[i].displayKm = 0;
+       }
+     }
 
-  const prepareWeekData = () => {
-    const currentWeek = getCurrentWeek();
-    const weekWorkouts = workouts.filter(w => w.week === currentWeek);
-    const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    const dayData = dayLabels.map((label, index) => {
-      const dayWorkouts = weekWorkouts.filter(w => {
-        const d = new Date(w.date + 'T00:00:00');
-        return d.getDay() === (index === 6 ? 0 : index + 1); // Mon=1, Sun=0
-      });
-      const totalKm = dayWorkouts.reduce((sum, w) => sum + (w.total_cardio || 0), 0);
-      const speeds = dayWorkouts.map(w => calculateSpeed(w.total_cardio || 0, w.time)).filter(s => s !== null) as number[];
-      const avgSpeed = speeds.length > 0 ? speeds.reduce((a, b) => a + b, 0) / speeds.length : null;
-      return { label, km: totalKm, displayKm: totalKm, originalKm: totalKm, avgSpeed, sessions: dayWorkouts.length };
-    });
-    return dayData;
-  };
-
-  const prepareMonthData = () => {
-    const currentMonth = getCurrentMonth();
-    const monthWorkouts = workouts.filter(w => w.date.startsWith(currentMonth));
-    const daysInMonth = new Date(parseInt(currentMonth.split('-')[0]), parseInt(currentMonth.split('-')[1]), 0).getDate();
-    const dayData = Array.from({ length: daysInMonth }, (_, i) => {
-      const day = i + 1;
-      const dayStr = `${currentMonth}-${String(day).padStart(2, '0')}`;
-      const dayWorkouts = monthWorkouts.filter(w => w.date === dayStr);
-      const totalKm = dayWorkouts.reduce((sum, w) => sum + (w.total_cardio || 0), 0);
-      const speeds = dayWorkouts.map(w => calculateSpeed(w.total_cardio || 0, w.time)).filter(s => s !== null) as number[];
-      const avgSpeed = speeds.length > 0 ? speeds.reduce((a, b) => a + b, 0) / speeds.length : null;
-      return { label: String(day), km: totalKm, displayKm: totalKm, originalKm: totalKm, avgSpeed, sessions: dayWorkouts.length };
-    });
-
-    // Apply decaying height for zero values
-    let lastNonZeroKm = 0;
-    let lastNonZeroIndex = -1;
-    for (let i = 0; i < dayData.length; i++) {
-      if (dayData[i].km > 0) {
-        lastNonZeroKm = dayData[i].km;
-        lastNonZeroIndex = i;
-      } else if (lastNonZeroIndex >= 0) {
-        const distance = i - lastNonZeroIndex;
-        dayData[i].displayKm = lastNonZeroKm * Math.pow(0.75, distance);
-      } else {
-        dayData[i].displayKm = 0;
-      }
-    }
-
-    return dayData;
-  };
+     return dayData;
+   };
 
   const prepareAllData = () => {
     // Group by week for all data
@@ -161,14 +188,14 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
     });
   };
 
-  const getDataForView = (type: string) => {
-    switch (type) {
-      case 'week': return prepareWeekData();
-      case 'month': return prepareMonthData();
-      case 'all': return prepareAllData();
-      default: return [];
-    }
-  };
+   const getDataForView = (type: string) => {
+     switch (type) {
+       case 'week': return prepareWeekData(getWeekByOffset(weekOffset));
+       case 'month': return prepareMonthData(getMonthByOffset(monthOffset));
+       case 'all': return prepareAllData();
+       default: return [];
+     }
+   };
 
   const getStats = () => {
     const allSpeeds = workouts.map(w => calculateSpeed(w.total_cardio || 0, w.time)).filter(s => s !== null) as number[];
@@ -206,9 +233,12 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
    };
 
    useEffect(() => {
-     // Reset selected bar when view changes
-     setSelectedBarIdx(null);
-   }, [currentIndex]);
+      // Reset selected bar when view changes
+      setSelectedBarIdx(null);
+      // Reset offsets when switching views
+      setWeekOffset(0);
+      setMonthOffset(0);
+    }, [currentIndex]);
 
   const renderChartArea = (view: { label: string; type: string }, data: any[]) => {
     const points: DataPoint[] = data.map((d, i) => ({
@@ -253,21 +283,94 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
     }
     const barWidth = points.length > 0 ? Math.max(8, (plotWidth - (points.length - 1) * dynamicBarSpacing) / points.length) : 0;
 
-    return (
-      <div>
-          {/* Period header */}
-        <div style={{
-          fontFamily: "'Inconsolata', monospace",
-          fontSize: '24px',
-          fontWeight: 348,
-          fontStretch: '175%',
-          letterSpacing: '0.08em',
-          color: 'rgba(0,0,0,0.7)',
-          textTransform: 'uppercase',
-          marginBottom: '4px'
-        }}>
-          {view.type === 'week' ? `WEEK ${getCurrentWeek()}` : view.type === 'month' ? `${getMonthInfo(getCurrentMonth()).label}` : 'ALL TIME'}
-        </div>
+     return (
+       <div>
+           {/* Period header with navigation */}
+         <div style={{
+           fontFamily: "'Inconsolata', monospace",
+           fontSize: '24px',
+           fontWeight: 348,
+           fontStretch: '175%',
+           letterSpacing: '0.08em',
+           color: 'rgba(0,0,0,0.7)',
+           textTransform: 'uppercase',
+           marginBottom: '4px',
+           display: 'flex',
+           alignItems: 'center',
+           justifyContent: 'center',
+           gap: view.type === 'all' ? '0' : '16px'
+         }}>
+           {view.type === 'week' && (
+             <>
+               <button
+                 onClick={() => setWeekOffset(prev => prev - 1)}
+                 style={{
+                   background: 'none',
+                   border: 'none',
+                   padding: 0,
+                   cursor: 'pointer',
+                   display: 'flex',
+                   alignItems: 'center',
+                   justifyContent: 'center'
+                 }}
+               >
+                 <ChevronLeft size={28} strokeWidth={2.5} />
+               </button>
+               <button
+                 onClick={() => setWeekOffset(prev => prev + 1)}
+                 disabled={weekOffset >= 0}
+                 style={{
+                   background: 'none',
+                   border: 'none',
+                   padding: 0,
+                   cursor: weekOffset >= 0 ? 'default' : 'pointer',
+                   opacity: weekOffset >= 0 ? 0.3 : 1,
+                   display: 'flex',
+                   alignItems: 'center',
+                   justifyContent: 'center'
+                 }}
+               >
+                 <ChevronRight size={28} strokeWidth={2.5} />
+               </button>
+             </>
+           )}
+
+           {view.type === 'month' && (
+             <>
+               <button
+                 onClick={() => setMonthOffset(prev => prev + 1)}
+                 disabled={monthOffset >= 0}
+                 style={{
+                   background: 'none',
+                   border: 'none',
+                   padding: 0,
+                   cursor: monthOffset >= 0 ? 'default' : 'pointer',
+                   opacity: monthOffset >= 0 ? 0.3 : 1,
+                   display: 'flex',
+                   alignItems: 'center',
+                   justifyContent: 'center'
+                 }}
+               >
+                 <ChevronLeft size={28} strokeWidth={2.5} />
+               </button>
+               <button
+                 onClick={() => setMonthOffset(prev => prev - 1)}
+                 disabled={false}
+                 style={{
+                   background: 'none',
+                   border: 'none',
+                   padding: 0,
+                   cursor: 'pointer',
+                   display: 'flex',
+                   alignItems: 'center',
+                   justifyContent: 'center'
+                 }}
+               >
+                 <ChevronRight size={28} strokeWidth={2.5} />
+               </button>
+             </>
+           )}
+         </div>
 
         {/* Big number */}
         <div className="flex items-start justify-between" style={{ marginBottom: '16px' }}>
@@ -485,17 +588,93 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
            {points.length > 0 && (
              <div style={{ marginTop: '8px', display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
             <div>
-              <div style={{
-                fontFamily: "'Inconsolata', monospace",
-                fontSize: '22px',
-                fontWeight: 348,
-                fontStretch: '175%',
-                letterSpacing: '0.06em',
-                color: 'rgba(0,0,0,0.35)',
-                textTransform: 'uppercase',
-              }}>
-                MAX
-              </div>
+         <div style={{
+           fontFamily: "'Inconsolata', monospace",
+           fontSize: '24px',
+           fontWeight: 348,
+           fontStretch: '175%',
+           letterSpacing: '0.08em',
+           color: 'rgba(0,0,0,0.7)',
+           textTransform: 'uppercase',
+           marginBottom: '4px',
+           display: 'flex',
+           alignItems: 'center',
+           justifyContent: 'center',
+           gap: view.type === 'all' ? '0' : '16px'
+         }}>
+           {view.type === 'week' && (
+             <button
+               onClick={() => setWeekOffset(prev => prev - 1)}
+               style={{
+                 background: 'none',
+                 border: 'none',
+                 padding: 0,
+                 cursor: 'pointer',
+                 display: 'flex',
+                 alignItems: 'center',
+                 justifyContent: 'center'
+               }}
+             >
+               <ChevronLeft size={28} strokeWidth={2.5} />
+             </button>
+           )}
+
+           <span>{getPeriodLabel(view.type)}</span>
+
+           {view.type === 'week' && (
+             <button
+               onClick={() => setWeekOffset(prev => prev + 1)}
+               disabled={weekOffset >= 0}
+               style={{
+                 background: 'none',
+                 border: 'none',
+                 padding: 0,
+                 cursor: weekOffset >= 0 ? 'default' : 'pointer',
+                 opacity: weekOffset >= 0 ? 0.3 : 1,
+                 display: 'flex',
+                 alignItems: 'center',
+                 justifyContent: 'center'
+               }}
+             >
+               <ChevronRight size={28} strokeWidth={2.5} />
+             </button>
+           )}
+
+           {view.type === 'month' && (
+             <>
+               <button
+                 onClick={() => setMonthOffset(prev => prev - 1)}
+                 style={{
+                   background: 'none',
+                   border: 'none',
+                   padding: 0,
+                   cursor: 'pointer',
+                   display: 'flex',
+                   alignItems: 'center',
+                   justifyContent: 'center'
+                 }}
+               >
+                 <ChevronLeft size={28} strokeWidth={2.5} />
+               </button>
+               <button
+                 onClick={() => setMonthOffset(prev => prev + 1)}
+                 disabled={monthOffset >= 0}
+                 style={{
+                   background: 'none',
+                   border: 'none',
+                   padding: 0,
+                   cursor: monthOffset >= 0 ? 'default' : 'pointer',
+                   opacity: monthOffset >= 0 ? 0.3 : 1,
+                   display: 'flex',
+                   alignItems: 'center',
+                   justifyContent: 'center'
+                 }}
+               >
+                 <ChevronRight size={28} strokeWidth={2.5} />
+               </button>
+             </>
+           )}
+         </div>
               <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
                 {Math.max(...data.map(d => d.originalKm)).toLocaleString()}<span style={{ fontSize: '16px', fontWeight: 200, color: '#999', marginLeft: '1px' }}>KM</span>
               </div>
@@ -576,15 +755,16 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
 
          )}
 
-        {/* Weekly comparison bar chart (CURRENT WEEK only) */}
-        {view.type === 'week' && (() => {
-          const allWeeksData = prepareAllData();
-          if (allWeeksData.length === 0) return null;
+         {/* Weekly comparison bar chart (CURRENT WEEK only) */}
+         {view.type === 'week' && (() => {
+           const allWeeksData = prepareAllData();
+           if (allWeeksData.length === 0) return null;
+           const selectedWeekNum = getWeekByOffset(weekOffset);
+           const selectedWeekLabel = `W${selectedWeekNum}`;
            const sortedWeeks = [...allWeeksData].sort((a, b) => a.km - b.km);
-           const currentWeekLabel = `W${getCurrentWeek()}`;
            const totalWeeks = sortedWeeks.length;
            const sortedDesc = [...allWeeksData].sort((a, b) => b.originalKm - a.originalKm);
-           const currentRank = sortedDesc.findIndex(w => w.label === currentWeekLabel) + 1;
+           const currentRank = sortedDesc.findIndex(w => w.label === selectedWeekLabel) + 1;
 
            const getOrdinalSuffix = (n: number) => {
              if (n % 100 >= 11 && n % 100 <= 13) return 'th';
@@ -614,45 +794,45 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                </div>
              </div>
               <div style={{ height: containerHeight, position: 'relative' }}>
-               <svg
-                 width="100%"
-                 height={containerHeight}
-                 viewBox={`0 0 ${chartWidth} ${containerHeight}`}
-                 preserveAspectRatio="none"
-                 style={{ overflow: 'visible' }}
-               >
-                  {sortedWeeks.map((week, idx) => {
-                    const barH = week.km > 0 ? Math.max(2, (week.km / maxWeekKm) * maxBarHeight) : 1;
-                    const x = paddingX + idx * slotWidth + (slotWidth - barWidthPx) / 2;
-                    const isCurrent = week.label === currentWeekLabel;
-                    const radius = barWidthPx / 2;
-                    return (
-                      <g key={week.label}>
-                        <rect
-                          x={x}
-                          y={containerHeight - barH}
-                          width={barWidthPx}
-                          height={barH}
-                          rx={radius}
-                          ry={radius}
-                          fill={isCurrent ? '#1a1a1a' : 'rgba(0,0,0,0.4)'}
-                        />
-                        {isCurrent && (
-                          <circle
-                            cx={x + barWidthPx / 2}
-                            cy={containerHeight - barH - 4}
-                            r="3"
-                            fill="#1a1a1a"
-                          />
-                        )}
-                      </g>
-                    );
-                  })}
-               </svg>
-             </div>
-           </div>
-         );
-       })()}
+                <svg
+                  width="100%"
+                  height={containerHeight}
+                  viewBox={`0 0 ${chartWidth} ${containerHeight}`}
+                  preserveAspectRatio="none"
+                  style={{ overflow: 'visible' }}
+                >
+                   {sortedWeeks.map((week, idx) => {
+                     const barH = week.km > 0 ? Math.max(2, (week.km / maxWeekKm) * maxBarHeight) : 1;
+                     const x = paddingX + idx * slotWidth + (slotWidth - barWidthPx) / 2;
+                     const isCurrent = week.label === selectedWeekLabel;
+                     const radius = barWidthPx / 2;
+                     return (
+                       <g key={week.label}>
+                         <rect
+                           x={x}
+                           y={containerHeight - barH}
+                           width={barWidthPx}
+                           height={barH}
+                           rx={radius}
+                           ry={radius}
+                           fill={isCurrent ? '#1a1a1a' : 'rgba(0,0,0,0.4)'}
+                         />
+                         {isCurrent && (
+                           <circle
+                             cx={x + barWidthPx / 2}
+                             cy={containerHeight - barH - 4}
+                             r="3"
+                             fill="#1a1a1a"
+                           />
+                         )}
+                       </g>
+                     );
+                   })}
+                </svg>
+              </div>
+            </div>
+          );
+        })()}
       </div>
     );
   };
