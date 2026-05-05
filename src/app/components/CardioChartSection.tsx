@@ -245,6 +245,20 @@ const CardioChartSection: React.FC<CardioChartSectionProps> = ({
                 <path d={fadedPath} fill="none" stroke="url(#fadeGradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               )}
 
+              {/* Subtle vertical droplines from each point down to axis */}
+              {linePts.filter(p => !p.isAnchor).map((p) => (
+                <line
+                  key={`dropline-${p.i}`}
+                  x1={p.x}
+                  y1={p.y}
+                  x2={p.x}
+                  y2={padTop + chartH}
+                  stroke="rgba(255,255,255,0.09)"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+              ))}
+
               {linePts.filter(p => !p.isAnchor).map((p) => (
                 <g key={p.i}>
                   {p.val === maxVal && <line x1={p.x} y1={p.y} x2={p.x} y2={VH - 2} stroke="rgba(255,255,255,0.6)" strokeWidth="1" strokeLinecap="round" />}
