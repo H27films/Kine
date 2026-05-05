@@ -254,9 +254,11 @@ const CardioChartSection: React.FC<CardioChartSectionProps> = ({
                 const segmentIdx = Math.min(Math.floor(segmentProgress), totalSegments - 1);
                 const localT = segmentProgress - segmentIdx;
                 
+                // Skip droplines exactly on data points
+                if (Math.abs(localT) < 0.01) return null;
+                
                 const prev = linePts[segmentIdx];
                 const curr = linePts[segmentIdx + 1];
-                const cpx = (prev.x + curr.x) / 2;
                 
                 // Cubic bezier y calculation
                 const y = (1 - localT) ** 2 * prev.y + 2 * (1 - localT) * localT * prev.y + localT ** 2 * curr.y;
@@ -269,7 +271,7 @@ const CardioChartSection: React.FC<CardioChartSectionProps> = ({
                     y1={y}
                     x2={x}
                     y2={padTop + chartH}
-                    stroke="rgba(255,255,255,0.06)"
+                    stroke="rgba(255,255,255,0.30)"
                     strokeWidth="1"
                   />
                 );
