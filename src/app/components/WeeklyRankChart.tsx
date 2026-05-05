@@ -25,17 +25,22 @@ export const WeeklyRankChart: React.FC<WeeklyRankChartProps> = ({
 }) => {
   if (allWeekData.length === 0) return null;
 
-  const sortedWeeks = [...allWeekData].sort((a, b) => a.km - b.km);
   const sortedDesc = [...allWeekData].sort((a, b) => b.originalKm - a.originalKm);
-  const totalWeeks = sortedWeeks.length;
+  const totalWeeks = sortedDesc.length;
   const currentRank = sortedDesc.findIndex(w => w.label === selectedWeekLabel) + 1;
-  const maxWeekKm = Math.max(...sortedWeeks.map(w => w.km));
+  const fillCount = currentRank;
+  const indicatorPosition = currentRank - 1;
 
-  const availableWidth = plotWidth;
-  const slotWidth = Math.max(4, Math.floor(availableWidth / sortedWeeks.length));
-  const barWidthPx = 1.3;
   const containerHeight = 120;
-  const maxBarHeight = 108;
+  const barHeight = 60;
+  const barGap = 7;
+  const barCount = allWeekData.length;
+
+  const totalBarWidth = plotWidth - ((barCount - 1) * barGap);
+  const barWidth = totalBarWidth / barCount;
+  const barRadius = 2;
+
+  const selectedWeekIndex = allWeekData.findIndex(w => w.label === selectedWeekLabel);
 
   return (
     <div>
@@ -53,6 +58,7 @@ export const WeeklyRankChart: React.FC<WeeklyRankChartProps> = ({
           {currentRank > 0 ? `${currentRank}${getOrdinalSuffix(currentRank)} / ${totalWeeks}` : `— / ${totalWeeks}`}
         </div>
       </div>
+
       <div style={{ height: containerHeight, position: 'relative' }}>
         <svg
           width="100%"
@@ -61,89 +67,40 @@ export const WeeklyRankChart: React.FC<WeeklyRankChartProps> = ({
           preserveAspectRatio="none"
           style={{ overflow: 'visible' }}
         >
-           <defs>
-             <linearGradient id="weeklyRankConnectorGradient" gradientUnits="userSpaceOnUse" x1="0" y1={containerHeight - 80} x2="0" y2={containerHeight}>
-              <stop offset="0%" stop-color="rgba(0,0,0,0.2)" />
-              <stop offset="100%" stop-color="rgba(0,0,0,0.01)" />
-            </linearGradient>
-            <filter id="circleBlur" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" />
-              <feColorMatrix type="matrix" values="0 0 0 0 0.949 0 0 0 0 0.949 0 0 0 0 0.949 0 0 0 1 0" />
-            </filter>
-          </defs>
-          {(() => {
-            const weekData = sortedWeeks.map((week, idx) => {
-              const barH = week.km > 0 ? Math.max(2, (week.km / maxWeekKm) * maxBarHeight) : 1;
-              const x = paddingX + idx * slotWidth + (slotWidth - barWidthPx) / 2;
-              const topY = containerHeight - barH;
-              const elevatedY = topY - 8;
-              return { week, idx, x, barH, topY, elevatedY, isCurrent: week.label === selectedWeekLabel };
-            });
 
-            const buildSmoothPath = (pts: {x: number, y: number}[]) => {
-              if (pts.length < 2) return '';
-              let d = `M ${pts[0].x} ${pts[0].y}`;
-              for (let i = 0; i < pts.length - 1; i++) {
-                const p0 = pts[i === 0 ? i : i - 1];
-                const p1 = pts[i];
-                const p2 = pts[i + 1];
-                const p3 = pts[i + 2] || p2;
-                const cp1x = p1.x + (p2.x - p0.x) / 6;
-                const cp1y = p1.y + (p2.y - p0.y) / 6;
-                const cp2x = p2.x - (p3.x - p1.x) / 6;
-                const cp2y = p2.y - (p3.y - p1.y) / 6;
-                d += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`;
-              }
-              return d;
-            };
-
-            const connectorPath = buildSmoothPath(weekData.map(w => ({ x: w.x, y: w.elevatedY })));
-
-            const connector = weekData.length > 1 && (
-              <path
-                d={connectorPath}
-                fill="none"
-                stroke="url(#weeklyRankConnectorGradient)"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            );
-
-            const bars = weekData.map(({ week, x, topY, isCurrent }) => {
-              return (
-                <g key={week.label}>
-                  <line
-                    className="bar-animate"
-                    x1={x + barWidthPx / 2}
-                    y1={containerHeight}
-                    x2={x + barWidthPx / 2}
-                    y2={topY}
-                    stroke="#1a1a1a"
-                    strokeWidth={barWidthPx}
-                    strokeLinecap="round"
-                    strokeOpacity={1}
-                  />
-                  {isCurrent && (
-                    <circle
-                      cx={x + barWidthPx / 2}
-                      cy={topY - 8}
-                      r="4"
-                      fill="#1a1a1a"
-                    />
-                  )}
-                </g>
-              );
-            });
-
+          {/* Ranked bars */}
+          {allWeekData.map((week, idx) => {
+            const x = paddingX + idx * (barWidth + barGap);
+            const y = (containerHeight - barHeight) / 2;
+            const isFilled = idx < fillCount;
+            
             return (
-              <>
-                {connector}
-                {bars}
-              </>
+              <g key={week.label}>
+                <rect
+                  x={x}
+                  y={y}
+                  width={barWidth}
+                  height={barHeight}
+                  fill={isFilled ? "#1a1a1a" : "#ddd"}
+                  rx={barRadius}
+                />
+
+                {/* Rank indicator line - always tracks last filled bar */}
+                {idx === indicatorPosition && (
+                  <rect
+                    x={x - 2}
+                    y={y + barHeight + 6}
+                    width={barWidth + 4}
+                    height="1.5"
+                    fill="#1a1a1a"
+                    rx="0.75"
+                    filter="drop-shadow(0px 1px 2px rgba(0,0,0,0.15))"
+                  />
+                )}
+              </g>
             );
-          })()}
-          <line x1={paddingX} y1={containerHeight} x2={chartWidth - paddingX} y2={containerHeight} stroke="#1a1a1a" strokeWidth="1" />
+          })}
+
         </svg>
       </div>
     </div>
