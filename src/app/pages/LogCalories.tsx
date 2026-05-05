@@ -37,7 +37,7 @@ const getMondayAtOffset = (offset: number): Date => {
 const fmtDate = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
-export const LogCalories: React.FC<LogCaloriesProps> = ({ onNavigate, showWeeklySummary = false }) => {
+export const LogCalories: React.FC<LogCaloriesProps> = () => {
   const [calories, setCalories] = useState('');
   const [chartExpanded, setChartExpanded] = useState(false);
   const [showEditSheet, setShowEditSheet] = useState(false);
