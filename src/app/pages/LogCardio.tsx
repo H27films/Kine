@@ -467,7 +467,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, showWeeklySumm
           </div>}
 
         {/* Row 3: full-width sparkline — tap to reveal pencil edit */}
-        <div style={{ marginTop: -6 }}>
+        <div style={{ marginTop: -14 }}>
           <div style={{ width: '100%', cursor: 'pointer' }} onClick={() => setSparklineClicked(v => !v)}>
             <TrackerSparkline weekChartData={weekChartData} />
           </div>
