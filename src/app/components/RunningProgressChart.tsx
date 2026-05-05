@@ -17,11 +17,10 @@ export const RunningProgressChart: React.FC<RunningProgressChartProps> = ({
   const chartWidth = 280;
   const barWidth = 60;
   
-  // Baseline position moves down as percentage increases
+  // Baseline position moves UP as percentage increases (0% at bottom, 100% at top)
   const baselineY = chartHeight - (percentage / 100) * chartHeight;
-  
-  // Calculate glow spread based on remaining percentage
-  const glowHeight = remainingPercentage / 100 * (chartHeight - 10);
+  const solidBlockHeight = chartHeight - baselineY;
+  const glowHeight = baselineY;
   
   return (
     <div style={{
