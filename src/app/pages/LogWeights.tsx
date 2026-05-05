@@ -564,19 +564,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
 
   return (
     <div>
-      <nav className="flex gap-8 items-end" style={{ marginBottom: (selectedGroup || showWeeklySummary) ? '0' : '3rem', maxHeight: (selectedGroup || showWeeklySummary) ? '0' : '80px', overflow: 'hidden', opacity: (selectedGroup || showWeeklySummary) ? 0 : 1, transition: 'all 0.35s ease' }}>
-        {tabs.map(tab => {
-          const isActive = tab.page === 'weights';
-          return (
-            <button key={tab.page} onClick={() => onNavigate(tab.page)} className="flex flex-col items-center" style={{ filter: isActive ? 'none' : 'blur(0.4px)' }}>
-              <span className="uppercase tracking-widest transition-all" style={{ color: isActive ? '#ffffff' : 'rgba(226,226,226,0.65)', fontWeight: isActive ? 900 : 400, fontSize: isActive ? '0.875rem' : '0.65rem', letterSpacing: '0.15em' }}>
-                {tab.label}
-              </span>
-              {isActive && <div className="h-1 w-1 rounded-full mt-1" style={{ backgroundColor: '#ffffff' }} />}
-            </button>
-          );
-        })}
-      </nav>
 
       {/* Weekly volume display — collapses when group selected */}
       <div style={{
