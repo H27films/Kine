@@ -479,8 +479,8 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                width="100%"
                height="100%"
                viewBox={`0 0 ${chartWidth} ${chartHeight}`}
-               preserveAspectRatio="none"
-               style={{ overflow: 'visible' }}
+               preserveAspectRatio="xMidYMid meet"
+               style={{ overflow: 'visible', maxWidth: chartWidth, margin: '0 auto' }}
               >
                <defs>
                  <pattern id="squarePattern" patternUnits="userSpaceOnUse" width="5" height="5">
