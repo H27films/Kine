@@ -41,7 +41,7 @@ export const RunningProgressChart: React.FC<RunningProgressChartProps> = ({
         textAlign: 'left',
       }}>
         <div style={{
-          fontSize: '28px',
+          fontSize: '22px',
           fontWeight: 900,
           lineHeight: 1,
           letterSpacing: '-0.04em',
@@ -52,7 +52,7 @@ export const RunningProgressChart: React.FC<RunningProgressChartProps> = ({
         <div style={{
           fontSize: '11px',
           fontWeight: 500,
-          color: '#999',
+          color: '#444',
           marginTop: '2px',
           textTransform: 'uppercase',
           letterSpacing: '0.05em'
@@ -127,7 +127,7 @@ export const RunningProgressChart: React.FC<RunningProgressChartProps> = ({
         textAlign: 'right',
       }}>
         <div style={{
-          fontSize: '28px',
+          fontSize: '22px',
           fontWeight: 900,
           lineHeight: 1,
           letterSpacing: '-0.04em',
@@ -139,7 +139,7 @@ export const RunningProgressChart: React.FC<RunningProgressChartProps> = ({
         <div style={{
           fontSize: '11px',
           fontWeight: 500,
-          color: '#999',
+          color: '#444',
           marginTop: '2px',
           textTransform: 'uppercase',
           letterSpacing: '0.05em'
