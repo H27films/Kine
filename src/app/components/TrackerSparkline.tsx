@@ -9,9 +9,10 @@ const TrackerSparkline: React.FC<Props> = ({ weekChartData }) => {
   if (!hasData) return null;
 
   const sparkDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-  // Fixed scale: 4km minimum, 20km maximum
+  // Fixed minimum 4km, dynamic maximum based on data
   const Y_MIN = 4;
-  const Y_MAX = 20;
+  const dataMax = Math.max(...weekChartData);
+  const Y_MAX = Math.max(dataMax, Y_MIN + 1);
   const range = Y_MAX - Y_MIN;
   const VW = 200;
   const VH = 120;
