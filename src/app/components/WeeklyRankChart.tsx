@@ -81,7 +81,7 @@ export const WeeklyRankChart: React.FC<WeeklyRankChartProps> = ({
                   y={y}
                   width={barWidth}
                   height={barHeight}
-                  fill={isFilled ? "#1a1a1a" : "#f0f0f0"}
+                  fill={isFilled ? "#1a1a1a" : "#e0e0e0"}
                   rx={barRadius}
                 />
 
