@@ -70,8 +70,8 @@ export const WeeklyRankChart: React.FC<WeeklyRankChartProps> = ({
         >
           <defs>
             <pattern id="squarePattern" patternUnits="userSpaceOnUse" width="5" height="5">
-              <rect x="0" y="0" width="2.5" height="2.5" fill="#e8e8e8" />
-              <rect x="2.5" y="2.5" width="2.5" height="2.5" fill="#e8e8e8" />
+              <rect x="0" y="0" width="2.5" height="2.5" fill="#f2f2f2" />
+              <rect x="2.5" y="2.5" width="2.5" height="2.5" fill="#f2f2f2" />
             </pattern>
           </defs>
 
