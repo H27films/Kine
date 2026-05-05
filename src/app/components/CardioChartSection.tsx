@@ -264,13 +264,16 @@ const CardioChartSection: React.FC<CardioChartSectionProps> = ({
                 const y = (1 - localT) ** 2 * prev.y + 2 * (1 - localT) * localT * prev.y + localT ** 2 * curr.y;
                 const x = prev.x + localT * (curr.x - prev.x);
                 
+                // Base Y position at the bottom of the line (same base for all points)
+                const baseY = padTop + chartH;
+                
                 return (
                   <line
                     key={`dropline-full-${idx}`}
                     x1={x}
                     y1={y}
                     x2={x}
-                    y2={padTop + chartH}
+                    y2={baseY}
                     stroke="rgba(255,255,255,0.30)"
                     strokeWidth="1"
                   />
