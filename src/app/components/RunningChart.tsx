@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { WeeklyRankChart } from './WeeklyRankChart';
 import { MonthlyRankChart } from './MonthlyRankChart';
+import { RunningProgressChart } from './RunningProgressChart';
 
 interface RunningWorkout {
   id: string;
@@ -760,37 +761,26 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                   }}>
                     
                     {/* Tab 1: PROGRESS CHART */}
-                    <div style={{ width: '50%' }}>
-                      <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'baseline',
-                        marginBottom: '8px',
-                        paddingTop: '4px'
-                      }}>
-                        <div style={{
-                          fontSize: '12px',
-                          fontWeight: 700,
-                          color: '#1a1a1a',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.08em',
-                        }}>
-                          PROGRESS CHART
-                        </div>
-                      </div>
-                      <div style={{
-                        height: '120px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundColor: 'rgba(0,0,0,0.02)',
-                        borderRadius: '8px',
-                        color: '#999',
-                        fontSize: '12px'
-                      }}>
-                        Progress Chart will be implemented here
-                      </div>
-                    </div>
+                     <div style={{ width: '50%' }}>
+                       <div style={{
+                         display: 'flex',
+                         justifyContent: 'space-between',
+                         alignItems: 'baseline',
+                         marginBottom: '8px',
+                         paddingTop: '4px'
+                       }}>
+                         <div style={{
+                           fontSize: '12px',
+                           fontWeight: 700,
+                           color: '#1a1a1a',
+                           textTransform: 'uppercase',
+                           letterSpacing: '0.08em',
+                         }}>
+                           PROGRESS CHART
+                         </div>
+                       </div>
+                       <RunningProgressChart completedKm={data.reduce((sum, d) => sum + d.originalKm, 0)} weeklyGoal={20} />
+                     </div>
                     
                     {/* Tab 2: WEEKLY RANK */}
                     <div style={{ width: '50%' }}>
