@@ -245,19 +245,35 @@ const CardioChartSection: React.FC<CardioChartSectionProps> = ({
                 <path d={fadedPath} fill="none" stroke="url(#fadeGradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               )}
 
-              {/* Subtle vertical droplines from each point down to axis */}
-              {linePts.filter(p => !p.isAnchor).map((p) => (
-                <line
-                  key={`dropline-${p.i}`}
-                  x1={p.x}
-                  y1={p.y}
-                  x2={p.x}
-                  y2={padTop + chartH}
-                  stroke="rgba(255,255,255,0.09)"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                />
-              ))}
+              {/* Subtle vertical droplines continuously along the entire curve */}
+              {Array.from({ length: 80 }).map((_, idx) => {
+                const t = idx / 79;
+                // Find position along bezier curve
+                const totalSegments = linePts.length - 1;
+                const segmentProgress = t * totalSegments;
+                const segmentIdx = Math.min(Math.floor(segmentProgress), totalSegments - 1);
+                const localT = segmentProgress - segmentIdx;
+                
+                const prev = linePts[segmentIdx];
+                const curr = linePts[segmentIdx + 1];
+                const cpx = (prev.x + curr.x) / 2;
+                
+                // Cubic bezier y calculation
+                const y = (1 - localT) ** 2 * prev.y + 2 * (1 - localT) * localT * prev.y + localT ** 2 * curr.y;
+                const x = prev.x + localT * (curr.x - prev.x);
+                
+                return (
+                  <line
+                    key={`dropline-full-${idx}`}
+                    x1={x}
+                    y1={y}
+                    x2={x}
+                    y2={padTop + chartH}
+                    stroke="rgba(255,255,255,0.06)"
+                    strokeWidth="1"
+                  />
+                );
+              })}
 
               {linePts.filter(p => !p.isAnchor).map((p) => (
                 <g key={p.i}>
