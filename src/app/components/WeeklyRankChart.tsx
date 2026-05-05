@@ -28,8 +28,9 @@ export const WeeklyRankChart: React.FC<WeeklyRankChartProps> = ({
   const sortedDesc = [...allWeekData].sort((a, b) => b.originalKm - a.originalKm);
   const totalWeeks = sortedDesc.length;
   const currentRank = sortedDesc.findIndex(w => w.label === selectedWeekLabel) + 1;
-  const fillCount = currentRank;
-  const indicatorPosition = currentRank - 1;
+  // Correct inverted ranking formula as requested
+  const fillCount = totalWeeks - currentRank + 1;
+  const indicatorPosition = fillCount - 1;
 
   const containerHeight = 120;
   const barHeight = 60;
