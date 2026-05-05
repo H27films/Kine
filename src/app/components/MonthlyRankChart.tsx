@@ -73,8 +73,8 @@ export const MonthlyRankChart: React.FC<MonthlyRankChartProps> = ({
           width="100%"
           height={containerHeight}
           viewBox={`0 0 ${chartWidth} ${containerHeight}`}
-          preserveAspectRatio="none"
-          style={{ overflow: 'visible' }}
+          preserveAspectRatio="xMidYMid meet"
+          style={{ overflow: 'visible', maxWidth: chartWidth, margin: '0 auto' }}
         >
           {(() => {
             const points = allMonths.map((month, idx) => {
