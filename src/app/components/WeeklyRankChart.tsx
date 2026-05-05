@@ -68,6 +68,12 @@ export const WeeklyRankChart: React.FC<WeeklyRankChartProps> = ({
           preserveAspectRatio="none"
           style={{ overflow: 'visible' }}
         >
+          <defs>
+            <pattern id="squarePattern" patternUnits="userSpaceOnUse" width="5" height="5">
+              <rect x="0" y="0" width="2.5" height="2.5" fill="#ccc" />
+              <rect x="2.5" y="2.5" width="2.5" height="2.5" fill="#ccc" />
+            </pattern>
+          </defs>
 
           {/* Ranked bars */}
           {allWeekData.map((week, idx) => {
@@ -82,7 +88,7 @@ export const WeeklyRankChart: React.FC<WeeklyRankChartProps> = ({
                   y={y}
                   width={barWidth}
                   height={barHeight}
-                  fill={isFilled ? "#1a1a1a" : "#ddd"}
+                  fill={isFilled ? "#1a1a1a" : "url(#squarePattern)"}
                   rx={barRadius}
                 />
 
