@@ -239,10 +239,10 @@ const CardioChartSection: React.FC<CardioChartSectionProps> = ({
               </defs>
 
               {solidPath && (
-                <path d={solidPath} fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d={solidPath} fill="none" stroke="rgba(255,255,255,0)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               )}
               {fadedPath && (
-                <path d={fadedPath} fill="none" stroke="url(#fadeGradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d={fadedPath} fill="none" stroke="rgba(255,255,255,0)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               )}
 
               {/* Subtle vertical droplines continuously along the entire curve */}
