@@ -263,7 +263,8 @@ const CardioChartSection: React.FC<CardioChartSectionProps> = ({
                 </linearGradient>
                 <linearGradient id="dropLineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
                   <stop offset="0%" stopColor="white" stopOpacity="1" />
-                  <stop offset="100%" stopColor="white" stopOpacity="0" />
+                  <stop offset="70%" stopColor="white" stopOpacity="0.4" />
+                  <stop offset="100%" stopColor="white" stopOpacity="0.15" />
                 </linearGradient>
               </defs>
 
