@@ -674,6 +674,7 @@ export const LogWeights: React.FC<LogWeightsProps> = () => {
                        0 0 16px rgba(255,255,255,0.08),
                        0 0 26px rgba(255,255,255,0.05),
                        0 0 45px rgba(255,255,255,0.03),
+                       4px 6px 20px rgba(0,0,0,0.40),
                        inset 2px 2px 10px rgba(255,255,255,0.10),
                        inset -2px -2px 10px rgba(255,255,255,0.03)
                      `,
