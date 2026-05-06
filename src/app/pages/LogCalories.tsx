@@ -53,6 +53,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState('');
+  const [bodySectionOpen, setBodySectionOpen] = useState(false);
 
   const [weekOffset, setWeekOffset] = useState(0);
   const [weekNumber, setWeekNumber] = useState<number | null>(null);
@@ -361,59 +362,82 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
       </section>
 
       <section className="mb-16">
-        <span className="text-[13px] uppercase tracking-[0.2em] font-black block mb-6" style={{ color: '#ffffff' }}>Body Measurements</span>
-        <div className="grid grid-cols-1 gap-4">
-          {[
-            { label: 'Body Weight (KG)', value: bodyWeight, onChange: setBodyWeight, id: 'field-bodyweight', last: lastBodyWeight },
-            { label: 'Body Fat (%)', value: bodyFat, onChange: setBodyFat, id: 'field-bodyfat', last: lastBodyFat },
-            { label: 'Muscle Mass (KG)', value: muscleMass, onChange: setMuscleMass, id: 'field-musclemass', last: lastMuscleMass },
-          ].map(field => {
-            const isFocused = focusedField === field.id;
-            const showHint = !isFocused && !field.value && field.last;
-            return (
-              <label key={field.label} htmlFor={field.id} className="flex justify-between items-center p-5 rounded-lg cursor-text"
-                style={{
-                  backgroundColor: isFocused ? '#ffffff' : '#121212',
-                  border: isFocused ? '1px solid #ffffff' : '1px solid rgba(255,255,255,0.05)',
-                  transition: 'background-color 0.15s, border-color 0.15s',
-                }}>
-                <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: isFocused ? '#000000' : '#ffffff' }}>{field.label}</span>
-                <div style={{ position: 'relative', width: '6rem', textAlign: 'right' }}>
-                  {showHint && (
-                    <span className="text-lg font-black tracking-tight" style={{ color: '#9ba4b0', pointerEvents: 'none', userSelect: 'none' }}>
-                      {field.last}
-                    </span>
-                  )}
-                  <input
-                    id={field.id}
-                    type="number"
-                    value={field.value}
-                    onChange={e => field.onChange(e.target.value)}
-                    onFocus={() => setFocusedField(field.id)}
-                    onBlur={() => setFocusedField(null)}
-                    step="0.1"
-                    className="text-right text-lg font-black tracking-tight p-0"
-                    style={{
-                      backgroundColor: 'transparent', border: 'none', outline: 'none',
-                      color: isFocused ? '#000000' : '#ffffff',
-                      width: showHint ? '0' : '100%',
-                      opacity: showHint ? 0 : 1,
-                      position: showHint ? 'absolute' : 'relative',
-                    }}
-                  />
-                </div>
-              </label>
-            );
-          })}
-        </div>
-
-        {saveError && <p className="text-red-400 text-sm mt-4 text-center">{saveError}</p>}
-
-        <button onClick={handleSave} disabled={saving}
-          className="w-full font-black uppercase tracking-widest text-[10px] py-5 rounded-full mt-8 active:scale-[0.98] transition-all"
-          style={{ backgroundColor: saveSuccess ? '#22c55e' : '#ffffff', color: '#000000', opacity: saving ? 0.7 : 1 }}>
-          {saving ? 'Saving...' : saveSuccess ? '✓ Saved!' : 'Update Metrics'}
+        <button 
+          onClick={() => setBodySectionOpen(!bodySectionOpen)}
+          className="w-full flex justify-between items-center mb-6 bg-transparent border-none p-0 cursor-pointer"
+        >
+          <span className="text-[13px] uppercase tracking-[0.2em] font-black" style={{ color: '#ffffff' }}>Body Measurements</span>
+          <svg 
+            className={`transition-transform duration-200 ${bodySectionOpen ? 'rotate-180' : ''}`} 
+            width="20" 
+            height="20" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="white" 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+          >
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
         </button>
+        
+        {bodySectionOpen && (
+          <>
+            <div className="grid grid-cols-1 gap-4">
+              {[
+                { label: 'Body Weight (KG)', value: bodyWeight, onChange: setBodyWeight, id: 'field-bodyweight', last: lastBodyWeight },
+                { label: 'Body Fat (%)', value: bodyFat, onChange: setBodyFat, id: 'field-bodyfat', last: lastBodyFat },
+                { label: 'Muscle Mass (KG)', value: muscleMass, onChange: setMuscleMass, id: 'field-musclemass', last: lastMuscleMass },
+              ].map(field => {
+                const isFocused = focusedField === field.id;
+                const showHint = !isFocused && !field.value && field.last;
+                return (
+                  <label key={field.label} htmlFor={field.id} className="flex justify-between items-center p-5 rounded-lg cursor-text"
+                    style={{
+                      backgroundColor: isFocused ? '#ffffff' : '#121212',
+                      border: isFocused ? '1px solid #ffffff' : '1px solid rgba(255,255,255,0.05)',
+                      transition: 'background-color 0.15s, border-color 0.15s',
+                    }}>
+                    <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: isFocused ? '#000000' : '#ffffff' }}>{field.label}</span>
+                    <div style={{ position: 'relative', width: '6rem', textAlign: 'right' }}>
+                      {showHint && (
+                        <span className="text-lg font-black tracking-tight" style={{ color: '#9ba4b0', pointerEvents: 'none', userSelect: 'none' }}>
+                          {field.last}
+                        </span>
+                      )}
+                      <input
+                        id={field.id}
+                        type="number"
+                        value={field.value}
+                        onChange={e => field.onChange(e.target.value)}
+                        onFocus={() => setFocusedField(field.id)}
+                        onBlur={() => setFocusedField(null)}
+                        step="0.1"
+                        className="text-right text-lg font-black tracking-tight p-0"
+                        style={{
+                          backgroundColor: 'transparent', border: 'none', outline: 'none',
+                          color: isFocused ? '#000000' : '#ffffff',
+                          width: showHint ? '0' : '100%',
+                          opacity: showHint ? 0 : 1,
+                          position: showHint ? 'absolute' : 'relative',
+                        }}
+                      />
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+
+            {saveError && <p className="text-red-400 text-sm mt-4 text-center">{saveError}</p>}
+
+            <button onClick={handleSave} disabled={saving}
+              className="w-full font-black uppercase tracking-widest text-[10px] py-5 rounded-full mt-8 active:scale-[0.98] transition-all"
+              style={{ backgroundColor: saveSuccess ? '#22c55e' : '#ffffff', color: '#000000', opacity: saving ? 0.7 : 1 }}>
+              {saving ? 'Saving...' : saveSuccess ? '✓ Saved!' : 'Update Metrics'}
+            </button>
+          </>
+        )}
       </section>
 
       <CaloriesTrends />

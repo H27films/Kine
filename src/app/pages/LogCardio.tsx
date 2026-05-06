@@ -535,6 +535,9 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
         {saving ? 'Saving...' : saveSuccess ? '✓ Session Saved!' : 'Log Session'}
       </button>
 
+      {/* Per-type cardio chart */}
+      <CardioTypeChart />
+
       {/* Monthly Calendar Chart */}
       <section className="mb-10">
         <div style={{ paddingLeft: '2px', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -563,11 +566,6 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
           defaultTab="RUNNING"
         />
       </section>
-
-
-
-      {/* Per-type cardio chart */}
-      <CardioTypeChart />
 
       {/* 30-day chart */}
       <section className="mb-2" style={{ marginTop: isRunning ? 0 : 0 }}>
