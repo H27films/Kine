@@ -185,7 +185,34 @@ const CardioChartSection: React.FC<CardioChartSectionProps> = ({
         const maxVal = Math.max(...sparkData.filter(v => v > 0), BASE_KM, 0.1);
         const getY = (val: number) => padTop + (1 - val / maxVal) * chartH;
 
-        const lineVals: number[] = sparkData.map((val) => val > 0 ? val : BASE_KM);
+        // Find last actual real value
+        let lastRealValue = BASE_KM;
+        let lastRealIndex = -1;
+        for (let i = 6; i >= 0; i--) {
+          if (sparkData[i] > 0) {
+            lastRealValue = sparkData[i];
+            lastRealIndex = i;
+            break;
+          }
+        }
+
+        const today = new Date();
+        const todayIndex = today.getDay() === 0 ? 6 : today.getDay() - 1;
+
+        const lineVals: number[] = sparkData.map((val, i) => {
+          if (val > 0) return val;
+          
+          // For future empty days: gradual interpolation from last real value down to BASE_KM
+          if (i > lastRealIndex && lastRealIndex >= 0) {
+            const totalSteps = 6 - lastRealIndex;
+            const currentStep = i - lastRealIndex;
+            const progress = totalSteps > 0 ? currentStep / totalSteps : 0;
+            // Linear interpolation: smoothly go from lastRealValue down to BASE_KM
+            return lastRealValue * (1 - progress) + BASE_KM * progress;
+          }
+          
+          return BASE_KM;
+        });
 
         const linePts = lineVals.map((val, i) => ({
           x: padLeft + (i / 6) * chartW,
@@ -195,8 +222,6 @@ const CardioChartSection: React.FC<CardioChartSectionProps> = ({
           isAnchor: sparkData[i] <= 0,
         }));
 
-        const today = new Date();
-        const todayIndex = today.getDay() === 0 ? 6 : today.getDay() - 1;
         const solidPts = linePts.slice(0, todayIndex + 1);
         const fadedPts = linePts.slice(todayIndex);
 
