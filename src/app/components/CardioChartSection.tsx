@@ -264,10 +264,10 @@ const CardioChartSection: React.FC<CardioChartSectionProps> = ({
               </defs>
 
               {solidPath && (
-                <path d={solidPath} fill="none" stroke="rgba(255,255,255,0)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d={solidPath} fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               )}
               {fadedPath && (
-                <path d={fadedPath} fill="none" stroke="rgba(255,255,255,0)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d={fadedPath} fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               )}
 
               {/* Subtle vertical droplines continuously along the entire curve */}
@@ -286,7 +286,7 @@ const CardioChartSection: React.FC<CardioChartSectionProps> = ({
                 const curr = linePts[segmentIdx + 1];
                 
                 // Cubic bezier y calculation
-                const y = (1 - localT) ** 2 * prev.y + 2 * (1 - localT) * localT * prev.y + localT ** 2 * curr.y;
+                const y = (1 - localT) ** 2 * prev.y + 2 * (1 - localT) * localT * ((prev.y + curr.y) / 2) + localT ** 2 * curr.y;
                 const x = prev.x + localT * (curr.x - prev.x);
                 
                 // Base Y position at the bottom of the line (same base for all points)
