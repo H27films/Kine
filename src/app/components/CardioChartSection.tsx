@@ -269,10 +269,10 @@ const CardioChartSection: React.FC<CardioChartSectionProps> = ({
               </defs>
 
               {solidPath && (
-                <path d={solidPath} fill="none" stroke="rgba(255,255,255,0)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d={solidPath} fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               )}
               {fadedPath && (
-                <path d={fadedPath} fill="none" stroke="rgba(255,255,255,0)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d={fadedPath} fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               )}
 
               {/* Subtle vertical droplines continuously along the entire curve */}
@@ -297,17 +297,31 @@ const CardioChartSection: React.FC<CardioChartSectionProps> = ({
                 // Base Y position at the bottom of the line (same base for all points)
                 const baseY = padTop + chartH;
                 
-                return (
-                  <line
-                    key={`dropline-full-${idx}`}
-                    x1={x}
-                    y1={y}
-                    x2={x}
-                    y2={baseY}
-                    stroke="rgba(255,255,255,0.30)"
-                    strokeWidth="1"
-                  />
-                );
+                // Calculate opacity gradient manually from bottom to top
+                const lineHeight = baseY - y;
+                const segments = 6;
+                const lines = [];
+                
+                for (let s = 0; s < segments; s++) {
+                  const progress = s / segments;
+                  const opacity = 0.12 + (0.38 * progress); // 12% at curve -> 50% at bottom
+                  const yStart = y + lineHeight * (s / segments);
+                  const yEnd = y + lineHeight * ((s + 1) / segments);
+                  
+                  lines.push(
+                    <line
+                      key={`s-${s}`}
+                      x1={x}
+                      y1={yStart}
+                      x2={x}
+                      y2={yEnd}
+                      stroke={`rgba(255,255,255,${opacity.toFixed(2)})`}
+                      strokeWidth="1.2"
+                    />
+                  );
+                }
+                
+                return lines;
               })}
 
               {linePts.filter(p => !p.isAnchor).map((p) => {
@@ -317,6 +331,7 @@ const CardioChartSection: React.FC<CardioChartSectionProps> = ({
                 const dotRadius = 2 + sizeRatio * 2; // 2px to 4px
                 return (
                   <g key={p.i}>
+                    {/* Main white dropline */}
                     <line x1={p.x} y1={p.y} x2={p.x} y2={padTop + chartH} stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" />
                     <circle cx={p.x} cy={p.y} r={glowRadius} fill="rgba(255,255,255,0.18)" filter="url(#dotBlur)" />
                     <circle cx={p.x} cy={p.y} r={dotRadius} fill="white" />
