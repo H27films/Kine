@@ -670,8 +670,10 @@ export const LogWeights: React.FC<LogWeightsProps> = () => {
                    boxShadow: selectedGroup === group 
                      ? '0 0 16px rgba(255,255,255,0.5)' 
                      : `
-                       0 0 22px rgba(255,255,255,0.06),
-                       0 0 45px rgba(255,255,255,0.04),
+                       0 0 8px rgba(255,255,255,0.12),
+                       0 0 16px rgba(255,255,255,0.08),
+                       0 0 26px rgba(255,255,255,0.05),
+                       0 0 45px rgba(255,255,255,0.03),
                        inset 2px 2px 10px rgba(255,255,255,0.10),
                        inset -2px -2px 10px rgba(255,255,255,0.03)
                      `,
