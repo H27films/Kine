@@ -261,6 +261,10 @@ const CardioChartSection: React.FC<CardioChartSectionProps> = ({
                   <stop offset="0%" stopColor="white" stopOpacity="0.15" />
                   <stop offset="100%" stopColor="white" stopOpacity="0.075" />
                 </linearGradient>
+                <linearGradient id="dropLineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="white" stopOpacity="1" />
+                  <stop offset="100%" stopColor="white" stopOpacity="0" />
+                </linearGradient>
               </defs>
 
               {solidPath && (
@@ -307,7 +311,7 @@ const CardioChartSection: React.FC<CardioChartSectionProps> = ({
 
               {linePts.filter(p => !p.isAnchor).map((p) => (
                 <g key={p.i}>
-                  <line x1={p.x} y1={p.y} x2={p.x} y2={padTop + chartH} stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" />
+                  <line x1={p.x} y1={p.y} x2={p.x} y2={padTop + chartH} stroke="url(#dropLineGradient)" strokeWidth="1.5" strokeLinecap="round" />
                   <circle cx={p.x} cy={p.y} r="5" fill="rgba(255,255,255,0.18)" filter="url(#dotBlur)" />
                   <circle cx={p.x} cy={p.y} r="3" fill="white" />
                   <text x={p.x} y={p.y - 9} textAnchor="middle" fill="rgba(255,255,255,0.70)" fontSize="7" fontWeight="700">
