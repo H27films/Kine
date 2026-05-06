@@ -657,25 +657,36 @@ export const LogWeights: React.FC<LogWeightsProps> = () => {
                   padding: 0,
                 }}
               >
-                <div style={{
-                  width: '52px',
-                  height: '52px',
-                  borderRadius: '50%',
-                  backgroundColor: selectedGroup === group ? '#ffffff' : '#000000',
-                  border: '2px solid #ffffff',
-                  boxShadow: selectedGroup === group ? '0 0 16px rgba(255,255,255,0.5)' : 'none',
-                  transition: 'all 0.2s',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  overflow: 'hidden',
-                }}>
-                  {selectedGroup === group ? (
-                    <Check size={24} color="#000000" strokeWidth={3} />
-                  ) : (
-                    <img src={`/icons/${group}.svg`} alt={group} style={{ width: '38px', height: '38px', objectFit: 'contain' }} />
-                  )}
-                </div>
+                 <div style={{
+                   width: '52px',
+                   height: '52px',
+                   borderRadius: '50%',
+                   backgroundColor: selectedGroup === group ? '#ffffff' : 'transparent',
+                   border: selectedGroup === group ? '2px solid #ffffff' : '1px solid rgba(255,255,255,0.08)',
+                   background: selectedGroup === group 
+                     ? '#ffffff' 
+                     : 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 40%, transparent 70%)',
+                   backgroundClip: 'padding-box',
+                   boxShadow: selectedGroup === group 
+                     ? '0 0 16px rgba(255,255,255,0.5)' 
+                     : `
+                       0 0 22px rgba(255,255,255,0.06),
+                       0 0 45px rgba(255,255,255,0.04),
+                       inset 2px 2px 10px rgba(255,255,255,0.10),
+                       inset -2px -2px 10px rgba(255,255,255,0.03)
+                     `,
+                   transition: 'all 0.2s',
+                   display: 'flex',
+                   alignItems: 'center',
+                   justifyContent: 'center',
+                   overflow: 'hidden',
+                 }}>
+                   {selectedGroup === group ? (
+                     <Check size={24} color="#000000" strokeWidth={3} />
+                   ) : (
+                     <img src={`/icons/${group}.svg`} alt={group} style={{ width: '38px', height: '38px', objectFit: 'contain' }} />
+                   )}
+                 </div>
                 <span style={{
                   fontSize: '0.7rem',
                   fontWeight: 700,
