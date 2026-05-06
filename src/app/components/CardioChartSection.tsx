@@ -310,16 +310,22 @@ const CardioChartSection: React.FC<CardioChartSectionProps> = ({
                 );
               })}
 
-              {linePts.filter(p => !p.isAnchor).map((p) => (
-                <g key={p.i}>
-                  <line x1={p.x} y1={p.y} x2={p.x} y2={padTop + chartH} stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" />
-                  <circle cx={p.x} cy={p.y} r="5" fill="rgba(255,255,255,0.18)" filter="url(#dotBlur)" />
-                  <circle cx={p.x} cy={p.y} r="3" fill="white" />
-                  <text x={p.x} y={p.y - 9} textAnchor="middle" fill="rgba(255,255,255,0.70)" fontSize="7" fontWeight="700">
-                    {p.val.toFixed(1)}
-                  </text>
-                </g>
-              ))}
+              {linePts.filter(p => !p.isAnchor).map((p) => {
+                // Scale circle size based on value relative to max
+                const sizeRatio = p.val / maxVal;
+                const glowRadius = 3 + sizeRatio * 4; // 3px to 7px
+                const dotRadius = 2 + sizeRatio * 2; // 2px to 4px
+                return (
+                  <g key={p.i}>
+                    <line x1={p.x} y1={p.y} x2={p.x} y2={padTop + chartH} stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" />
+                    <circle cx={p.x} cy={p.y} r={glowRadius} fill="rgba(255,255,255,0.18)" filter="url(#dotBlur)" />
+                    <circle cx={p.x} cy={p.y} r={dotRadius} fill="white" />
+                    <text x={p.x} y={p.y - 9} textAnchor="middle" fill="rgba(255,255,255,0.70)" fontSize="7" fontWeight="700">
+                      {p.val.toFixed(1)}
+                    </text>
+                  </g>
+                );
+              })}
 
               {sparkData.map((_, k) => (
                 <text key={k} x={padLeft + (k / 6) * chartW} y={VH + 12} textAnchor="middle" fill="white" fontSize="7" fontWeight="700">
