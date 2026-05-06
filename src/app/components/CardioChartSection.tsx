@@ -264,10 +264,10 @@ const CardioChartSection: React.FC<CardioChartSectionProps> = ({
               </defs>
 
               {solidPath && (
-                <path d={solidPath} fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d={solidPath} fill="none" stroke="rgba(255,255,255,0)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               )}
               {fadedPath && (
-                <path d={fadedPath} fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d={fadedPath} fill="none" stroke="rgba(255,255,255,0)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               )}
 
               {/* Subtle vertical droplines continuously along the entire curve */}
@@ -307,7 +307,7 @@ const CardioChartSection: React.FC<CardioChartSectionProps> = ({
 
               {linePts.filter(p => !p.isAnchor).map((p) => (
                 <g key={p.i}>
-                  <line x1={p.x} y1={p.y} x2={p.x} y2={padTop + chartH} stroke="rgba(255,255,255,0.6)" strokeWidth="1" strokeLinecap="round" />
+                  <line x1={p.x} y1={p.y} x2={p.x} y2={padTop + chartH} stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" />
                   <circle cx={p.x} cy={p.y} r="5" fill="rgba(255,255,255,0.18)" filter="url(#dotBlur)" />
                   <circle cx={p.x} cy={p.y} r="3" fill="white" />
                   <text x={p.x} y={p.y - 9} textAnchor="middle" fill="rgba(255,255,255,0.70)" fontSize="7" fontWeight="700">
