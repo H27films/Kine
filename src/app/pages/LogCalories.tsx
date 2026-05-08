@@ -361,7 +361,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
         </div>
       </section>
 
-      <section className="mb-16">
+      <section className="mb-4">
         <button 
           onClick={() => setBodySectionOpen(!bodySectionOpen)}
           className="w-full flex justify-between items-center mb-6 bg-transparent border-none p-0 cursor-pointer"
@@ -431,14 +431,15 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
 
             {saveError && <p className="text-red-400 text-sm mt-4 text-center">{saveError}</p>}
 
-            <button onClick={handleSave} disabled={saving}
-              className="w-full font-black uppercase tracking-widest text-[10px] py-5 rounded-full mt-8 active:scale-[0.98] transition-all"
-              style={{ backgroundColor: saveSuccess ? '#22c55e' : '#ffffff', color: '#000000', opacity: saving ? 0.7 : 1 }}>
-              {saving ? 'Saving...' : saveSuccess ? '✓ Saved!' : 'Update Metrics'}
-            </button>
           </>
         )}
       </section>
+
+      <button onClick={handleSave} disabled={saving}
+        className="w-full font-black uppercase tracking-widest text-[10px] py-5 rounded-full mt-4 active:scale-[0.98] transition-all mb-16"
+        style={{ backgroundColor: saveSuccess ? '#22c55e' : '#ffffff', color: '#000000', opacity: saving ? 0.7 : 1 }}>
+        {saving ? 'Saving...' : saveSuccess ? '✓ Saved!' : 'Update Metrics'}
+      </button>
 
       <CaloriesTrends />
 
