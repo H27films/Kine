@@ -5,6 +5,8 @@ import { supabase, Exercise, todayStr, getISOWeek, getDayName, weeksAgoMonday, r
 import WeeklyVolumeSection from '../components/WeeklyVolumeSection';
 import RecentLogsSection from '../components/RecentLogsSection';
 import WeeklyWeightsChart from '../components/WeeklyWeightsChart';
+import LogWeightsEntry from '../components/LogWeightsEntry';
+import { ArrowLeftFromLine } from 'lucide-react';
 
 interface LogWeightsProps {
   onNavigate: (page: Page) => void;
@@ -106,6 +108,7 @@ export const LogWeights: React.FC<LogWeightsProps> = () => {
   const [templateSaveFlash, setTemplateSaveFlash] = useState(false);
   const [applyingTemplate, setApplyingTemplate] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState<number | null>(null);
+  const [showEntryCard, setShowEntryCard] = useState(false);
 
   const groupRef = useRef<HTMLDivElement>(null);
   const exerciseRef = useRef<HTMLDivElement>(null);
@@ -870,6 +873,28 @@ export const LogWeights: React.FC<LogWeightsProps> = () => {
                </>
              ) : null}
            </div>
+           {/* Arrow to open full-screen entry card — shown when exercises are added */}
+           {addedExercises.length > 0 && (
+             <button
+               onClick={() => setShowEntryCard(true)}
+               style={{
+                 background: 'none',
+                 border: '1px solid rgba(255,255,255,0.15)',
+                 borderRadius: '50%',
+                 width: 36,
+                 height: 36,
+                 display: 'flex',
+                 alignItems: 'center',
+                 justifyContent: 'center',
+                 cursor: 'pointer',
+                 color: '#ffffff',
+                 flexShrink: 0,
+                 transition: 'all 0.2s',
+               }}
+             >
+               <ArrowLeftFromLine size={16} strokeWidth={1.5} style={{ transform: 'rotate(180deg)' }} />
+             </button>
+           )}
          </div>
        )}
 
@@ -1142,6 +1167,19 @@ export const LogWeights: React.FC<LogWeightsProps> = () => {
       <section className="mb-4 mt-8">
         <WeeklyWeightsChart />
       </section>
+
+      {/* Full-screen entry card overlay */}
+      {showEntryCard && (
+        <LogWeightsEntry
+          addedExercises={addedExercises}
+          onUpdateSet={updateSet}
+          onAddSet={addSet}
+          onToggleFail={toggleFail}
+          onLoadMaxSession={loadMaxSession}
+          onToggleCopyFromLast={toggleCopyFromLast}
+          onClose={() => setShowEntryCard(false)}
+        />
+      )}
     </div>
   );
 };
