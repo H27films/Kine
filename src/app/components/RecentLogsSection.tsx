@@ -162,41 +162,57 @@ const RecentLogsSection: React.FC<Props> = ({ refreshKey }) => {
                   <div key={`sep-${log.id}`} className="w-full h-[0.5px] bg-white my-2" />
                 )}
                <div key={log.id} className="rounded-lg overflow-hidden" style={{ backgroundColor: '#1b1b1b' }}>
-              {/* Collapsed / header row */}
-              <div
-                className="flex items-center gap-4 p-4 cursor-pointer"
-                onClick={() => {
-                  const expanding = !isExpanded;
-                  setExpandedLogId(expanding ? log.id : null);
-                  setDeleteConfirmId(null);
-                  if (expanding) initEditSets(log);
-                }}
-              >
-                <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#353535' }}>
-                  <Dumbbell size={16} color="white" />
-                </div>
-                <div className="flex-grow min-w-0">
-                  <p className="font-bold text-sm text-white truncate uppercase tracking-wide">
-                    {log.name}
-                  </p>
-                  {lastSet && (
-                    <p className="text-[10px] uppercase tracking-widest mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                      {log.setsData.length} Sets · {lastSet.r} Reps · {lastSet.w} kg
-                    </p>
-                  )}
-                </div>
-                {log.pb === 'PB' && (
-                  <div style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <span style={{ fontSize: '0.6rem', fontWeight: 900, color: '#000000', letterSpacing: '0.05em' }}>PB</span>
-                  </div>
-                )}
-                {log.weight > 0 && (
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px', flexShrink: 0, marginLeft: 'auto', alignSelf: 'flex-start', marginTop: '2px' }}>
-                    <span style={{ color: '#ffffff', fontWeight: 900, fontSize: '1.15rem', letterSpacing: '-0.02em', lineHeight: 1 }}>{Math.round(log.weight).toLocaleString()}</span>
-                    <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 700, fontSize: '0.65rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>KG</span>
-                  </div>
-                )}
-              </div>
+               {/* Collapsed / header row */}
+               <div
+                 className="flex items-center gap-4 p-4 cursor-pointer"
+                 onClick={() => {
+                   const expanding = !isExpanded;
+                   setExpandedLogId(expanding ? log.id : null);
+                   setDeleteConfirmId(null);
+                   if (expanding) initEditSets(log);
+                 }}
+               >
+                 <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#353535' }}>
+                   <Dumbbell size={16} color="white" />
+                 </div>
+                 <div className="flex-grow min-w-0">
+                   <p className="font-bold text-sm text-white truncate uppercase tracking-wide">
+                     {log.name}
+                   </p>
+                   {lastSet && (
+                     <p className="text-[10px] uppercase tracking-widest mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                       {log.setsData.length} Sets · {lastSet.r} Reps · {lastSet.w} kg
+                     </p>
+                   )}
+                 </div>
+                 {(() => {
+                   const liveTotal = isExpanded
+                     ? (editSets[log.id] || []).reduce((acc, s) => {
+                         const w = parseFloat(s.w) || 0;
+                         return acc + w * s.r * log.multiplier;
+                       }, 0)
+                     : 0;
+                   const displayWeight = isExpanded ? liveTotal : log.weight;
+                   const isStillPB = isExpanded
+                     ? (log.pb === 'PB' && liveTotal >= log.weight)
+                     : (log.pb === 'PB');
+                   return (
+                     <>
+                       {isStillPB && (
+                         <div style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                           <span style={{ fontSize: '0.6rem', fontWeight: 900, color: '#000000', letterSpacing: '0.05em' }}>PB</span>
+                         </div>
+                       )}
+                       {displayWeight > 0 && (
+                         <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px', flexShrink: 0, marginLeft: 'auto', alignSelf: 'flex-start', marginTop: '2px' }}>
+                           <span style={{ color: '#ffffff', fontWeight: 900, fontSize: '1.15rem', letterSpacing: '-0.02em', lineHeight: 1 }}>{Math.round(displayWeight).toLocaleString()}</span>
+                           <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 700, fontSize: '0.65rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>KG</span>
+                         </div>
+                       )}
+                     </>
+                   );
+                 })()}
+               </div>
 
               {/* Expanded section */}
               {isExpanded && (
