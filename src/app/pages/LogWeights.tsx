@@ -663,9 +663,9 @@ export const LogWeights: React.FC<LogWeightsProps> = () => {
                    borderRadius: '50%',
                    backgroundColor: selectedGroup === group ? '#ffffff' : 'transparent',
                    border: selectedGroup === group ? '2px solid #ffffff' : '1px solid rgba(255,255,255,0.08)',
-                   background: selectedGroup === group 
-                     ? '#ffffff' 
-                     : 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 40%, transparent 70%)',
+                    background: selectedGroup === group 
+                      ? '#ffffff' 
+                      : 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.10) 30%, transparent 70%)',
                    backgroundClip: 'padding-box',
                    boxShadow: selectedGroup === group 
                      ? '0 0 16px rgba(255,255,255,0.5)' 
@@ -675,7 +675,7 @@ export const LogWeights: React.FC<LogWeightsProps> = () => {
                        0 0 26px rgba(255,255,255,0.05),
                        0 0 45px rgba(255,255,255,0.03),
                        4px 6px 20px rgba(0,0,0,0.40),
-                       inset 2px 2px 10px rgba(255,255,255,0.10),
+                       inset 2px 2px 12px rgba(255,255,255,0.25),
                        inset -2px -2px 10px rgba(255,255,255,0.03)
                      `,
                    transition: 'all 0.2s',
