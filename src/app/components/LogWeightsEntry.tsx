@@ -177,10 +177,10 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
           const rowTotal = w * set.reps * mult;
           const hasData = set.weight !== '';
           return (
-            <div key={idx} style={{ marginBottom: '6px' }}>
+            <div key={idx}>
               {/* Separator line between sets */}
               {showSeparator && (
-                <div style={{ height: '0.5px', backgroundColor: 'rgba(0,0,0,0.18)', marginBottom: '6px' }} />
+                <div style={{ height: '0.5px', backgroundColor: 'rgba(0,0,0,0.18)', marginTop: '17px', marginBottom: '9px' }} />
               )}
               {/* Row: SET label (left) + W/R inputs (right) */}
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
@@ -230,7 +230,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                       <span
                         style={{
                           fontSize: '10px',
-                          fontWeight: 500,
+                          fontWeight: 400,
                           color: 'rgba(0,0,0,0.45)',
                           letterSpacing: '0.08em',
                           textTransform: 'uppercase',
@@ -243,7 +243,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                       <span
                         style={{
                           fontSize: '10px',
-                          fontWeight: 500,
+                          fontWeight: 400,
                           color: 'rgba(0,0,0,0.45)',
                           letterSpacing: '0.08em',
                           textTransform: 'uppercase',
@@ -264,7 +264,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                         borderRadius: '6px',
                         backgroundColor: 'rgba(0,0,0,0.04)',
                         overflow: 'hidden',
-                        height: 38,
+                        height: 48,
                       }}
                     >
                       <div
@@ -303,7 +303,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                           fontSize: '15px',
                           fontWeight: 700,
                           color: hasData ? '#1a1a1a' : 'rgba(0,0,0,0.25)',
-                          height: 38,
+                          height: 48,
                           padding: 0,
                           MozAppearance: 'textfield',
                         }}
@@ -339,7 +339,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                         borderRadius: '6px',
                         backgroundColor: 'rgba(0,0,0,0.04)',
                         overflow: 'hidden',
-                        height: 38,
+                        height: 48,
                       }}
                     >
                       <div
@@ -376,7 +376,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                           fontSize: '15px',
                           fontWeight: 700,
                           color: '#1a1a1a',
-                          height: 38,
+                          height: 48,
                           padding: 0,
                           MozAppearance: 'textfield',
                         }}
