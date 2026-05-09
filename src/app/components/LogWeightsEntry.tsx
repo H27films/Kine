@@ -392,121 +392,115 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
         })}
       </div>
 
-      {/* Bottom bar: add set + actions */}
+      {/* Bottom bar: actions */}
       <div
         style={{
           padding: '12px 20px',
           paddingBottom: 'calc(12px + env(safe-area-inset-bottom))',
           borderTop: '1px solid rgba(0,0,0,0.06)',
           display: 'flex',
-          flexDirection: 'column',
-          gap: '10px',
+          gap: '8px',
+          flexWrap: 'wrap',
         }}
       >
-        {/* Add set button */}
+        {/* + SET */}
         {activeEx.sets.length < 6 && (
           <button
             onClick={() => onAddSet(activeEx.exercise.id)}
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              padding: '12px',
-              borderRadius: '10px',
+              padding: '8px 16px',
+              borderRadius: '8px',
               border: '1px dashed rgba(0,0,0,0.15)',
-              backgroundColor: 'transparent',
-              cursor: 'pointer',
-              color: '#1a1a1a',
-              fontSize: '12px',
-              fontWeight: 600,
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-            }}
-          >
-            <Plus size={14} />
-            Add Set
-          </button>
-        )}
-
-        {/* Action buttons row */}
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          {/* Copy from last */}
-          <button
-            onClick={() => onToggleCopyFromLast(activeEx.exercise.id)}
-            disabled={!activeEx.lastSets || activeEx.lastSets.length === 0}
-            style={{
-              padding: '8px 16px',
-              borderRadius: '8px',
-              border: '1px solid rgba(0,0,0,0.10)',
-              backgroundColor: activeEx.copied ? 'rgba(0,0,0,0.06)' : 'transparent',
-              cursor: activeEx.lastSets && activeEx.lastSets.length > 0 ? 'pointer' : 'default',
-              color: activeEx.copied ? '#1a1a1a' : 'rgba(0,0,0,0.5)',
-              fontSize: '11px',
-              fontWeight: 600,
-              letterSpacing: '0.04em',
-              opacity: activeEx.lastSets && activeEx.lastSets.length > 0 ? 1 : 0.4,
-            }}
-          >
-            {activeEx.copied ? 'REVERT' : 'COPY LAST'}
-          </button>
-
-          {/* Max */}
-          <button
-            onClick={() => onLoadMaxSession(activeEx.exercise.id)}
-            style={{
-              padding: '8px 16px',
-              borderRadius: '8px',
-              border: '1px solid rgba(0,0,0,0.10)',
               backgroundColor: 'transparent',
               cursor: 'pointer',
               color: 'rgba(0,0,0,0.5)',
               fontSize: '11px',
-              fontWeight: 600,
+              fontWeight: 500,
               letterSpacing: '0.04em',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
             }}
           >
-            MAX
+            <Plus size={12} /> SET
           </button>
+        )}
 
-          {/* Fail */}
-          <button
-            onClick={() => onToggleFail(activeEx.exercise.id)}
+        {/* LAST */}
+        <button
+          onClick={() => onToggleCopyFromLast(activeEx.exercise.id)}
+          disabled={!activeEx.lastSets || activeEx.lastSets.length === 0}
+          style={{
+            padding: '8px 16px',
+            borderRadius: '8px',
+            border: '1px solid rgba(0,0,0,0.10)',
+            backgroundColor: activeEx.copied ? 'rgba(0,0,0,0.06)' : 'transparent',
+            cursor: activeEx.lastSets && activeEx.lastSets.length > 0 ? 'pointer' : 'default',
+            color: activeEx.copied ? '#1a1a1a' : 'rgba(0,0,0,0.5)',
+            fontSize: '11px',
+            fontWeight: 500,
+            letterSpacing: '0.04em',
+            opacity: activeEx.lastSets && activeEx.lastSets.length > 0 ? 1 : 0.4,
+          }}
+        >
+          {activeEx.copied ? 'REVERT' : 'LAST'}
+        </button>
+
+        {/* Max */}
+        <button
+          onClick={() => onLoadMaxSession(activeEx.exercise.id)}
+          style={{
+            padding: '8px 16px',
+            borderRadius: '8px',
+            border: '1px solid rgba(0,0,0,0.10)',
+            backgroundColor: 'transparent',
+            cursor: 'pointer',
+            color: 'rgba(0,0,0,0.5)',
+            fontSize: '11px',
+            fontWeight: 500,
+            letterSpacing: '0.04em',
+          }}
+        >
+          MAX
+        </button>
+
+        {/* Fail */}
+        <button
+          onClick={() => onToggleFail(activeEx.exercise.id)}
+          style={{
+            padding: '8px 16px',
+            borderRadius: '8px',
+            border: activeEx.fail ? '1px solid rgba(255,80,80,0.5)' : '1px solid rgba(0,0,0,0.10)',
+            backgroundColor: activeEx.fail ? 'rgba(255,80,80,0.08)' : 'transparent',
+            cursor: 'pointer',
+            color: activeEx.fail ? '#ff5050' : 'rgba(0,0,0,0.5)',
+            fontSize: '11px',
+            fontWeight: 500,
+            letterSpacing: '0.04em',
+          }}
+        >
+          FAIL
+        </button>
+
+        {/* PB badge if applicable */}
+        {exTotal > 0 && activeEx.pbThreshold > 0 && exTotal > activeEx.pbThreshold && (
+          <div
             style={{
-              padding: '8px 16px',
+              padding: '8px 14px',
               borderRadius: '8px',
-              border: activeEx.fail ? '1px solid rgba(255,80,80,0.5)' : '1px solid rgba(0,0,0,0.10)',
-              backgroundColor: activeEx.fail ? 'rgba(255,80,80,0.08)' : 'transparent',
-              cursor: 'pointer',
-              color: activeEx.fail ? '#ff5050' : 'rgba(0,0,0,0.5)',
+              backgroundColor: '#1a1a1a',
+              color: '#ffffff',
               fontSize: '11px',
-              fontWeight: 600,
-              letterSpacing: '0.04em',
+              fontWeight: 800,
+              letterSpacing: '0.06em',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
             }}
           >
-            FAIL
-          </button>
-
-          {/* PB badge if applicable */}
-          {exTotal > 0 && activeEx.pbThreshold > 0 && exTotal > activeEx.pbThreshold && (
-            <div
-              style={{
-                padding: '8px 14px',
-                borderRadius: '8px',
-                backgroundColor: '#1a1a1a',
-                color: '#ffffff',
-                fontSize: '11px',
-                fontWeight: 800,
-                letterSpacing: '0.06em',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-              }}
-            >
-              PB
-            </div>
-          )}
-        </div>
+            PB
+          </div>
+        )}
       </div>
 
       <style>{`
