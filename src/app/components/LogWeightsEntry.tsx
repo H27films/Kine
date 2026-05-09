@@ -60,12 +60,19 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
   const [adderGroup, setAdderGroup] = useState<string | null>(null);
   const adderRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const tabScrollRef = useRef<HTMLDivElement>(null);
   const safeIndex = Math.min(activeExIndex, addedExercises.length - 1);
   const activeEx = addedExercises[safeIndex];
   // Reorder so the active exercise always appears first in the tab bar
   const orderedExercises = addedExercises.length > 1
     ? [addedExercises[safeIndex], ...addedExercises.filter((_, i) => i !== safeIndex)]
     : addedExercises;
+
+  const isAdderActive = adderOpen;
+  const showingAdder = isAdderActive;
+  // When adder is open, show "ADD EXERCISE" as the active tab
+  const effectiveIndex = showingAdder ? -1 : safeIndex;
+  const effectiveActiveEx = showingAdder ? null : activeEx;
 
   if (addedExercises.length === 0) return null;
 
@@ -82,6 +89,13 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
+
+  // Scroll tabs to the far left when active exercise or adder state changes
+  useEffect(() => {
+    if (tabScrollRef.current) {
+      tabScrollRef.current.scrollLeft = 0;
+    }
+  }, [activeExIndex, adderOpen]);
 
   const calcExerciseTotal = (sets: SetRow[], multiplier: number = 1): number =>
     sets.reduce((acc, s) => acc + (parseFloat(s.weight) || 0) * s.reps * multiplier, 0);
@@ -212,6 +226,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
 
       {/* Exercise tabs — text only, no boxes */}
       <div
+        ref={tabScrollRef}
         style={{
           display: 'flex',
           gap: '10px',
@@ -223,82 +238,136 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
           alignItems: 'baseline',
         }}
       >
-        {orderedExercises.map((ex, i) => {
-          const isActive = i === 0;
-          const hasData = ex.sets.some(s => s.weight !== '');
-          return (
+        {/* When adder is open, show ADD EXERCISE as first active tab */}
+        {adderOpen ? (
+          <>
+            <span
+              style={{
+                fontSize: '17px',
+                fontWeight: 400,
+                color: '#1a1a1a',
+                letterSpacing: '0.02em',
+                borderBottom: '1.5px solid #333333',
+                padding: '4px 0',
+                flexShrink: 0,
+              }}
+            >
+              ADD EXERCISE
+            </span>
+            {orderedExercises.map((ex) => {
+              const hasData = ex.sets.some(s => s.weight !== '');
+              return (
+                <button
+                  key={ex.exercise.id}
+                  onClick={() => {
+                    const idxInOriginal = addedExercises.findIndex(e => e.exercise.id === ex.exercise.id);
+                    setActiveExIndex(idxInOriginal);
+                    setAdderOpen(false);
+                    setAdderGroup(null);
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    borderBottom: hasData ? '1px solid rgba(26,26,26,0.12)' : 'none',
+                    padding: '4px 0',
+                    cursor: 'pointer',
+                    flexShrink: 0,
+                    transition: 'all 0.2s ease',
+                    fontSize: '11px',
+                    fontWeight: 300,
+                    color: 'rgba(26,26,26,0.35)',
+                    filter: 'blur(0.5px)',
+                    letterSpacing: '0.02em',
+                  }}
+                >
+                  {ex.exercise.exercise_name.toUpperCase()}
+                </button>
+              );
+            })}
+          </>
+        ) : (
+          <>
+            {orderedExercises.map((ex, i) => {
+              const isActive = i === 0;
+              const hasData = ex.sets.some(s => s.weight !== '');
+              return (
+                <button
+                  key={ex.exercise.id}
+                  onClick={() => {
+                    const idxInOriginal = addedExercises.findIndex(e => e.exercise.id === ex.exercise.id);
+                    setActiveExIndex(idxInOriginal);
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    borderBottom: isActive
+                      ? '1.5px solid #333333'
+                      : hasData
+                        ? '1px solid rgba(26,26,26,0.12)'
+                        : 'none',
+                    padding: '4px 0',
+                    cursor: 'pointer',
+                    flexShrink: 0,
+                    transition: 'all 0.2s ease',
+                    fontSize: isActive ? '17px' : '11px',
+                    fontWeight: isActive ? 400 : 300,
+                    color: isActive ? '#1a1a1a' : 'rgba(26,26,26,0.35)',
+                    filter: isActive ? 'none' : 'blur(0.5px)',
+                    letterSpacing: '0.02em',
+                  }}
+                >
+                  {ex.exercise.exercise_name.toUpperCase()}
+                </button>
+              );
+            })}
             <button
-              key={ex.exercise.id}
               onClick={() => {
-                const idxInOriginal = addedExercises.findIndex(e => e.exercise.id === ex.exercise.id);
-                setActiveExIndex(idxInOriginal);
+                setAdderOpen(true);
+                setAdderGroup(null);
               }}
               style={{
                 background: 'none',
                 border: 'none',
-                borderBottom: isActive
-                  ? '1.5px solid #333333'
-                  : hasData
-                    ? '1px solid rgba(26,26,26,0.12)'
-                    : 'none',
                 padding: '4px 0',
                 cursor: 'pointer',
-                flexShrink: 0,
-                transition: 'all 0.2s ease',
-                fontSize: isActive ? '17px' : '11px',
-                fontWeight: isActive ? 400 : 300,
-                color: isActive ? '#1a1a1a' : 'rgba(26,26,26,0.35)',
-                filter: isActive ? 'none' : 'blur(0.5px)',
+                fontSize: '11px',
+                fontWeight: 300,
+                color: '#1a1a1a',
                 letterSpacing: '0.02em',
+                filter: 'none',
               }}
             >
-              {ex.exercise.exercise_name.toUpperCase()}
+              + ADD
             </button>
-          );
-        })}
-        {/* + ADD tab */}
-        <div ref={adderRef} style={{ position: 'relative', flexShrink: 0 }}>
-          <button
-            onClick={() => {
-              setAdderOpen(o => !o);
-              setAdderGroup(null);
-            }}
+          </>
+        )}
+      </div>
+
+      {/* Adder dropdown — rendered between tabs and set rows as a full-width panel */}
+      <div ref={adderRef}>
+        {adderOpen && (
+          <div
             style={{
-              background: 'none',
-              border: 'none',
-              borderBottom: adderOpen ? '1.5px solid #333333' : 'none',
-              padding: '4px 0',
-              cursor: 'pointer',
-              fontSize: '11px',
-              fontWeight: 300,
-              color: adderOpen ? '#1a1a1a' : 'rgba(26,26,26,0.35)',
-              letterSpacing: '0.02em',
-              filter: 'none',
+              padding: '0 20px',
+              width: '100%',
+              boxSizing: 'border-box',
             }}
           >
-            + ADD
-          </button>
-          {/* Dropdown panel — overlaid over set area */}
-          {adderOpen && (
             <div
               style={{
-                position: 'absolute',
-                top: 'calc(100% + 4px)',
-                left: '-20px',
-                right: '-20px',
-                zIndex: 100,
                 backgroundColor: '#f2f2f2',
                 border: '1px solid rgba(0,0,0,0.08)',
                 borderRadius: '10px',
                 overflow: 'hidden',
                 boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
                 fontFamily: "'Archivo', sans-serif",
+                marginBottom: '12px',
               }}
             >
               {!adderGroup ? (
                 /* Group selection */
                 <>
-                  {['Chest', 'Back', 'Legs'].map((group, gi) => (
+                  {['Chest', 'Back', 'Legs'].map((group) => (
                     <div
                       key={group}
                       onClick={() => setAdderGroup(group)}
@@ -310,7 +379,6 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                         letterSpacing: '0.12em',
                         color: '#1a1a1a',
                         textTransform: 'uppercase',
-                        borderBottom: gi < 2 ? 'none' : 'none',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
@@ -420,12 +488,20 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                 </div>
               )}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
-      {/* Scrollable set rows area */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '0 20px', position: 'relative' }}>
+      {/* Scrollable set rows area — blurred/dimmed when adder is open */}
+      <div style={{
+        flex: 1,
+        overflowY: 'auto',
+        padding: '0 20px',
+        filter: adderOpen ? 'blur(3px)' : 'none',
+        opacity: adderOpen ? 0.3 : 1,
+        transition: 'filter 0.25s ease, opacity 0.25s ease',
+        pointerEvents: adderOpen ? 'none' : 'auto',
+      }}>
         {activeEx.sets.map((set, idx) => {
           const showSeparator = idx > 0;
           const w = parseFloat(set.weight) || 0;
