@@ -166,6 +166,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
               style={{
                 background: 'none',
                 border: 'none',
+                borderBottom: isActive ? '2px solid #1a1a1a' : 'none',
                 padding: '4px 0',
                 cursor: 'pointer',
                 flexShrink: 0,
@@ -432,7 +433,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
           }}
           style={{
             position: 'fixed',
-            bottom: 'calc(55px + env(safe-area-inset-bottom))',
+            bottom: 'calc(50px + env(safe-area-inset-bottom))',
             right: '20px',
             zIndex: 100,
             cursor: activeEx.lastSets && activeEx.lastSets.length > 0 ? 'pointer' : 'default',
