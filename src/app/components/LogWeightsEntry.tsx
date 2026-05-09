@@ -182,17 +182,17 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
               {showSeparator && (
                 <div style={{ height: '0.5px', backgroundColor: 'rgba(0,0,0,0.18)', marginBottom: '6px' }} />
               )}
-              {/* Row: SET label (left) + Weight/Reps inputs (right) */}
+              {/* Row: SET label (left) + W/R inputs (right) */}
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                 {/* LEFT: SET label + total below */}
-                <div style={{ flexShrink: 0, marginRight: '16px', paddingTop: '2px' }}>
+                <div style={{ flexShrink: 0, marginRight: '16px' }}>
                   <span
                     style={{
                       fontSize: '18px',
                       fontWeight: 400,
                       letterSpacing: '-0.02em',
                       color: '#1a1a1a',
-                      lineHeight: 1.1,
+                      lineHeight: 1,
                     }}
                   >
                     SET {idx + 1}
@@ -222,51 +222,71 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                   </div>
                 </div>
 
-                {/* RIGHT: Weight + Reps stacked */}
-                <div style={{ flex: 1, maxWidth: '240px' }}>
-                  {/* Weight */}
-                  <div style={{ marginBottom: '4px' }}>
-                    <span
-                      style={{
-                        fontSize: '8px',
-                        fontWeight: 500,
-                        color: 'rgba(0,0,0,0.45)',
-                        letterSpacing: '0.08em',
-                        textTransform: 'uppercase',
-                        marginBottom: '2px',
-                        display: 'block',
-                      }}
-                    >
-                      Weight (kg)
-                    </span>
+                {/* RIGHT: WEIGHT + REPS columns */}
+                <div style={{ flex: 1, maxWidth: '220px' }}>
+                  {/* Top row: WEIGHT and REPS labels */}
+                  <div style={{ display: 'flex', gap: '6px', marginBottom: '2px', lineHeight: '18px' }}>
+                    <div style={{ flex: 1, textAlign: 'center' }}>
+                      <span
+                        style={{
+                          fontSize: '10px',
+                          fontWeight: 500,
+                          color: 'rgba(0,0,0,0.45)',
+                          letterSpacing: '0.08em',
+                          textTransform: 'uppercase',
+                        }}
+                      >
+                        WEIGHT
+                      </span>
+                    </div>
+                    <div style={{ flex: 1, textAlign: 'center' }}>
+                      <span
+                        style={{
+                          fontSize: '10px',
+                          fontWeight: 500,
+                          color: 'rgba(0,0,0,0.45)',
+                          letterSpacing: '0.08em',
+                          textTransform: 'uppercase',
+                        }}
+                      >
+                        REPS
+                      </span>
+                    </div>
+                  </div>
+                  {/* Bottom row: Weight and Reps input boxes */}
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    {/* Weight input */}
                     <div
                       style={{
+                        flex: 1,
                         display: 'flex',
-                        alignItems: 'center',
+                        flexDirection: 'row',
                         borderRadius: '6px',
                         backgroundColor: 'rgba(0,0,0,0.04)',
                         overflow: 'hidden',
+                        height: 38,
                       }}
                     >
-                      <button
+                      <div
                         onClick={() => {
                           const cur = parseFloat(set.weight) || 0;
                           const next = Math.max(0, Math.round((cur - 1) * 10) / 10);
                           onUpdateSet(activeEx.exercise.id, idx, 'weight', next === 0 ? '' : String(next));
                         }}
                         style={{
-                          padding: '4px 8px',
-                          background: 'none',
-                          border: 'none',
+                          width: 34,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
                           cursor: 'pointer',
                           color: 'rgba(0,0,0,0.35)',
-                          fontSize: '11px',
+                          fontSize: '15px',
                           fontWeight: 300,
-                          lineHeight: 1,
+                          flexShrink: 0,
                         }}
                       >
                         −
-                      </button>
+                      </div>
                       <input
                         type="number"
                         inputMode="decimal"
@@ -275,78 +295,69 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                         onChange={e => onUpdateSet(activeEx.exercise.id, idx, 'weight', e.target.value)}
                         style={{
                           flex: 1,
+                          minWidth: 0,
                           background: 'transparent',
                           border: 'none',
                           outline: 'none',
                           textAlign: 'center',
-                          fontSize: '13px',
-                          fontWeight: 600,
+                          fontSize: '15px',
+                          fontWeight: 700,
                           color: hasData ? '#1a1a1a' : 'rgba(0,0,0,0.25)',
-                          padding: '4px 2px',
+                          height: 38,
+                          padding: 0,
                           MozAppearance: 'textfield',
                         }}
                       />
-                      <button
+                      <div
                         onClick={() => {
                           const cur = parseFloat(set.weight) || 0;
                           const next = Math.round((cur + 1) * 10) / 10;
                           onUpdateSet(activeEx.exercise.id, idx, 'weight', String(next));
                         }}
                         style={{
-                          padding: '4px 8px',
-                          background: 'none',
-                          border: 'none',
+                          width: 34,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
                           cursor: 'pointer',
                           color: 'rgba(0,0,0,0.35)',
-                          fontSize: '11px',
+                          fontSize: '15px',
                           fontWeight: 300,
-                          lineHeight: 1,
+                          flexShrink: 0,
                         }}
                       >
                         +
-                      </button>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Reps */}
-                  <div>
-                    <span
-                      style={{
-                        fontSize: '8px',
-                        fontWeight: 500,
-                        color: 'rgba(0,0,0,0.45)',
-                        letterSpacing: '0.08em',
-                        textTransform: 'uppercase',
-                        marginBottom: '2px',
-                        display: 'block',
-                      }}
-                    >
-                      Reps
-                    </span>
+                    {/* Reps input */}
                     <div
                       style={{
+                        flex: 1,
                         display: 'flex',
-                        alignItems: 'center',
+                        flexDirection: 'row',
                         borderRadius: '6px',
                         backgroundColor: 'rgba(0,0,0,0.04)',
                         overflow: 'hidden',
+                        height: 38,
                       }}
                     >
-                      <button
+                      <div
                         onClick={() => onUpdateSet(activeEx.exercise.id, idx, 'reps', Math.max(1, set.reps - 1))}
                         style={{
-                          padding: '4px 8px',
-                          background: 'none',
-                          border: 'none',
+                          width: 34,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
                           cursor: 'pointer',
                           color: 'rgba(0,0,0,0.35)',
-                          fontSize: '11px',
+                          fontSize: '15px',
                           fontWeight: 300,
-                          lineHeight: 1,
+                          flexShrink: 0,
                         }}
                       >
                         −
-                      </button>
+                      </div>
                       <input
                         type="number"
                         inputMode="numeric"
@@ -357,32 +368,35 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                         }}
                         style={{
                           flex: 1,
+                          minWidth: 0,
                           background: 'transparent',
                           border: 'none',
                           outline: 'none',
                           textAlign: 'center',
-                          fontSize: '13px',
-                          fontWeight: 600,
+                          fontSize: '15px',
+                          fontWeight: 700,
                           color: '#1a1a1a',
-                          padding: '4px 2px',
+                          height: 38,
+                          padding: 0,
                           MozAppearance: 'textfield',
                         }}
                       />
-                      <button
+                      <div
                         onClick={() => onUpdateSet(activeEx.exercise.id, idx, 'reps', set.reps + 1)}
                         style={{
-                          padding: '4px 8px',
-                          background: 'none',
-                          border: 'none',
+                          width: 34,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
                           cursor: 'pointer',
                           color: 'rgba(0,0,0,0.35)',
-                          fontSize: '11px',
+                          fontSize: '15px',
                           fontWeight: 300,
-                          lineHeight: 1,
+                          flexShrink: 0,
                         }}
                       >
                         +
-                      </button>
+                      </div>
                     </div>
                   </div>
                 </div>
