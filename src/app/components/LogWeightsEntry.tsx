@@ -496,25 +496,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
           FAIL
         </button>
 
-        {/* PB badge if applicable */}
-        {exTotal > 0 && activeEx.pbThreshold > 0 && exTotal > activeEx.pbThreshold && (
-          <div
-            style={{
-              padding: '8px 14px',
-              borderRadius: '8px',
-              backgroundColor: '#1a1a1a',
-              color: '#ffffff',
-              fontSize: '11px',
-              fontWeight: 800,
-              letterSpacing: '0.06em',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-            }}
-          >
-            PB
-          </div>
-        )}
+
       </div>
 
       <style>{`
