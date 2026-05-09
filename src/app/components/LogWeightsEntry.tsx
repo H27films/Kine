@@ -63,9 +63,9 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
   const tabScrollRef = useRef<HTMLDivElement>(null);
   const safeIndex = Math.min(activeExIndex, addedExercises.length - 1);
   const activeEx = addedExercises[safeIndex];
-  // Reorder so the active exercise always appears first in the tab bar
+  // Rotate so the active exercise appears first in the tab bar, maintaining relative order
   const orderedExercises = addedExercises.length > 1
-    ? [addedExercises[safeIndex], ...addedExercises.filter((_, i) => i !== safeIndex)]
+    ? [...addedExercises.slice(safeIndex), ...addedExercises.slice(0, safeIndex)]
     : addedExercises;
 
   const isAdderActive = adderOpen;
@@ -170,16 +170,16 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                 KG
               </span>
               {/* Progress bar */}
-              <div style={{ height: '8px', flex: 1, backgroundColor: 'rgba(26,26,26,0.1)', borderRadius: '999px', overflow: 'hidden' }}>
-                <div
-                  style={{
-                    height: '100%',
-                    width: `${Math.min((todayTotalSum / 20000) * 100, 100)}%`,
-                    backgroundColor: '#1a1a1a',
-                    borderRadius: '999px',
-                    transition: 'width 0.3s ease',
-                  }}
-                />
+              <div style={{ height: '12px', flex: 1, backgroundColor: 'rgba(26,26,26,0.1)', borderRadius: '999px', overflow: 'hidden', padding: '2px' }}>
+            <div
+              style={{
+                height: '100%',
+                width: `${Math.min((todayTotalSum / 20000) * 100, 100)}%`,
+                background: 'linear-gradient(to right, rgba(26,26,26,0.6), #1a1a1a)',
+                borderRadius: '999px',
+                transition: 'width 0.3s ease',
+              }}
+            />
               </div>
             </>
           ) : (
