@@ -444,7 +444,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                 backgroundColor: 'transparent',
                 cursor: 'pointer',
                 color: 'rgba(0,0,0,0.5)',
-                fontSize: '11px',
+            fontSize: '12px',
                 fontWeight: 500,
                 letterSpacing: '0.04em',
                 display: 'flex',
@@ -541,14 +541,45 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
             paddingBottom: 'calc(10px + env(safe-area-inset-bottom))',
             borderTop: '1px solid rgba(0,0,0,0.06)',
             cursor: 'pointer',
-            color: '#1a1a1a',
-            fontSize: '11px',
-            fontWeight: 500,
-            letterSpacing: '0.04em',
-            textAlign: 'left',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
           }}
         >
-          / ADVANCED
+          <span
+            style={{
+              color: '#1a1a1a',
+              fontSize: '12px',
+              fontWeight: 500,
+              letterSpacing: '0.04em',
+            }}
+          >
+            / ADVANCED
+          </span>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+            <span
+              style={{
+                fontSize: '18px',
+                fontWeight: 350,
+                letterSpacing: '-0.02em',
+                color: '#1a1a1a',
+                lineHeight: 1,
+              }}
+            >
+              {addedExercises.reduce((acc, ex) => acc + calcExerciseTotal(ex.sets, ex.exercise.multiplier ?? 1), 0).toLocaleString()}
+            </span>
+            <span
+              style={{
+                fontSize: '10px',
+                fontWeight: 400,
+                color: 'rgba(26,26,26,0.45)',
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+              }}
+            >
+              KG
+            </span>
+          </div>
         </div>
       )}
 
