@@ -212,27 +212,29 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                     SET {idx + 1}
                   </span>
                   <div style={{ marginTop: '2px', display: 'flex', alignItems: 'baseline', gap: '3px' }}>
-                    <span
-                      style={{
-                        fontSize: '22px',
-                        fontWeight: 300,
-                        letterSpacing: '-0.01em',
-                        color: '#1a1a1a',
-                        lineHeight: 1,
-                      }}
-                    >
-                      {rowTotal > 0 ? rowTotal.toLocaleString() : '—'}
-                    </span>
-                    <span
-                      style={{
-                        fontSize: '9px',
-                        fontWeight: 400,
-                        color: 'rgba(26,26,26,0.4)',
-                        letterSpacing: '0.04em',
-                      }}
-                    >
-                      KG
-                    </span>
+                     <span
+                       style={{
+                         fontSize: '22px',
+                         fontWeight: 300,
+                         letterSpacing: '-0.01em',
+                         color: '#1a1a1a',
+                         lineHeight: 1,
+                       }}
+                     >
+                       {rowTotal > 0 ? rowTotal.toLocaleString() : ''}
+                     </span>
+                     {rowTotal > 0 && (
+                       <span
+                         style={{
+                           fontSize: '9px',
+                           fontWeight: 400,
+                           color: 'rgba(26,26,26,0.4)',
+                           letterSpacing: '0.04em',
+                         }}
+                       >
+                         KG
+                       </span>
+                     )}
                   </div>
                 </div>
 
@@ -305,7 +307,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                         type="number"
                         inputMode="decimal"
                         value={set.weight}
-                        placeholder="—"
+                         placeholder="—"
                         onChange={e => onUpdateSet(activeEx.exercise.id, idx, 'weight', e.target.value)}
                         style={{
                           flex: 1,
@@ -430,7 +432,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
           }}
           style={{
             position: 'fixed',
-            bottom: 'calc(60px + env(safe-area-inset-bottom))',
+            bottom: 'calc(55px + env(safe-area-inset-bottom))',
             right: '20px',
             zIndex: 100,
             cursor: activeEx.lastSets && activeEx.lastSets.length > 0 ? 'pointer' : 'default',
@@ -439,9 +441,9 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
           }}
         >
           {activeEx.copied ? (
-            <Minus size={24} color="#1a1a1a" strokeWidth={1.5} />
+            <Minus size={26} color="#1a1a1a" strokeWidth={1.2} />
           ) : (
-            <Plus size={24} color="#1a1a1a" strokeWidth={1.5} />
+            <Plus size={26} color="#1a1a1a" strokeWidth={1.2} />
           )}
         </div>
       )}
