@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, Plus, Minus, Check } from 'lucide-react';
 import { Exercise } from '../../lib/supabase';
 
@@ -41,6 +41,8 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
   onClose,
 }) => {
   const [activeExIndex, setActiveExIndex] = useState(0);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
   const safeIndex = Math.min(activeExIndex, addedExercises.length - 1);
   const activeEx = addedExercises[safeIndex];
   // Reorder so the active exercise always appears first in the tab bar
@@ -49,6 +51,16 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
     : addedExercises;
 
   if (addedExercises.length === 0) return null;
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (bottomRef.current && !bottomRef.current.contains(e.target as Node)) {
+        setShowAdvanced(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
   const calcExerciseTotal = (sets: SetRow[], multiplier: number = 1): number =>
     sets.reduce((acc, s) => acc + (parseFloat(s.weight) || 0) * s.reps * multiplier, 0);
@@ -408,25 +420,105 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
         })}
       </div>
 
-      {/* Bottom bar: actions */}
-      <div
-        style={{
-          padding: '12px 20px',
-          paddingBottom: 'calc(12px + env(safe-area-inset-bottom))',
-          borderTop: '1px solid rgba(0,0,0,0.06)',
-          display: 'flex',
-          gap: '8px',
-          flexWrap: 'wrap',
-        }}
-      >
-        {/* + SET */}
-        {activeEx.sets.length < 6 && (
+      {/* Bottom area */}
+      {showAdvanced ? (
+        <div
+          ref={bottomRef}
+          style={{
+            padding: '12px 20px',
+            paddingBottom: 'calc(12px + env(safe-area-inset-bottom))',
+            borderTop: '1px solid rgba(0,0,0,0.06)',
+            display: 'flex',
+            gap: '8px',
+            flexWrap: 'wrap',
+          }}
+        >
+          {/* + SET */}
+          {activeEx.sets.length < 6 && (
+            <button
+              onClick={() => onAddSet(activeEx.exercise.id)}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '8px',
+                border: '1px solid rgba(0,0,0,0.10)',
+                backgroundColor: 'transparent',
+                cursor: 'pointer',
+                color: 'rgba(0,0,0,0.5)',
+                fontSize: '11px',
+                fontWeight: 500,
+                letterSpacing: '0.04em',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+              }}
+            >
+              <Plus size={12} /> SET
+            </button>
+          )}
+
+          {/* LAST */}
           <button
-            onClick={() => onAddSet(activeEx.exercise.id)}
+            onClick={() => onToggleCopyFromLast(activeEx.exercise.id)}
+            disabled={!activeEx.lastSets || activeEx.lastSets.length === 0}
             style={{
               padding: '8px 16px',
               borderRadius: '8px',
-              border: '1px dashed rgba(0,0,0,0.15)',
+              border: '1px solid rgba(0,0,0,0.10)',
+              backgroundColor: activeEx.copied ? 'rgba(0,0,0,0.06)' : 'transparent',
+              cursor: activeEx.lastSets && activeEx.lastSets.length > 0 ? 'pointer' : 'default',
+              color: activeEx.copied ? '#1a1a1a' : 'rgba(0,0,0,0.5)',
+              fontSize: '11px',
+              fontWeight: 500,
+              letterSpacing: '0.04em',
+              opacity: activeEx.lastSets && activeEx.lastSets.length > 0 ? 1 : 0.4,
+            }}
+          >
+            {activeEx.copied ? 'REVERT' : 'LAST'}
+          </button>
+
+          {/* Max */}
+          <button
+            onClick={() => onLoadMaxSession(activeEx.exercise.id)}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '8px',
+              border: '1px solid rgba(0,0,0,0.10)',
+              backgroundColor: 'transparent',
+              cursor: 'pointer',
+              color: 'rgba(0,0,0,0.5)',
+              fontSize: '11px',
+              fontWeight: 500,
+              letterSpacing: '0.04em',
+            }}
+          >
+            MAX
+          </button>
+
+          {/* Fail */}
+          <button
+            onClick={() => onToggleFail(activeEx.exercise.id)}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '8px',
+              border: activeEx.fail ? '1px solid rgba(255,80,80,0.5)' : '1px solid rgba(0,0,0,0.10)',
+              backgroundColor: activeEx.fail ? 'rgba(255,80,80,0.08)' : 'transparent',
+              cursor: 'pointer',
+              color: activeEx.fail ? '#ff5050' : 'rgba(0,0,0,0.5)',
+              fontSize: '11px',
+              fontWeight: 500,
+              letterSpacing: '0.04em',
+            }}
+          >
+            FAIL
+          </button>
+
+          {/* Remove */}
+          <button
+            onClick={() => onRemoveExercise(activeEx.exercise.id)}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '8px',
+              border: '1px solid rgba(0,0,0,0.10)',
               backgroundColor: 'transparent',
               cursor: 'pointer',
               color: 'rgba(0,0,0,0.5)',
@@ -438,89 +530,27 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
               gap: '4px',
             }}
           >
-            <Plus size={12} /> SET
+            <Minus size={12} /> REMOVE
           </button>
-        )}
-
-        {/* LAST */}
-        <button
-          onClick={() => onToggleCopyFromLast(activeEx.exercise.id)}
-          disabled={!activeEx.lastSets || activeEx.lastSets.length === 0}
+        </div>
+      ) : (
+        <div
+          onClick={() => setShowAdvanced(true)}
           style={{
-            padding: '8px 16px',
-            borderRadius: '8px',
-            border: '1px solid rgba(0,0,0,0.10)',
-            backgroundColor: activeEx.copied ? 'rgba(0,0,0,0.06)' : 'transparent',
-            cursor: activeEx.lastSets && activeEx.lastSets.length > 0 ? 'pointer' : 'default',
-            color: activeEx.copied ? '#1a1a1a' : 'rgba(0,0,0,0.5)',
-            fontSize: '11px',
-            fontWeight: 500,
-            letterSpacing: '0.04em',
-            opacity: activeEx.lastSets && activeEx.lastSets.length > 0 ? 1 : 0.4,
-          }}
-        >
-          {activeEx.copied ? 'REVERT' : 'LAST'}
-        </button>
-
-        {/* Max */}
-        <button
-          onClick={() => onLoadMaxSession(activeEx.exercise.id)}
-          style={{
-            padding: '8px 16px',
-            borderRadius: '8px',
-            border: '1px solid rgba(0,0,0,0.10)',
-            backgroundColor: 'transparent',
+            padding: '10px 20px',
+            paddingBottom: 'calc(10px + env(safe-area-inset-bottom))',
+            borderTop: '1px solid rgba(0,0,0,0.06)',
             cursor: 'pointer',
-            color: 'rgba(0,0,0,0.5)',
+            color: '#1a1a1a',
             fontSize: '11px',
             fontWeight: 500,
             letterSpacing: '0.04em',
+            textAlign: 'left',
           }}
         >
-          MAX
-        </button>
-
-        {/* Fail */}
-        <button
-          onClick={() => onToggleFail(activeEx.exercise.id)}
-          style={{
-            padding: '8px 16px',
-            borderRadius: '8px',
-            border: activeEx.fail ? '1px solid rgba(255,80,80,0.5)' : '1px solid rgba(0,0,0,0.10)',
-            backgroundColor: activeEx.fail ? 'rgba(255,80,80,0.08)' : 'transparent',
-            cursor: 'pointer',
-            color: activeEx.fail ? '#ff5050' : 'rgba(0,0,0,0.5)',
-            fontSize: '11px',
-            fontWeight: 500,
-            letterSpacing: '0.04em',
-          }}
-        >
-          FAIL
-        </button>
-
-        {/* Remove */}
-        <button
-          onClick={() => onRemoveExercise(activeEx.exercise.id)}
-          style={{
-            padding: '8px 16px',
-            borderRadius: '8px',
-            border: '1px solid rgba(255,80,80,0.5)',
-            backgroundColor: 'transparent',
-            cursor: 'pointer',
-            color: 'rgba(255,80,80,0.5)',
-            fontSize: '11px',
-            fontWeight: 500,
-            letterSpacing: '0.04em',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-          }}
-        >
-          <Minus size={12} /> REMOVE
-        </button>
-
-
-      </div>
+          / ADVANCED
+        </div>
+      )}
 
       <style>{`
         input[type=number]::-webkit-outer-spin-button,
