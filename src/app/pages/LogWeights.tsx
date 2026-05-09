@@ -1177,6 +1177,7 @@ export const LogWeights: React.FC<LogWeightsProps> = () => {
           onToggleFail={toggleFail}
           onLoadMaxSession={loadMaxSession}
           onToggleCopyFromLast={toggleCopyFromLast}
+          onRemoveExercise={removeExercise}
           onClose={() => setShowEntryCard(false)}
         />
       )}

@@ -26,6 +26,7 @@ interface LogWeightsEntryProps {
   onToggleFail: (exerciseId: number) => void;
   onLoadMaxSession: (exerciseId: number) => void;
   onToggleCopyFromLast: (exerciseId: number) => void;
+  onRemoveExercise: (exerciseId: number) => void;
   onClose: () => void;
 }
 
@@ -36,6 +37,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
   onToggleFail,
   onLoadMaxSession,
   onToggleCopyFromLast,
+  onRemoveExercise,
   onClose,
 }) => {
   const [activeExIndex, setActiveExIndex] = useState(0);
@@ -494,6 +496,27 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
           }}
         >
           FAIL
+        </button>
+
+        {/* Remove */}
+        <button
+          onClick={() => onRemoveExercise(activeEx.exercise.id)}
+          style={{
+            padding: '8px 16px',
+            borderRadius: '8px',
+            border: '1px solid rgba(255,80,80,0.5)',
+            backgroundColor: 'transparent',
+            cursor: 'pointer',
+            color: 'rgba(255,80,80,0.5)',
+            fontSize: '11px',
+            fontWeight: 500,
+            letterSpacing: '0.04em',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+          }}
+        >
+          <Minus size={12} /> REMOVE
         </button>
 
 
