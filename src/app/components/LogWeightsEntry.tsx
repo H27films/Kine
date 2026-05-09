@@ -171,7 +171,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                 cursor: 'pointer',
                 flexShrink: 0,
                 transition: 'all 0.2s ease',
-                fontSize: isActive ? '17px' : '13px',
+                fontSize: isActive ? '17px' : '11px',
                 fontWeight: isActive ? 400 : 300,
                 color: isActive ? '#1a1a1a' : 'rgba(26,26,26,0.35)',
                 filter: isActive ? 'none' : 'blur(0.5px)',
