@@ -477,6 +477,27 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
             </div>
           );
         })}
+        {/* Separator line + Add set link after last set */}
+        {activeEx.sets.length < 6 && (
+          <>
+            <div style={{ height: '0.5px', backgroundColor: 'rgba(0,0,0,0.18)', marginTop: '17px', marginBottom: '9px' }} />
+            <div
+              onClick={() => onAddSet(activeEx.exercise.id)}
+              style={{
+                cursor: 'pointer',
+                paddingTop: '6px',
+                paddingBottom: '14px',
+                fontSize: '12px',
+                fontWeight: 300,
+                color: 'rgba(26,26,26,0.3)',
+                letterSpacing: '0.03em',
+                userSelect: 'none',
+              }}
+            >
+              + ADD SET
+            </div>
+          </>
+        )}
       </div>
 
       {/* Floating plus/minus icon */}
@@ -518,32 +539,6 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
             flexWrap: 'wrap',
           }}
         >
-          {/* + SET */}
-          {activeEx.sets.length < 6 && (
-          <button
-            onClick={() => onAddSet(activeEx.exercise.id)}
-            style={{
-              padding: '8px 16px',
-              borderRadius: '8px',
-              border: '1px solid rgba(255,255,255,0.55)',
-              background: 'linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.10) 100%)',
-              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -1px 0 rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.08)',
-              backdropFilter: 'blur(8px)',
-              WebkitBackdropFilter: 'blur(8px)',
-              cursor: 'pointer',
-              color: 'rgba(0,0,0,0.5)',
-              fontSize: '11px',
-              fontWeight: 500,
-              letterSpacing: '0.04em',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-            }}
-          >
-              <Plus size={12} /> SET
-            </button>
-          )}
-
           {/* LAST */}
           <button
             onClick={() => onToggleCopyFromLast(activeEx.exercise.id)}
