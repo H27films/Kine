@@ -41,6 +41,10 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
   const [activeExIndex, setActiveExIndex] = useState(0);
   const safeIndex = Math.min(activeExIndex, addedExercises.length - 1);
   const activeEx = addedExercises[safeIndex];
+  // Reorder so the active exercise always appears first in the tab bar
+  const orderedExercises = addedExercises.length > 1
+    ? [addedExercises[safeIndex], ...addedExercises.filter((_, i) => i !== safeIndex)]
+    : addedExercises;
 
   if (addedExercises.length === 0) return null;
 
@@ -78,7 +82,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
           <span
             style={{
               fontSize: '28px',
-              fontWeight: 300,
+              fontWeight: 350,
               letterSpacing: '-0.02em',
               color: '#1a1a1a',
               lineHeight: 1,
@@ -136,13 +140,15 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
           alignItems: 'baseline',
         }}
       >
-        {addedExercises.map((ex, i) => {
-          const isActive = i === safeIndex;
-          const hasData = ex.sets.some(s => s.weight !== '');
+        {orderedExercises.map((ex, i) => {
+          const isActive = i === 0;
           return (
             <button
               key={ex.exercise.id}
-              onClick={() => setActiveExIndex(i)}
+              onClick={() => {
+                const idxInOriginal = addedExercises.findIndex(e => e.exercise.id === ex.exercise.id);
+                setActiveExIndex(idxInOriginal);
+              }}
               style={{
                 background: 'none',
                 border: 'none',
@@ -151,17 +157,13 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                 flexShrink: 0,
                 transition: 'all 0.2s ease',
                 fontSize: isActive ? '17px' : '13px',
-                fontWeight: 300,
+                fontWeight: isActive ? 400 : 300,
                 color: isActive ? '#1a1a1a' : 'rgba(26,26,26,0.35)',
                 filter: isActive ? 'none' : 'blur(0.5px)',
                 letterSpacing: '0.02em',
-                display: 'flex',
-                alignItems: 'baseline',
-                gap: '5px',
               }}
             >
-              <span>{ex.exercise.exercise_name.toUpperCase()}</span>
-              {hasData && <span style={{ fontSize: '10px', color: isActive ? '#1a1a1a' : 'rgba(26,26,26,0.25)' }}>✓</span>}
+              {ex.exercise.exercise_name.toUpperCase()}
             </button>
           );
         })}
