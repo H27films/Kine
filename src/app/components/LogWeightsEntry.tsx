@@ -464,23 +464,26 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
         >
           {/* + SET */}
           {activeEx.sets.length < 6 && (
-            <button
-              onClick={() => onAddSet(activeEx.exercise.id)}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '8px',
-                border: '1px solid rgba(0,0,0,0.10)',
-                backgroundColor: 'transparent',
-                cursor: 'pointer',
-                color: 'rgba(0,0,0,0.5)',
-            fontSize: '12px',
-                fontWeight: 500,
-                letterSpacing: '0.04em',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-              }}
-            >
+          <button
+            onClick={() => onAddSet(activeEx.exercise.id)}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '8px',
+              border: '1px solid rgba(255,255,255,0.55)',
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.10) 100%)',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -1px 0 rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.08)',
+              backdropFilter: 'blur(8px)',
+              webkitBackdropFilter: 'blur(8px)',
+              cursor: 'pointer',
+              color: 'rgba(0,0,0,0.5)',
+              fontSize: '11px',
+              fontWeight: 500,
+              letterSpacing: '0.04em',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+            }}
+          >
               <Plus size={12} /> SET
             </button>
           )}
@@ -492,8 +495,12 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
             style={{
               padding: '8px 16px',
               borderRadius: '8px',
-              border: '1px solid rgba(0,0,0,0.10)',
-              backgroundColor: activeEx.copied ? 'rgba(0,0,0,0.06)' : 'transparent',
+              border: '1px solid rgba(255,255,255,0.55)',
+              background: activeEx.copied ? undefined : 'linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.10) 100%)',
+              backgroundColor: activeEx.copied ? 'rgba(0,0,0,0.06)' : undefined,
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -1px 0 rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.08)',
+              backdropFilter: 'blur(8px)',
+              webkitBackdropFilter: 'blur(8px)',
               cursor: activeEx.lastSets && activeEx.lastSets.length > 0 ? 'pointer' : 'default',
               color: activeEx.copied ? '#1a1a1a' : 'rgba(0,0,0,0.5)',
               fontSize: '11px',
@@ -511,8 +518,11 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
             style={{
               padding: '8px 16px',
               borderRadius: '8px',
-              border: '1px solid rgba(0,0,0,0.10)',
-              backgroundColor: 'transparent',
+              border: '1px solid rgba(255,255,255,0.55)',
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.10) 100%)',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -1px 0 rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.08)',
+              backdropFilter: 'blur(8px)',
+              webkitBackdropFilter: 'blur(8px)',
               cursor: 'pointer',
               color: 'rgba(0,0,0,0.5)',
               fontSize: '11px',
@@ -529,8 +539,12 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
             style={{
               padding: '8px 16px',
               borderRadius: '8px',
-              border: activeEx.fail ? '1px solid rgba(255,80,80,0.5)' : '1px solid rgba(0,0,0,0.10)',
-              backgroundColor: activeEx.fail ? 'rgba(255,80,80,0.08)' : 'transparent',
+              border: activeEx.fail ? '1px solid rgba(255,80,80,0.5)' : '1px solid rgba(255,255,255,0.55)',
+              background: activeEx.fail ? undefined : 'linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.10) 100%)',
+              backgroundColor: activeEx.fail ? 'rgba(255,80,80,0.08)' : undefined,
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -1px 0 rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.08)',
+              backdropFilter: 'blur(8px)',
+              webkitBackdropFilter: 'blur(8px)',
               cursor: 'pointer',
               color: activeEx.fail ? '#ff5050' : 'rgba(0,0,0,0.5)',
               fontSize: '11px',
@@ -547,8 +561,11 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
             style={{
               padding: '8px 16px',
               borderRadius: '8px',
-              border: '1px solid rgba(0,0,0,0.10)',
-              backgroundColor: 'transparent',
+              border: '1px solid rgba(255,255,255,0.55)',
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.10) 100%)',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -1px 0 rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.08)',
+              backdropFilter: 'blur(8px)',
+              webkitBackdropFilter: 'blur(8px)',
               cursor: 'pointer',
               color: 'rgba(0,0,0,0.5)',
               fontSize: '11px',
