@@ -530,13 +530,25 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                   <span
                     style={{
                       fontSize: '18px',
+                      fontWeight: 330,
+                      letterSpacing: '-0.01em',
+                      color: '#333333',
+                      lineHeight: 1,
+                      marginRight: '4px',
+                    }}
+                  >
+                    SET
+                  </span>
+                  <span
+                    style={{
+                      fontSize: '18px',
                       fontWeight: 400,
-                      letterSpacing: '-0.02em',
-                      color: '#1a1a1a',
+                      letterSpacing: '0.05em',
+                      color: '#000000',
                       lineHeight: 1,
                     }}
                   >
-                    SET {idx + 1}
+                    {idx + 1}
                   </span>
                   <div style={{ marginTop: '2px', display: 'flex', alignItems: 'baseline', gap: '3px' }}>
                      <span
