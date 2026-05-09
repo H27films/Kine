@@ -121,45 +121,43 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
         overflow: 'hidden',
       }}
     >
-      {/* Header row: grand total (left) + PB badge + back arrow (right) */}
+      {/* Header row: grand total (left) + progress bar + back arrow (right) */}
         <div
           onClick={() => setShowTodayTotal(!showTodayTotal)}
           style={{
             display: 'flex',
-            alignItems: 'baseline',
+            alignItems: 'center',
             justifyContent: 'space-between',
             padding: '18px 20px 10px',
             paddingTop: 'calc(18px + env(safe-area-inset-top))',
             cursor: 'pointer',
           }}
         >
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, marginRight: '20px' }}>
           {showTodayTotal ? (
             <>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '14px' }}>
-                <span
-                  style={{
-                    fontSize: '22px',
-                    fontWeight: 350,
-                    letterSpacing: '-0.02em',
-                    color: '#1a1a1a',
-                    lineHeight: 1,
-                  }}
-                >
-                  / TODAY
-                </span>
-                <span
-                  style={{
-                    fontSize: '22px',
-                    fontWeight: 350,
-                    letterSpacing: '-0.02em',
-                    color: '#1a1a1a',
-                    lineHeight: 1,
-                  }}
-                >
-                  {todayTotalSum.toLocaleString()}
-                </span>
-              </div>
+              <span
+                style={{
+                  fontSize: '22px',
+                  fontWeight: 350,
+                  letterSpacing: '-0.02em',
+                  color: '#1a1a1a',
+                  lineHeight: 1,
+                }}
+              >
+                /
+              </span>
+              <span
+                style={{
+                  fontSize: '22px',
+                  fontWeight: 350,
+                  letterSpacing: '-0.02em',
+                  color: '#1a1a1a',
+                  lineHeight: 1,
+                }}
+              >
+                {todayTotalSum.toLocaleString()}
+              </span>
               <span
                 style={{
                   fontSize: '10px',
@@ -171,6 +169,18 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
               >
                 KG
               </span>
+              {/* Progress bar */}
+              <div style={{ height: '8px', flex: 1, backgroundColor: 'rgba(26,26,26,0.1)', borderRadius: '999px', overflow: 'hidden' }}>
+                <div
+                  style={{
+                    height: '100%',
+                    width: `${Math.min((todayTotalSum / 20000) * 100, 100)}%`,
+                    backgroundColor: '#1a1a1a',
+                    borderRadius: '999px',
+                    transition: 'width 0.3s ease',
+                  }}
+                />
+              </div>
             </>
           ) : (
             <>
