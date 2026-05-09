@@ -276,7 +276,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                     fontSize: '11px',
                     fontWeight: 300,
                     color: 'rgba(26,26,26,0.35)',
-                    filter: 'blur(0.5px)',
+                    filter: 'blur(3px)',
                     letterSpacing: '0.02em',
                   }}
                 >
