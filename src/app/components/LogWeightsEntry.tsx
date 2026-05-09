@@ -207,6 +207,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
       >
         {orderedExercises.map((ex, i) => {
           const isActive = i === 0;
+          const hasData = ex.sets.some(s => s.weight !== '');
           return (
             <button
               key={ex.exercise.id}
@@ -217,7 +218,11 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
               style={{
                 background: 'none',
                 border: 'none',
-                borderBottom: isActive ? '1.5px solid #333333' : 'none',
+                borderBottom: isActive
+                  ? '1.5px solid #333333'
+                  : hasData
+                    ? '1px solid rgba(26,26,26,0.12)'
+                    : 'none',
                 padding: '4px 0',
                 cursor: 'pointer',
                 flexShrink: 0,
