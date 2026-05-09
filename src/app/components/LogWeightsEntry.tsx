@@ -102,7 +102,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
               lineHeight: 1,
             }}
           >
-            {exTotal > 0 ? exTotal.toLocaleString() : '—'}
+            {exTotal > 0 ? exTotal.toLocaleString() : '0'}
           </span>
           <span
             style={{
