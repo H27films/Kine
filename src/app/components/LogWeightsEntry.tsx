@@ -778,7 +778,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                 }}
               >
                 {activeEx.copied ? (
-                  <Minus size={20} color="#1a1a1a" strokeWidth={1.5} />
+                  <X size={20} color="#1a1a1a" strokeWidth={1.5} />
                 ) : (
                   <Plus size={20} color="#1a1a1a" strokeWidth={1.5} />
                 )}
