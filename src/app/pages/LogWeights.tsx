@@ -1180,6 +1180,8 @@ export const LogWeights: React.FC<LogWeightsProps> = () => {
           onRemoveExercise={removeExercise}
           onClose={() => setShowEntryCard(false)}
           todayLoggedTotal={todayTotal}
+          onAddExercise={handleAddExercise}
+          exercisesByGroup={exercisesByGroup}
         />
       )}
     </div>

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, Plus, Minus, Check } from 'lucide-react';
+import { ArrowLeft, Plus, Minus, Check, X, ChevronDown, ChevronLeft } from 'lucide-react';
 import { Exercise } from '../../lib/supabase';
 
 interface SetRow {
@@ -29,7 +29,16 @@ interface LogWeightsEntryProps {
   onRemoveExercise: (exerciseId: number) => void;
   onClose: () => void;
   todayLoggedTotal: number;
+  onAddExercise: (exercise: Exercise) => void;
+  exercisesByGroup: Record<string, Exercise[]>;
 }
+
+const TYPE2_LABELS: Record<string, string> = {
+  'BODY WEIGHT': 'Body Weight',
+  'BAR': 'Bar',
+  'DUMB BELL': 'Dumbbell',
+  'MACHINE': 'Machine',
+};
 
 const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
   addedExercises,
@@ -41,10 +50,15 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
   onRemoveExercise,
   onClose,
   todayLoggedTotal,
+  onAddExercise,
+  exercisesByGroup,
 }) => {
   const [activeExIndex, setActiveExIndex] = useState(0);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showTodayTotal, setShowTodayTotal] = useState(false);
+  const [adderOpen, setAdderOpen] = useState(false);
+  const [adderGroup, setAdderGroup] = useState<string | null>(null);
+  const adderRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const safeIndex = Math.min(activeExIndex, addedExercises.length - 1);
   const activeEx = addedExercises[safeIndex];
@@ -59,6 +73,10 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
     const handler = (e: MouseEvent) => {
       if (bottomRef.current && !bottomRef.current.contains(e.target as Node)) {
         setShowAdvanced(false);
+      }
+      if (adderRef.current && !adderRef.current.contains(e.target as Node)) {
+        setAdderOpen(false);
+        setAdderGroup(null);
       }
     };
     document.addEventListener('mousedown', handler);
@@ -238,10 +256,176 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
             </button>
           );
         })}
+        {/* + ADD tab */}
+        <div ref={adderRef} style={{ position: 'relative', flexShrink: 0 }}>
+          <button
+            onClick={() => {
+              setAdderOpen(o => !o);
+              setAdderGroup(null);
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              borderBottom: adderOpen ? '1.5px solid #333333' : 'none',
+              padding: '4px 0',
+              cursor: 'pointer',
+              fontSize: '11px',
+              fontWeight: 300,
+              color: adderOpen ? '#1a1a1a' : 'rgba(26,26,26,0.35)',
+              letterSpacing: '0.02em',
+              filter: 'none',
+            }}
+          >
+            + ADD
+          </button>
+          {/* Dropdown panel — overlaid over set area */}
+          {adderOpen && (
+            <div
+              style={{
+                position: 'absolute',
+                top: 'calc(100% + 4px)',
+                left: '-20px',
+                right: '-20px',
+                zIndex: 100,
+                backgroundColor: '#f2f2f2',
+                border: '1px solid rgba(0,0,0,0.08)',
+                borderRadius: '10px',
+                overflow: 'hidden',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                fontFamily: "'Archivo', sans-serif",
+              }}
+            >
+              {!adderGroup ? (
+                /* Group selection */
+                <>
+                  {['Chest', 'Back', 'Legs'].map((group, gi) => (
+                    <div
+                      key={group}
+                      onClick={() => setAdderGroup(group)}
+                      style={{
+                        padding: '12px 14px',
+                        cursor: 'pointer',
+                        fontSize: '10px',
+                        fontWeight: 700,
+                        letterSpacing: '0.12em',
+                        color: '#1a1a1a',
+                        textTransform: 'uppercase',
+                        borderBottom: gi < 2 ? 'none' : 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                      }}
+                      role="button"
+                      tabIndex={0}
+                    >
+                      {group.toUpperCase()}
+                      <ChevronDown size={12} style={{ transform: 'rotate(-90deg)', color: 'rgba(0,0,0,0.25)' }} />
+                    </div>
+                  ))}
+                </>
+              ) : (
+                /* Exercise list for selected group */
+                <div>
+                  <div
+                    onClick={() => setAdderGroup(null)}
+                    style={{
+                      padding: '10px 14px',
+                      cursor: 'pointer',
+                      fontSize: '9px',
+                      fontWeight: 600,
+                      letterSpacing: '0.1em',
+                      color: '#999',
+                      textTransform: 'uppercase',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      backgroundColor: 'rgba(0,0,0,0.04)',
+                    }}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    <ChevronLeft size={12} /> {adderGroup}
+                  </div>
+                  <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                    {(exercisesByGroup[adderGroup] || []).map((ex, _ei, arr) => {
+                      const alreadyAdded = !!addedExercises.find(e => e.exercise.id === ex.id);
+                      const t2 = ex.type2 ?? '';
+                      const prevT2 = _ei > 0 ? arr[_ei - 1].type2 ?? '' : '';
+                      const showHeader = t2 !== '' && t2 !== prevT2;
+                      return (
+                        <React.Fragment key={ex.id}>
+                          {showHeader && (
+                            <div style={{
+                              borderTop: _ei > 0 ? '1px solid rgba(0,0,0,0.06)' : 'none',
+                              padding: '10px 14px 4px 14px',
+                            }}>
+                              <span style={{
+                                fontSize: '10px',
+                                fontWeight: 800,
+                                letterSpacing: '0.12em',
+                                textTransform: 'uppercase',
+                                color: 'rgba(0,0,0,0.5)',
+                              }}>
+                                {TYPE2_LABELS[t2] || t2}
+                              </span>
+                            </div>
+                          )}
+                          <div
+                            onClick={() => {
+                              onAddExercise(ex);
+                              setAdderOpen(false);
+                              setAdderGroup(null);
+                            }}
+                            style={{
+                              padding: '10px 14px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            <div>
+                              <span style={{
+                                fontSize: '12px',
+                                fontWeight: 500,
+                                color: alreadyAdded ? 'rgba(0,0,0,0.3)' : '#1a1a1a',
+                              }}>
+                                {ex.exercise_name.charAt(0).toUpperCase() + ex.exercise_name.slice(1).toLowerCase()}
+                              </span>
+                              {ex.info_notes && (
+                                <span style={{
+                                  fontSize: '9px',
+                                  color: 'rgba(0,0,0,0.3)',
+                                  display: 'block',
+                                  marginTop: '1px',
+                                }}>
+                                  {ex.info_notes}
+                                </span>
+                              )}
+                            </div>
+                            <div style={{
+                              width: 24, height: 24, borderRadius: '50%',
+                              backgroundColor: alreadyAdded ? 'rgba(0,0,0,0.15)' : '#1a1a1a',
+                              color: alreadyAdded ? '#666' : '#ffffff',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              flexShrink: 0,
+                            }}>
+                              {alreadyAdded ? <X size={11} strokeWidth={3} /> : <Plus size={11} strokeWidth={3} />}
+                            </div>
+                          </div>
+                        </React.Fragment>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Scrollable set rows area */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '0 20px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '0 20px', position: 'relative' }}>
         {activeEx.sets.map((set, idx) => {
           const showSeparator = idx > 0;
           const w = parseFloat(set.weight) || 0;
