@@ -1179,6 +1179,7 @@ export const LogWeights: React.FC<LogWeightsProps> = () => {
           onToggleCopyFromLast={toggleCopyFromLast}
           onRemoveExercise={removeExercise}
           onClose={() => setShowEntryCard(false)}
+          todayLoggedTotal={todayTotal}
         />
       )}
     </div>

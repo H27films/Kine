@@ -28,6 +28,7 @@ interface LogWeightsEntryProps {
   onToggleCopyFromLast: (exerciseId: number) => void;
   onRemoveExercise: (exerciseId: number) => void;
   onClose: () => void;
+  todayLoggedTotal: number;
 }
 
 const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
@@ -39,9 +40,11 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
   onToggleCopyFromLast,
   onRemoveExercise,
   onClose,
+  todayLoggedTotal,
 }) => {
   const [activeExIndex, setActiveExIndex] = useState(0);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showTodayTotal, setShowTodayTotal] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const safeIndex = Math.min(activeExIndex, addedExercises.length - 1);
   const activeEx = addedExercises[safeIndex];
@@ -65,6 +68,10 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
   const calcExerciseTotal = (sets: SetRow[], multiplier: number = 1): number =>
     sets.reduce((acc, s) => acc + (parseFloat(s.weight) || 0) * s.reps * multiplier, 0);
 
+  // Calculate today's total: logged + pending
+  const pendingTotal = addedExercises.reduce((acc, ex) => acc + calcExerciseTotal(ex.sets, ex.exercise.multiplier ?? 1), 0);
+  const todayTotalSum = todayLoggedTotal + pendingTotal;
+
   const mult = activeEx.exercise.multiplier ?? 1;
   const exTotal = calcExerciseTotal(activeEx.sets, mult);
 
@@ -83,54 +90,98 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
       }}
     >
       {/* Header row: grand total (left) + PB badge + back arrow (right) */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'baseline',
-          justifyContent: 'space-between',
-          padding: '18px 20px 10px',
-          paddingTop: 'calc(18px + env(safe-area-inset-top))',
-        }}
-      >
+        <div
+          onClick={() => setShowTodayTotal(!showTodayTotal)}
+          style={{
+            display: 'flex',
+            alignItems: 'baseline',
+            justifyContent: 'space-between',
+            padding: '18px 20px 10px',
+            paddingTop: 'calc(18px + env(safe-area-inset-top))',
+            cursor: 'pointer',
+          }}
+        >
         <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-          <span
-            style={{
-              fontSize: '28px',
-              fontWeight: 350,
-              letterSpacing: '-0.02em',
-              color: '#1a1a1a',
-              lineHeight: 1,
-            }}
-          >
-            {exTotal > 0 ? exTotal.toLocaleString() : '0'}
-          </span>
-          <span
-            style={{
-              fontSize: '10px',
-              fontWeight: 400,
-              color: 'rgba(26,26,26,0.45)',
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-            }}
-          >
-            KG
-          </span>
-          {exTotal > 0 && activeEx.pbThreshold > 0 && exTotal > activeEx.pbThreshold && (
-            <div
-              style={{
-                width: 24,
-                height: 24,
-                borderRadius: '50%',
-                backgroundColor: '#1a1a1a',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-                marginLeft: '4px',
-              }}
-            >
-              <span style={{ fontSize: '8px', fontWeight: 800, color: '#ffffff', letterSpacing: '0.05em' }}>PB</span>
-            </div>
+          {showTodayTotal ? (
+            <>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '14px' }}>
+                <span
+                  style={{
+                    fontSize: '22px',
+                    fontWeight: 350,
+                    letterSpacing: '-0.02em',
+                    color: '#1a1a1a',
+                    lineHeight: 1,
+                  }}
+                >
+                  / TODAY
+                </span>
+                <span
+                  style={{
+                    fontSize: '22px',
+                    fontWeight: 350,
+                    letterSpacing: '-0.02em',
+                    color: '#1a1a1a',
+                    lineHeight: 1,
+                  }}
+                >
+                  {todayTotalSum.toLocaleString()}
+                </span>
+              </div>
+              <span
+                style={{
+                  fontSize: '10px',
+                  fontWeight: 400,
+                  color: 'rgba(26,26,26,0.45)',
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                KG
+              </span>
+            </>
+          ) : (
+            <>
+              <span
+                style={{
+                  fontSize: '28px',
+                  fontWeight: 350,
+                  letterSpacing: '-0.02em',
+                  color: '#1a1a1a',
+                  lineHeight: 1,
+                }}
+              >
+                {exTotal > 0 ? exTotal.toLocaleString() : '0'}
+              </span>
+              <span
+                style={{
+                  fontSize: '10px',
+                  fontWeight: 400,
+                  color: 'rgba(26,26,26,0.45)',
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                KG
+              </span>
+              {exTotal > 0 && activeEx.pbThreshold > 0 && exTotal > activeEx.pbThreshold && (
+                <div
+                  style={{
+                    width: 24,
+                    height: 24,
+                    borderRadius: '50%',
+                    backgroundColor: '#1a1a1a',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    marginLeft: '4px',
+                  }}
+                >
+                  <span style={{ fontSize: '8px', fontWeight: 800, color: '#ffffff', letterSpacing: '0.05em' }}>PB</span>
+                </div>
+              )}
+            </>
           )}
         </div>
         <button
