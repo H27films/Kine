@@ -420,6 +420,32 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
         })}
       </div>
 
+      {/* Floating plus/minus icon */}
+      {!showAdvanced && (
+        <div
+          onClick={() => {
+            if (activeEx.lastSets && activeEx.lastSets.length > 0) {
+              onToggleCopyFromLast(activeEx.exercise.id);
+            }
+          }}
+          style={{
+            position: 'fixed',
+            bottom: 'calc(60px + env(safe-area-inset-bottom))',
+            right: '20px',
+            zIndex: 100,
+            cursor: activeEx.lastSets && activeEx.lastSets.length > 0 ? 'pointer' : 'default',
+            opacity: activeEx.lastSets && activeEx.lastSets.length > 0 ? 0.9 : 0.3,
+            transition: 'opacity 0.2s',
+          }}
+        >
+          {activeEx.copied ? (
+            <Minus size={24} color="#1a1a1a" strokeWidth={1.5} />
+          ) : (
+            <Plus size={24} color="#1a1a1a" strokeWidth={1.5} />
+          )}
+        </div>
+      )}
+
       {/* Bottom area */}
       {showAdvanced ? (
         <div
