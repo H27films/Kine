@@ -229,7 +229,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
         ref={tabScrollRef}
         style={{
           display: 'flex',
-          gap: '10px',
+          gap: '18px',
           padding: '6px 20px 12px',
           overflowX: 'auto',
           whiteSpace: 'nowrap',
