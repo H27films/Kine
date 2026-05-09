@@ -166,7 +166,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
               style={{
                 background: 'none',
                 border: 'none',
-                borderBottom: isActive ? '2px solid #1a1a1a' : 'none',
+                borderBottom: isActive ? '1.5px solid #333333' : 'none',
                 padding: '4px 0',
                 cursor: 'pointer',
                 flexShrink: 0,
