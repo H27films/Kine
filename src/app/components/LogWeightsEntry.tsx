@@ -477,54 +477,56 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
             </div>
           );
         })}
-        {/* Separator line + Add set link after last set */}
+        {/* Separator line + Add set link + copy icon */}
         {activeEx.sets.length < 6 && (
           <>
             <div style={{ height: '0.5px', backgroundColor: 'rgba(0,0,0,0.18)', marginTop: '17px', marginBottom: '9px' }} />
             <div
-              onClick={() => onAddSet(activeEx.exercise.id)}
               style={{
-                cursor: 'pointer',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
                 paddingTop: '6px',
                 paddingBottom: '14px',
-                fontSize: '12px',
-                fontWeight: 300,
-                color: 'rgba(26,26,26,0.3)',
-                letterSpacing: '0.03em',
-                userSelect: 'none',
               }}
             >
-              + ADD SET
+              <div
+                onClick={() => onAddSet(activeEx.exercise.id)}
+                style={{
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  fontWeight: 300,
+                  color: 'rgba(26,26,26,0.3)',
+                  letterSpacing: '0.03em',
+                  userSelect: 'none',
+                }}
+              >
+                + ADD SET
+              </div>
+              <div
+                onClick={() => {
+                  if (activeEx.lastSets && activeEx.lastSets.length > 0) {
+                    onToggleCopyFromLast(activeEx.exercise.id);
+                  }
+                }}
+                style={{
+                  cursor: activeEx.lastSets && activeEx.lastSets.length > 0 ? 'pointer' : 'default',
+                  opacity: activeEx.lastSets && activeEx.lastSets.length > 0 ? 0.9 : 0.3,
+                  transition: 'opacity 0.2s',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              >
+                {activeEx.copied ? (
+                  <Minus size={20} color="#1a1a1a" strokeWidth={1.5} />
+                ) : (
+                  <Plus size={20} color="#1a1a1a" strokeWidth={1.5} />
+                )}
+              </div>
             </div>
           </>
         )}
       </div>
-
-      {/* Floating plus/minus icon */}
-      {!showAdvanced && (
-        <div
-          onClick={() => {
-            if (activeEx.lastSets && activeEx.lastSets.length > 0) {
-              onToggleCopyFromLast(activeEx.exercise.id);
-            }
-          }}
-          style={{
-            position: 'fixed',
-            bottom: 'calc(50px + env(safe-area-inset-bottom))',
-            right: '20px',
-            zIndex: 100,
-            cursor: activeEx.lastSets && activeEx.lastSets.length > 0 ? 'pointer' : 'default',
-            opacity: activeEx.lastSets && activeEx.lastSets.length > 0 ? 0.9 : 0.3,
-            transition: 'opacity 0.2s',
-          }}
-        >
-          {activeEx.copied ? (
-            <Minus size={26} color="#1a1a1a" strokeWidth={1.2} />
-          ) : (
-            <Plus size={26} color="#1a1a1a" strokeWidth={1.2} />
-          )}
-        </div>
-      )}
 
       {/* Bottom area */}
       {showAdvanced ? (
