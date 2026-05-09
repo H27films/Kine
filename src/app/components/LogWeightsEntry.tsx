@@ -252,7 +252,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                 flexShrink: 0,
               }}
             >
-              ADD EXERCISE
+              + EXERCISE
             </span>
             {orderedExercises.map((ex) => {
               const hasData = ex.sets.some(s => s.weight !== '');
@@ -414,7 +414,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                   >
                     <ChevronLeft size={12} /> {adderGroup}
                   </div>
-                  <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                  <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
                     {(exercisesByGroup[adderGroup] || []).map((ex, _ei, arr) => {
                       const alreadyAdded = !!addedExercises.find(e => e.exercise.id === ex.id);
                       const t2 = ex.type2 ?? '';
