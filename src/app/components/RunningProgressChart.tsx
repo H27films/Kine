@@ -7,7 +7,7 @@ interface RunningProgressChartProps {
 
 export const RunningProgressChart: React.FC<RunningProgressChartProps> = ({ 
   completedKm, 
-  weeklyGoal = 20 
+  weeklyGoal = 25 
 }) => {
   const percentage = Math.min(100, (completedKm / weeklyGoal) * 100);
   const remainingPercentage = 100 - percentage;
@@ -17,19 +17,18 @@ export const RunningProgressChart: React.FC<RunningProgressChartProps> = ({
   const chartWidth = 280;
   const barWidth = 60;
   
-  // Baseline position moves UP as percentage increases (0% at bottom, 100% at top)
-  const baselineY = chartHeight - (percentage / 100) * chartHeight;
-  const solidBlockHeight = chartHeight - baselineY;
-  const glowHeight = baselineY;
+  const baselineY = (percentage / 100) * chartHeight;
+  const glowHeight = chartHeight - baselineY;
   
   return (
     <div style={{
       width: '100%',
-      height: '120px',
+      height: '100%',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       position: 'relative',
+      overflow: 'visible',
     }}>
       
       {/* Left labels */}
@@ -69,7 +68,6 @@ export const RunningProgressChart: React.FC<RunningProgressChartProps> = ({
         }}
       >
         <defs>
-          {/* Soft blur filter for remaining distance */}
           <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur stdDeviation="8" result="blur" />
             <feColorMatrix
@@ -83,7 +81,7 @@ export const RunningProgressChart: React.FC<RunningProgressChartProps> = ({
           </filter>
         </defs>
         
-        {/* Remaining distance glow (below baseline) - rendered FIRST so it sits behind */}
+        {/* Remaining distance glow (below baseline) */}
         {remainingPercentage > 0 && (
           <rect
             x={(chartWidth - barWidth) / 2}
@@ -102,19 +100,21 @@ export const RunningProgressChart: React.FC<RunningProgressChartProps> = ({
           x2={(chartWidth + barWidth) / 2 + 4}
           y2={baselineY}
           stroke="#666"
-          strokeWidth="1"
+          strokeWidth="2.0"
           strokeOpacity={0.6}
         />
         
-        {/* Completed portion (above baseline) - rendered on TOP */}
-        <rect
-          x={(chartWidth - barWidth) / 2}
-          y={baselineY - (chartHeight - baselineY)}
-          width={barWidth}
-          height={chartHeight - baselineY}
-          fill="#1a1a1a"
-          rx={2}
-        />
+        {/* Completed portion — starts at y=0, fills down to baselineY */}
+        {percentage > 0 && (
+          <rect
+            x={(chartWidth - barWidth) / 2}
+            y={0}
+            width={barWidth}
+            height={baselineY}
+            fill="#1a1a1a"
+            rx={2}
+          />
+        )}
         
       </svg>
       

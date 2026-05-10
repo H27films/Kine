@@ -761,26 +761,33 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                   }}>
                     
                     {/* Tab 1: PROGRESS CHART */}
-                     <div style={{ width: '50%' }}>
-                       <div style={{
-                         display: 'flex',
-                         justifyContent: 'space-between',
-                         alignItems: 'baseline',
-                         marginBottom: '8px',
-                         paddingTop: '4px'
-                       }}>
-                         <div style={{
-                           fontSize: '12px',
-                           fontWeight: 700,
-                           color: '#1a1a1a',
-                           textTransform: 'uppercase',
-                           letterSpacing: '0.08em',
-                         }}>
-                           PROGRESS CHART
-                         </div>
-                       </div>
-                       <RunningProgressChart completedKm={data.reduce((sum, d) => sum + d.originalKm, 0)} weeklyGoal={20} />
-                     </div>
+<div style={{ width: '50%' }}>
+  <div style={{
+    display: 'flex',
+    flexDirection: 'column',
+    height: '160px',   // fixed total height for title + chart
+  }}>
+    <div style={{
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'baseline',
+      paddingTop: '4px'
+    }}>
+      <div style={{
+        fontSize: '12px',
+        fontWeight: 700,
+        color: '#1a1a1a',
+        textTransform: 'uppercase',
+        letterSpacing: '0.08em',
+      }}>
+        PROGRESS CHART
+      </div>
+    </div>
+    <div style={{ flex: 1 }}>
+      <RunningProgressChart completedKm={data.reduce((sum, d) => sum + d.originalKm, 0)} weeklyGoal={25} />
+    </div>
+  </div>
+</div>
                     
                     {/* Tab 2: WEEKLY RANK */}
                     <div style={{ width: '50%' }}>
