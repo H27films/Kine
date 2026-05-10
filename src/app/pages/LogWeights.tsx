@@ -36,12 +36,12 @@ const TYPE2_LABELS: Record<string, string> = {
   'MACHINE': 'Machine',
 };
 
-interface SetRow {
+export interface SetRow {
   weight: string;
   reps: number;
 }
 
-interface AddedExercise {
+export interface AddedExercise {
   exercise: Exercise;
   sets: SetRow[];
   expanded: boolean;
@@ -1188,8 +1188,9 @@ export const LogWeights: React.FC<LogWeightsProps> = () => {
           onRemoveExercise={removeExercise}
           onClose={() => setShowEntryCard(false)}
           todayLoggedTotal={todayTotal}
-          onAddExercise={handleAddExercise}
+          onAddExercise={(exercise) => handleAddExercise(exercise)}
           exercisesByGroup={exercisesByGroup}
+          onNavigate={onNavigate}
         />
       )}
     </div>

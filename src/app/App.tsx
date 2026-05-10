@@ -12,7 +12,7 @@ const LogCalories = lazy(() => import('./pages/LogCalories').then(m => ({ defaul
 const Analytics = lazy(() => import('./pages/Analytics').then(m => ({ default: m.Analytics })));
 const WeightsPlus = lazy(() => import('./pages/WeightsPlus').then(m => ({ default: m.WeightsPlus })));
 const RunningPlus = lazy(() => import('./pages/RunningPlus').then(m => ({ default: m.RunningPlus })));
-const Profile = lazy(() => import('./pages/Profile').then(m => ({ default: m.Profile })));
+const SummaryWeights = lazy(() => import('./pages/SummaryWeights').then(m => ({ default: m.default })));
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<{page: Page, data?: any}>({page: 'dashboard'});
@@ -33,7 +33,7 @@ const App: React.FC = () => {
     }
   }, [currentPage.page]);
 
-  const getHeaderTitle = (): string => {
+   const getHeaderTitle = (): string => {
     switch (currentPage.page) {
       case 'dashboard': return '';
       case 'weights':
@@ -44,6 +44,7 @@ const App: React.FC = () => {
       case 'weights-plus': return 'Weights+';
       case 'running-plus': return 'Running+';
       case 'profile': return 'Profile';
+      case 'summary-weights': return 'Summary';
     }
   };
 
@@ -65,11 +66,13 @@ const App: React.FC = () => {
         return <RunningPlus onNavigate={onNavigate} />;
       case 'profile':
         return <Profile onNavigate={onNavigate} />;
+      case 'summary-weights':
+        return <SummaryWeights onNavigate={onNavigate} addedExercises={currentPage.data?.addedExercises || []} todayLoggedTotal={currentPage.data?.todayLoggedTotal || 0} exercisesByGroup={currentPage.data?.exercisesByGroup || {}} />;
     }
   };
 
   const showBackButton = false;
-  const hideChrome = currentPage.page === 'analytics' || currentPage.page === 'profile' || currentPage.page === 'weights-plus' || currentPage.page === 'running-plus';
+  const hideChrome = currentPage.page === 'analytics' || currentPage.page === 'profile' || currentPage.page === 'weights-plus' || currentPage.page === 'running-plus' || currentPage.page === 'summary-weights';
 
   return (
     <>

@@ -1,4 +1,4 @@
-export type Page = 'dashboard' | 'weights' | 'cardio' | 'calories' | 'analytics' | 'profile' | 'weights-plus' | 'running-plus';
+export type Page = 'dashboard' | 'weights' | 'cardio' | 'calories' | 'analytics' | 'profile' | 'weights-plus' | 'running-plus' | 'summary-weights';
 
 export type LogTab = 'weights' | 'cardio' | 'calories';
 

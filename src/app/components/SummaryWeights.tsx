@@ -1,15 +1,14 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Plus, Minus, Check, X, ChevronDown, ChevronLeft } from 'lucide-react';
 import { Exercise } from '../../lib/supabase';
-import { Page } from '../../types';
 import { DoubleArrowIcon } from '../components/DoubleArrowIcon';
 
-export interface SetRow {
+interface SetRow {
   weight: string;
   reps: number;
 }
 
-export interface AddedExercise {
+interface AddedExercise {
   exercise: Exercise;
   sets: SetRow[];
   expanded: boolean;
@@ -22,7 +21,7 @@ export interface AddedExercise {
   pbThreshold: number;
 }
 
-interface LogWeightsEntryProps {
+interface SummaryWeightsProps {
   addedExercises: AddedExercise[];
   onUpdateSet: (exerciseId: number, setIdx: number, field: 'weight' | 'reps', value: string | number) => void;
   onAddSet: (exerciseId: number) => void;
@@ -34,8 +33,6 @@ interface LogWeightsEntryProps {
   todayLoggedTotal: number;
   onAddExercise: (exercise: Exercise) => void;
   exercisesByGroup: Record<string, Exercise[]>;
-  onNavigate?: (page: Page, data?: any) => void;
-  showDoubleArrow?: boolean;
 }
 
 const TYPE2_LABELS: Record<string, string> = {
@@ -45,7 +42,10 @@ const TYPE2_LABELS: Record<string, string> = {
   'MACHINE': 'Machine',
 };
 
-const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
+const makeDefaultSets = (): SetRow[] =>
+  Array.from({ length: 4 }, () => ({ weight: '', reps: 10 }));
+
+export const SummaryWeights: React.FC<SummaryWeightsProps> = ({
   addedExercises,
   onUpdateSet,
   onAddSet,
@@ -57,8 +57,6 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
   todayLoggedTotal,
   onAddExercise,
   exercisesByGroup,
-  onNavigate,
-  showDoubleArrow = true,
 }) => {
   const [activeExIndex, setActiveExIndex] = useState(0);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -70,14 +68,12 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
   const tabScrollRef = useRef<HTMLDivElement>(null);
   const safeIndex = Math.min(activeExIndex, addedExercises.length - 1);
   const activeEx = addedExercises[safeIndex];
-  // Rotate so the active exercise appears first in the tab bar, maintaining relative order
   const orderedExercises = addedExercises.length > 1
     ? [...addedExercises.slice(safeIndex), ...addedExercises.slice(0, safeIndex)]
     : addedExercises;
 
   const isAdderActive = adderOpen;
   const showingAdder = isAdderActive;
-  // When adder is open, show "ADD EXERCISE" as the active tab
   const effectiveIndex = showingAdder ? -1 : safeIndex;
   const effectiveActiveEx = showingAdder ? null : activeEx;
 
@@ -97,7 +93,6 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  // Scroll tabs to the far left when active exercise or adder state changes
   useEffect(() => {
     if (tabScrollRef.current) {
       tabScrollRef.current.scrollLeft = 0;
@@ -107,7 +102,6 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
   const calcExerciseTotal = (sets: SetRow[], multiplier: number = 1): number =>
     sets.reduce((acc, s) => acc + (parseFloat(s.weight) || 0) * s.reps * multiplier, 0);
 
-  // Calculate today's total: logged + pending
   const pendingTotal = addedExercises.reduce((acc, ex) => acc + calcExerciseTotal(ex.sets, ex.exercise.multiplier ?? 1), 0);
   const todayTotalSum = todayLoggedTotal + pendingTotal;
 
@@ -255,269 +249,46 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
           alignItems: 'baseline',
         }}
       >
-        {/* When adder is open, show ADD EXERCISE as first active tab */}
-        {adderOpen ? (
-          <>
-            <span
-              style={{
-                fontSize: '17px',
-                fontWeight: 400,
-                color: '#1a1a1a',
-                letterSpacing: '0.02em',
-                borderBottom: '1.5px solid #333333',
-                padding: '4px 0',
-                flexShrink: 0,
-              }}
-            >
-              + EXERCISE
-            </span>
-            {orderedExercises.map((ex) => {
-              const hasData = ex.sets.some(s => s.weight !== '');
-              return (
-                <button
-                  key={ex.exercise.id}
-                  onClick={() => {
-                    const idxInOriginal = addedExercises.findIndex(e => e.exercise.id === ex.exercise.id);
-                    setActiveExIndex(idxInOriginal);
-                    setAdderOpen(false);
-                    setAdderGroup(null);
-                  }}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    borderBottom: hasData ? '1px solid rgba(26,26,26,0.12)' : 'none',
-                    padding: '4px 0',
-                    cursor: 'pointer',
-                    flexShrink: 0,
-                    transition: 'all 0.2s ease',
-                    fontSize: '11px',
-                    fontWeight: 300,
-                    color: 'rgba(26,26,26,0.35)',
-                    filter: 'blur(3px)',
-                    letterSpacing: '0.02em',
-                  }}
-                >
-                  {ex.exercise.exercise_name.toUpperCase()}
-                </button>
-              );
-            })}
-          </>
-        ) : (
-          <>
-            {orderedExercises.map((ex, i) => {
-              const isActive = i === 0;
-              const hasData = ex.sets.some(s => s.weight !== '');
-              return (
-                <button
-                  key={ex.exercise.id}
-                  onClick={() => {
-                    const idxInOriginal = addedExercises.findIndex(e => e.exercise.id === ex.exercise.id);
-                    setActiveExIndex(idxInOriginal);
-                  }}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    borderBottom: isActive
-                      ? '1.5px solid #333333'
-                      : hasData
-                        ? '1px solid rgba(26,26,26,0.12)'
-                        : 'none',
-                    padding: '4px 0',
-                    cursor: 'pointer',
-                    flexShrink: 0,
-                    transition: 'all 0.2s ease',
-                    fontSize: isActive ? '17px' : '11px',
-                    fontWeight: isActive ? 400 : 300,
-                    color: isActive ? '#1a1a1a' : 'rgba(26,26,26,0.35)',
-                    filter: isActive ? 'none' : 'blur(0.5px)',
-                    letterSpacing: '0.02em',
-                  }}
-                >
-                  {ex.exercise.exercise_name.toUpperCase()}
-                </button>
-              );
-            })}
+        {orderedExercises.map((ex, i) => {
+          const isActive = i === 0;
+          const hasData = ex.sets.some(s => s.weight !== '');
+          return (
             <button
+              key={ex.exercise.id}
               onClick={() => {
-                setAdderOpen(true);
-                setAdderGroup(null);
+                const idxInOriginal = addedExercises.findIndex(e => e.exercise.id === ex.exercise.id);
+                setActiveExIndex(idxInOriginal);
               }}
               style={{
                 background: 'none',
                 border: 'none',
+                borderBottom: isActive
+                  ? '1.5px solid #333333'
+                  : hasData
+                    ? '1px solid rgba(26,26,26,0.12)'
+                    : 'none',
                 padding: '4px 0',
                 cursor: 'pointer',
-                fontSize: '15px',
-                fontWeight: 400,
-                color: '#1a1a1a',
+                flexShrink: 0,
+                transition: 'all 0.2s ease',
+                fontSize: isActive ? '17px' : '11px',
+                fontWeight: isActive ? 400 : 300,
+                color: isActive ? '#1a1a1a' : 'rgba(26,26,26,0.35)',
+                filter: isActive ? 'none' : 'blur(0.5px)',
                 letterSpacing: '0.02em',
-                filter: 'none',
               }}
             >
-              + ADD
+              {ex.exercise.exercise_name.toUpperCase()}
             </button>
-          </>
-        )}
+          );
+        })}
       </div>
 
-      {/* Adder dropdown — rendered between tabs and set rows as a full-width panel */}
-      <div ref={adderRef}>
-        {adderOpen && (
-          <div
-            style={{
-              padding: '0 20px',
-              width: '100%',
-              boxSizing: 'border-box',
-            }}
-          >
-            <div
-              style={{
-                backgroundColor: '#f2f2f2',
-                border: '1px solid rgba(0,0,0,0.08)',
-                borderRadius: '10px',
-                overflow: 'hidden',
-                boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
-                fontFamily: "'Archivo', sans-serif",
-                marginBottom: '12px',
-              }}
-            >
-              {!adderGroup ? (
-                /* Group selection */
-                <>
-                  {['Chest', 'Back', 'Legs'].map((group) => (
-                    <div
-                      key={group}
-                      onClick={() => setAdderGroup(group)}
-                      style={{
-                        padding: '12px 14px',
-                        cursor: 'pointer',
-                        fontSize: '10px',
-                        fontWeight: 700,
-                        letterSpacing: '0.12em',
-                        color: '#1a1a1a',
-                        textTransform: 'uppercase',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                      }}
-                      role="button"
-                      tabIndex={0}
-                    >
-                      {group.toUpperCase()}
-                      <ChevronDown size={12} style={{ transform: 'rotate(-90deg)', color: 'rgba(0,0,0,0.25)' }} />
-                    </div>
-                  ))}
-                </>
-              ) : (
-                /* Exercise list for selected group */
-                <div>
-                  <div
-                    onClick={() => setAdderGroup(null)}
-                    style={{
-                      padding: '10px 14px',
-                      cursor: 'pointer',
-                      fontSize: '9px',
-                      fontWeight: 600,
-                      letterSpacing: '0.1em',
-                      color: '#999',
-                      textTransform: 'uppercase',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      backgroundColor: 'rgba(0,0,0,0.04)',
-                    }}
-                    role="button"
-                    tabIndex={0}
-                  >
-                    <ChevronLeft size={12} /> {adderGroup}
-                  </div>
-                  <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                    {(exercisesByGroup[adderGroup] || []).map((ex, _ei, arr) => {
-                      const alreadyAdded = !!addedExercises.find(e => e.exercise.id === ex.id);
-                      const t2 = ex.type2 ?? '';
-                      const prevT2 = _ei > 0 ? arr[_ei - 1].type2 ?? '' : '';
-                      const showHeader = t2 !== '' && t2 !== prevT2;
-                      return (
-                        <React.Fragment key={ex.id}>
-                          {showHeader && (
-                            <div style={{
-                              borderTop: _ei > 0 ? '1px solid rgba(0,0,0,0.06)' : 'none',
-                              padding: '10px 14px 4px 14px',
-                            }}>
-                              <span style={{
-                                fontSize: '10px',
-                                fontWeight: 800,
-                                letterSpacing: '0.12em',
-                                textTransform: 'uppercase',
-                                color: 'rgba(0,0,0,0.5)',
-                              }}>
-                                {TYPE2_LABELS[t2] || t2}
-                              </span>
-                            </div>
-                          )}
-                          <div
-                            onClick={() => {
-                              onAddExercise(ex);
-                              setAdderOpen(false);
-                              setAdderGroup(null);
-                            }}
-                            style={{
-                              padding: '10px 14px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              cursor: 'pointer',
-                            }}
-                          >
-                            <div>
-                              <span style={{
-                                fontSize: '12px',
-                                fontWeight: 500,
-                                color: alreadyAdded ? 'rgba(0,0,0,0.3)' : '#1a1a1a',
-                              }}>
-                                {ex.exercise_name.charAt(0).toUpperCase() + ex.exercise_name.slice(1).toLowerCase()}
-                              </span>
-                              {ex.info_notes && (
-                                <span style={{
-                                  fontSize: '9px',
-                                  color: 'rgba(0,0,0,0.3)',
-                                  display: 'block',
-                                  marginTop: '1px',
-                                }}>
-                                  {ex.info_notes}
-                                </span>
-                              )}
-                            </div>
-                            <div style={{
-                              width: 24, height: 24, borderRadius: '50%',
-                              backgroundColor: alreadyAdded ? 'rgba(0,0,0,0.15)' : '#1a1a1a',
-                              color: alreadyAdded ? '#666' : '#ffffff',
-                              display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              flexShrink: 0,
-                            }}>
-                              {alreadyAdded ? <X size={11} strokeWidth={3} /> : <Plus size={11} strokeWidth={3} />}
-                            </div>
-                          </div>
-                        </React.Fragment>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Scrollable set rows area — blurred/dimmed when adder is open */}
+      {/* Scrollable set rows area */}
       <div style={{
         flex: 1,
         overflowY: 'auto',
         padding: '0 20px',
-        filter: adderOpen ? 'blur(3px)' : 'none',
-        opacity: adderOpen ? 0.3 : 1,
-        transition: 'filter 0.25s ease, opacity 0.25s ease',
-        pointerEvents: adderOpen ? 'none' : 'auto',
       }}>
         {activeEx.sets.map((set, idx) => {
           const showSeparator = idx > 0;
@@ -526,13 +297,10 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
           const hasData = set.weight !== '';
           return (
             <div key={idx}>
-              {/* Separator line between sets */}
               {showSeparator && (
                 <div style={{ height: '0.5px', backgroundColor: 'rgba(0,0,0,0.18)', marginTop: '17px', marginBottom: '9px' }} />
               )}
-              {/* Row: SET label (left) + W/R inputs (right) */}
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-                {/* LEFT: SET label + total below */}
                 <div style={{ flexShrink: 0, marginRight: '16px' }}>
                   <span
                     style={{
@@ -581,12 +349,10 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                          KG
                        </span>
                      )}
-                  </div>
+                   </div>
                 </div>
 
-                {/* RIGHT: WEIGHT + REPS columns */}
                 <div style={{ flex: 1, maxWidth: '220px' }}>
-                  {/* Top row: WEIGHT and REPS labels */}
                   <div style={{ display: 'flex', gap: '6px', marginBottom: '2px', lineHeight: '18px' }}>
                     <div style={{ flex: 1, textAlign: 'center' }}>
                       <span
@@ -615,9 +381,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                       </span>
                     </div>
                   </div>
-                  {/* Bottom row: Weight and Reps input boxes */}
                   <div style={{ display: 'flex', gap: '6px' }}>
-                    {/* Weight input */}
                     <div
                       style={{
                         flex: 1,
@@ -627,34 +391,18 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                         backgroundColor: 'rgba(0,0,0,0.04)',
                         overflow: 'hidden',
                         height: 48,
+                        pointerEvents: 'none',
                       }}
                     >
-                      <div
-                        onClick={() => {
-                          const cur = parseFloat(set.weight) || 0;
-                          const next = Math.max(0, Math.round((cur - 1) * 10) / 10);
-                          onUpdateSet(activeEx.exercise.id, idx, 'weight', next === 0 ? '' : String(next));
-                        }}
-                        style={{
-                          width: 34,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          cursor: 'pointer',
-                          color: 'rgba(0,0,0,0.35)',
-                          fontSize: '15px',
-                          fontWeight: 300,
-                          flexShrink: 0,
-                        }}
-                      >
+                      <div style={{ width: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(0,0,0,0.25)', fontSize: '15px', fontWeight: 300, flexShrink: 0 }}>
                         −
                       </div>
                       <input
                         type="number"
                         inputMode="decimal"
                         value={set.weight}
-                         placeholder="—"
-                        onChange={e => onUpdateSet(activeEx.exercise.id, idx, 'weight', e.target.value)}
+                        placeholder="—"
+                        readOnly
                         style={{
                           flex: 1,
                           minWidth: 0,
@@ -663,36 +411,19 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                           outline: 'none',
                           textAlign: 'center',
                           fontSize: '15px',
-                           fontWeight: 600,
+                          fontWeight: 600,
                           color: hasData ? '#1a1a1a' : 'rgba(0,0,0,0.25)',
                           height: 48,
                           padding: 0,
                           MozAppearance: 'textfield',
+                          pointerEvents: 'none',
                         }}
                       />
-                      <div
-                        onClick={() => {
-                          const cur = parseFloat(set.weight) || 0;
-                          const next = Math.round((cur + 1) * 10) / 10;
-                          onUpdateSet(activeEx.exercise.id, idx, 'weight', String(next));
-                        }}
-                        style={{
-                          width: 34,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          cursor: 'pointer',
-                          color: 'rgba(0,0,0,0.35)',
-                          fontSize: '15px',
-                          fontWeight: 300,
-                          flexShrink: 0,
-                        }}
-                      >
+                      <div style={{ width: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(0,0,0,0.25)', fontSize: '15px', fontWeight: 300, flexShrink: 0 }}>
                         +
                       </div>
                     </div>
 
-                    {/* Reps input */}
                     <div
                       style={{
                         flex: 1,
@@ -702,32 +433,17 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                         backgroundColor: 'rgba(0,0,0,0.04)',
                         overflow: 'hidden',
                         height: 48,
+                        pointerEvents: 'none',
                       }}
                     >
-                      <div
-                        onClick={() => onUpdateSet(activeEx.exercise.id, idx, 'reps', Math.max(1, set.reps - 1))}
-                        style={{
-                          width: 34,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          cursor: 'pointer',
-                          color: 'rgba(0,0,0,0.35)',
-                          fontSize: '15px',
-                          fontWeight: 300,
-                          flexShrink: 0,
-                        }}
-                      >
+                      <div style={{ width: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(0,0,0,0.25)', fontSize: '15px', fontWeight: 300, flexShrink: 0 }}>
                         −
                       </div>
                       <input
                         type="number"
                         inputMode="numeric"
                         value={set.reps}
-                        onChange={e => {
-                          const val = parseInt(e.target.value) || 1;
-                          onUpdateSet(activeEx.exercise.id, idx, 'reps', Math.max(1, val));
-                        }}
+                        readOnly
                         style={{
                           flex: 1,
                           minWidth: 0,
@@ -736,27 +452,15 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                           outline: 'none',
                           textAlign: 'center',
                           fontSize: '15px',
-                           fontWeight: 600,
+                          fontWeight: 600,
                           color: '#1a1a1a',
                           height: 48,
                           padding: 0,
                           MozAppearance: 'textfield',
+                          pointerEvents: 'none',
                         }}
                       />
-                      <div
-                        onClick={() => onUpdateSet(activeEx.exercise.id, idx, 'reps', set.reps + 1)}
-                        style={{
-                          width: 34,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          cursor: 'pointer',
-                          color: 'rgba(0,0,0,0.35)',
-                          fontSize: '15px',
-                          fontWeight: 300,
-                          flexShrink: 0,
-                        }}
-                      >
+                      <div style={{ width: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(0,0,0,0.25)', fontSize: '15px', fontWeight: 300, flexShrink: 0 }}>
                         +
                       </div>
                     </div>
@@ -766,97 +470,6 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
             </div>
           );
         })}
-        {/* Separator line + Add set link + copy icon */}
-        {activeEx.sets.length < 6 && (
-          <>
-            <div style={{ height: '0.5px', backgroundColor: 'rgba(0,0,0,0.18)', marginTop: '17px', marginBottom: '9px' }} />
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                paddingTop: '6px',
-                paddingBottom: '14px',
-              }}
-            >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                <div
-                  onClick={() => onToggleFail(activeEx.exercise.id)}
-                  style={{
-                    cursor: 'pointer',
-                    userSelect: 'none',
-                    display: 'inline-flex',
-                    alignSelf: 'flex-start',
-                  }}
-                >
-                  {activeEx.fail ? (
-                    <span
-                      style={{
-                        display: 'inline-block',
-                        padding: '1px 8px',
-                        borderRadius: '999px',
-                        backgroundColor: '#1a1a1a',
-                        color: '#ffffff',
-                        fontSize: '11px',
-                        fontWeight: 600,
-                        letterSpacing: '0.04em',
-                        lineHeight: '20px',
-                      }}
-                    >
-                      FAILED
-                    </span>
-                  ) : (
-                    <span
-                      style={{
-                        fontSize: '12px',
-                        fontWeight: 300,
-                        color: 'rgba(26,26,26,0.75)',
-                        letterSpacing: '0.03em',
-                      }}
-                    >
-                      + FAIL
-                    </span>
-                  )}
-                </div>
-                  <div
-                    onClick={() => onAddSet(activeEx.exercise.id)}
-                    style={{
-                      cursor: 'pointer',
-                      fontSize: '12px',
-                      fontWeight: 300,
-                      color: 'rgba(26,26,26,0.75)',
-                      letterSpacing: '0.03em',
-                      userSelect: 'none',
-                    }}
-                  >
-                    + SET
-                  </div>
-              </div>
-              {!showAdvanced && (
-                <div
-                  onClick={() => {
-                    if (activeEx.lastSets && activeEx.lastSets.length > 0) {
-                      onToggleCopyFromLast(activeEx.exercise.id);
-                    }
-                  }}
-                  style={{
-                    cursor: activeEx.lastSets && activeEx.lastSets.length > 0 ? 'pointer' : 'default',
-                    opacity: activeEx.lastSets && activeEx.lastSets.length > 0 ? 0.9 : 0.3,
-                    transition: 'opacity 0.2s',
-                    display: 'flex',
-                    alignItems: 'center',
-                  }}
-                >
-                  {activeEx.copied ? (
-                    <X size={20} color="#1a1a1a" strokeWidth={1.5} />
-                  ) : (
-                    <Plus size={20} color="#1a1a1a" strokeWidth={1.5} />
-                  )}
-                </div>
-              )}
-            </div>
-          </>
-        )}
       </div>
 
       {/* Bottom area */}
@@ -872,7 +485,6 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
             flexWrap: 'wrap',
           }}
         >
-          {/* LAST */}
           <button
             onClick={() => onToggleCopyFromLast(activeEx.exercise.id)}
             disabled={!activeEx.lastSets || activeEx.lastSets.length === 0}
@@ -896,7 +508,6 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
             {activeEx.copied ? 'REVERT' : 'LAST'}
           </button>
 
-          {/* Max */}
           <button
             onClick={() => onLoadMaxSession(activeEx.exercise.id)}
             style={{
@@ -918,8 +529,6 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
             {activeEx.loadedMax ? 'DEFAULT' : 'MAX'}
           </button>
 
-
-          {/* Remove */}
           <button
             onClick={() => onRemoveExercise(activeEx.exercise.id)}
             style={{
@@ -942,24 +551,6 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
           >
             <Minus size={12} /> EXE
           </button>
-
-          {showDoubleArrow && (
-            <button
-              onClick={() => onNavigate && onNavigate('summary-weights', { addedExercises, todayLoggedTotal, exercisesByGroup })}
-              style={{
-                marginLeft: 'auto',
-                background: 'none',
-                border: 'none',
-                padding: 0,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-              }}
-              aria-label="Summary"
-            >
-              <DoubleArrowIcon size={18} />
-            </button>
-          )}
         </div>
       ) : (
         <div
@@ -1022,4 +613,4 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
   );
 };
 
-export default LogWeightsEntry;
+export default SummaryWeights;
