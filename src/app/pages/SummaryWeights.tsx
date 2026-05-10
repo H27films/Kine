@@ -41,6 +41,7 @@ const SummaryWeights: React.FC<SummaryWeightsProps> = ({
       onAddExercise={noop}
       exercisesByGroup={exercisesByGroup}
       showDoubleArrow={false}
+      showDailyTotalOnly={true}
     />
   );
 };

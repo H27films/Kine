@@ -36,6 +36,7 @@ interface LogWeightsEntryProps {
   exercisesByGroup: Record<string, Exercise[]>;
   onNavigate?: (page: Page, data?: any) => void;
   showDoubleArrow?: boolean;
+  showDailyTotalOnly?: boolean;
 }
 
 const TYPE2_LABELS: Record<string, string> = {
@@ -59,6 +60,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
   exercisesByGroup,
   onNavigate,
   showDoubleArrow = true,
+  showDailyTotalOnly = false,
 }) => {
   const [activeExIndex, setActiveExIndex] = useState(0);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -124,18 +126,18 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
     >
       {/* Header row: grand total (left) + progress bar + back arrow (right) */}
         <div
-          onClick={() => setShowTodayTotal(!showTodayTotal)}
+          onClick={showDailyTotalOnly ? undefined : () => setShowTodayTotal(!showTodayTotal)}
           style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '18px 20px 10px',
             paddingTop: 'calc(18px + env(safe-area-inset-top))',
-            cursor: 'pointer',
+            cursor: showDailyTotalOnly ? 'default' : 'pointer',
           }}
         >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, marginRight: '20px' }}>
-          {showTodayTotal ? (
+          {showDailyTotalOnly || showTodayTotal ? (
             <>
               <span
                 style={{
