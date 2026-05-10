@@ -777,14 +777,39 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                   onClick={() => onToggleFail(activeEx.exercise.id)}
                   style={{
                     cursor: 'pointer',
-                    fontSize: activeEx.fail ? '14px' : '12px',
-                    fontWeight: activeEx.fail ? 500 : 300,
-                    color: activeEx.fail ? '#1a1a1a' : 'rgba(26,26,26,0.3)',
-                    letterSpacing: activeEx.fail ? '0.04em' : '0.03em',
                     userSelect: 'none',
+                    display: 'inline-flex',
+                    alignSelf: 'flex-start',
                   }}
                 >
-                  {activeEx.fail ? 'FAILED' : '+ FAIL'}
+                  {activeEx.fail ? (
+                    <span
+                      style={{
+                        display: 'inline-block',
+                        padding: '2px 10px',
+                        borderRadius: '999px',
+                        backgroundColor: '#1a1a1a',
+                        color: '#ffffff',
+                        fontSize: '13px',
+                        fontWeight: 600,
+                        letterSpacing: '0.04em',
+                        lineHeight: '22px',
+                      }}
+                    >
+                      FAILED
+                    </span>
+                  ) : (
+                    <span
+                      style={{
+                        fontSize: '12px',
+                        fontWeight: 300,
+                        color: 'rgba(26,26,26,0.3)',
+                        letterSpacing: '0.03em',
+                      }}
+                    >
+                      + FAIL
+                    </span>
+                  )}
                 </div>
                 <div
                   onClick={() => onAddSet(activeEx.exercise.id)}
