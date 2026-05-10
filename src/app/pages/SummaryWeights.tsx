@@ -36,7 +36,7 @@ const SummaryWeights: React.FC<SummaryWeightsProps> = ({
       onLoadMaxSession={noop}
       onToggleCopyFromLast={noop}
       onRemoveExercise={noop}
-      onClose={() => onNavigate('weights')}
+      onClose={() => onNavigate('weights', { showEntryCard: true, addedExercises, todayLoggedTotal, exercisesByGroup })}
       todayLoggedTotal={todayLoggedTotal}
       onAddExercise={noop}
       exercisesByGroup={exercisesByGroup}

@@ -9,8 +9,9 @@ import LogWeightsEntry from '../components/LogWeightsEntry';
 import { ArrowLeftFromLine } from 'lucide-react';
 
 interface LogWeightsProps {
-  onNavigate: (page: Page) => void;
+  onNavigate: (page: Page, data?: any) => void;
   showWeeklySummary?: boolean;
+  data?: any;
 }
 
 const tabs: { label: string; page: Page }[] = [
@@ -110,6 +111,13 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
   const [applyingTemplate, setApplyingTemplate] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState<number | null>(null);
   const [showEntryCard, setShowEntryCard] = useState(false);
+
+  useEffect(() => {
+    if (data?.showEntryCard) setShowEntryCard(true);
+    if (data?.addedExercises) setAddedExercises(data.addedExercises);
+    if (data?.todayLoggedTotal !== undefined) setTodayTotal(data.todayLoggedTotal);
+    if (data?.exercisesByGroup) setExercisesByGroup(data.exercisesByGroup);
+  }, [data]);
 
   const groupRef = useRef<HTMLDivElement>(null);
   const exerciseRef = useRef<HTMLDivElement>(null);
