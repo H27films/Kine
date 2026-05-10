@@ -47,6 +47,7 @@ interface AddedExercise {
   expanded: boolean;
   logged: boolean;
   copied: boolean;
+  loadedMax: boolean;
   lastSets: SetRow[] | null;
   maxSets: SetRow[] | null;
   fail: boolean;
@@ -255,6 +256,7 @@ export const LogWeights: React.FC<LogWeightsProps> = () => {
       expanded: false,
       logged: false,
       copied: false,
+      loadedMax: false,
       lastSets,
       maxSets,
       fail: false,
@@ -344,12 +346,12 @@ export const LogWeights: React.FC<LogWeightsProps> = () => {
     setAddedExercises(prev => prev.map(e => {
       if (e.exercise.id !== id) return e;
       if (e.copied && e.lastSets && e.lastSets.length > 0) {
-        return { ...e, sets: makeDefaultSets(), copied: false };
+        return { ...e, sets: makeDefaultSets(), copied: false, loadedMax: false };
       }
       if (!e.lastSets || e.lastSets.length === 0) {
         return e;
       }
-      return { ...e, sets: [...e.lastSets], copied: true };
+      return { ...e, sets: [...e.lastSets], copied: true, loadedMax: false };
     }));
   };
 
@@ -357,12 +359,12 @@ export const LogWeights: React.FC<LogWeightsProps> = () => {
     const ex = addedExercises.find(e => e.exercise.id === id);
     if (!ex) return;
     if (ex.copied) {
-      setAddedExercises(prev => prev.map(e => e.exercise.id !== id ? e : { ...e, copied: false, sets: makeDefaultSets() }));
+      setAddedExercises(prev => prev.map(e => e.exercise.id !== id ? e : { ...e, copied: false, loadedMax: false, sets: makeDefaultSets() }));
     } else {
       if (!ex.lastSets || ex.lastSets.length === 0) return;
       setAddedExercises(prev => prev.map(e => {
         if (e.exercise.id !== id) return e;
-        return { ...e, sets: [...e.lastSets!], copied: true };
+        return { ...e, sets: [...e.lastSets!], copied: true, loadedMax: false };
       }));
     }
   };
@@ -370,6 +372,12 @@ export const LogWeights: React.FC<LogWeightsProps> = () => {
   const loadMaxSession = async (id: number) => {
     const ex = addedExercises.find(e => e.exercise.id === id);
     if (!ex) return;
+
+    // Toggle off: revert to defaults if already loaded max
+    if (ex.loadedMax) {
+      setAddedExercises(prev => prev.map(e => e.exercise.id !== id ? e : { ...e, loadedMax: false, sets: makeDefaultSets() }));
+      return;
+    }
 
     let maxSets = ex.maxSets;
 
@@ -398,7 +406,7 @@ export const LogWeights: React.FC<LogWeightsProps> = () => {
     setAddedExercises(prev => prev.map(e => {
       if (e.exercise.id !== id) return e;
       if (!maxSets || maxSets.length === 0) return { ...e, expanded: true };
-      return { ...e, sets: [...maxSets], maxSets, expanded: true };
+      return { ...e, sets: [...maxSets], maxSets, expanded: true, loadedMax: true };
     }));
   };
 
