@@ -786,14 +786,14 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                     <span
                       style={{
                         display: 'inline-block',
-                        padding: '2px 10px',
+                        padding: '1px 8px',
                         borderRadius: '999px',
                         backgroundColor: '#1a1a1a',
                         color: '#ffffff',
-                        fontSize: '13px',
+                        fontSize: '11px',
                         fontWeight: 600,
                         letterSpacing: '0.04em',
-                        lineHeight: '22px',
+                        lineHeight: '20px',
                       }}
                     >
                       FAILED
