@@ -24,15 +24,15 @@ export interface AddedExercise {
 
 interface LogWeightsEntryProps {
   addedExercises: AddedExercise[];
-  onUpdateSet: (exerciseId: number, setIdx: number, field: 'weight' | 'reps', value: string | number) => void;
-  onAddSet: (exerciseId: number) => void;
-  onToggleFail: (exerciseId: number) => void;
-  onLoadMaxSession: (exerciseId: number) => void;
-  onToggleCopyFromLast: (exerciseId: number) => void;
-  onRemoveExercise: (exerciseId: number) => void;
+  onUpdateSet?: (exerciseId: number, setIdx: number, field: 'weight' | 'reps', value: string | number) => void;
+  onAddSet?: (exerciseId: number) => void;
+  onToggleFail?: (exerciseId: number) => void;
+  onLoadMaxSession?: (exerciseId: number) => void;
+  onToggleCopyFromLast?: (exerciseId: number) => void;
+  onRemoveExercise?: (exerciseId: number) => void;
   onClose: () => void;
   todayLoggedTotal: number;
-  onAddExercise: (exercise: Exercise) => void;
+  onAddExercise?: (exercise: Exercise) => void;
   exercisesByGroup: Record<string, Exercise[]>;
   onNavigate?: (page: Page, data?: any) => void;
   showDoubleArrow?: boolean;
@@ -48,15 +48,15 @@ const TYPE2_LABELS: Record<string, string> = {
 
 const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
   addedExercises,
-  onUpdateSet,
-  onAddSet,
-  onToggleFail,
-  onLoadMaxSession,
-  onToggleCopyFromLast,
-  onRemoveExercise,
+  onUpdateSet = () => {},
+  onAddSet = () => {},
+  onToggleFail = () => {},
+  onLoadMaxSession = () => {},
+  onToggleCopyFromLast = () => {},
+  onRemoveExercise = () => {},
   onClose,
   todayLoggedTotal,
-  onAddExercise,
+  onAddExercise = () => {},
   exercisesByGroup,
   onNavigate,
   showDoubleArrow = true,

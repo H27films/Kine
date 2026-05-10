@@ -9,13 +9,6 @@ interface SummaryWeightsProps {
   addedExercises: AddedExercise[];
   todayLoggedTotal: number;
   exercisesByGroup: Record<string, Exercise[]>;
-  onUpdateSet: (exerciseId: number, setIdx: number, field: 'weight' | 'reps', value: string | number) => void;
-  onAddSet: (exerciseId: number) => void;
-  onToggleFail: (exerciseId: number) => void;
-  onLoadMaxSession: (exerciseId: number) => void;
-  onToggleCopyFromLast: (exerciseId: number) => void;
-  onRemoveExercise: (exerciseId: number) => void;
-  onAddExercise: (exercise: Exercise) => void;
 }
 
 const SummaryWeights: React.FC<SummaryWeightsProps> = ({
@@ -23,18 +16,7 @@ const SummaryWeights: React.FC<SummaryWeightsProps> = ({
   addedExercises,
   todayLoggedTotal,
   exercisesByGroup,
-  // The following props are intentionally not used in summary mode
-  onUpdateSet: _onUpdateSet,
-  onAddSet: _onAddSet,
-  onToggleFail: _onToggleFail,
-  onLoadMaxSession: _onLoadMaxSession,
-  onToggleCopyFromLast: _onToggleCopyFromLast,
-  onRemoveExercise: _onRemoveExercise,
-  onAddExercise: _onAddExercise,
-}) => {
-  const noop = () => {};
-
-  const [loggedExercises, setLoggedExercises] = useState<AddedExercise[]>([]);
+}) => {  const [loggedExercises, setLoggedExercises] = useState<AddedExercise[]>([]);
 
   useEffect(() => {
     const fetchLoggedExercises = async () => {
@@ -44,6 +26,17 @@ const SummaryWeights: React.FC<SummaryWeightsProps> = ({
         .select('exercise_id, w1, r1, w2, r2, w3, r3, w4, r4, w5, r5, w6, r6, total_weight')
         .eq('date', today);
       if (error || !todayData) return;
+
+      type WorkoutRow = {
+        exercise_id: number;
+        w1?: number; r1?: number;
+        w2?: number; r2?: number;
+        w3?: number; r3?: number;
+        w4?: number; r4?: number;
+        w5?: number; r5?: number;
+        w6?: number; r6?: number;
+        total_weight?: number;
+      };
 
       // Fetch historical max total per exercise (best before today)
       const { data: historicalData } = await supabase
@@ -65,13 +58,13 @@ const SummaryWeights: React.FC<SummaryWeightsProps> = ({
       const idToEx = new Map(allEx.map(ex => [ex.id, ex]));
 
       const result: AddedExercise[] = [];
-      for (const row of todayData) {
+      for (const row of todayData as WorkoutRow[]) {
         const ex = idToEx.get(row.exercise_id);
         if (!ex) continue;
         const sets: { weight: string; reps: number }[] = [];
         for (let i = 1; i <= 6; i++) {
-          const w = (row as any)[`w${i}`];
-          const r = (row as any)[`r${i}`];
+          const w = row[`w${i}` as keyof WorkoutRow];
+          const r = row[`r${i}` as keyof WorkoutRow];
           if (w != null && Number(w) > 0) {
             sets.push({ weight: String(Number(w)), reps: Number(r) || 10 });
           }
@@ -103,15 +96,8 @@ const SummaryWeights: React.FC<SummaryWeightsProps> = ({
   return (
     <LogWeightsEntry
       addedExercises={displayExercises}
-      onUpdateSet={noop}
-      onAddSet={noop}
-      onToggleFail={noop}
-      onLoadMaxSession={noop}
-      onToggleCopyFromLast={noop}
-      onRemoveExercise={noop}
       onClose={() => onNavigate('weights', { showEntryCard: true, addedExercises, todayLoggedTotal, exercisesByGroup })}
       todayLoggedTotal={todayLoggedTotal}
-      onAddExercise={noop}
       exercisesByGroup={exercisesByGroup}
       showDoubleArrow={false}
       showDailyTotalOnly={true}
