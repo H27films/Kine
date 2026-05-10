@@ -274,6 +274,23 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
       return { maxKm, maxSpeed };
     };
 
+    // Find the fastest speed from runs longer than 3.0km
+    const getFastestRun = (): { fastestKm: number; fastestSpeed: number | null } => {
+      let fastestKm = 0;
+      let fastestSpeed: number | null = null;
+      for (const w of workouts) {
+        const km = w.total_cardio || 0;
+        if (km > 3.0) {
+          const speed = calculateSpeed(km, w.time);
+          if (speed !== null && (fastestSpeed === null || speed > fastestSpeed)) {
+            fastestSpeed = speed;
+            fastestKm = km;
+          }
+        }
+      }
+      return { fastestKm, fastestSpeed };
+    };
+
     const getDataForView = (type: string) => {
       switch (type) {
         case 'week': return prepareWeekData(getWeekByOffset(weekOffset));
@@ -754,18 +771,19 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                  </div>
               </div>
 
-              {/* Row 2: MAX RUN - left side */}
+              {/* Row 2: MAX RUN - left / FASTEST - right */}
               {(() => {
                 const maxRun = getMaxRun();
+                const fastestRun = getFastestRun();
                 return (
-                  <div style={{ marginTop: '14px', display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-start' }}>
+                  <div style={{ marginTop: '14px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
                     <div style={{ flex: 1 }}>
                       <div style={{
                         fontFamily: "'Inconsolata', monospace",
                         fontSize: '18px',
                         fontWeight: 348,
                         fontStretch: '175%',
-                        letterSpacing: '0.06em',
+                        letterSpacing: '0.02em',
                         color: 'rgba(0,0,0,0.35)',
                         textTransform: 'uppercase',
                       }}>
@@ -774,8 +792,28 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                       <div style={{ fontSize: '20px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
                         {maxRun.maxKm.toFixed(1)}<span style={{ fontSize: '14px', fontWeight: 200, color: '#999', marginLeft: '1px' }}>KM</span>
                       </div>
-                      <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em', color: '#1a1a1a', marginTop: '2px', textTransform: 'uppercase' }}>
+                      <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.01em', color: '#1a1a1a', marginTop: '2px', textTransform: 'uppercase' }}>
                         {maxRun.maxSpeed !== null ? `${maxRun.maxSpeed.toFixed(1)} KM/H` : '—'}
+                      </div>
+                    </div>
+                    <div style={{ flex: 1, textAlign: 'right' }}>
+                      <div style={{
+                        fontFamily: "'Inconsolata', monospace",
+                        fontSize: '18px',
+                        fontWeight: 348,
+                        fontStretch: '175%',
+                        letterSpacing: '0.02em',
+                        color: 'rgba(0,0,0,0.35)',
+                        textTransform: 'uppercase',
+                        textAlign: 'right',
+                      }}>
+                        FASTEST
+                      </div>
+                      <div style={{ fontSize: '20px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
+                        {fastestRun.fastestKm > 0 ? `${fastestRun.fastestKm.toFixed(1)}` : '—'}<span style={{ fontSize: '14px', fontWeight: 200, color: '#999', marginLeft: '1px' }}>KM</span>
+                      </div>
+                      <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.01em', color: '#1a1a1a', marginTop: '2px', textTransform: 'uppercase' }}>
+                        {fastestRun.fastestSpeed !== null ? `${fastestRun.fastestSpeed.toFixed(1)} KM/H` : '—'}
                       </div>
                     </div>
                   </div>
