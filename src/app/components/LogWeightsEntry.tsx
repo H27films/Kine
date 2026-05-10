@@ -340,8 +340,8 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                 border: 'none',
                 padding: '4px 0',
                 cursor: 'pointer',
-                fontSize: '11px',
-                fontWeight: 300,
+                fontSize: '15px',
+                fontWeight: 400,
                 color: '#1a1a1a',
                 letterSpacing: '0.02em',
                 filter: 'none',
@@ -772,39 +772,56 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                 paddingBottom: '14px',
               }}
             >
-              <div
-                onClick={() => onAddSet(activeEx.exercise.id)}
-                style={{
-                  cursor: 'pointer',
-                  fontSize: '12px',
-                  fontWeight: 300,
-                  color: 'rgba(26,26,26,0.3)',
-                  letterSpacing: '0.03em',
-                  userSelect: 'none',
-                }}
-              >
-                + ADD SET
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                <div
+                  onClick={() => onToggleFail(activeEx.exercise.id)}
+                  style={{
+                    cursor: 'pointer',
+                    fontSize: activeEx.fail ? '14px' : '12px',
+                    fontWeight: activeEx.fail ? 500 : 300,
+                    color: activeEx.fail ? '#1a1a1a' : 'rgba(26,26,26,0.3)',
+                    letterSpacing: activeEx.fail ? '0.04em' : '0.03em',
+                    userSelect: 'none',
+                  }}
+                >
+                  {activeEx.fail ? 'FAILED' : '+ FAIL'}
+                </div>
+                <div
+                  onClick={() => onAddSet(activeEx.exercise.id)}
+                  style={{
+                    cursor: 'pointer',
+                    fontSize: '12px',
+                    fontWeight: 300,
+                    color: 'rgba(26,26,26,0.3)',
+                    letterSpacing: '0.03em',
+                    userSelect: 'none',
+                  }}
+                >
+                  + ADD SET
+                </div>
               </div>
-              <div
-                onClick={() => {
-                  if (activeEx.lastSets && activeEx.lastSets.length > 0) {
-                    onToggleCopyFromLast(activeEx.exercise.id);
-                  }
-                }}
-                style={{
-                  cursor: activeEx.lastSets && activeEx.lastSets.length > 0 ? 'pointer' : 'default',
-                  opacity: activeEx.lastSets && activeEx.lastSets.length > 0 ? 0.9 : 0.3,
-                  transition: 'opacity 0.2s',
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
-              >
-                {activeEx.copied ? (
-                  <X size={20} color="#1a1a1a" strokeWidth={1.5} />
-                ) : (
-                  <Plus size={20} color="#1a1a1a" strokeWidth={1.5} />
-                )}
-              </div>
+              {!showAdvanced && (
+                <div
+                  onClick={() => {
+                    if (activeEx.lastSets && activeEx.lastSets.length > 0) {
+                      onToggleCopyFromLast(activeEx.exercise.id);
+                    }
+                  }}
+                  style={{
+                    cursor: activeEx.lastSets && activeEx.lastSets.length > 0 ? 'pointer' : 'default',
+                    opacity: activeEx.lastSets && activeEx.lastSets.length > 0 ? 0.9 : 0.3,
+                    transition: 'opacity 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                >
+                  {activeEx.copied ? (
+                    <X size={20} color="#1a1a1a" strokeWidth={1.5} />
+                  ) : (
+                    <Plus size={20} color="#1a1a1a" strokeWidth={1.5} />
+                  )}
+                </div>
+              )}
             </div>
           </>
         )}
@@ -868,27 +885,6 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
             MAX
           </button>
 
-          {/* Fail */}
-          <button
-            onClick={() => onToggleFail(activeEx.exercise.id)}
-            style={{
-              padding: '8px 16px',
-              borderRadius: '8px',
-              border: activeEx.fail ? '1px solid rgba(255,80,80,0.5)' : '1px solid rgba(255,255,255,0.55)',
-              background: activeEx.fail ? undefined : 'linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.10) 100%)',
-              backgroundColor: activeEx.fail ? 'rgba(255,80,80,0.08)' : undefined,
-              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -1px 0 rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.08)',
-              backdropFilter: 'blur(8px)',
-              WebkitBackdropFilter: 'blur(8px)',
-              cursor: 'pointer',
-              color: activeEx.fail ? '#ff5050' : 'rgba(0,0,0,0.5)',
-              fontSize: '11px',
-              fontWeight: 500,
-              letterSpacing: '0.04em',
-            }}
-          >
-            FAIL
-          </button>
 
           {/* Remove */}
           <button
@@ -911,7 +907,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
               gap: '4px',
             }}
           >
-            <Minus size={12} /> REMOVE
+            <Minus size={12} /> EXE
           </button>
         </div>
       ) : (
