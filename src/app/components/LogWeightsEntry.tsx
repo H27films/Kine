@@ -591,41 +591,44 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                       )}
                     </div>
                   </div>
-                  {/* Bottom row: sets left, last+PB right */}
-                  {total > 0 && (
-                    <div style={{ display: 'flex', marginTop: '10px' }}>
-                      {/* Sets block */}
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', alignItems: 'flex-start' }}>
-                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-                          <span style={{ fontSize: '16px', fontWeight: 300, letterSpacing: '-0.01em', color: '#1a1a1a' }}>{setsDone}</span>
-                        </div>
-                        <div style={{ fontSize: '9px', fontWeight: 300, color: 'rgba(26,26,26,0.6)', letterSpacing: '0.04em' }}>SETS</div>
-                      </div>
-                      {/* Last block with PB — pushed to right */}
-                      <div style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'column', gap: '2px', alignItems: 'flex-start' }}>
-                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-                          {lastDisplay}
-                          {total > 0 && ex.pbThreshold > 0 && total > ex.pbThreshold && (
-                            <div
-                              style={{
-                                width: 20,
-                                height: 20,
-                                borderRadius: '50%',
-                                backgroundColor: '#1a1a1a',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                flexShrink: 0,
-                              }}
-                            >
-                              <span style={{ fontSize: '8px', fontWeight: 800, color: '#ffffff', letterSpacing: '0.05em' }}>PB</span>
-                            </div>
-                          )}
-                        </div>
-                        <div style={{ fontSize: '9px', fontWeight: 300, color: 'rgba(26,26,26,0.6)', letterSpacing: '0.04em' }}>LAST</div>
-                      </div>
-                    </div>
-                  )}
+                   {/* Bottom row: sets, small gap, last, big gap, PB right aligned */}
+                   {total > 0 && (
+                     <div style={{ display: 'flex', alignItems: 'baseline', marginTop: '10px' }}>
+                       {/* Sets block */}
+                       <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', alignItems: 'flex-start' }}>
+                         <span style={{ fontSize: '16px', fontWeight: 300, letterSpacing: '-0.01em', color: '#1a1a1a' }}>{setsDone}</span>
+                         <div style={{ fontSize: '9px', fontWeight: 300, color: 'rgba(26,26,26,0.6)', letterSpacing: '0.04em' }}>SETS</div>
+                       </div>
+                       {/* Small gap */}
+                       <div style={{ width: '20px' }}></div>
+                       {/* Last block */}
+                       <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', alignItems: 'flex-start' }}>
+                         <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+                           {lastDisplay}
+                         </div>
+                         <div style={{ fontSize: '9px', fontWeight: 300, color: 'rgba(26,26,26,0.6)', letterSpacing: '0.04em' }}>LAST</div>
+                       </div>
+                       {/* Big gap - PB right aligned */}
+                       <div style={{ marginLeft: 'auto' }}>
+                         {total > 0 && ex.pbThreshold > 0 && total > ex.pbThreshold && (
+                           <div
+                             style={{
+                               width: 20,
+                               height: 20,
+                               borderRadius: '50%',
+                               backgroundColor: '#1a1a1a',
+                               display: 'flex',
+                               alignItems: 'center',
+                               justifyContent: 'center',
+                               flexShrink: 0,
+                             }}
+                           >
+                             <span style={{ fontSize: '8px', fontWeight: 800, color: '#ffffff', letterSpacing: '0.05em' }}>PB</span>
+                           </div>
+                         )}
+                       </div>
+                     </div>
+                   )}
                 </div>
               );
             })}
