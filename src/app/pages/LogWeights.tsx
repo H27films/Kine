@@ -599,7 +599,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
           {lastWeekTotal > 0 && (
             <div style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.45)', marginTop: '6px', letterSpacing: '-0.01em', lineHeight: 1, display: 'flex', alignItems: 'center', gap: '6px' }}>
               LAST WEEK {Math.round(lastWeekTotal).toLocaleString()} KG
-              {addedExercises.length > 0 && (
+              {addedExercises.length === 0 && (
                 <button
                   onClick={() => setShowEntryCard(true)}
                   style={{
