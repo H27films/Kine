@@ -23,16 +23,16 @@ interface AddedExercise {
 
 interface SummaryWeightsProps {
   addedExercises: AddedExercise[];
-  onUpdateSet: (exerciseId: number, setIdx: number, field: 'weight' | 'reps', value: string | number) => void;
-  onAddSet: (exerciseId: number) => void;
-  onToggleFail: (exerciseId: number) => void;
+  onUpdateSet?: (exerciseId: number, setIdx: number, field: 'weight' | 'reps', value: string | number) => void;
+  onAddSet?: (exerciseId: number) => void;
+  onToggleFail?: (exerciseId: number) => void;
   onLoadMaxSession: (exerciseId: number) => void;
   onToggleCopyFromLast: (exerciseId: number) => void;
   onRemoveExercise: (exerciseId: number) => void;
   onClose: () => void;
   todayLoggedTotal: number;
-  onAddExercise: (exercise: Exercise) => void;
-  exercisesByGroup: Record<string, Exercise[]>;
+  onAddExercise?: (exercise: Exercise) => void;
+  exercisesByGroup?: Record<string, Exercise[]>;
 }
 
 const TYPE2_LABELS: Record<string, string> = {
@@ -47,16 +47,16 @@ const makeDefaultSets = (): SetRow[] =>
 
 export const SummaryWeights: React.FC<SummaryWeightsProps> = ({
   addedExercises,
-  onUpdateSet,
-  onAddSet,
-  onToggleFail,
+  onUpdateSet: _onUpdateSet,
+  onAddSet: _onAddSet,
+  onToggleFail: _onToggleFail,
   onLoadMaxSession,
   onToggleCopyFromLast,
   onRemoveExercise,
   onClose,
   todayLoggedTotal,
-  onAddExercise,
-  exercisesByGroup,
+  onAddExercise: _onAddExercise,
+  exercisesByGroup: _exercisesByGroup,
 }) => {
   const [activeExIndex, setActiveExIndex] = useState(0);
   const [showAdvanced, setShowAdvanced] = useState(false);

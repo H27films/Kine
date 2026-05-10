@@ -9,6 +9,13 @@ interface SummaryWeightsProps {
   addedExercises: AddedExercise[];
   todayLoggedTotal: number;
   exercisesByGroup: Record<string, Exercise[]>;
+  onUpdateSet: (exerciseId: number, setIdx: number, field: 'weight' | 'reps', value: string | number) => void;
+  onAddSet: (exerciseId: number) => void;
+  onToggleFail: (exerciseId: number) => void;
+  onLoadMaxSession: (exerciseId: number) => void;
+  onToggleCopyFromLast: (exerciseId: number) => void;
+  onRemoveExercise: (exerciseId: number) => void;
+  onAddExercise: (exercise: Exercise) => void;
 }
 
 const SummaryWeights: React.FC<SummaryWeightsProps> = ({
@@ -63,8 +70,8 @@ const SummaryWeights: React.FC<SummaryWeightsProps> = ({
         if (!ex) continue;
         const sets: { weight: string; reps: number }[] = [];
         for (let i = 1; i <= 6; i++) {
-          const w = row[`w${i}`];
-          const r = row[`r${i}`];
+          const w = (row as any)[`w${i}`];
+          const r = (row as any)[`r${i}`];
           if (w != null && Number(w) > 0) {
             sets.push({ weight: String(Number(w)), reps: Number(r) || 10 });
           }
