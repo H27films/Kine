@@ -260,6 +260,20 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
      }));
    };
 
+    // Find the highest single run km and its speed
+    const getMaxRun = (): { maxKm: number; maxSpeed: number | null } => {
+      let maxKm = 0;
+      let maxSpeed: number | null = null;
+      for (const w of workouts) {
+        const km = w.total_cardio || 0;
+        if (km > maxKm) {
+          maxKm = km;
+          maxSpeed = calculateSpeed(km, w.time);
+        }
+      }
+      return { maxKm, maxSpeed };
+    };
+
     const getDataForView = (type: string) => {
       switch (type) {
         case 'week': return prepareWeekData(getWeekByOffset(weekOffset));
@@ -663,8 +677,9 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
             ))}
           </div>
 
-            {/* MAX/AVG stats - single row */}
+            {/* MAX/AVG stats - row 1: MAX | SPEED | AVG */}
             {points.length > 0 && (
+              <>
               <div style={{ marginTop: '0', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
                  {/* MAX KM - left */}
                  <div style={{ flex: 1 }}>
@@ -738,6 +753,35 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                    </div>
                  </div>
               </div>
+
+              {/* Row 2: MAX RUN - left side */}
+              {(() => {
+                const maxRun = getMaxRun();
+                return (
+                  <div style={{ marginTop: '14px', display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-start' }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{
+                        fontFamily: "'Inconsolata', monospace",
+                        fontSize: '18px',
+                        fontWeight: 348,
+                        fontStretch: '175%',
+                        letterSpacing: '0.06em',
+                        color: 'rgba(0,0,0,0.35)',
+                        textTransform: 'uppercase',
+                      }}>
+                        MAX RUN
+                      </div>
+                      <div style={{ fontSize: '20px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
+                        {maxRun.maxKm.toFixed(1)}<span style={{ fontSize: '14px', fontWeight: 200, color: '#999', marginLeft: '1px' }}>KM</span>
+                      </div>
+                      <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em', color: '#1a1a1a', marginTop: '2px', textTransform: 'uppercase' }}>
+                        {maxRun.maxSpeed !== null ? `${maxRun.maxSpeed.toFixed(1)} KM/H` : '—'}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+              </>
             )}
 
             {/* Weekly bottom tabbed container (CURRENT WEEK only) */}
