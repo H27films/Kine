@@ -804,7 +804,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                       style={{
                         fontSize: '12px',
                         fontWeight: 300,
-                        color: 'rgba(26,26,26,0.3)',
+                        color: 'rgba(26,26,26,0.75)',
                         letterSpacing: '0.03em',
                       }}
                     >
@@ -812,19 +812,19 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                     </span>
                   )}
                 </div>
-                <div
-                  onClick={() => onAddSet(activeEx.exercise.id)}
-                  style={{
-                    cursor: 'pointer',
-                    fontSize: '12px',
-                    fontWeight: 300,
-                    color: 'rgba(26,26,26,0.3)',
-                    letterSpacing: '0.03em',
-                    userSelect: 'none',
-                  }}
-                >
-                  + ADD SET
-                </div>
+                  <div
+                    onClick={() => onAddSet(activeEx.exercise.id)}
+                    style={{
+                      cursor: 'pointer',
+                      fontSize: '12px',
+                      fontWeight: 300,
+                      color: 'rgba(26,26,26,0.75)',
+                      letterSpacing: '0.03em',
+                      userSelect: 'none',
+                    }}
+                  >
+                    + SET
+                  </div>
               </div>
               {!showAdvanced && (
                 <div
