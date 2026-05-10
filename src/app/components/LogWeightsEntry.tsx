@@ -251,114 +251,132 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
           alignItems: 'baseline',
         }}
       >
-        {/* When adder is open, show ADD EXERCISE as first active tab */}
-        {adderOpen ? (
+        {showDailyTotalOnly ? (
+          <span
+            style={{
+              fontSize: '17px',
+              fontWeight: 400,
+              color: '#1a1a1a',
+              letterSpacing: '0.02em',
+              borderBottom: '1.5px solid #333333',
+              padding: '4px 0',
+              flexShrink: 0,
+            }}
+          >
+            SUMMARY
+          </span>
+        ) : (
           <>
-            <span
-              style={{
-                fontSize: '17px',
-                fontWeight: 400,
-                color: '#1a1a1a',
-                letterSpacing: '0.02em',
-                borderBottom: '1.5px solid #333333',
-                padding: '4px 0',
-                flexShrink: 0,
-              }}
-            >
-              + EXERCISE
-            </span>
-            {orderedExercises.map((ex) => {
-              const hasData = ex.sets.some(s => s.weight !== '');
-              return (
+            {/* When adder is open, show ADD EXERCISE as first active tab */}
+            {adderOpen ? (
+              <>
+                <span
+                  style={{
+                    fontSize: '17px',
+                    fontWeight: 400,
+                    color: '#1a1a1a',
+                    letterSpacing: '0.02em',
+                    borderBottom: '1.5px solid #333333',
+                    padding: '4px 0',
+                    flexShrink: 0,
+                  }}
+                >
+                  + EXERCISE
+                </span>
+                {orderedExercises.map((ex) => {
+                  const hasData = ex.sets.some(s => s.weight !== '');
+                  return (
+                    <button
+                      key={ex.exercise.id}
+                      onClick={() => {
+                        const idxInOriginal = addedExercises.findIndex(e => e.exercise.id === ex.exercise.id);
+                        setActiveExIndex(idxInOriginal);
+                        setAdderOpen(false);
+                        setAdderGroup(null);
+                      }}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        borderBottom: hasData ? '1px solid rgba(26,26,26,0.12)' : 'none',
+                        padding: '4px 0',
+                        cursor: 'pointer',
+                        flexShrink: 0,
+                        transition: 'all 0.2s ease',
+                        fontSize: '11px',
+                        fontWeight: 300,
+                        color: 'rgba(26,26,26,0.35)',
+                        filter: 'blur(3px)',
+                        letterSpacing: '0.02em',
+                      }}
+                    >
+                      {ex.exercise.exercise_name.toUpperCase()}
+                    </button>
+                  );
+                })}
+              </>
+            ) : (
+              <>
+                {orderedExercises.map((ex, i) => {
+                  const isActive = i === 0;
+                  const hasData = ex.sets.some(s => s.weight !== '');
+                  return (
+                    <button
+                      key={ex.exercise.id}
+                      onClick={() => {
+                        const idxInOriginal = addedExercises.findIndex(e => e.exercise.id === ex.exercise.id);
+                        setActiveExIndex(idxInOriginal);
+                      }}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        borderBottom: isActive
+                          ? '1.5px solid #333333'
+                          : hasData
+                            ? '1px solid rgba(26,26,26,0.12)'
+                            : 'none',
+                        padding: '4px 0',
+                        cursor: 'pointer',
+                        flexShrink: 0,
+                        transition: 'all 0.2s ease',
+                        fontSize: isActive ? '17px' : '11px',
+                        fontWeight: isActive ? 400 : 300,
+                        color: isActive ? '#1a1a1a' : 'rgba(26,26,26,0.35)',
+                        filter: isActive ? 'none' : 'blur(0.5px)',
+                        letterSpacing: '0.02em',
+                      }}
+                    >
+                      {ex.exercise.exercise_name.toUpperCase()}
+                    </button>
+                  );
+                })}
                 <button
-                  key={ex.exercise.id}
                   onClick={() => {
-                    const idxInOriginal = addedExercises.findIndex(e => e.exercise.id === ex.exercise.id);
-                    setActiveExIndex(idxInOriginal);
-                    setAdderOpen(false);
+                    setAdderOpen(true);
                     setAdderGroup(null);
                   }}
                   style={{
                     background: 'none',
                     border: 'none',
-                    borderBottom: hasData ? '1px solid rgba(26,26,26,0.12)' : 'none',
                     padding: '4px 0',
                     cursor: 'pointer',
-                    flexShrink: 0,
-                    transition: 'all 0.2s ease',
-                    fontSize: '11px',
-                    fontWeight: 300,
-                    color: 'rgba(26,26,26,0.35)',
-                    filter: 'blur(3px)',
+                    fontSize: '15px',
+                    fontWeight: 400,
+                    color: '#1a1a1a',
                     letterSpacing: '0.02em',
+                    filter: 'none',
                   }}
                 >
-                  {ex.exercise.exercise_name.toUpperCase()}
+                  + ADD
                 </button>
-              );
-            })}
-          </>
-        ) : (
-          <>
-            {orderedExercises.map((ex, i) => {
-              const isActive = i === 0;
-              const hasData = ex.sets.some(s => s.weight !== '');
-              return (
-                <button
-                  key={ex.exercise.id}
-                  onClick={() => {
-                    const idxInOriginal = addedExercises.findIndex(e => e.exercise.id === ex.exercise.id);
-                    setActiveExIndex(idxInOriginal);
-                  }}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    borderBottom: isActive
-                      ? '1.5px solid #333333'
-                      : hasData
-                        ? '1px solid rgba(26,26,26,0.12)'
-                        : 'none',
-                    padding: '4px 0',
-                    cursor: 'pointer',
-                    flexShrink: 0,
-                    transition: 'all 0.2s ease',
-                    fontSize: isActive ? '17px' : '11px',
-                    fontWeight: isActive ? 400 : 300,
-                    color: isActive ? '#1a1a1a' : 'rgba(26,26,26,0.35)',
-                    filter: isActive ? 'none' : 'blur(0.5px)',
-                    letterSpacing: '0.02em',
-                  }}
-                >
-                  {ex.exercise.exercise_name.toUpperCase()}
-                </button>
-              );
-            })}
-            <button
-              onClick={() => {
-                setAdderOpen(true);
-                setAdderGroup(null);
-              }}
-              style={{
-                background: 'none',
-                border: 'none',
-                padding: '4px 0',
-                cursor: 'pointer',
-                fontSize: '15px',
-                fontWeight: 400,
-                color: '#1a1a1a',
-                letterSpacing: '0.02em',
-                filter: 'none',
-              }}
-            >
-              + ADD
-            </button>
+              </>
+            )}
           </>
         )}
       </div>
 
       {/* Adder dropdown — rendered between tabs and set rows as a full-width panel */}
       <div ref={adderRef}>
-        {adderOpen && (
+        {adderOpen && !showDailyTotalOnly && (
           <div
             style={{
               padding: '0 20px',
@@ -505,7 +523,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
         )}
       </div>
 
-      {/* Scrollable set rows area — blurred/dimmed when adder is open */}
+      {/* Scrollable content — summary mode shows exercise list, normal mode shows set rows */}
       <div style={{
         flex: 1,
         overflowY: 'auto',
@@ -515,496 +533,598 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
         transition: 'filter 0.25s ease, opacity 0.25s ease',
         pointerEvents: adderOpen ? 'none' : 'auto',
       }}>
-        {activeEx.sets.map((set, idx) => {
-          const showSeparator = idx > 0;
-          const w = parseFloat(set.weight) || 0;
-          const rowTotal = w * set.reps * mult;
-          const hasData = set.weight !== '';
-          return (
-            <div key={idx}>
-              {/* Separator line between sets */}
-              {showSeparator && (
-                <div style={{ height: '0.5px', backgroundColor: 'rgba(0,0,0,0.18)', marginTop: '17px', marginBottom: '9px' }} />
-              )}
-              {/* Row: SET label (left) + W/R inputs (right) */}
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-                {/* LEFT: SET label + total below */}
-                <div style={{ flexShrink: 0, marginRight: '16px' }}>
-                  <span
-                    style={{
-                      fontSize: '18px',
-                      fontWeight: 330,
-                      letterSpacing: '-0.01em',
-                      color: '#333333',
-                      lineHeight: 1,
-                      marginRight: '4px',
-                    }}
-                  >
-                    SET
-                  </span>
-                  <span
-                    style={{
-                      fontSize: '18px',
-                      fontWeight: 400,
-                      letterSpacing: '0.05em',
-                      color: '#000000',
-                      lineHeight: 1,
-                    }}
-                  >
-                    {idx + 1}
-                  </span>
-                  <div style={{ marginTop: '2px', display: 'flex', alignItems: 'baseline', gap: '3px' }}>
-                     <span
-                       style={{
-                         fontSize: '22px',
-                         fontWeight: 300,
-                         letterSpacing: '-0.01em',
-                         color: '#1a1a1a',
-                         lineHeight: 1,
-                       }}
-                     >
-                       {rowTotal > 0 ? rowTotal.toLocaleString() : ''}
-                     </span>
-                     {rowTotal > 0 && (
-                       <span
-                         style={{
-                           fontSize: '9px',
-                           fontWeight: 400,
-                           color: 'rgba(26,26,26,0.4)',
-                           letterSpacing: '0.04em',
-                         }}
-                       >
-                         KG
-                       </span>
-                     )}
-                  </div>
-                </div>
+        {showDailyTotalOnly ? (
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            {addedExercises.map((ex, idx) => {
+              const mult = ex.exercise.multiplier ?? 1;
+              const total = calcExerciseTotal(ex.sets, mult);
+              const setsDone = ex.sets.filter(s => s.weight !== '').length;
+              // Find last non-zero set's weight and reps
+              let lastW = 0, lastR = 0;
+              for (let i = ex.sets.length - 1; i >= 0; i--) {
+                const w = parseFloat(ex.sets[i].weight) || 0;
+                if (w > 0) { lastW = w; lastR = ex.sets[i].reps; break; }
+              }
+              const isLast = idx === addedExercises.length - 1;
 
-                {/* RIGHT: WEIGHT + REPS columns */}
-                <div style={{ flex: 1, maxWidth: '220px' }}>
-                  {/* Top row: WEIGHT and REPS labels */}
-                  <div style={{ display: 'flex', gap: '6px', marginBottom: '2px', lineHeight: '18px' }}>
-                    <div style={{ flex: 1, textAlign: 'center' }}>
-                      <span
-                        style={{
-                          fontSize: '10px',
-                          fontWeight: 400,
-                          color: 'rgba(0,0,0,0.45)',
-                          letterSpacing: '0.08em',
-                          textTransform: 'uppercase',
-                        }}
-                      >
-                        WEIGHT
-                      </span>
-                    </div>
-                    <div style={{ flex: 1, textAlign: 'center' }}>
-                      <span
-                        style={{
-                          fontSize: '10px',
-                          fontWeight: 400,
-                          color: 'rgba(0,0,0,0.45)',
-                          letterSpacing: '0.08em',
-                          textTransform: 'uppercase',
-                        }}
-                      >
-                        REPS
-                      </span>
-                    </div>
-                  </div>
-                  {/* Bottom row: Weight and Reps input boxes */}
-                  <div style={{ display: 'flex', gap: '6px' }}>
-                    {/* Weight input */}
-                    <div
-                      style={{
-                        flex: 1,
-                        display: 'flex',
-                        flexDirection: 'row',
-                        borderRadius: '6px',
-                        backgroundColor: 'rgba(0,0,0,0.04)',
-                        overflow: 'hidden',
-                        height: 48,
-                      }}
-                    >
-                      <div
-                        onClick={() => {
-                          const cur = parseFloat(set.weight) || 0;
-                          const next = Math.max(0, Math.round((cur - 1) * 10) / 10);
-                          onUpdateSet(activeEx.exercise.id, idx, 'weight', next === 0 ? '' : String(next));
-                        }}
-                        style={{
-                          width: 34,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          cursor: 'pointer',
-                          color: 'rgba(0,0,0,0.35)',
-                          fontSize: '15px',
-                          fontWeight: 300,
-                          flexShrink: 0,
-                        }}
-                      >
-                        −
-                      </div>
-                      <input
-                        type="number"
-                        inputMode="decimal"
-                        value={set.weight}
-                         placeholder="—"
-                        onChange={e => onUpdateSet(activeEx.exercise.id, idx, 'weight', e.target.value)}
-                        style={{
-                          flex: 1,
-                          minWidth: 0,
-                          background: 'transparent',
-                          border: 'none',
-                          outline: 'none',
-                          textAlign: 'center',
-                          fontSize: '15px',
-                           fontWeight: 600,
-                          color: hasData ? '#1a1a1a' : 'rgba(0,0,0,0.25)',
-                          height: 48,
-                          padding: 0,
-                          MozAppearance: 'textfield',
-                        }}
-                      />
-                      <div
-                        onClick={() => {
-                          const cur = parseFloat(set.weight) || 0;
-                          const next = Math.round((cur + 1) * 10) / 10;
-                          onUpdateSet(activeEx.exercise.id, idx, 'weight', String(next));
-                        }}
-                        style={{
-                          width: 34,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          cursor: 'pointer',
-                          color: 'rgba(0,0,0,0.35)',
-                          fontSize: '15px',
-                          fontWeight: 300,
-                          flexShrink: 0,
-                        }}
-                      >
-                        +
-                      </div>
-                    </div>
+              // Build last display node
+              let lastDisplay: React.ReactNode;
+              if (lastW > 0) {
+                lastDisplay = (
+                  <>
+                    <span style={{ fontSize: '16px', fontWeight: 300, letterSpacing: '-0.01em', color: '#1a1a1a' }}>{lastW.toLocaleString()}</span>
+                    <span style={{ fontSize: '9px', fontWeight: 400, color: 'rgba(26,26,26,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>KG x</span>
+                    <span style={{ fontSize: '16px', fontWeight: 300, letterSpacing: '-0.01em', color: '#1a1a1a' }}>{lastR}</span>
+                    <span style={{ fontSize: '9px', fontWeight: 400, color: 'rgba(26,26,26,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>REPS</span>
+                  </>
+                );
+              } else {
+                lastDisplay = <span style={{ fontSize: '16px', fontWeight: 300, letterSpacing: '-0.01em', color: '#1a1a1a' }}>—</span>;
+              }
 
-                    {/* Reps input */}
-                    <div
-                      style={{
-                        flex: 1,
-                        display: 'flex',
-                        flexDirection: 'row',
-                        borderRadius: '6px',
-                        backgroundColor: 'rgba(0,0,0,0.04)',
-                        overflow: 'hidden',
-                        height: 48,
-                      }}
-                    >
-                      <div
-                        onClick={() => onUpdateSet(activeEx.exercise.id, idx, 'reps', Math.max(1, set.reps - 1))}
-                        style={{
-                          width: 34,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          cursor: 'pointer',
-                          color: 'rgba(0,0,0,0.35)',
-                          fontSize: '15px',
-                          fontWeight: 300,
-                          flexShrink: 0,
-                        }}
-                      >
-                        −
-                      </div>
-                      <input
-                        type="number"
-                        inputMode="numeric"
-                        value={set.reps}
-                        onChange={e => {
-                          const val = parseInt(e.target.value) || 1;
-                          onUpdateSet(activeEx.exercise.id, idx, 'reps', Math.max(1, val));
-                        }}
-                        style={{
-                          flex: 1,
-                          minWidth: 0,
-                          background: 'transparent',
-                          border: 'none',
-                          outline: 'none',
-                          textAlign: 'center',
-                          fontSize: '15px',
-                           fontWeight: 600,
+              return (
+                <div key={ex.exercise.id} style={{ padding: '16px 0', borderBottom: isLast ? 'none' : '1px solid rgba(0,0,0,0.18)' }}>
+                  {/* Top row: name left, total/NO DATA right */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div style={{ fontSize: '12px', fontWeight: 400, color: '#1a1a1a', letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+                      {ex.exercise.exercise_name.toUpperCase()}
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+                      {total > 0 ? (
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+                          <span style={{ fontSize: '16px', fontWeight: 300, letterSpacing: '-0.01em', color: '#1a1a1a' }}>{total.toLocaleString()}</span>
+                          <span style={{ fontSize: '9px', fontWeight: 400, color: 'rgba(26,26,26,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>KG</span>
+                        </div>
+                      ) : (
+                        <div style={{
+                          padding: '4px 12px',
+                          borderRadius: '999px',
+                          background: 'linear-gradient(135deg, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0.95) 100%)',
+                          fontSize: '11px',
+                          fontWeight: 500,
+                          letterSpacing: '0.04em',
                           color: '#1a1a1a',
-                          height: 48,
-                          padding: 0,
-                          MozAppearance: 'textfield',
-                        }}
-                      />
-                      <div
-                        onClick={() => onUpdateSet(activeEx.exercise.id, idx, 'reps', set.reps + 1)}
+                          boxShadow: '0 1px 2px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9)',
+                        }}>
+                          NO DATA
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  {/* Bottom row: sets left, last+PB right */}
+                  {total > 0 && (
+                    <div style={{ display: 'flex', marginTop: '10px' }}>
+                      {/* Sets block */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', alignItems: 'flex-start' }}>
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+                          <span style={{ fontSize: '16px', fontWeight: 300, letterSpacing: '-0.01em', color: '#1a1a1a' }}>{setsDone}</span>
+                        </div>
+                        <div style={{ fontSize: '9px', fontWeight: 300, color: 'rgba(26,26,26,0.6)', letterSpacing: '0.04em' }}>SETS</div>
+                      </div>
+                      {/* Last block with PB — pushed to right */}
+                      <div style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'column', gap: '2px', alignItems: 'flex-start' }}>
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                          {lastDisplay}
+                          {total > 0 && ex.pbThreshold > 0 && total > ex.pbThreshold && (
+                            <div
+                              style={{
+                                width: 20,
+                                height: 20,
+                                borderRadius: '50%',
+                                backgroundColor: '#1a1a1a',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                flexShrink: 0,
+                              }}
+                            >
+                              <span style={{ fontSize: '8px', fontWeight: 800, color: '#ffffff', letterSpacing: '0.05em' }}>PB</span>
+                            </div>
+                          )}
+                        </div>
+                        <div style={{ fontSize: '9px', fontWeight: 300, color: 'rgba(26,26,26,0.6)', letterSpacing: '0.04em' }}>LAST</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <>
+            {activeEx.sets.map((set, idx) => {
+              const showSeparator = idx > 0;
+              const w = parseFloat(set.weight) || 0;
+              const rowTotal = w * set.reps * mult;
+              const hasData = set.weight !== '';
+              return (
+                <div key={idx}>
+                  {/* Separator line between sets */}
+                  {showSeparator && (
+                    <div style={{ height: '0.5px', backgroundColor: 'rgba(0,0,0,0.18)', marginTop: '17px', marginBottom: '9px' }} />
+                  )}
+                  {/* Row: SET label (left) + W/R inputs (right) */}
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                    {/* LEFT: SET label + total below */}
+                    <div style={{ flexShrink: 0, marginRight: '16px' }}>
+                      <span
                         style={{
-                          width: 34,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          cursor: 'pointer',
-                          color: 'rgba(0,0,0,0.35)',
-                          fontSize: '15px',
-                          fontWeight: 300,
-                          flexShrink: 0,
+                          fontSize: '18px',
+                          fontWeight: 330,
+                          letterSpacing: '-0.01em',
+                          color: '#333333',
+                          lineHeight: 1,
+                          marginRight: '4px',
                         }}
                       >
-                        +
+                        SET
+                      </span>
+                      <span
+                        style={{
+                          fontSize: '18px',
+                          fontWeight: 400,
+                          letterSpacing: '0.05em',
+                          color: '#000000',
+                          lineHeight: 1,
+                        }}
+                      >
+                        {idx + 1}
+                      </span>
+                      <div style={{ marginTop: '2px', display: 'flex', alignItems: 'baseline', gap: '3px' }}>
+                        <span
+                          style={{
+                            fontSize: '22px',
+                            fontWeight: 300,
+                            letterSpacing: '-0.01em',
+                            color: '#1a1a1a',
+                            lineHeight: 1,
+                          }}
+                        >
+                          {rowTotal > 0 ? rowTotal.toLocaleString() : ''}
+                        </span>
+                        {rowTotal > 0 && (
+                          <span
+                            style={{
+                              fontSize: '9px',
+                              fontWeight: 400,
+                              color: 'rgba(26,26,26,0.4)',
+                              letterSpacing: '0.04em',
+                            }}
+                          >
+                            KG
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* RIGHT: WEIGHT + REPS columns */}
+                    <div style={{ flex: 1, maxWidth: '220px' }}>
+                      {/* Top row: WEIGHT and REPS labels */}
+                      <div style={{ display: 'flex', gap: '6px', marginBottom: '2px', lineHeight: '18px' }}>
+                        <div style={{ flex: 1, textAlign: 'center' }}>
+                          <span
+                            style={{
+                              fontSize: '10px',
+                              fontWeight: 400,
+                              color: 'rgba(0,0,0,0.45)',
+                              letterSpacing: '0.08em',
+                              textTransform: 'uppercase',
+                            }}
+                          >
+                            WEIGHT
+                          </span>
+                        </div>
+                        <div style={{ flex: 1, textAlign: 'center' }}>
+                          <span
+                            style={{
+                              fontSize: '10px',
+                              fontWeight: 400,
+                              color: 'rgba(0,0,0,0.45)',
+                              letterSpacing: '0.08em',
+                              textTransform: 'uppercase',
+                            }}
+                          >
+                            REPS
+                          </span>
+                        </div>
+                      </div>
+                      {/* Bottom row: Weight and Reps input boxes */}
+                      <div style={{ display: 'flex', gap: '6px' }}>
+                        {/* Weight input */}
+                        <div
+                          style={{
+                            flex: 1,
+                            display: 'flex',
+                            flexDirection: 'row',
+                            borderRadius: '6px',
+                            backgroundColor: 'rgba(0,0,0,0.04)',
+                            overflow: 'hidden',
+                            height: 48,
+                          }}
+                        >
+                          <div
+                            onClick={() => {
+                              const cur = parseFloat(set.weight) || 0;
+                              const next = Math.max(0, Math.round((cur - 1) * 10) / 10);
+                              onUpdateSet(activeEx.exercise.id, idx, 'weight', next === 0 ? '' : String(next));
+                            }}
+                            style={{
+                              width: 34,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              cursor: 'pointer',
+                              color: 'rgba(0,0,0,0.35)',
+                              fontSize: '15px',
+                              fontWeight: 300,
+                              flexShrink: 0,
+                            }}
+                          >
+                            −
+                          </div>
+                          <input
+                            type="number"
+                            inputMode="decimal"
+                            value={set.weight}
+                            placeholder="—"
+                            onChange={e => onUpdateSet(activeEx.exercise.id, idx, 'weight', e.target.value)}
+                            style={{
+                              flex: 1,
+                              minWidth: 0,
+                              background: 'transparent',
+                              border: 'none',
+                              outline: 'none',
+                              textAlign: 'center',
+                              fontSize: '15px',
+                              fontWeight: 600,
+                              color: hasData ? '#1a1a1a' : 'rgba(0,0,0,0.25)',
+                              height: 48,
+                              padding: 0,
+                              MozAppearance: 'textfield',
+                            }}
+                          />
+                          <div
+                            onClick={() => {
+                              const cur = parseFloat(set.weight) || 0;
+                              const next = Math.round((cur + 1) * 10) / 10;
+                              onUpdateSet(activeEx.exercise.id, idx, 'weight', String(next));
+                            }}
+                            style={{
+                              width: 34,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              cursor: 'pointer',
+                              color: 'rgba(0,0,0,0.35)',
+                              fontSize: '15px',
+                              fontWeight: 300,
+                              flexShrink: 0,
+                            }}
+                          >
+                            +
+                          </div>
+                        </div>
+
+                        {/* Reps input */}
+                        <div
+                          style={{
+                            flex: 1,
+                            display: 'flex',
+                            flexDirection: 'row',
+                            borderRadius: '6px',
+                            backgroundColor: 'rgba(0,0,0,0.04)',
+                            overflow: 'hidden',
+                            height: 48,
+                          }}
+                        >
+                          <div
+                            onClick={() => onUpdateSet(activeEx.exercise.id, idx, 'reps', Math.max(1, set.reps - 1))}
+                            style={{
+                              width: 34,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              cursor: 'pointer',
+                              color: 'rgba(0,0,0,0.35)',
+                              fontSize: '15px',
+                              fontWeight: 300,
+                              flexShrink: 0,
+                            }}
+                          >
+                            −
+                          </div>
+                          <input
+                            type="number"
+                            inputMode="numeric"
+                            value={set.reps}
+                            onChange={e => {
+                              const val = parseInt(e.target.value) || 1;
+                              onUpdateSet(activeEx.exercise.id, idx, 'reps', Math.max(1, val));
+                            }}
+                            style={{
+                              flex: 1,
+                              minWidth: 0,
+                              background: 'transparent',
+                              border: 'none',
+                              outline: 'none',
+                              textAlign: 'center',
+                              fontSize: '15px',
+                              fontWeight: 600,
+                              color: '#1a1a1a',
+                              height: 48,
+                              padding: 0,
+                              MozAppearance: 'textfield',
+                            }}
+                          />
+                          <div
+                            onClick={() => onUpdateSet(activeEx.exercise.id, idx, 'reps', set.reps + 1)}
+                            style={{
+                              width: 34,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              cursor: 'pointer',
+                              color: 'rgba(0,0,0,0.35)',
+                              fontSize: '15px',
+                              fontWeight: 300,
+                              flexShrink: 0,
+                            }}
+                          >
+                            +
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          );
-        })}
-        {/* Separator line + Add set link + copy icon */}
-        {activeEx.sets.length < 6 && (
-          <>
-            <div style={{ height: '0.5px', backgroundColor: 'rgba(0,0,0,0.18)', marginTop: '17px', marginBottom: '9px' }} />
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                paddingTop: '6px',
-                paddingBottom: '14px',
-              }}
-            >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+              );
+            })}
+            {/* Separator line + Add set link + copy icon */}
+            {activeEx.sets.length < 6 && (
+              <>
+                <div style={{ height: '0.5px', backgroundColor: 'rgba(0,0,0,0.18)', marginTop: '17px', marginBottom: '9px' }} />
                 <div
-                  onClick={() => onToggleFail(activeEx.exercise.id)}
                   style={{
-                    cursor: 'pointer',
-                    userSelect: 'none',
-                    display: 'inline-flex',
-                    alignSelf: 'flex-start',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    paddingTop: '6px',
+                    paddingBottom: '14px',
                   }}
                 >
-                  {activeEx.fail ? (
-                    <span
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    <div
+                      onClick={() => onToggleFail(activeEx.exercise.id)}
                       style={{
-                        display: 'inline-block',
-                        padding: '1px 8px',
-                        borderRadius: '999px',
-                        backgroundColor: '#1a1a1a',
-                        color: '#ffffff',
-                        fontSize: '11px',
-                        fontWeight: 600,
-                        letterSpacing: '0.04em',
-                        lineHeight: '20px',
+                        cursor: 'pointer',
+                        userSelect: 'none',
+                        display: 'inline-flex',
+                        alignSelf: 'flex-start',
                       }}
                     >
-                      FAILED
-                    </span>
-                  ) : (
-                    <span
+                      {activeEx.fail ? (
+                        <span
+                          style={{
+                            display: 'inline-block',
+                            padding: '1px 8px',
+                            borderRadius: '999px',
+                            backgroundColor: '#1a1a1a',
+                            color: '#ffffff',
+                            fontSize: '11px',
+                            fontWeight: 600,
+                            letterSpacing: '0.04em',
+                            lineHeight: '20px',
+                          }}
+                        >
+                          FAILED
+                        </span>
+                      ) : (
+                        <span
+                          style={{
+                            fontSize: '12px',
+                            fontWeight: 300,
+                            color: 'rgba(26,26,26,0.75)',
+                            letterSpacing: '0.03em',
+                          }}
+                        >
+                          + FAIL
+                        </span>
+                      )}
+                    </div>
+                    <div
+                      onClick={() => onAddSet(activeEx.exercise.id)}
                       style={{
+                        cursor: 'pointer',
                         fontSize: '12px',
                         fontWeight: 300,
                         color: 'rgba(26,26,26,0.75)',
                         letterSpacing: '0.03em',
+                        userSelect: 'none',
                       }}
                     >
-                      + FAIL
-                    </span>
-                  )}
-                </div>
-                  <div
-                    onClick={() => onAddSet(activeEx.exercise.id)}
-                    style={{
-                      cursor: 'pointer',
-                      fontSize: '12px',
-                      fontWeight: 300,
-                      color: 'rgba(26,26,26,0.75)',
-                      letterSpacing: '0.03em',
-                      userSelect: 'none',
-                    }}
-                  >
-                    + SET
+                      + SET
+                    </div>
                   </div>
-              </div>
-              {!showAdvanced && (
-                <div
-                  onClick={() => {
-                    if (activeEx.lastSets && activeEx.lastSets.length > 0) {
-                      onToggleCopyFromLast(activeEx.exercise.id);
-                    }
-                  }}
-                  style={{
-                    cursor: activeEx.lastSets && activeEx.lastSets.length > 0 ? 'pointer' : 'default',
-                    opacity: activeEx.lastSets && activeEx.lastSets.length > 0 ? 0.9 : 0.3,
-                    transition: 'opacity 0.2s',
-                    display: 'flex',
-                    alignItems: 'center',
-                  }}
-                >
-                  {activeEx.copied ? (
-                    <X size={20} color="#1a1a1a" strokeWidth={1.5} />
-                  ) : (
-                    <Plus size={20} color="#1a1a1a" strokeWidth={1.5} />
+                  {!showAdvanced && (
+                    <div
+                      onClick={() => {
+                        if (activeEx.lastSets && activeEx.lastSets.length > 0) {
+                          onToggleCopyFromLast(activeEx.exercise.id);
+                        }
+                      }}
+                      style={{
+                        cursor: activeEx.lastSets && activeEx.lastSets.length > 0 ? 'pointer' : 'default',
+                        opacity: activeEx.lastSets && activeEx.lastSets.length > 0 ? 0.9 : 0.3,
+                        transition: 'opacity 0.2s',
+                        display: 'flex',
+                        alignItems: 'center',
+                      }}
+                    >
+                      {activeEx.copied ? (
+                        <X size={20} color="#1a1a1a" strokeWidth={1.5} />
+                      ) : (
+                        <Plus size={20} color="#1a1a1a" strokeWidth={1.5} />
+                      )}
+                    </div>
                   )}
                 </div>
-              )}
-            </div>
+              </>
+            )}
           </>
         )}
       </div>
 
-      {/* Bottom area */}
-      {showAdvanced ? (
-        <div
-          ref={bottomRef}
-          style={{
-            padding: '12px 20px',
-            paddingBottom: 'calc(12px + env(safe-area-inset-bottom))',
-            borderTop: '1px solid rgba(0,0,0,0.06)',
-            display: 'flex',
-            gap: '8px',
-            flexWrap: 'wrap',
-          }}
-        >
-          {/* LAST */}
-          <button
-            onClick={() => onToggleCopyFromLast(activeEx.exercise.id)}
-            disabled={!activeEx.lastSets || activeEx.lastSets.length === 0}
+      {/* Bottom area — hidden in summary mode */}
+      {!showDailyTotalOnly && (
+        showAdvanced ? (
+          <div
+            ref={bottomRef}
             style={{
-              padding: '8px 16px',
-              borderRadius: '8px',
-              border: '1px solid rgba(255,255,255,0.55)',
-              background: activeEx.copied ? undefined : 'linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.10) 100%)',
-              backgroundColor: activeEx.copied ? 'rgba(0,0,0,0.06)' : undefined,
-              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -1px 0 rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.08)',
-              backdropFilter: 'blur(8px)',
-              WebkitBackdropFilter: 'blur(8px)',
-              cursor: activeEx.lastSets && activeEx.lastSets.length > 0 ? 'pointer' : 'default',
-              color: activeEx.copied ? '#1a1a1a' : 'rgba(0,0,0,0.5)',
-              fontSize: '11px',
-              fontWeight: 500,
-              letterSpacing: '0.04em',
-              opacity: activeEx.lastSets && activeEx.lastSets.length > 0 ? 1 : 0.4,
-            }}
-          >
-            {activeEx.copied ? 'REVERT' : 'LAST'}
-          </button>
-
-          {/* Max */}
-          <button
-            onClick={() => onLoadMaxSession(activeEx.exercise.id)}
-            style={{
-              padding: '8px 16px',
-              borderRadius: '8px',
-              border: '1px solid rgba(255,255,255,0.55)',
-              background: activeEx.loadedMax ? undefined : 'linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.10) 100%)',
-              backgroundColor: activeEx.loadedMax ? 'rgba(0,0,0,0.06)' : undefined,
-              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -1px 0 rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.08)',
-              backdropFilter: 'blur(8px)',
-              WebkitBackdropFilter: 'blur(8px)',
-              cursor: 'pointer',
-              color: activeEx.loadedMax ? '#1a1a1a' : 'rgba(0,0,0,0.5)',
-              fontSize: '11px',
-              fontWeight: 500,
-              letterSpacing: '0.04em',
-            }}
-          >
-            {activeEx.loadedMax ? 'DEFAULT' : 'MAX'}
-          </button>
-
-
-          {/* Remove */}
-          <button
-            onClick={() => onRemoveExercise(activeEx.exercise.id)}
-            style={{
-              padding: '8px 16px',
-              borderRadius: '8px',
-              border: '1px solid rgba(255,255,255,0.55)',
-              background: 'linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.10) 100%)',
-              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -1px 0 rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.08)',
-              backdropFilter: 'blur(8px)',
-              WebkitBackdropFilter: 'blur(8px)',
-              cursor: 'pointer',
-              color: 'rgba(0,0,0,0.5)',
-              fontSize: '11px',
-              fontWeight: 500,
-              letterSpacing: '0.04em',
+              padding: '12px 20px',
+              paddingBottom: 'calc(12px + env(safe-area-inset-bottom))',
+              borderTop: '1px solid rgba(0,0,0,0.06)',
               display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
+              gap: '8px',
+              flexWrap: 'wrap',
             }}
           >
-            <Minus size={12} /> EXE
-          </button>
-
-          {showDoubleArrow && (
+            {/* LAST */}
             <button
-              onClick={() => onNavigate && onNavigate('summary-weights', { addedExercises, todayLoggedTotal, exercisesByGroup })}
+              onClick={() => onToggleCopyFromLast(activeEx.exercise.id)}
+              disabled={!activeEx.lastSets || activeEx.lastSets.length === 0}
               style={{
-                marginLeft: 'auto',
-                background: 'none',
-                border: 'none',
-                padding: 0,
+                padding: '8px 16px',
+                borderRadius: '8px',
+                border: '1px solid rgba(255,255,255,0.55)',
+                background: activeEx.copied ? undefined : 'linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.10) 100%)',
+                backgroundColor: activeEx.copied ? 'rgba(0,0,0,0.06)' : undefined,
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -1px 0 rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.08)',
+                backdropFilter: 'blur(8px)',
+                WebkitBackdropFilter: 'blur(8px)',
+                cursor: activeEx.lastSets && activeEx.lastSets.length > 0 ? 'pointer' : 'default',
+                color: activeEx.copied ? '#1a1a1a' : 'rgba(0,0,0,0.5)',
+                fontSize: '11px',
+                fontWeight: 500,
+                letterSpacing: '0.04em',
+                opacity: activeEx.lastSets && activeEx.lastSets.length > 0 ? 1 : 0.4,
+              }}
+            >
+              {activeEx.copied ? 'REVERT' : 'LAST'}
+            </button>
+
+            {/* Max */}
+            <button
+              onClick={() => onLoadMaxSession(activeEx.exercise.id)}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '8px',
+                border: '1px solid rgba(255,255,255,0.55)',
+                background: activeEx.loadedMax ? undefined : 'linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.10) 100%)',
+                backgroundColor: activeEx.loadedMax ? 'rgba(0,0,0,0.06)' : undefined,
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -1px 0 rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.08)',
+                backdropFilter: 'blur(8px)',
+                WebkitBackdropFilter: 'blur(8px)',
                 cursor: 'pointer',
+                color: activeEx.loadedMax ? '#1a1a1a' : 'rgba(0,0,0,0.5)',
+                fontSize: '11px',
+                fontWeight: 500,
+                letterSpacing: '0.04em',
+              }}
+            >
+              {activeEx.loadedMax ? 'DEFAULT' : 'MAX'}
+            </button>
+
+            {/* Remove */}
+            <button
+              onClick={() => onRemoveExercise(activeEx.exercise.id)}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '8px',
+                border: '1px solid rgba(255,255,255,0.55)',
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.10) 100%)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -1px 0 rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.08)',
+                backdropFilter: 'blur(8px)',
+                WebkitBackdropFilter: 'blur(8px)',
+                cursor: 'pointer',
+                color: 'rgba(0,0,0,0.5)',
+                fontSize: '11px',
+                fontWeight: 500,
+                letterSpacing: '0.04em',
                 display: 'flex',
                 alignItems: 'center',
+                gap: '4px',
               }}
-              aria-label="Summary"
             >
-              <DoubleArrowIcon size={18} />
+              <Minus size={12} /> EXE
             </button>
-          )}
-        </div>
-      ) : (
-        <div
-          onClick={() => setShowAdvanced(true)}
-          style={{
-            padding: '10px 20px',
-            paddingBottom: 'calc(10px + env(safe-area-inset-bottom))',
-            borderTop: '1px solid rgba(0,0,0,0.06)',
-            cursor: 'pointer',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          <span
+
+            {showDoubleArrow && (
+              <button
+                onClick={() => onNavigate && onNavigate('summary-weights', { addedExercises, todayLoggedTotal, exercisesByGroup })}
+                style={{
+                  marginLeft: 'auto',
+                  background: 'none',
+                  border: 'none',
+                  padding: 0,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+                aria-label="Summary"
+              >
+                <DoubleArrowIcon size={18} />
+              </button>
+            )}
+          </div>
+        ) : (
+          <div
+            onClick={() => setShowAdvanced(true)}
             style={{
-              color: '#1a1a1a',
-              fontSize: '12px',
-              fontWeight: 500,
-              letterSpacing: '0.04em',
+              padding: '10px 20px',
+              paddingBottom: 'calc(10px + env(safe-area-inset-bottom))',
+              borderTop: '1px solid rgba(0,0,0,0.06)',
+              cursor: 'pointer',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
             }}
           >
-            / ADVANCED
-          </span>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
             <span
               style={{
-                fontSize: '18px',
-                fontWeight: 350,
-                letterSpacing: '-0.02em',
                 color: '#1a1a1a',
-                lineHeight: 1,
+                fontSize: '12px',
+                fontWeight: 500,
+                letterSpacing: '0.04em',
               }}
             >
-              {addedExercises.reduce((acc, ex) => acc + calcExerciseTotal(ex.sets, ex.exercise.multiplier ?? 1), 0).toLocaleString()}
+              / ADVANCED
             </span>
-            <span
-              style={{
-                fontSize: '10px',
-                fontWeight: 400,
-                color: 'rgba(26,26,26,0.45)',
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-              }}
-            >
-              KG
-            </span>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+              <span
+                style={{
+                  fontSize: '18px',
+                  fontWeight: 350,
+                  letterSpacing: '-0.02em',
+                  color: '#1a1a1a',
+                  lineHeight: 1,
+                }}
+              >
+                {addedExercises.reduce((acc, ex) => acc + calcExerciseTotal(ex.sets, ex.exercise.multiplier ?? 1), 0).toLocaleString()}
+              </span>
+              <span
+                style={{
+                  fontSize: '10px',
+                  fontWeight: 400,
+                  color: 'rgba(26,26,26,0.45)',
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                KG
+              </span>
+            </div>
           </div>
-        </div>
+        )
       )}
 
       <style>{`
