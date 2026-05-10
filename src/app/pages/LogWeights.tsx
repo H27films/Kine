@@ -74,7 +74,7 @@ const fetchSavedWorkoutIds = async (): Promise<number[]> => {
   return [];
 };
 
-export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySummary }) => {
+export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySummary: _showWeeklySummary }) => {
   const [selectedGroup, setSelectedGroup] = useState<string>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);

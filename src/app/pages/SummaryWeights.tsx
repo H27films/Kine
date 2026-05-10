@@ -17,13 +17,13 @@ const SummaryWeights: React.FC<SummaryWeightsProps> = ({
   todayLoggedTotal,
   exercisesByGroup,
   // The following props are intentionally not used in summary mode
-  // onUpdateSet: _onUpdateSet,
-  // onAddSet: _onAddSet,
-  // onToggleFail: _onToggleFail,
-  // onLoadMaxSession: _onLoadMaxSession,
-  // onToggleCopyFromLast: _onToggleCopyFromLast,
-  // onRemoveExercise: _onRemoveExercise,
-  // onAddExercise: _onAddExercise,
+  onUpdateSet: _onUpdateSet,
+  onAddSet: _onAddSet,
+  onToggleFail: _onToggleFail,
+  onLoadMaxSession: _onLoadMaxSession,
+  onToggleCopyFromLast: _onToggleCopyFromLast,
+  onRemoveExercise: _onRemoveExercise,
+  onAddExercise: _onAddExercise,
 }) => {
   const noop = () => {};
 
