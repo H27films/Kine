@@ -53,8 +53,8 @@ const App: React.FC = () => {
     switch (currentPage.page) {
       case 'dashboard':
         return <Dashboard showWeeklySummary={showWeeklySummary} onNavigate={onNavigate} />;
-      case 'weights':
-        return <LogWeights onNavigate={onNavigate} showWeeklySummary={showWeeklySummary} />;
+       case 'weights':
+         return <LogWeights onNavigate={onNavigate} showWeeklySummary={showWeeklySummary} data={currentPage.data} />;
       case 'cardio':
         return <LogCardio onNavigate={onNavigate} showWeeklySummary={showWeeklySummary} initialSelectedActivity={currentPage.data?.selectedActivity} />;
       case 'calories':
