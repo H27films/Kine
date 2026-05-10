@@ -75,12 +75,6 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
     ? [...addedExercises.slice(safeIndex), ...addedExercises.slice(0, safeIndex)]
     : addedExercises;
 
-  const isAdderActive = adderOpen;
-  const showingAdder = isAdderActive;
-  // When adder is open, show "ADD EXERCISE" as the active tab
-  const effectiveIndex = showingAdder ? -1 : safeIndex;
-  const effectiveActiveEx = showingAdder ? null : activeEx;
-
   if (addedExercises.length === 0) return null;
 
   useEffect(() => {

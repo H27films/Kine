@@ -12,6 +12,7 @@ const LogCalories = lazy(() => import('./pages/LogCalories').then(m => ({ defaul
 const Analytics = lazy(() => import('./pages/Analytics').then(m => ({ default: m.Analytics })));
 const WeightsPlus = lazy(() => import('./pages/WeightsPlus').then(m => ({ default: m.WeightsPlus })));
 const RunningPlus = lazy(() => import('./pages/RunningPlus').then(m => ({ default: m.RunningPlus })));
+const Profile = lazy(() => import('./pages/Profile').then(m => ({ default: m.Profile })));
 const SummaryWeights = lazy(() => import('./pages/SummaryWeights').then(m => ({ default: m.default })));
 
 const App: React.FC = () => {

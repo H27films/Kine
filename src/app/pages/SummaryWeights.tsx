@@ -1,6 +1,6 @@
 import React from 'react';
-import { Page } from '../types';
-import { LogWeightsEntry } from '../components/LogWeightsEntry';
+import { Page } from '../../types';
+import LogWeightsEntry from '../components/LogWeightsEntry';
 import { AddedExercise } from '../components/LogWeightsEntry';
 import { Exercise } from '../../lib/supabase';
 
@@ -16,6 +16,14 @@ const SummaryWeights: React.FC<SummaryWeightsProps> = ({
   addedExercises,
   todayLoggedTotal,
   exercisesByGroup,
+  // The following props are intentionally not used in summary mode
+  // onUpdateSet: _onUpdateSet,
+  // onAddSet: _onAddSet,
+  // onToggleFail: _onToggleFail,
+  // onLoadMaxSession: _onLoadMaxSession,
+  // onToggleCopyFromLast: _onToggleCopyFromLast,
+  // onRemoveExercise: _onRemoveExercise,
+  // onAddExercise: _onAddExercise,
 }) => {
   const noop = () => {};
 
