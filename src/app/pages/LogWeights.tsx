@@ -597,8 +597,29 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
         <div className="text-[3.25rem] font-black leading-none tracking-tighter text-white flex-shrink-0">
           {fmtVol(thisWeekTotal)}
           {lastWeekTotal > 0 && (
-            <div style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.45)', marginTop: '6px', letterSpacing: '-0.01em', lineHeight: 1 }}>
+            <div style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.45)', marginTop: '6px', letterSpacing: '-0.01em', lineHeight: 1, display: 'flex', alignItems: 'center', gap: '6px' }}>
               LAST WEEK {Math.round(lastWeekTotal).toLocaleString()} KG
+              {addedExercises.length > 0 && (
+                <button
+                  onClick={() => setShowEntryCard(true)}
+                  style={{
+                    background: 'none',
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    borderRadius: '50%',
+                    width: 24,
+                    height: 24,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    color: '#ffffff',
+                    flexShrink: 0,
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  <ArrowLeftFromLine size={12} strokeWidth={1.5} style={{ transform: 'rotate(180deg)' }} />
+                </button>
+              )}
             </div>
           )}
         </div>
