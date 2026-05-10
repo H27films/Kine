@@ -488,7 +488,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
     if (ex.lastSets && ex.lastSets.length > 0) return acc + calcExerciseTotal(ex.lastSets, mult);
     return acc;
   }, 0);
-  const showEstGrandTotal = addedExercises.length > 0 && grandTotal === 0 && estGrandTotal > 0;
+  const showEstGrandTotal = addedExercises.length > 0 && grandTotal === 0;
 
   const textTriggerStyle: React.CSSProperties = {
     display: 'inline-flex', alignItems: 'center', gap: '6px', cursor: 'pointer', userSelect: 'none',
@@ -838,7 +838,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
 
 <div style={{ marginTop: '-4px' }} />
         
-          {!selectedGroup && addedExercises.length > 1 && (grandTotal > 0 || showEstGrandTotal) && (
+          {!selectedGroup && addedExercises.length > 0 && (grandTotal > 0 || showEstGrandTotal) && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
               <button
                 type="button"
