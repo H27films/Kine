@@ -698,20 +698,20 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
           
           {/* Food Rating Circles - Vertical */}
           {!selectedActivity && (
-            <div className="flex flex-col items-center justify-center ml-4" style={{ marginTop: '12px', gap: '6px' }}>
+            <div className="flex flex-col items-center justify-center ml-4" style={{ marginTop: '12px', gap: '5px' }}>
               {/* Always show top circle (grey) */}
-              <div className="w-4 h-4 rounded-full" style={{ 
+              <div className="w-3.5 h-3.5 rounded-full" style={{ 
                 backgroundColor: '#666666'
               }}></div>
               {/* Show middle circle only for OK and GOOD */}
               {(foodRating === 'OK' || foodRating === 'GOOD') && (
-                <div className="w-4 h-4 rounded-full" style={{ 
+                <div className="w-3.5 h-3.5 rounded-full" style={{ 
                   backgroundColor: '#cccccc'
                 }}></div>
               )}
               {/* Show bottom circle only for GOOD */}
               {foodRating === 'GOOD' && (
-                <div className="w-4 h-4 rounded-full" style={{ 
+                <div className="w-3.5 h-3.5 rounded-full" style={{ 
                   backgroundColor: '#ffffff'
                 }}></div>
               )}
