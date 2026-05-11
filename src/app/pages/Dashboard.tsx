@@ -315,6 +315,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
   const [dayWeightsTotal, setDayWeightsTotal] = useState<number>(0);
 
   const [todayCalories, setTodayCalories] = useState<number>(0);
+  const [foodRating, setFoodRating] = useState<string>('BAD'); // BAD, OK, or GOOD
   const [cardioWeeks, setCardioWeeks] = useState<WeekData[]>([]);
   const [weightsWeeks, setWeightsWeeks] = useState<WeekData[]>([]);
   const [weightsExerciseCounts, setWeightsExerciseCounts] = useState<Record<number, number[]>>({});
@@ -403,6 +404,19 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
       setTodayCalories(data && data.length > 0 ? Number(data[0].calories) : 0);
     };
     loadTodayCalories();
+    
+    // Today's food rating
+    const loadFoodRating = async () => {
+      const { data } = await supabase
+        .from('workouts')
+        .select('food_rating')
+        .eq('exercise_id', 89)
+        .eq('date', selectedDate)
+        .not('food_rating', 'is', null)
+        .limit(1);
+      setFoodRating(data && data.length > 0 ? String(data[0].food_rating) : 'BAD');
+    };
+    loadFoodRating();
   }, [selectedDate]);
 
   useEffect(() => {
@@ -681,6 +695,29 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
               </div>
             )}
           </div>
+          
+          {/* Food Rating Circles - Vertical */}
+          {!selectedActivity && (
+            <div className="flex flex-col items-center justify-center ml-4" style={{ marginTop: '12px', gap: '6px' }}>
+              {/* Always show top circle (grey) */}
+              <div className="w-4 h-4 rounded-full" style={{ 
+                backgroundColor: '#666666'
+              }}></div>
+              {/* Show middle circle only for OK and GOOD */}
+              {(foodRating === 'OK' || foodRating === 'GOOD') && (
+                <div className="w-4 h-4 rounded-full" style={{ 
+                  backgroundColor: '#cccccc'
+                }}></div>
+              )}
+              {/* Show bottom circle only for GOOD */}
+              {foodRating === 'GOOD' && (
+                <div className="w-4 h-4 rounded-full" style={{ 
+                  backgroundColor: '#ffffff'
+                }}></div>
+              )}
+            </div>
+          )}
+          
           {selectedActivity && (
             <div
               onClick={() => {
