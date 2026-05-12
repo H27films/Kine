@@ -14,14 +14,7 @@ interface LogWeightsProps {
   data?: any;
 }
 
-const tabs: { label: string; page: Page }[] = [
-  { label: 'Weights', page: 'weights' },
-  { label: 'Cardio', page: 'cardio' },
-  { label: 'Calories', page: 'calories' },
-];
-
 const WEIGHT_TYPES = ['CHEST', 'BACK', 'LEGS'];
-// GROUP_ORDER not used anymore
 
 const TYPE2_ORDER: Record<string, number> = {
   'BODY WEIGHT': 0,
@@ -59,7 +52,6 @@ const makeDefaultSets = (): SetRow[] =>
   Array.from({ length: 4 }, () => ({ weight: '', reps: 10 }));
 
 const STORAGE_KEY = 'kine_logweights_v1';
-/** Matches Log Calories empty-state / placeholder (slate cool grey) */
 const EST_SLATE = '#94A3B8';
 
 const fetchSavedWorkoutIds = async (): Promise<number[]> => {
@@ -207,7 +199,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
     v >= 1000 ? `${(v / 1000).toFixed(1)}k` : `${Math.round(v)}`;
 
   const handleSelectGroup = (group: string) => {
-    // Toggle: if clicking same group, deselect it
     setSelectedGroup(selectedGroup === group ? '' : group);
     setExerciseOpen(false);
   };
@@ -278,7 +269,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
       setAddedExercises(prev => prev.filter(e => e.exercise.id !== exercise.id));
       return;
     }
-
     const row = await fetchAddedExerciseRow(exercise);
     setAddedExercises(prev => (prev.some(e => e.exercise.id === exercise.id) ? prev : [...prev, row]));
   };
@@ -298,8 +288,9 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
     }
   };
 
+  // Guard removed: now works whether or not exercises are already added
   const handleApplySavedWorkoutTemplate = async () => {
-    if (addedExercises.length > 0 || savedWorkoutIds.length === 0) return;
+    if (savedWorkoutIds.length === 0) return;
     const allExercises = Object.values(exercisesByGroup).flat();
     setApplyingTemplate(true);
     try {
@@ -356,9 +347,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
       if (e.copied && e.lastSets && e.lastSets.length > 0) {
         return { ...e, sets: makeDefaultSets(), copied: false, loadedMax: false };
       }
-      if (!e.lastSets || e.lastSets.length === 0) {
-        return e;
-      }
+      if (!e.lastSets || e.lastSets.length === 0) return e;
       return { ...e, sets: [...e.lastSets], copied: true, loadedMax: false };
     }));
   };
@@ -381,7 +370,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
     const ex = addedExercises.find(e => e.exercise.id === id);
     if (!ex) return;
 
-    // Toggle off: revert to defaults if already loaded max
     if (ex.loadedMax) {
       setAddedExercises(prev => prev.map(e => e.exercise.id !== id ? e : { ...e, loadedMax: false, sets: makeDefaultSets() }));
       return;
@@ -389,7 +377,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
 
     let maxSets = ex.maxSets;
 
-    // If maxSets wasn't loaded (e.g. stale localStorage), fetch it now
     if (!maxSets || maxSets.length === 0) {
       const { data } = await supabase
         .from('workouts')
@@ -471,7 +458,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
       await recalculateDailyTotals(today);
 
       setAddedExercises([]);
-      setRefreshKey(k => k + 1); // signal RecentLogsSection to re-fetch
+      setRefreshKey(k => k + 1);
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
     } finally {
@@ -506,9 +493,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
     boxShadow: '0 16px 40px rgba(0,0,0,0.8)',
   };
 
-  const orderedGroups: string[] = [];
-  void orderedGroups;
-
   const renderExerciseDropdown = () => {
     const exercises = exercisesByGroup[selectedGroup] || [];
     if (exercises.length === 0) return null;
@@ -516,7 +500,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
     const items: React.ReactNode[] = [];
     let lastType2: string | null = undefined as any;
 
-    exercises.forEach((ex, _i) => {
+    exercises.forEach((ex) => {
       const t2 = ex.type2 ?? '';
       const alreadyAdded = !!addedExercises.find(e => e.exercise.id === ex.id);
 
@@ -563,15 +547,13 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
               </span>
             )}
           </div>
-          <div
-            style={{
-              width: 28, height: 28, borderRadius: '50%',
-              backgroundColor: alreadyAdded ? '#ef4444' : '#ffffff',
-              color: alreadyAdded ? '#ffffff' : '#1a1a1a',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              flexShrink: 0,
-            }}
-          >
+          <div style={{
+            width: 28, height: 28, borderRadius: '50%',
+            backgroundColor: alreadyAdded ? '#ef4444' : '#ffffff',
+            color: alreadyAdded ? '#ffffff' : '#1a1a1a',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexShrink: 0,
+          }}>
             {alreadyAdded ? <X size={14} strokeWidth={3} /> : <Plus size={14} strokeWidth={3} />}
           </div>
         </div>
@@ -592,75 +574,58 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
         transition: 'max-height 0.35s ease, opacity 0.25s ease, margin 0.35s ease',
         marginBottom: selectedGroup ? '0px' : '1rem',
       }}>
-      <div className="flex items-start">
-        {/* Big weekly total on left */}
-        <div className="text-[3.25rem] font-black leading-none tracking-tighter text-white flex-shrink-0">
-          {fmtVol(thisWeekTotal)}
-          {lastWeekTotal > 0 && (
-            <div style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.45)', marginTop: '6px', letterSpacing: '-0.01em', lineHeight: 1 }}>
-              LAST WEEK {Math.round(lastWeekTotal).toLocaleString()} KG
+        <div className="flex items-start">
+          <div className="text-[3.25rem] font-black leading-none tracking-tighter text-white flex-shrink-0">
+            {fmtVol(thisWeekTotal)}
+            {lastWeekTotal > 0 && (
+              <div style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.45)', marginTop: '6px', letterSpacing: '-0.01em', lineHeight: 1 }}>
+                LAST WEEK {Math.round(lastWeekTotal).toLocaleString()} KG
+              </div>
+            )}
+            {!selectedGroup && addedExercises.length === 0 && (
+              <button
+                onClick={() => setShowEntryCard(true)}
+                style={{
+                  background: 'none', border: 'none',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  cursor: 'pointer', color: '#ffffff', flexShrink: 0,
+                  marginTop: '16px', transition: 'all 0.2s',
+                }}
+              >
+                <ArrowLeftFromLine size={16} strokeWidth={1.5} style={{ transform: 'rotate(180deg)' }} />
+              </button>
+            )}
+          </div>
+          <div className="flex flex-col ml-4 pt-1 flex-1 min-w-0">
+            <div className="flex items-start justify-between">
+              <div style={{ fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2.5px', color: '#ffffff' }}>
+                VOLUME (KG)
+              </div>
+              {todayTotal > 0 && (
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginLeft: '12px', flexShrink: 0 }}>
+                  <span style={{ color: '#ffffff', fontWeight: 900, fontSize: '1.1rem', letterSpacing: '-0.02em', lineHeight: 1 }}>{Math.round(todayTotal).toLocaleString()}</span>
+                  <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 700, fontSize: '0.65rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>KG</span>
+                </div>
+              )}
             </div>
-          )}
-          {/* Right arrow to navigate to LogWeightsEntry - only shown when no group selected AND no exercises added */}
-          {!selectedGroup && addedExercises.length === 0 && (
-            <button
-              onClick={() => setShowEntryCard(true)}
-              style={{
-                background: 'none',
-                border: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                color: '#ffffff',
-                flexShrink: 0,
-                marginTop: '16px',
-                transition: 'all 0.2s',
-              }}
-            >
-              <ArrowLeftFromLine size={16} strokeWidth={1.5} style={{ transform: 'rotate(180deg)' }} />
-            </button>
-          )}
-        </div>
-        {/* Right section: labels + KG TODAY + bar */}
-        <div className="flex flex-col ml-4 pt-1 flex-1 min-w-0">
-          {/* Top row: label + KG TODAY */}
-          <div className="flex items-start justify-between">
-            <div style={{ fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2.5px', color: '#ffffff' }}>
-              VOLUME (KG)
-            </div>
-            {todayTotal > 0 && (
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginLeft: '12px', flexShrink: 0 }}>
-                <span style={{ color: '#ffffff', fontWeight: 900, fontSize: '1.1rem', letterSpacing: '-0.02em', lineHeight: 1 }}>{Math.round(todayTotal).toLocaleString()}</span>
-                <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 700, fontSize: '0.65rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>KG</span>
+            {lastWeekTotal > 0 && (
+              <div style={{ display: 'flex', alignItems: 'center', marginTop: '6px' }}>
+                <div style={{
+                  flex: 1, height: '8px',
+                  backgroundColor: 'rgba(255,255,255,0.22)',
+                  borderRadius: '999px', position: 'relative', overflow: 'hidden',
+                }}>
+                  <div style={{
+                    position: 'absolute', right: 0, top: 0, bottom: 0,
+                    width: `${Math.min(100, (todayTotal / 25000) * 100)}%`,
+                    background: 'linear-gradient(to right, #ffffff, rgba(255,255,255,0.45))',
+                    borderRadius: '999px', transition: 'width 0.6s ease',
+                  }} />
+                </div>
               </div>
             )}
           </div>
-          {/* Bottom row: inline progress bar */}
-          {lastWeekTotal > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', marginTop: '6px' }}>
-              {/* Progress bar */}
-              <div style={{
-                flex: 1,
-                height: '8px',
-                backgroundColor: 'rgba(255,255,255,0.22)',
-                borderRadius: '999px',
-                position: 'relative',
-                overflow: 'hidden',
-              }}>
-                <div style={{
-                  position: 'absolute',
-                  right: 0, top: 0, bottom: 0,
-                  width: `${Math.min(100, (todayTotal / 25000) * 100)}%`,
-                  background: 'linear-gradient(to right, #ffffff, rgba(255,255,255,0.45))',
-                  borderRadius: '999px',
-                  transition: 'width 0.6s ease',
-                }} />
-              </div>
-            </div>
-          )}
         </div>
-      </div>
       </div>
 
       {/* Today's total — visible when group selected */}
@@ -678,7 +643,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
       )}
 
       <section style={{ marginBottom: selectedGroup ? '30px' : '2.5rem', transition: 'margin 0.35s ease' }}>
-        {/* Muscle group circles */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
           <div style={{ display: 'flex', gap: '24px', flex: 1, justifyContent: 'space-between' }}>
             {['Chest', 'Back', 'Legs'].map(group => (
@@ -686,56 +650,31 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                 key={group}
                 onClick={() => handleSelectGroup(group)}
                 style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: '8px',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  padding: 0,
+                  display: 'flex', flexDirection: 'column', alignItems: 'center',
+                  gap: '8px', background: 'none', border: 'none', cursor: 'pointer', padding: 0,
                 }}
               >
-                 <div style={{
-                   width: '52px',
-                   height: '52px',
-                   borderRadius: '50%',
-                   backgroundColor: selectedGroup === group ? '#ffffff' : 'transparent',
-                   border: selectedGroup === group ? '2px solid #ffffff' : '1px solid rgba(255,255,255,0.08)',
-                    background: selectedGroup === group 
-                      ? '#ffffff' 
-                      : 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.10) 30%, transparent 70%)',
-                   backgroundClip: 'padding-box',
-                   boxShadow: selectedGroup === group 
-                     ? '0 0 16px rgba(255,255,255,0.5)' 
-                     : `
-                       0 0 8px rgba(255,255,255,0.12),
-                       0 0 16px rgba(255,255,255,0.08),
-                       0 0 26px rgba(255,255,255,0.05),
-                       0 0 45px rgba(255,255,255,0.03),
-                       4px 6px 20px rgba(0,0,0,0.40),
-                       inset 2px 2px 12px rgba(255,255,255,0.25),
-                       inset -2px -2px 10px rgba(255,255,255,0.03)
-                     `,
-                   transition: 'all 0.2s',
-                   display: 'flex',
-                   alignItems: 'center',
-                   justifyContent: 'center',
-                   overflow: 'hidden',
-                 }}>
-                   {selectedGroup === group ? (
-                     <Check size={24} color="#000000" strokeWidth={3} />
-                   ) : (
-                     <img src={`/icons/${group}.svg`} alt={group} style={{ width: '38px', height: '38px', objectFit: 'contain' }} />
-                   )}
-                 </div>
-                <span style={{
-                  fontSize: '0.7rem',
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.2em',
-                  color: '#ffffff',
+                <div style={{
+                  width: '52px', height: '52px', borderRadius: '50%',
+                  backgroundColor: selectedGroup === group ? '#ffffff' : 'transparent',
+                  border: selectedGroup === group ? '2px solid #ffffff' : '1px solid rgba(255,255,255,0.08)',
+                  background: selectedGroup === group
+                    ? '#ffffff'
+                    : 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.10) 30%, transparent 70%)',
+                  backgroundClip: 'padding-box',
+                  boxShadow: selectedGroup === group
+                    ? '0 0 16px rgba(255,255,255,0.5)'
+                    : `0 0 8px rgba(255,255,255,0.12), 0 0 16px rgba(255,255,255,0.08), 0 0 26px rgba(255,255,255,0.05), 0 0 45px rgba(255,255,255,0.03), 4px 6px 20px rgba(0,0,0,0.40), inset 2px 2px 12px rgba(255,255,255,0.25), inset -2px -2px 10px rgba(255,255,255,0.03)`,
+                  transition: 'all 0.2s',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
                 }}>
+                  {selectedGroup === group ? (
+                    <Check size={24} color="#000000" strokeWidth={3} />
+                  ) : (
+                    <img src={`/icons/${group}.svg`} alt={group} style={{ width: '38px', height: '38px', objectFit: 'contain' }} />
+                  )}
+                </div>
+                <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#ffffff' }}>
                   {group}
                 </span>
               </button>
@@ -758,14 +697,9 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                     title="Add saved exercises"
                     onClick={e => { e.stopPropagation(); void handleApplySavedWorkoutTemplate(); }}
                     style={{
-                      width: 30,
-                      height: 30,
-                      borderRadius: '50%',
-                      backgroundColor: '#ffffff',
-                      color: '#1a1a1a',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
+                      width: 30, height: 30, borderRadius: '50%',
+                      backgroundColor: '#ffffff', color: '#1a1a1a',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
                       border: 'none',
                       cursor: applyingTemplate || Object.values(exercisesByGroup).flat().length === 0 ? 'default' : 'pointer',
                       opacity: applyingTemplate ? 0.55 : 1,
@@ -781,158 +715,111 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                 )}
               </div>
             </div>
-             {exerciseOpen && (
-               <div style={{ ...dropdownStyle, top: 'calc(100% + 16px)', left: '-16px', right: '-16px', maxHeight: '65vh', overflowY: 'auto' }}>
-                 {renderExerciseDropdown()}
-               </div>
-             )}
-             
-{(selectedGroup && addedExercises.length > 1) && (
-                <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '10px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <button
-                      type="button"
-                      onClick={handleSaveWorkoutTemplate}
-                      style={{
-                        ...textTriggerStyle,
-                        padding: 0,
-                        margin: 0,
-                        border: 'none',
-                        background: 'none',
-                        font: 'inherit',
-                        color: EST_SLATE,
-                      }}
-                    >
-                      <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: EST_SLATE }}>SAVE WORKOUT</span>
-                      <Save size={13} strokeWidth={2.2} style={{ color: EST_SLATE }} />
-                    </button>
-                    {templateSaveFlash && (
-                      <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#22c55e', letterSpacing: '0.08em' }}>Saved</span>
-                    )}
-                  </div>
+            {exerciseOpen && (
+              <div style={{ ...dropdownStyle, top: 'calc(100% + 16px)', left: '-16px', right: '-16px', maxHeight: '65vh', overflowY: 'auto' }}>
+                {renderExerciseDropdown()}
+              </div>
+            )}
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); setShowClearConfirm(0); }}
-                      style={{
-                        ...textTriggerStyle,
-                        padding: 0,
-                        margin: 0,
-                        border: 'none',
-                        background: 'none',
-                        font: 'inherit',
-                      }}
-                    >
-                      <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,80,80,0.55)' }}>CLEAR ALL</span>
-                      <X size={13} strokeWidth={2.2} style={{ color: 'rgba(255,80,80,0.55)' }} />
-                    </button>
-{showClearConfirm !== null && (
-                      <>
-                        <span style={{ fontSize: '0.55rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.4)' }}>Clear all?</span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setAddedExercises([]);
-                            setShowClearConfirm(null);
-                          }}
-                          style={{ ...textTriggerStyle, padding: 0, margin: 0, border: 'none', background: 'none', font: 'inherit' }}
-                        >
-                          <span style={{ fontSize: '0.55rem', fontWeight: 800, color: '#22c55e' }}>YES</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setShowClearConfirm(null)}
-                          style={{ ...textTriggerStyle, padding: 0, margin: 0, border: 'none', background: 'none', font: 'inherit' }}
-                        >
-                          <span style={{ fontSize: '0.55rem', fontWeight: 700, color: 'rgba(255,80,80,0.55)' }}>CANCEL</span>
-                        </button>
-                      </>
-                    )}
-                  </div>
+            {selectedGroup && addedExercises.length > 1 && (
+              <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <button
+                    type="button"
+                    onClick={handleSaveWorkoutTemplate}
+                    style={{ ...textTriggerStyle, padding: 0, margin: 0, border: 'none', background: 'none', font: 'inherit', color: EST_SLATE }}
+                  >
+                    <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: EST_SLATE }}>SAVE WORKOUT</span>
+                    <Save size={13} strokeWidth={2.2} style={{ color: EST_SLATE }} />
+                  </button>
+                  {templateSaveFlash && (
+                    <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#22c55e', letterSpacing: '0.08em' }}>Saved</span>
+                  )}
                 </div>
-              )}
-           </div>
-         )}
-       </section>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setShowClearConfirm(0); }}
+                    style={{ ...textTriggerStyle, padding: 0, margin: 0, border: 'none', background: 'none', font: 'inherit' }}
+                  >
+                    <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,80,80,0.55)' }}>CLEAR ALL</span>
+                    <X size={13} strokeWidth={2.2} style={{ color: 'rgba(255,80,80,0.55)' }} />
+                  </button>
+                  {showClearConfirm !== null && (
+                    <>
+                      <span style={{ fontSize: '0.55rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.4)' }}>Clear all?</span>
+                      <button type="button" onClick={() => { setAddedExercises([]); setShowClearConfirm(null); }} style={{ ...textTriggerStyle, padding: 0, margin: 0, border: 'none', background: 'none', font: 'inherit' }}>
+                        <span style={{ fontSize: '0.55rem', fontWeight: 800, color: '#22c55e' }}>YES</span>
+                      </button>
+                      <button type="button" onClick={() => setShowClearConfirm(null)} style={{ ...textTriggerStyle, padding: 0, margin: 0, border: 'none', background: 'none', font: 'inherit' }}>
+                        <span style={{ fontSize: '0.55rem', fontWeight: 700, color: 'rgba(255,80,80,0.55)' }}>CANCEL</span>
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </section>
 
-<div style={{ marginTop: '-4px' }} />
-        
-          {!selectedGroup && addedExercises.length > 0 && (grandTotal > 0 || showEstGrandTotal) && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); setShowClearConfirm(0); }}
-                style={{ ...textTriggerStyle, padding: 0, margin: 0, border: 'none', background: 'none', font: 'inherit' }}
-              >
-                <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,80,80,0.55)' }}>CLEAR ALL</span>
-                <X size={13} strokeWidth={2.2} style={{ color: 'rgba(255,80,80,0.55)' }} />
+      <div style={{ marginTop: '-4px' }} />
+
+      {!selectedGroup && addedExercises.length > 0 && (grandTotal > 0 || showEstGrandTotal) && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); setShowClearConfirm(0); }}
+            style={{ ...textTriggerStyle, padding: 0, margin: 0, border: 'none', background: 'none', font: 'inherit' }}
+          >
+            <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,80,80,0.55)' }}>CLEAR ALL</span>
+            <X size={13} strokeWidth={2.2} style={{ color: 'rgba(255,80,80,0.55)' }} />
+          </button>
+          {showClearConfirm !== null && (
+            <>
+              <span style={{ fontSize: '0.55rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.4)' }}>Clear all?</span>
+              <button type="button" onClick={() => { setAddedExercises([]); setShowClearConfirm(null); }} style={{ ...textTriggerStyle, padding: 0, margin: 0, border: 'none', background: 'none', font: 'inherit' }}>
+                <span style={{ fontSize: '0.55rem', fontWeight: 800, color: '#22c55e' }}>YES</span>
               </button>
-              {showClearConfirm !== null && (
-                <>
-                  <span style={{ fontSize: '0.55rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.4)' }}>Clear all?</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAddedExercises([]);
-                      setShowClearConfirm(null);
-                    }}
-                    style={{ ...textTriggerStyle, padding: 0, margin: 0, border: 'none', background: 'none', font: 'inherit' }}
-                  >
-                    <span style={{ fontSize: '0.55rem', fontWeight: 800, color: '#22c55e' }}>YES</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowClearConfirm(null)}
-                    style={{ ...textTriggerStyle, padding: 0, margin: 0, border: 'none', background: 'none', font: 'inherit' }}
-                  >
-                    <span style={{ fontSize: '0.55rem', fontWeight: 700, color: 'rgba(255,80,80,0.55)' }}>CANCEL</span>
-                  </button>
-                </>
-              )}
-            </div>
+              <button type="button" onClick={() => setShowClearConfirm(null)} style={{ ...textTriggerStyle, padding: 0, margin: 0, border: 'none', background: 'none', font: 'inherit' }}>
+                <span style={{ fontSize: '0.55rem', fontWeight: 700, color: 'rgba(255,80,80,0.55)' }}>CANCEL</span>
+              </button>
+            </>
           )}
+        </div>
+      )}
 
-        {(grandTotal > 0 || showEstGrandTotal) && (
-         <div className="flex items-baseline justify-between gap-4 mb-6 mt-2 flex-wrap">
-           <div className="flex items-baseline gap-2 flex-wrap min-w-0">
-             {grandTotal > 0 ? (
-               <>
-                 <span style={{ fontSize: '2.6rem', fontWeight: 900, lineHeight: 1, color: '#ffffff', letterSpacing: '-0.02em' }}>{grandTotal.toLocaleString()}</span>
-                 <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#ffffff', letterSpacing: '0.12em', textTransform: 'uppercase' }}>KG</span>
-               </>
-             ) : showEstGrandTotal ? (
-               <>
-                 <span style={{ fontSize: '1.05rem', fontWeight: 800, color: EST_SLATE, letterSpacing: '0.1em', textTransform: 'uppercase', flexShrink: 0 }}>EST.</span>
-                 <span style={{ fontSize: '2.6rem', fontWeight: 900, lineHeight: 1, color: EST_SLATE, letterSpacing: '-0.02em' }}>{estGrandTotal.toLocaleString()}</span>
-                 <span style={{ fontSize: '0.75rem', fontWeight: 700, color: EST_SLATE, letterSpacing: '0.12em', textTransform: 'uppercase' }}>KG</span>
-               </>
-             ) : null}
-           </div>
-           {/* Arrow to open full-screen entry card — shown when exercises are added */}
-           {addedExercises.length > 0 && (
-             <button
-               onClick={() => setShowEntryCard(true)}
-               style={{
-                 background: 'none',
-                 border: '1px solid rgba(255,255,255,0.15)',
-                 borderRadius: '50%',
-                 width: 36,
-                 height: 36,
-                 display: 'flex',
-                 alignItems: 'center',
-                 justifyContent: 'center',
-                 cursor: 'pointer',
-                 color: '#ffffff',
-                 flexShrink: 0,
-                 transition: 'all 0.2s',
-               }}
-             >
+      {(grandTotal > 0 || showEstGrandTotal) && (
+        <div className="flex items-baseline justify-between gap-4 mb-6 mt-2 flex-wrap">
+          <div className="flex items-baseline gap-2 flex-wrap min-w-0">
+            {grandTotal > 0 ? (
+              <>
+                <span style={{ fontSize: '2.6rem', fontWeight: 900, lineHeight: 1, color: '#ffffff', letterSpacing: '-0.02em' }}>{grandTotal.toLocaleString()}</span>
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#ffffff', letterSpacing: '0.12em', textTransform: 'uppercase' }}>KG</span>
+              </>
+            ) : showEstGrandTotal ? (
+              <>
+                <span style={{ fontSize: '1.05rem', fontWeight: 800, color: EST_SLATE, letterSpacing: '0.1em', textTransform: 'uppercase', flexShrink: 0 }}>EST.</span>
+                <span style={{ fontSize: '2.6rem', fontWeight: 900, lineHeight: 1, color: EST_SLATE, letterSpacing: '-0.02em' }}>{estGrandTotal.toLocaleString()}</span>
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: EST_SLATE, letterSpacing: '0.12em', textTransform: 'uppercase' }}>KG</span>
+              </>
+            ) : null}
+          </div>
+          {addedExercises.length > 0 && (
+            <button
+              onClick={() => setShowEntryCard(true)}
+              style={{
+                background: 'none', border: '1px solid rgba(255,255,255,0.15)',
+                borderRadius: '50%', width: 36, height: 36,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer', color: '#ffffff', flexShrink: 0, transition: 'all 0.2s',
+              }}
+            >
               <ArrowLeftFromLine size={18} strokeWidth={1.5} style={{ transform: 'rotate(180deg)' }} />
-             </button>
-           )}
-         </div>
-       )}
+            </button>
+          )}
+        </div>
+      )}
 
       {addedExercises.length > 0 && (
         <section className="mb-10">
@@ -950,15 +837,12 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
               const hasData = ex.sets.some(s => s.weight !== '');
               const mult = ex.exercise.multiplier ?? 1;
               const exTotal = calcExerciseTotal(ex.sets, mult);
-              const estFromLast =
-                ex.lastSets && ex.lastSets.length > 0 ? calcExerciseTotal(ex.lastSets, mult) : 0;
+              const estFromLast = ex.lastSets && ex.lastSets.length > 0 ? calcExerciseTotal(ex.lastSets, mult) : 0;
               const showEstHeader = exTotal === 0 && estFromLast > 0;
-
               const swipeOffset = swipeOffsets[ex.exercise.id] || 0;
 
               return (
                 <div key={ex.exercise.id} style={{ position: 'relative', overflow: 'hidden' }}>
-                  {/* Red remove reveal */}
                   {!ex.expanded && (
                     <div style={{
                       position: 'absolute', right: 0, top: 0, bottom: 0,
@@ -974,17 +858,14 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                       borderBottom: ex.expanded ? 'none' : '1px solid rgba(255,255,255,0.06)',
                       transform: ex.expanded ? 'none' : `translateX(${swipeOffset}px)`,
                       transition: swipeOffset === 0 ? 'transform 0.25s ease' : 'none',
-                      backgroundColor: '#000000',
-                      willChange: 'transform',
+                      backgroundColor: '#000000', willChange: 'transform',
                     }}
                     onTouchStart={ex.expanded ? undefined : (e) => {
                       touchStartX.current[ex.exercise.id] = e.touches[0].clientX;
                     }}
                     onTouchMove={ex.expanded ? undefined : (e) => {
                       const dx = e.touches[0].clientX - (touchStartX.current[ex.exercise.id] || 0);
-                      if (dx < 0) {
-                        setSwipeOffsets(prev => ({ ...prev, [ex.exercise.id]: Math.max(dx, -80) }));
-                      }
+                      if (dx < 0) setSwipeOffsets(prev => ({ ...prev, [ex.exercise.id]: Math.max(dx, -80) }));
                     }}
                     onTouchEnd={ex.expanded ? undefined : () => {
                       const offset = swipeOffsets[ex.exercise.id] || 0;
@@ -1003,8 +884,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                         border: hasData || ex.logged ? 'none' : '2px solid rgba(255,255,255,0.2)',
                         backgroundColor: hasData || ex.logged ? '#ffffff' : 'transparent',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        flexShrink: 0, transition: 'all 0.25s',
-                        cursor: 'pointer',
+                        flexShrink: 0, transition: 'all 0.25s', cursor: 'pointer',
                       }}
                     >
                       {(hasData || ex.logged) && <Check size={14} color="#1a1a1a" strokeWidth={3} />}
@@ -1021,12 +901,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                           </p>
                         </div>
                         {!ex.expanded && exTotal > 0 && (ex.pbThreshold ?? 0) > 0 && exTotal > (ex.pbThreshold ?? 0) && (
-                          <div style={{
-                            width: 32, height: 32, borderRadius: '50%',
-                            backgroundColor: '#ffffff',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            flexShrink: 0,
-                          }}>
+                          <div style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                             <span style={{ fontSize: '0.6rem', fontWeight: 900, color: '#000000', letterSpacing: '0.05em' }}>PB</span>
                           </div>
                         )}
@@ -1057,75 +932,55 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                             )}
                           </div>
                           {exTotal > 0 && (ex.pbThreshold ?? 0) > 0 && exTotal > (ex.pbThreshold ?? 0) && (
-                            <div style={{
-                              width: 32, height: 32, borderRadius: '50%',
-                              backgroundColor: '#ffffff',
-                              display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              flexShrink: 0,
-                            }}>
+                            <div style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                               <span style={{ fontSize: '0.6rem', fontWeight: 900, color: '#000000', letterSpacing: '0.05em' }}>PB</span>
                             </div>
                           )}
                         </div>
-                        <button onClick={(e) => { e.stopPropagation(); toggleCopyFromLast(ex.exercise.id); }}
-                          style={{ width: 30, height: 30, borderRadius: '50%', backgroundColor: ex.copied ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.08)', border: ex.copied ? '1px solid rgba(255,255,255,0.3)' : '1px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: ex.copied ? '#ffffff' : 'rgba(255,255,255,0.55)', cursor: 'pointer', flexShrink: 0, transition: 'all 0.2s' }}>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); toggleCopyFromLast(ex.exercise.id); }}
+                          style={{
+                            width: 30, height: 30, borderRadius: '50%',
+                            backgroundColor: ex.copied ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.08)',
+                            border: ex.copied ? '1px solid rgba(255,255,255,0.3)' : '1px solid rgba(255,255,255,0.12)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            color: ex.copied ? '#ffffff' : 'rgba(255,255,255,0.55)',
+                            cursor: 'pointer', flexShrink: 0, transition: 'all 0.2s',
+                          }}
+                        >
                           {ex.copied ? <Minus size={14} strokeWidth={2.5} /> : <Plus size={14} strokeWidth={2.5} />}
                         </button>
                       </div>
 
                       <div className="grid mb-2" style={{ gridTemplateColumns: '1.8rem 1fr 1fr 1fr', gap: '0.5rem' }}>
                         <div />
-                        {['kg', 'reps', 'total'].map(h => <p key={h} className="text-center text-[10px] font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.3)' }}>{h}</p>)}
+                        {['kg', 'reps', 'total'].map(h => (
+                          <p key={h} className="text-center text-[10px] font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.3)' }}>{h}</p>
+                        ))}
                       </div>
 
-                       {ex.sets.map((set, idx) => {
-                         const w = parseFloat(set.weight) || 0;
-                         const rowTotal = w * set.reps * mult;
+                      {ex.sets.map((set, idx) => {
+                        const w = parseFloat(set.weight) || 0;
+                        const rowTotal = w * set.reps * mult;
                         const rowHasData = set.weight !== '';
                         const numColor = rowHasData ? '#ffffff' : 'rgba(255,255,255,0.25)';
                         return (
                           <div key={idx} className="grid items-center mb-2" style={{ gridTemplateColumns: '1.8rem 1fr 1fr 1fr', gap: '0.5rem' }}>
                             <p className="font-black" style={{ fontSize: '1rem', color: numColor, lineHeight: 1, textAlign: 'center' }}>{idx + 1}</p>
-
-                            <div
-                              className="flex items-center justify-between rounded-lg py-2 px-2"
-                              style={{ backgroundColor: '#1b1b1b', border: '1px solid rgba(255,255,255,0.07)' }}
-                              onClick={e => e.stopPropagation()}
-                            >
-                              <button
-                                onClick={() => adjustWeight(ex.exercise.id, idx, -1)}
-                                style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}
-                              >−</button>
+                            <div className="flex items-center justify-between rounded-lg py-2 px-2" style={{ backgroundColor: '#1b1b1b', border: '1px solid rgba(255,255,255,0.07)' }} onClick={e => e.stopPropagation()}>
+                              <button onClick={() => adjustWeight(ex.exercise.id, idx, -1)} style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>−</button>
                               <input
-                                type="number"
-                                inputMode="decimal"
-                                value={set.weight}
-                                placeholder="—"
+                                type="number" inputMode="decimal" value={set.weight} placeholder="—"
                                 onChange={e => updateSet(ex.exercise.id, idx, 'weight', e.target.value)}
-                                style={{
-                                  background: 'transparent',
-                                  border: 'none',
-                                  outline: 'none',
-                                  width: '100%',
-                                  textAlign: 'center',
-                                  fontSize: '0.875rem',
-                                  fontWeight: 700,
-                                  color: rowHasData ? '#ffffff' : 'rgba(255,255,255,0.3)',
-                                  MozAppearance: 'textfield',
-                                }}
+                                style={{ background: 'transparent', border: 'none', outline: 'none', width: '100%', textAlign: 'center', fontSize: '0.875rem', fontWeight: 700, color: rowHasData ? '#ffffff' : 'rgba(255,255,255,0.3)', MozAppearance: 'textfield' }}
                               />
-                              <button
-                                onClick={() => adjustWeight(ex.exercise.id, idx, 1)}
-                                style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}
-                              >+</button>
+                              <button onClick={() => adjustWeight(ex.exercise.id, idx, 1)} style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>+</button>
                             </div>
-
                             <div className="flex items-center justify-between rounded-lg py-2 px-2" style={{ backgroundColor: '#1b1b1b', border: '1px solid rgba(255,255,255,0.07)' }} onClick={e => e.stopPropagation()}>
                               <button onClick={() => updateSet(ex.exercise.id, idx, 'reps', Math.max(1, set.reps - 1))} style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}>−</button>
                               <span className="font-bold" style={{ fontSize: '0.875rem', color: rowHasData ? '#ffffff' : 'rgba(255,255,255,0.3)' }}>{set.reps}</span>
                               <button onClick={() => updateSet(ex.exercise.id, idx, 'reps', set.reps + 1)} style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}>+</button>
                             </div>
-
                             <p className="text-center font-bold" style={{ fontSize: '0.875rem', color: '#ffffff' }}>{rowTotal > 0 ? rowTotal : '—'}</p>
                           </div>
                         );
@@ -1133,50 +988,24 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
 
                       <div className="flex items-center gap-5 mt-4 flex-wrap">
                         {ex.sets.length < 6 && (
-                          <button
-                            onClick={(e) => { e.stopPropagation(); addSet(ex.exercise.id); }}
-                            className="flex items-center gap-1 text-xs font-bold uppercase tracking-widest"
-                            style={{ color: 'rgba(255,255,255,0.35)' }}
-                          >
+                          <button onClick={(e) => { e.stopPropagation(); addSet(ex.exercise.id); }} className="flex items-center gap-1 text-xs font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.35)' }}>
                             <Plus size={13} /><span>Set</span>
                           </button>
                         )}
-                        <button
-                          onClick={(e) => { e.stopPropagation(); removeExercise(ex.exercise.id); }}
-                          className="flex items-center gap-1 text-xs font-bold uppercase tracking-widest"
-                          style={{ color: 'rgba(255,80,80,0.55)' }}
-                        >
+                        <button onClick={(e) => { e.stopPropagation(); removeExercise(ex.exercise.id); }} className="flex items-center gap-1 text-xs font-bold uppercase tracking-widest" style={{ color: 'rgba(255,80,80,0.55)' }}>
                           <Minus size={13} /><span>Remove Ex.</span>
                         </button>
                         <button
                           onClick={(e) => { e.stopPropagation(); toggleFail(ex.exercise.id); }}
                           className="text-xs font-bold uppercase tracking-widest"
-                          style={{
-                            padding: '3px 12px',
-                            borderRadius: '999px',
-                            border: ex.fail
-                              ? '1px solid rgba(255,80,80,0.7)'
-                              : '1px solid rgba(255,255,255,0.12)',
-                            backgroundColor: ex.fail ? 'rgba(255,80,80,0.15)' : 'transparent',
-                            color: ex.fail ? '#ff5050' : 'rgba(255,255,255,0.28)',
-                            transition: 'all 0.2s',
-                            letterSpacing: '0.1em',
-                          }}
+                          style={{ padding: '3px 12px', borderRadius: '999px', border: ex.fail ? '1px solid rgba(255,80,80,0.7)' : '1px solid rgba(255,255,255,0.12)', backgroundColor: ex.fail ? 'rgba(255,80,80,0.15)' : 'transparent', color: ex.fail ? '#ff5050' : 'rgba(255,255,255,0.28)', transition: 'all 0.2s', letterSpacing: '0.1em' }}
                         >
                           Fail
                         </button>
                         <button
                           onClick={(e) => { e.stopPropagation(); loadMaxSession(ex.exercise.id); }}
                           className="text-xs font-bold uppercase tracking-widest"
-                          style={{
-                            padding: '3px 12px',
-                            borderRadius: '999px',
-                            border: '1px solid rgba(255,255,255,0.12)',
-                            backgroundColor: 'transparent',
-                            color: 'rgba(255,255,255,0.28)',
-                            transition: 'all 0.2s',
-                            letterSpacing: '0.1em',
-                          }}
+                          style={{ padding: '3px 12px', borderRadius: '999px', border: '1px solid rgba(255,255,255,0.12)', backgroundColor: 'transparent', color: 'rgba(255,255,255,0.28)', transition: 'all 0.2s', letterSpacing: '0.1em' }}
                         >
                           Max
                         </button>
@@ -1188,18 +1017,19 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
             })}
           </div>
 
-          <button onClick={handleLogAll} disabled={saving}
+          <button
+            onClick={handleLogAll}
+            disabled={saving}
             className="w-full mt-8 py-4 rounded-full font-black uppercase tracking-widest text-sm active:scale-95 duration-150"
-            style={{ backgroundColor: saveSuccess ? '#22c55e' : '#ffffff', color: '#1a1c1c', boxShadow: '0 12px 32px rgba(0,0,0,0.4)', opacity: saving ? 0.7 : 1 }}>
+            style={{ backgroundColor: saveSuccess ? '#22c55e' : '#ffffff', color: '#1a1c1c', boxShadow: '0 12px 32px rgba(0,0,0,0.4)', opacity: saving ? 0.7 : 1 }}
+          >
             {saving ? 'Saving...' : saveSuccess ? '✓ Saved!' : 'Log Exercises'}
           </button>
         </section>
       )}
 
       <WeeklyVolumeSection />
-
       <RecentLogsSection refreshKey={refreshKey} />
-
       <section className="mb-4 mt-8">
         <WeeklyWeightsChart />
       </section>
@@ -1219,6 +1049,8 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
           onAddExercise={(exercise) => handleAddExercise(exercise)}
           exercisesByGroup={exercisesByGroup}
           onNavigate={onNavigate}
+          savedWorkoutIds={savedWorkoutIds}
+          onApplySavedTemplate={handleApplySavedWorkoutTemplate}
         />
       )}
     </div>
