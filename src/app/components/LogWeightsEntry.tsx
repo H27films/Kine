@@ -283,8 +283,10 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                     onClick={() => { setAdderOpen(true); setAdderGroup(null); }}
                     style={{
                       background: 'none', border: 'none', padding: '4px 0',
-                      cursor: 'pointer', fontSize: '15px', fontWeight: 400,
+                      cursor: 'pointer', fontSize: '16px', fontWeight: 400,
                       color: '#1a1a1a', letterSpacing: '0.02em', filter: 'none',
+                      borderBottom: addedExercises.length === 0 ? '1.5px solid #333333' : 'none',
+                      marginBottom: addedExercises.length === 0 ? '2px' : '0',
                     }}
                   >
                     + ADD
