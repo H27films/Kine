@@ -601,6 +601,29 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
               LAST WEEK {Math.round(lastWeekTotal).toLocaleString()} KG
             </div>
           )}
+          {/* Right arrow to navigate to LogWeightsEntry - only shown when no group selected AND no exercises added */}
+          {!selectedGroup && addedExercises.length === 0 && (
+            <button
+              onClick={() => setShowEntryCard(true)}
+              style={{
+                background: 'none',
+                border: '1px solid rgba(255,255,255,0.15)',
+                borderRadius: '50%',
+                width: 36,
+                height: 36,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                color: '#ffffff',
+                flexShrink: 0,
+                marginTop: '8px',
+                transition: 'all 0.2s',
+              }}
+            >
+              <ArrowLeftFromLine size={16} strokeWidth={1.5} style={{ transform: 'rotate(180deg)' }} />
+            </button>
+          )}
         </div>
         {/* Right section: labels + KG TODAY + bar */}
         <div className="flex flex-col ml-4 pt-1 flex-1 min-w-0">
