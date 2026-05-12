@@ -93,11 +93,8 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
         setShowAdvanced(false);
       }
       if (adderRef.current && !adderRef.current.contains(e.target as Node)) {
-        // Only close adder if there are exercises to go back to
-        if (addedExercises.length > 0) {
-          setAdderOpen(false);
-          setAdderGroup(null);
-        }
+        setAdderOpen(false);
+        setAdderGroup(null);
       }
     };
     document.addEventListener('mousedown', handler);
@@ -280,7 +277,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                     onClick={() => { setAdderOpen(true); setAdderGroup(null); }}
                     style={{
                       background: 'none', border: 'none', padding: '4px 0',
-                      cursor: 'pointer', fontSize: '16px', fontWeight: 400,
+                      cursor: 'pointer', fontSize: '15px', fontWeight: 400,
                       color: '#1a1a1a', letterSpacing: '0.02em', filter: 'none',
                     }}
                   >
@@ -332,7 +329,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                     onClick={() => setAdderGroup(null)}
                     style={{
                       padding: '10px 14px', cursor: 'pointer',
-                      fontSize: '12px', fontWeight: 600, letterSpacing: '0.1em',
+                      fontSize: '9px', fontWeight: 600, letterSpacing: '0.1em',
                       color: '#999', textTransform: 'uppercase',
                       display: 'flex', alignItems: 'center', gap: '6px',
                       backgroundColor: 'rgba(0,0,0,0.04)',
@@ -360,8 +357,6 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                           <div
                             onClick={() => {
                               onAddExercise(ex);
-                              setAdderOpen(false);
-                              setAdderGroup(null);
                             }}
                             style={{
                               padding: '10px 14px',
@@ -370,11 +365,11 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                             }}
                           >
                             <div>
-                              <span style={{ fontSize: '13px', fontWeight: 450, color: alreadyAdded ? 'rgba(0,0,0,0.3)' : '#1a1a1a' }}>
+                              <span style={{ fontSize: '12px', fontWeight: 500, color: alreadyAdded ? 'rgba(0,0,0,0.3)' : '#1a1a1a' }}>
                                 {ex.exercise_name.charAt(0).toUpperCase() + ex.exercise_name.slice(1).toLowerCase()}
                               </span>
                               {ex.info_notes && (
-                                <span style={{ fontSize: '11px', color: 'rgba(0,0,0,0.3)', display: 'block', marginTop: '1px' }}>
+                                <span style={{ fontSize: '9px', color: 'rgba(0,0,0,0.3)', display: 'block', marginTop: '1px' }}>
                                   {ex.info_notes}
                                 </span>
                               )}
