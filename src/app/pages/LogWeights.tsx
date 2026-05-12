@@ -590,7 +590,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
         opacity: selectedGroup ? 0 : 1,
         overflow: 'hidden',
         transition: 'max-height 0.35s ease, opacity 0.25s ease, margin 0.35s ease',
-        marginBottom: selectedGroup ? '0px' : '2rem',
+        marginBottom: selectedGroup ? '0px' : '1rem',
       }}>
       <div className="flex items-start">
         {/* Big weekly total on left */}
@@ -607,10 +607,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
               onClick={() => setShowEntryCard(true)}
               style={{
                 background: 'none',
-                border: '1px solid rgba(255,255,255,0.15)',
-                borderRadius: '50%',
-                width: 36,
-                height: 36,
+                border: 'none',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -680,7 +677,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
         </div>
       )}
 
-      <section style={{ marginBottom: selectedGroup ? '40px' : '3rem', transition: 'margin 0.35s ease' }}>
+      <section style={{ marginBottom: selectedGroup ? '30px' : '2.5rem', transition: 'margin 0.35s ease' }}>
         {/* Muscle group circles */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
           <div style={{ display: 'flex', gap: '24px', flex: 1, justifyContent: 'space-between' }}>
