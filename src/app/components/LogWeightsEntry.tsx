@@ -277,8 +277,8 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                     </button>
                   );
                 })}
-                {/* Only show + ADD button when there are already exercises */}
-                {addedExercises.length > 0 && (
+                {/* Show + ADD button when there are exercises or when adder is closed */}
+                {(addedExercises.length > 0 || !adderOpen) && (
                   <button
                     onClick={() => { setAdderOpen(true); setAdderGroup(null); }}
                     style={{
