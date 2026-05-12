@@ -1205,7 +1205,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
       </section>
 
       {/* Full-screen entry card overlay */}
-      {showEntryCard && addedExercises.length > 0 && (
+      {showEntryCard && (
         <LogWeightsEntry
           addedExercises={addedExercises}
           onUpdateSet={updateSet}
