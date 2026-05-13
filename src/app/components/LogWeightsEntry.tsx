@@ -471,17 +471,17 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                     <div style={{ fontSize: '12px', fontWeight: 400, color: '#1a1a1a', letterSpacing: '0.02em', textTransform: 'uppercase' }}>
                       {ex.exercise.exercise_name.toUpperCase()}
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
-                      {total > 0 ? (
-                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-                          <span style={{ fontSize: '16px', fontWeight: 300, letterSpacing: '-0.01em', color: '#1a1a1a' }}>{total.toLocaleString()}</span>
-                          <span style={{ fontSize: '9px', fontWeight: 400, color: 'rgba(26,26,26,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>KG</span>
-                        </div>
-                      ) : (
-                        <div style={{ padding: '4px 12px', borderRadius: '999px', background: 'linear-gradient(135deg, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0.95) 100%)', fontSize: '11px', fontWeight: 500, letterSpacing: '0.04em', color: '#1a1a1a', boxShadow: '0 1px 2px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9)' }}>
-                          NO DATA
-                        </div>
-                      )}
+                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+                       {total > 0 ? (
+                         <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+                           <span style={{ fontSize: '16px', fontWeight: 300, letterSpacing: '-0.01em', color: '#1a1a1a' }}>{total.toLocaleString()}</span>
+                           <span style={{ fontSize: '9px', fontWeight: 400, color: 'rgba(26,26,26,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>KG</span>
+                         </div>
+                       ) : (
+                         <div style={{ padding: '4px 12px', borderRadius: '999px', background: 'linear-gradient(135deg, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0.95) 100%)', fontSize: '11px', fontWeight: 500, letterSpacing: '0.04em', color: '#1a1a1a', boxShadow: '0 1px 2px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9)' }}>
+                           NO DATA
+                         </div>
+                       )}
                     </div>
                   </div>
                   {total > 0 && (
@@ -503,11 +503,19 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                         )}
                       </div>
                     </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+                   )}
+                   {total === 0 && ex.lastSets && ex.lastSets.length > 0 && (
+                     <div style={{ display: 'flex', alignItems: 'baseline', marginTop: '10px' }}>
+                       <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', alignItems: 'flex-start' }}>
+                         <span style={{ fontSize: '16px', fontWeight: 300, letterSpacing: '-0.01em', color: '#94A3B8' }}>{calcExerciseTotal(ex.lastSets, mult).toLocaleString()}</span>
+                         <div style={{ fontSize: '9px', fontWeight: 300, color: 'rgba(148,163,184,0.6)', letterSpacing: '0.04em' }}>EST. KG</div>
+                       </div>
+                     </div>
+                   )}
+                 </div>
+               );
+             })}
+           </div>
         ) : (
           /* Only render set rows if we actually have an active exercise */
           activeEx ? (
