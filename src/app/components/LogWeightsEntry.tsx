@@ -612,58 +612,62 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
               {activeEx.sets.length < 6 && (
                 <>
                   <div style={{ height: '0.5px', backgroundColor: 'rgba(0,0,0,0.18)', marginTop: '17px', marginBottom: '9px' }} />
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingTop: '6px', paddingBottom: '14px' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-        <div
-          onClick={() => onToggleFail(activeEx.exercise.id)}
-          style={{ cursor: 'pointer', userSelect: 'none', display: 'inline-flex', alignSelf: 'flex-start' }}
-        >
-          {activeEx.fail ? (
-            <span style={{ display: 'inline-block', padding: '1px 8px', borderRadius: '999px', backgroundColor: '#1a1a1a', color: '#ffffff', fontSize: '11px', fontWeight: 600, letterSpacing: '0.04em', lineHeight: '20px' }}>FAILED</span>
-          ) : (
-            <span style={{ fontSize: '14px', fontWeight: 300, color: 'rgba(26,26,26,0.75)', letterSpacing: '0.03em' }}>+ FAIL</span>
-          )}
-        </div>
-        <div
-          onClick={() => onAddSet(activeEx.exercise.id)}
-          style={{ cursor: 'pointer', fontSize: '14px', fontWeight: 300, color: 'rgba(26,26,26,0.75)', letterSpacing: '0.03em', userSelect: 'none' }}
-        >
-          + SET
-        </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', paddingTop: '6px', paddingBottom: '14px' }}>
+  {/* Row 1: FAIL + copy icon */}
+  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div
+      onClick={() => onToggleFail(activeEx.exercise.id)}
+      style={{ cursor: 'pointer', userSelect: 'none' }}
+    >
+      {activeEx.fail ? (
+        <span style={{ display: 'inline-block', padding: '1px 8px', borderRadius: '999px', backgroundColor: '#1a1a1a', color: '#ffffff', fontSize: '11px', fontWeight: 600, letterSpacing: '0.04em', lineHeight: '20px' }}>FAILED</span>
+      ) : (
+        <span style={{ fontSize: '14px', fontWeight: 300, color: 'rgba(26,26,26,0.75)', letterSpacing: '0.03em' }}>+ FAIL</span>
+      )}
+    </div>
+    {!showAdvanced && (
+      <div
+        onClick={() => {
+          if (activeEx.lastSets && activeEx.lastSets.length > 0) {
+            onToggleCopyFromLast(activeEx.exercise.id);
+          }
+        }}
+        style={{
+          cursor: activeEx.lastSets && activeEx.lastSets.length > 0 ? 'pointer' : 'default',
+          opacity: activeEx.lastSets && activeEx.lastSets.length > 0 ? 0.9 : 0.3,
+          transition: 'opacity 0.2s',
+          display: 'flex', alignItems: 'center',
+        }}
+      >
+        {activeEx.copied ? <X size={20} color="#1a1a1a" strokeWidth={1.5} /> : <Plus size={20} color="#1a1a1a" strokeWidth={1.5} />}
       </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      {!showAdvanced && (
-                        <div
-                          onClick={() => {
-                            if (activeEx.lastSets && activeEx.lastSets.length > 0) {
-                              onToggleCopyFromLast(activeEx.exercise.id);
-                            }
-                          }}
-                          style={{
-                            cursor: activeEx.lastSets && activeEx.lastSets.length > 0 ? 'pointer' : 'default',
-                            opacity: activeEx.lastSets && activeEx.lastSets.length > 0 ? 0.9 : 0.3,
-                            transition: 'opacity 0.2s',
-                            display: 'flex', alignItems: 'center',
-                          }}
-                        >
-                          {activeEx.copied ? <X size={20} color="#1a1a1a" strokeWidth={1.5} /> : <Plus size={20} color="#1a1a1a" strokeWidth={1.5} />}
-                        </div>
-                      )}
-                      {showDoubleArrow && (
-                        <button
-                          onClick={() => onNavigate && onNavigate('summary-weights', { addedExercises, todayLoggedTotal, exercisesByGroup })}
-                          style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-                          aria-label="Summary"
-                        >
-                          <DoubleArrowIcon size={18} />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </>
-              )}
-            </>
-          ) : (
+    )}
+  </div>
+{/* Row 2: SET + double arrow */}
+{!showAdvanced && (
+  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div
+      onClick={() => onAddSet(activeEx.exercise.id)}
+      style={{ cursor: 'pointer', fontSize: '14px', fontWeight: 300, color: 'rgba(26,26,26,0.75)', letterSpacing: '0.03em', userSelect: 'none' }}
+    >
+      + SET
+    </div>
+    {showDoubleArrow && (
+      <button
+        onClick={() => onNavigate && onNavigate('summary-weights', { addedExercises, todayLoggedTotal, exercisesByGroup })}
+        style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+        aria-label="Summary"
+      >
+        <DoubleArrowIcon size={18} />
+      </button>
+    )}
+  </div>
+)}
+</div>
+</>
+)}
+</>
+) : (
             /* No exercises yet — show saved template prompt */
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '12px', paddingTop: '40px' }}>
               {savedWorkoutIds.length > 0 ? (
