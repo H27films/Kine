@@ -631,23 +631,34 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
           + SET
         </div>
       </div>
-                    {!showAdvanced && (
-                      <div
-                        onClick={() => {
-                          if (activeEx.lastSets && activeEx.lastSets.length > 0) {
-                            onToggleCopyFromLast(activeEx.exercise.id);
-                          }
-                        }}
-                        style={{
-                          cursor: activeEx.lastSets && activeEx.lastSets.length > 0 ? 'pointer' : 'default',
-                          opacity: activeEx.lastSets && activeEx.lastSets.length > 0 ? 0.9 : 0.3,
-                          transition: 'opacity 0.2s',
-                          display: 'flex', alignItems: 'center',
-                        }}
-                      >
-                        {activeEx.copied ? <X size={20} color="#1a1a1a" strokeWidth={1.5} /> : <Plus size={20} color="#1a1a1a" strokeWidth={1.5} />}
-                      </div>
-                    )}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      {!showAdvanced && (
+                        <div
+                          onClick={() => {
+                            if (activeEx.lastSets && activeEx.lastSets.length > 0) {
+                              onToggleCopyFromLast(activeEx.exercise.id);
+                            }
+                          }}
+                          style={{
+                            cursor: activeEx.lastSets && activeEx.lastSets.length > 0 ? 'pointer' : 'default',
+                            opacity: activeEx.lastSets && activeEx.lastSets.length > 0 ? 0.9 : 0.3,
+                            transition: 'opacity 0.2s',
+                            display: 'flex', alignItems: 'center',
+                          }}
+                        >
+                          {activeEx.copied ? <X size={20} color="#1a1a1a" strokeWidth={1.5} /> : <Plus size={20} color="#1a1a1a" strokeWidth={1.5} />}
+                        </div>
+                      )}
+                      {showDoubleArrow && (
+                        <button
+                          onClick={() => onNavigate && onNavigate('summary-weights', { addedExercises, todayLoggedTotal, exercisesByGroup })}
+                          style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                          aria-label="Summary"
+                        >
+                          <DoubleArrowIcon size={18} />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </>
               )}
