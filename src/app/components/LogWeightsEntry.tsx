@@ -595,7 +595,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
               {activeEx.sets.length < 6 && (
                 <>
                   <div style={{ height: '0.5px', backgroundColor: 'rgba(0,0,0,0.18)', marginTop: '17px', marginBottom: '9px' }} />
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '6px', paddingBottom: '14px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingTop: '6px', paddingBottom: '14px' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
         <div
           onClick={() => onToggleFail(activeEx.exercise.id)}
