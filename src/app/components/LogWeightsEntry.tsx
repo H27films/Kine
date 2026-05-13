@@ -125,7 +125,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
 
   // Calculate today's total: logged + pending
   const pendingTotal = addedExercises.reduce((acc, ex) => acc + calcExerciseTotal(ex.sets, ex.exercise.multiplier ?? 1), 0);
-  const todayTotalSum = todayLoggedTotal + pendingTotal;
+  const todayTotalSum = showDailyTotalOnly ? pendingTotal : todayLoggedTotal + pendingTotal;
 
   // Safe derived values — all fall back gracefully when activeEx is null
   const mult = activeEx?.exercise?.multiplier ?? 1;
@@ -505,7 +505,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                     </div>
                    )}
                    {total === 0 && ex.lastSets && ex.lastSets.length > 0 && (
-                     <div style={{ display: 'flex', alignItems: 'baseline', marginTop: '6px' }}>
+                     <div style={{ display: 'flex', alignItems: 'baseline', marginTop: '2.5px' }}>
                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', alignItems: 'flex-start' }}>
                          <span style={{ fontSize: '16px', fontWeight: 300, letterSpacing: '-0.01em', color: '#94A3B8' }}>{calcExerciseTotal(ex.lastSets, mult).toLocaleString()}</span>
                          <div style={{ fontSize: '9px', fontWeight: 300, color: 'rgba(148,163,184,0.6)', letterSpacing: '0.04em' }}>EST. KG</div>
