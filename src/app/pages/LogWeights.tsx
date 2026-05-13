@@ -1051,6 +1051,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
           onNavigate={onNavigate}
           savedWorkoutIds={savedWorkoutIds}
           onApplySavedTemplate={handleApplySavedWorkoutTemplate}
+          onLogAll={handleLogAll}
         />
       )}
     </div>
