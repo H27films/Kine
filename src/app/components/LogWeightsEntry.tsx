@@ -71,6 +71,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
   const [showTodayTotal, setShowTodayTotal] = useState(false);
   const [adderOpen, setAdderOpen] = useState(false);
   const [adderGroup, setAdderGroup] = useState<string | null>(null);
+  const [showExerciseInfo, setShowExerciseInfo] = useState(false);
   const adderRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const tabScrollRef = useRef<HTMLDivElement>(null);
@@ -259,7 +260,13 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                       key={ex.exercise.id}
                       onClick={() => {
                         const idxInOriginal = addedExercises.findIndex(e => e.exercise.id === ex.exercise.id);
-                        setActiveExIndex(idxInOriginal);
+                        if (idxInOriginal === activeExIndex) {
+                          console.log('Toggling info for active tab', !showExerciseInfo);
+                          setShowExerciseInfo(!showExerciseInfo);
+                        } else {
+                          setActiveExIndex(idxInOriginal);
+                          setShowExerciseInfo(false);
+                        }
                       }}
                       style={{
                         background: 'none', border: 'none',
@@ -401,6 +408,22 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
           </div>
         )}
       </div>
+
+      {/* Exercise info row */}
+      {showExerciseInfo && activeEx && (
+        <div style={{
+          padding: '12px 20px',
+          borderTop: '1px solid rgba(0,0,0,0.06)',
+          fontSize: '14px',
+          fontWeight: 400,
+          color: '#333333',
+          letterSpacing: '0.02em',
+          textTransform: 'capitalize',
+          fontFamily: "'Archivo', sans-serif",
+        }}>
+          {activeEx.exercise.info_notes || "No Information"}
+        </div>
+      )}
 
       {/* Scrollable content */}
       <div style={{
