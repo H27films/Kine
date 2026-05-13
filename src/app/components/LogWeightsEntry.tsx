@@ -596,24 +596,24 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                 <>
                   <div style={{ height: '0.5px', backgroundColor: 'rgba(0,0,0,0.18)', marginTop: '17px', marginBottom: '9px' }} />
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '6px', paddingBottom: '14px' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                      <div
-                        onClick={() => onToggleFail(activeEx.exercise.id)}
-                        style={{ cursor: 'pointer', userSelect: 'none', display: 'inline-flex', alignSelf: 'flex-start' }}
-                      >
-                        {activeEx.fail ? (
-                          <span style={{ display: 'inline-block', padding: '1px 8px', borderRadius: '999px', backgroundColor: '#1a1a1a', color: '#ffffff', fontSize: '11px', fontWeight: 600, letterSpacing: '0.04em', lineHeight: '20px' }}>FAILED</span>
-                        ) : (
-                          <span style={{ fontSize: '12px', fontWeight: 300, color: 'rgba(26,26,26,0.75)', letterSpacing: '0.03em' }}>+ FAIL</span>
-                        )}
-                      </div>
-                      <div
-                        onClick={() => onAddSet(activeEx.exercise.id)}
-                        style={{ cursor: 'pointer', fontSize: '12px', fontWeight: 300, color: 'rgba(26,26,26,0.75)', letterSpacing: '0.03em', userSelect: 'none' }}
-                      >
-                        + SET
-                      </div>
-                    </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+        <div
+          onClick={() => onToggleFail(activeEx.exercise.id)}
+          style={{ cursor: 'pointer', userSelect: 'none', display: 'inline-flex', alignSelf: 'flex-start' }}
+        >
+          {activeEx.fail ? (
+            <span style={{ display: 'inline-block', padding: '1px 8px', borderRadius: '999px', backgroundColor: '#1a1a1a', color: '#ffffff', fontSize: '11px', fontWeight: 600, letterSpacing: '0.04em', lineHeight: '20px' }}>FAILED</span>
+          ) : (
+            <span style={{ fontSize: '14px', fontWeight: 300, color: 'rgba(26,26,26,0.75)', letterSpacing: '0.03em' }}>+ FAIL</span>
+          )}
+        </div>
+        <div
+          onClick={() => onAddSet(activeEx.exercise.id)}
+          style={{ cursor: 'pointer', fontSize: '14px', fontWeight: 300, color: 'rgba(26,26,26,0.75)', letterSpacing: '0.03em', userSelect: 'none' }}
+        >
+          + SET
+        </div>
+      </div>
                     {!showAdvanced && (
                       <div
                         onClick={() => {
