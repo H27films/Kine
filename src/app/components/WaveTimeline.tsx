@@ -666,14 +666,6 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
                 >
                   {day}
                 </text>
-                {isToday && (
-                  <circle
-                    cx={x}
-                    cy={baselineY + 50} // Position below the day label
-                    r={3} // Small radius for the circle
-                    fill="#1a1a1a"
-                  />
-                )}
               </g>
             );
           })}
