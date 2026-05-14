@@ -75,9 +75,16 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
   const [adderGroup, setAdderGroup] = useState<string | null>(null);
   const [showExerciseInfo, setShowExerciseInfo] = useState(false);
   const [logConfirm, setLogConfirm] = useState(false);
+  const logConfirmRef = useRef(false);
+  const [logging, setLogging] = useState(false);
   const adderRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const tabScrollRef = useRef<HTMLDivElement>(null);
+
+  const setLogConfirmSynced = (val: boolean) => {
+    logConfirmRef.current = val;
+    setLogConfirm(val);
+  };
 
   const safeIndex = Math.min(activeExIndex, Math.max(0, addedExercises.length - 1));
   const activeEx = addedExercises[safeIndex] ?? null;
@@ -101,17 +108,17 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
     const handler = (e: MouseEvent) => {
       if (bottomRef.current && !bottomRef.current.contains(e.target as Node)) {
         setShowAdvanced(false);
-        setLogConfirm(false);
+        if (!logging) setLogConfirmSynced(false);
       }
       if (adderRef.current && !adderRef.current.contains(e.target as Node)) {
         setAdderOpen(false);
         setAdderGroup(null);
-        setLogConfirm(false);
+        if (!logging) setLogConfirmSynced(false);
       }
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
-  }, [addedExercises.length]);
+  }, [addedExercises.length, logging]);
 
   // Scroll tabs to the far left when active exercise or adder state changes
   useEffect(() => {
@@ -761,26 +768,34 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
               <Minus size={12} /> EXE
             </button>
             <button
-              onClick={() => {
-                if (!logConfirm) {
-                  setLogConfirm(true);
+              onMouseDown={e => e.stopPropagation()}
+              onClick={async () => {
+                if (!logConfirmRef.current) {
+                  setLogConfirmSynced(true);
                 } else {
-                  onLogAll();
-                  setLogConfirm(false);
+                  setLogging(true);
+                  try {
+                    await onLogAll();
+                  } finally {
+                    setLogging(false);
+                    setLogConfirmSynced(false);
+                  }
                 }
               }}
+              disabled={logging}
               style={{
                 padding: '8px 16px', borderRadius: '8px',
                 border: '1px solid rgba(0,0,0,0.3)',
                 backgroundColor: logConfirm ? '#ffffff' : '#000000',
                 boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -1px 0 rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.3)',
                 backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
-                cursor: 'pointer',
+                cursor: logging ? 'default' : 'pointer',
                 color: logConfirm ? '#000000' : '#ffffff',
                 fontSize: '11px', fontWeight: 500, letterSpacing: '0.04em',
+                opacity: logging ? 0.7 : 1,
               }}
             >
-              {logConfirm ? 'CONFIRM' : 'LOG'}
+              {logging ? 'LOGGING...' : logConfirm ? 'CONFIRM' : 'LOG'}
             </button>
             {showDoubleArrow && (
               <button
