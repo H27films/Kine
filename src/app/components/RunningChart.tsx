@@ -261,11 +261,13 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
    };
 
     // Find the highest single run km and its speed
-    const getMaxRun = (): { maxKm: number; maxSpeed: number | null; maxDate: string | null } => {
+    const getMaxRun = (monthFilter: string | null = null): { maxKm: number; maxSpeed: number | null; maxDate: string | null } => {
       let maxKm = 0;
       let maxSpeed: number | null = null;
       let maxDate: string | null = null;
       for (const w of workouts) {
+        // Filter by month if specified
+        if (monthFilter && !w.date.startsWith(monthFilter)) continue;
         const km = w.total_cardio || 0;
         if (km > maxKm) {
           maxKm = km;
@@ -277,11 +279,13 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
     };
 
     // Find the fastest speed from runs longer than 3.0km
-    const getFastestRun = (): { fastestKm: number; fastestSpeed: number | null; fastestDate: string | null } => {
+    const getFastestRun = (monthFilter: string | null = null): { fastestKm: number; fastestSpeed: number | null; fastestDate: string | null } => {
       let fastestKm = 0;
       let fastestSpeed: number | null = null;
       let fastestDate: string | null = null;
       for (const w of workouts) {
+        // Filter by month if specified
+        if (monthFilter && !w.date.startsWith(monthFilter)) continue;
         const km = w.total_cardio || 0;
         if (km > 3.0) {
           const speed = calculateSpeed(km, w.time);
@@ -788,8 +792,9 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
 
                {/* Row 2: MAX RUN - left / FASTEST - right */}
                {(() => {
-                 const maxRun = getMaxRun();
-                 const fastestRun = getFastestRun();
+                 const monthFilter = view.type === 'month' ? getMonthByOffset(monthOffset) : null;
+                 const maxRun = getMaxRun(monthFilter);
+                 const fastestRun = getFastestRun(monthFilter);
                  return (
                    <>
                      <div style={{ marginTop: '14px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
