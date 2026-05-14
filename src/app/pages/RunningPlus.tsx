@@ -61,8 +61,8 @@ export const RunningPlus: React.FC<RunningPlusProps> = ({ onNavigate }) => {
         flexDirection: 'column',
       }}
     >
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', paddingLeft: '20px', paddingRight: '20px', paddingBottom: '16px', paddingTop: '16px', position: 'relative' }}>
+      {/* Header — fixed, never scrolls */}
+      <div style={{ display: 'flex', alignItems: 'center', paddingLeft: '20px', paddingRight: '20px', paddingBottom: '16px', paddingTop: '16px', position: 'relative', flexShrink: 0 }}>
         {/* Left: hamburger */}
         <div style={{ width: 48, display: 'flex', alignItems: 'center', position: 'relative', zIndex: 10 }} ref={menuRef}>
           <button
@@ -151,10 +151,19 @@ export const RunningPlus: React.FC<RunningPlusProps> = ({ onNavigate }) => {
         </div>
       </div>
 
-       {/* Chart area */}
-       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', paddingTop: '8px', paddingLeft: '5px', paddingRight: '5px' }}>
-         <RunningChart />
-       </div>
+      {/* Scrollable chart area */}
+      <div style={{
+        flex: 1,
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        paddingTop: '8px',
+        paddingLeft: '5px',
+        paddingRight: '5px',
+        paddingBottom: 'calc(24px + env(safe-area-inset-bottom))',
+        WebkitOverflowScrolling: 'touch',
+      }}>
+        <RunningChart />
+      </div>
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;900&family=Inconsolata:wght@200..900&display=swap');
