@@ -645,7 +645,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
   </div>
 {/* Row 2: SET + double arrow */}
 {!showAdvanced && (
-  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
     <div
       onClick={() => onAddSet(activeEx.exercise.id)}
       style={{ cursor: 'pointer', fontSize: '14px', fontWeight: 300, color: 'rgba(26,26,26,0.75)', letterSpacing: '0.03em', userSelect: 'none' }}
