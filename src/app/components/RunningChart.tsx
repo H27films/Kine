@@ -796,12 +796,24 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                   const maxRun = getMaxRun(monthFilter);
                   const fastestRun = getFastestRun(monthFilter);
 
-                  // Calculate month total for goal
-                  const monthTotal = view.type === 'month' ? workouts
-                    .filter(w => monthFilter && w.date.startsWith(monthFilter))
-                    .reduce((sum, w) => sum + (w.total_cardio || 0), 0) : 0;
-                  const goalKm = 90;
-                  const differenceKm = monthTotal - goalKm;
+                  // Calculate total for goal (month or week)
+                  let totalForGoal = 0;
+                  let goalKm = 0;
+
+                  if (view.type === 'month') {
+                    totalForGoal = workouts
+                      .filter(w => monthFilter && w.date.startsWith(monthFilter))
+                      .reduce((sum, w) => sum + (w.total_cardio || 0), 0);
+                    goalKm = 90;
+                  } else if (view.type === 'week') {
+                    const weekNum = getWeekByOffset(weekOffset);
+                    totalForGoal = workouts
+                      .filter(w => w.week === weekNum)
+                      .reduce((sum, w) => sum + (w.total_cardio || 0), 0);
+                    goalKm = 20;
+                  }
+
+                  const differenceKm = totalForGoal - goalKm;
 
                   return (
                     <>
@@ -826,8 +838,8 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                           </div>
                         </div>
 
-                        {/* GOAL section - center (only for CURRENT MONTH view) */}
-                        {view.type === 'month' && (
+                        {/* GOAL section - center (for CURRENT MONTH and CURRENT WEEK views) */}
+                        {(view.type === 'month' || view.type === 'week') && (
                           <div style={{ flex: 1, textAlign: 'center' }}>
                             <div style={{
                               fontFamily: "'Inconsolata', monospace",
