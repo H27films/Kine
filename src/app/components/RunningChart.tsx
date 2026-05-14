@@ -261,23 +261,26 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
    };
 
     // Find the highest single run km and its speed
-    const getMaxRun = (): { maxKm: number; maxSpeed: number | null } => {
+    const getMaxRun = (): { maxKm: number; maxSpeed: number | null; maxDate: string | null } => {
       let maxKm = 0;
       let maxSpeed: number | null = null;
+      let maxDate: string | null = null;
       for (const w of workouts) {
         const km = w.total_cardio || 0;
         if (km > maxKm) {
           maxKm = km;
           maxSpeed = calculateSpeed(km, w.time);
+          maxDate = w.date;
         }
       }
-      return { maxKm, maxSpeed };
+      return { maxKm, maxSpeed, maxDate };
     };
 
     // Find the fastest speed from runs longer than 3.0km
-    const getFastestRun = (): { fastestKm: number; fastestSpeed: number | null } => {
+    const getFastestRun = (): { fastestKm: number; fastestSpeed: number | null; fastestDate: string | null } => {
       let fastestKm = 0;
       let fastestSpeed: number | null = null;
+      let fastestDate: string | null = null;
       for (const w of workouts) {
         const km = w.total_cardio || 0;
         if (km > 3.0) {
@@ -285,10 +288,22 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
           if (speed !== null && (fastestSpeed === null || speed > fastestSpeed)) {
             fastestSpeed = speed;
             fastestKm = km;
+            fastestDate = w.date;
           }
         }
       }
-      return { fastestKm, fastestSpeed };
+      return { fastestKm, fastestSpeed, fastestDate };
+    };
+
+    // Format date as "20 Jan 2026"
+    const formatDateDisplay = (dateStr: string | null): string => {
+      if (!dateStr) return '—';
+      const d = new Date(dateStr + 'T00:00:00');
+      const day = d.getDate();
+      const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+      const month = monthNames[d.getMonth()];
+      const year = d.getFullYear();
+      return `${day} ${month} ${year}`;
     };
 
     const getDataForView = (type: string) => {
@@ -771,54 +786,95 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
                  </div>
               </div>
 
-              {/* Row 2: MAX RUN - left / FASTEST - right */}
-              {(() => {
-                const maxRun = getMaxRun();
-                const fastestRun = getFastestRun();
-                return (
-                  <div style={{ marginTop: '14px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
-                    <div style={{ flex: 1 }}>
-                      <div style={{
-                        fontFamily: "'Inconsolata', monospace",
-                        fontSize: '18px',
-                        fontWeight: 348,
-                        fontStretch: '175%',
-                        letterSpacing: '0.02em',
-                        color: 'rgba(0,0,0,0.35)',
-                        textTransform: 'uppercase',
-                      }}>
-                        MAX RUN
-                      </div>
-                      <div style={{ fontSize: '20px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
-                        {maxRun.maxKm.toFixed(1)}<span style={{ fontSize: '14px', fontWeight: 200, color: '#999', marginLeft: '1px' }}>KM</span>
-                      </div>
-                      <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.01em', color: '#1a1a1a', marginTop: '2px', textTransform: 'uppercase' }}>
-                        {maxRun.maxSpeed !== null ? `${maxRun.maxSpeed.toFixed(1)} KM/H` : '—'}
-                      </div>
-                    </div>
-                    <div style={{ flex: 1, textAlign: 'right' }}>
-                      <div style={{
-                        fontFamily: "'Inconsolata', monospace",
-                        fontSize: '18px',
-                        fontWeight: 348,
-                        fontStretch: '175%',
-                        letterSpacing: '0.02em',
-                        color: 'rgba(0,0,0,0.35)',
-                        textTransform: 'uppercase',
-                        textAlign: 'right',
-                      }}>
-                        FASTEST
-                      </div>
-                      <div style={{ fontSize: '20px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
-                        {fastestRun.fastestKm > 0 ? `${fastestRun.fastestKm.toFixed(1)}` : '—'}<span style={{ fontSize: '14px', fontWeight: 200, color: '#999', marginLeft: '1px' }}>KM</span>
-                      </div>
-                      <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.01em', color: '#1a1a1a', marginTop: '2px', textTransform: 'uppercase' }}>
-                        {fastestRun.fastestSpeed !== null ? `${fastestRun.fastestSpeed.toFixed(1)} KM/H` : '—'}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
+               {/* Row 2: MAX RUN - left / FASTEST - right */}
+               {(() => {
+                 const maxRun = getMaxRun();
+                 const fastestRun = getFastestRun();
+                 return (
+                   <>
+                     <div style={{ marginTop: '14px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
+                       <div style={{ flex: 1 }}>
+                         <div style={{
+                           fontFamily: "'Inconsolata', monospace",
+                           fontSize: '18px',
+                           fontWeight: 348,
+                           fontStretch: '175%',
+                           letterSpacing: '0.02em',
+                           color: 'rgba(0,0,0,0.35)',
+                           textTransform: 'uppercase',
+                         }}>
+                           MAX RUN
+                         </div>
+                         <div style={{ fontSize: '20px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
+                           {maxRun.maxKm.toFixed(1)}<span style={{ fontSize: '14px', fontWeight: 200, color: '#999', marginLeft: '1px' }}>KM</span>
+                         </div>
+                         <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.01em', color: '#1a1a1a', marginTop: '2px', textTransform: 'uppercase' }}>
+                           {maxRun.maxSpeed !== null ? `${maxRun.maxSpeed.toFixed(1)} KM/H` : '—'}
+                         </div>
+                       </div>
+                       <div style={{ flex: 1, textAlign: 'right' }}>
+                         <div style={{
+                           fontFamily: "'Inconsolata', monospace",
+                           fontSize: '18px',
+                           fontWeight: 348,
+                           fontStretch: '175%',
+                           letterSpacing: '0.02em',
+                           color: 'rgba(0,0,0,0.35)',
+                           textTransform: 'uppercase',
+                           textAlign: 'right',
+                         }}>
+                           FASTEST
+                         </div>
+                         <div style={{ fontSize: '20px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
+                           {fastestRun.fastestKm > 0 ? `${fastestRun.fastestKm.toFixed(1)}` : '—'}<span style={{ fontSize: '14px', fontWeight: 200, color: '#999', marginLeft: '1px' }}>KM</span>
+                         </div>
+                         <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.01em', color: '#1a1a1a', marginTop: '2px', textTransform: 'uppercase' }}>
+                           {fastestRun.fastestSpeed !== null ? `${fastestRun.fastestSpeed.toFixed(1)} KM/H` : '—'}
+                         </div>
+                       </div>
+                     </div>
+
+                      {/* Row 3: DATE - left / DATE - right (only for ALL TIME view) */}
+                      {view.type === 'all' && (
+                        <div style={{ marginTop: '14px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
+                          <div style={{ flex: 1 }}>
+                            <div style={{
+                              fontFamily: "'Inconsolata', monospace",
+                              fontSize: '14px',
+                              fontWeight: 400,
+                              fontStretch: '175%',
+                              letterSpacing: '0.02em',
+                              color: 'rgba(0,0,0,0.35)',
+                              textTransform: 'uppercase',
+                            }}>
+                              DATE
+                            </div>
+                            <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.01em', color: '#1a1a1a', marginTop: '2px', textTransform: 'uppercase' }}>
+                              {formatDateDisplay(maxRun.maxDate)}
+                            </div>
+                          </div>
+                          <div style={{ flex: 1, textAlign: 'right' }}>
+                            <div style={{
+                              fontFamily: "'Inconsolata', monospace",
+                              fontSize: '14px',
+                              fontWeight: 400,
+                              fontStretch: '175%',
+                              letterSpacing: '0.02em',
+                              color: 'rgba(0,0,0,0.35)',
+                              textTransform: 'uppercase',
+                              textAlign: 'right',
+                            }}>
+                              DATE
+                            </div>
+                            <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.01em', color: '#1a1a1a', marginTop: '2px', textTransform: 'uppercase' }}>
+                              {formatDateDisplay(fastestRun.fastestDate)}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                   </>
+                 );
+               })()}
               </>
             )}
 
