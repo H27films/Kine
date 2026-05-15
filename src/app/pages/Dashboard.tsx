@@ -151,32 +151,32 @@ const WeeklyChart: React.FC<{
   return (
     <div>
       {/* WEEKLY heading with chevrons + week number */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{
             fontSize: '1.1rem',
             fontWeight: 800,
             letterSpacing: '0.18em',
             textTransform: 'uppercase',
-            color: '#ffffff',
+            color: '#1a1a1a',
           }}>Weekly</span>
           <button onClick={onPrev} disabled={!canPrev} style={{ opacity: !canPrev ? 0.2 : 0.55, background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}>
-            <ChevronLeft size={18} color="white" />
+            <ChevronLeft size={18} color="#1a1a1a" />
           </button>
           <button onClick={onNext} disabled={!canNext} style={{ opacity: !canNext ? 0.2 : 0.55, background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}>
-            <ChevronRight size={18} color="white" />
+            <ChevronRight size={18} color="#1a1a1a" />
           </button>
         </div>
         <span style={{
           fontSize: '0.95rem',
           fontWeight: 700,
           letterSpacing: '0.06em',
-          color: '#ffffff',
+          color: '#1a1a1a',
           marginRight: '6px',
         }}>{weekLabel}</span>
       </div>
 
-      <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff' }}>
+      <div className="rounded-lg p-5" style={{ backgroundColor: '#f2f2f2', borderLeft: '2px solid rgba(0,0,0,0.08)', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
         {/* Tabs only — chevrons moved above */}
         <div className="flex items-center mb-3">
           <div className="flex gap-4">
@@ -190,8 +190,8 @@ const WeeklyChart: React.FC<{
                   textTransform: 'uppercase',
                   letterSpacing: '1.5px',
                   paddingBottom: '4px',
-                  color: activeTab === tab ? '#ffffff' : 'rgba(255,255,255,0.3)',
-                  borderBottom: activeTab === tab ? '2px solid #ffffff' : '2px solid transparent',
+                  color: activeTab === tab ? '#1a1a1a' : 'rgba(26,26,26,0.45)',
+                  borderBottom: activeTab === tab ? '2px solid #1a1a1a' : '2px solid transparent',
                   background: 'none',
                   border: 'none',
                   cursor: 'pointer',
@@ -209,7 +209,7 @@ const WeeklyChart: React.FC<{
             fontSize: '1.6rem',
             fontWeight: 900,
             letterSpacing: '-0.02em',
-            color: '#ffffff',
+            color: '#1a1a1a',
             lineHeight: 1,
           }}>
             {summaryParts.value}
@@ -218,7 +218,7 @@ const WeeklyChart: React.FC<{
             <span style={{
               fontSize: '10px',
               fontWeight: 700,
-              color: 'rgba(255,255,255,0.4)',
+              color: 'rgba(26,26,26,0.45)',
               letterSpacing: '0.12em',
             }}>
               {summaryParts.unit}
@@ -228,8 +228,8 @@ const WeeklyChart: React.FC<{
             const exerciseTotal = (weightsExerciseCounts[effectiveWeekNumber] || []).reduce((s, c) => s + c, 0);
             return (
               <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', marginLeft: '8px' }}>
-                <span style={{ color: '#ffffff' }}> / {exerciseTotal}</span>
-                <span style={{ color: 'rgba(255,255,255,0.35)' }}> EX</span>
+                <span style={{ color: '#1a1a1a' }}> / {exerciseTotal}</span>
+                <span style={{ color: 'rgba(26,26,26,0.45)' }}> EX</span>
               </span>
             );
           })()}
@@ -241,7 +241,7 @@ const WeeklyChart: React.FC<{
             const pct = val > 0 ? Math.max((clampedVal - yMin) / (yMax - yMin), 0.04) : 0;
             const rawPct = rawMax > 0 ? val / rawMax : 0;
             const brightness = Math.round(80 + rawPct * 175);
-            const barColor = val > 0 ? `rgb(${brightness},${brightness},${brightness})` : 'rgba(255,255,255,0.05)';
+            const barColor = val > 0 ? `rgb(${brightness},${brightness},${brightness})` : 'rgba(26,26,26,0.04)';
             let barLabel = '';
             if (val > 0) {
               if (unit === 'kg') {
@@ -667,7 +667,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
 
       <section className="pt-1 mb-4">
         <div className="flex items-start">
-          <div className="text-[4rem] font-black leading-none tracking-tighter text-white flex-shrink-0">
+          <div className="text-[4rem] font-black leading-none tracking-tighter flex-shrink-0" style={{ color: '#1a1a1a' }}>
             {displayMovement > 0 ? displayMovement.toFixed(1) : '0.0'}
           </div>
           <div className="flex flex-col justify-center ml-4 pt-3 flex-1 min-w-0">
@@ -677,7 +677,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
                 fontWeight: 800,
                 textTransform: 'uppercase',
                 letterSpacing: '2.5px',
-                color: '#ffffff',
+                color: '#1a1a1a',
               }}
             >
               {selectedActivity
@@ -685,12 +685,12 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
                 : 'MOVEMENT (KM)'}
             </div>
             {selectedActivity && (
-              <div className="text-[11px] font-medium mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              <div className="text-[11px] font-medium mt-1" style={{ color: 'rgba(26,26,26,0.45)' }}>
                 This week
               </div>
             )}
             {!selectedActivity && yesterdayMovement > 0 && (
-              <div className="text-[11px] font-medium mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              <div className="text-[11px] font-medium mt-1" style={{ color: 'rgba(26,26,26,0.45)' }}>
                 Yesterday {yesterdayMovement.toFixed(1)} km
               </div>
             )}
@@ -756,7 +756,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
       </section>
 
       <section className="mb-4">
-        <div className={`rounded-lg ${dayWeights.length > 0 ? 'p-5' : 'p-3'} cursor-pointer`} style={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff' }} onClick={() => setWeightsExpanded(!weightsExpanded)}>
+        <div className={`rounded-lg ${dayWeights.length > 0 ? 'p-5' : 'p-3'} cursor-pointer`} style={{ backgroundColor: '#f2f2f2', borderLeft: '2px solid rgba(0,0,0,0.08)', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }} onClick={() => setWeightsExpanded(!weightsExpanded)}>
           <div className={`flex items-center justify-between ${dayWeights.length > 0 ? 'mb-4' : 'mb-0'}`}>
             <div className="flex items-center gap-2">
               <Dumbbell size={16} color="white" />
@@ -860,7 +860,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
             })()}
           </span>
         </div>
-        <MonthlyCalendarChart monthOffset={monthlyOffset} containerStyle={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff', padding: '32px 24px' }} />
+        <MonthlyCalendarChart monthOffset={monthlyOffset} containerStyle={{ backgroundColor: '#f2f2f2', borderLeft: '2px solid rgba(0,0,0,0.08)', boxShadow: '0 8px 24px rgba(0,0,0,0.12)', padding: '32px 24px' }} />
       </section>
 
       <section className="mt-8">

@@ -191,12 +191,6 @@ const WeeklyWeightsChart: React.FC = () => {
       <div className="absolute inset-0 pointer-events-none rounded-lg" style={{ opacity: 0.025, background: 'radial-gradient(circle at top right, #1a1a1a, transparent, transparent)' }} />
     </div>
   );
-        })}
-      </div>
-
-      <div className="absolute inset-0 pointer-events-none rounded-lg" style={{ opacity: 0.025, background: 'radial-gradient(circle at top right, white, transparent, transparent)' }} />
-    </div>
-  );
 };
 
 export default WeeklyWeightsChart;
