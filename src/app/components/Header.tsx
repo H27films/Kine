@@ -19,7 +19,7 @@ const headerTextStyle: React.CSSProperties = {
   fontStretch: '200%',
   letterSpacing: '0.8em',
   lineHeight: '1',
-  color: '#ffffff',
+  color: '#1a1a1a',
   textTransform: 'uppercase',
 };
 
@@ -29,7 +29,7 @@ const secondaryHeaderTextStyle: React.CSSProperties = {
 };
 
 const DumbbellIcon = ({ size = 16 }: { size?: number }) => (
-  <img src="/icons/dumbbell.svg" style={{ width: size, height: size, filter: 'brightness(0) invert(1)' }} alt="weights" />
+  <img src="/icons/dumbbell.svg" style={{ width: size, height: size }} alt="weights" />
 );
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -61,10 +61,10 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
   const isDashboard = !title;
 
   const getLogIcon = () => {
-    if (currentPage === 'weights') return <img src="/icons/dumbbell.svg" style={{ width: 20, height: 20, filter: 'brightness(0) invert(1)' }} alt="weights" />;
-    if (currentPage === 'cardio') return <NewRunningManIcon size={24} color="#ffffff" />;
-    if (currentPage === 'calories') return <NewCaloriesIcon size={25} color="#ffffff" />;
-    if (currentPage === 'profile') return <NewProfileIcon size={22} color="#ffffff" />;
+    if (currentPage === 'weights') return <img src="/icons/dumbbell.svg" style={{ width: 20, height: 20 }} alt="weights" />;
+    if (currentPage === 'cardio') return <NewRunningManIcon size={24} color="#1a1a1a" />;
+    if (currentPage === 'calories') return <NewCaloriesIcon size={25} color="#1a1a1a" />;
+    if (currentPage === 'profile') return <NewProfileIcon size={22} color="#1a1a1a" />;
     return null;
   };
 
@@ -75,25 +75,26 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
     <header
       className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-5"
       style={{
-        backgroundColor: 'rgba(0,0,0,0.6)',
+        backgroundColor: 'rgba(242,242,242,0.85)',
         backdropFilter: 'blur(24px)',
         WebkitBackdropFilter: 'blur(24px)',
         paddingTop: 'env(safe-area-inset-top)',
         height: 'calc(4rem + env(safe-area-inset-top))',
         paddingBottom: '0',
+        borderBottom: '1px solid rgba(0,0,0,0.08)',
       }}
     >
       <div className="relative flex items-center w-12" ref={menuRef}>
         {onBack ? (
           <button onClick={onBack} className="hover:opacity-80 transition-opacity">
-            <ArrowLeft size={22} color="white" />
+            <ArrowLeft size={22} color="#1a1a1a" />
           </button>
         ) : (
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className="hover:opacity-80 transition-opacity"
           >
-            <Menu size={18} color="white" />
+            <Menu size={18} color="#1a1a1a" />
           </button>
         )}
 
@@ -101,8 +102,8 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
           <div
             className="absolute top-12 left-0 w-48 rounded-xl overflow-hidden shadow-2xl"
             style={{
-              backgroundColor: '#1a1a1a',
-              border: '1px solid rgba(255,255,255,0.1)',
+              backgroundColor: '#f2f2f2',
+              border: '1px solid rgba(0,0,0,0.08)',
               animation: 'fadeIn 0.15s ease-out',
             }}
           >
@@ -113,15 +114,15 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
                   onNavigate?.(item.page);
                   setMenuOpen(false);
                 }}
-                className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-white/10 transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-black/5 transition-colors"
                 style={{
-                  borderBottom: index < menuItems.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none',
+                  borderBottom: index < menuItems.length - 1 ? '1px solid rgba(0,0,0,0.06)' : 'none',
                 }}
               >
-                <span style={{ color: 'rgba(255,255,255,0.5)', display: 'flex', alignItems: 'center' }}>
+                <span style={{ color: 'rgba(26,26,26,0.45)', display: 'flex', alignItems: 'center' }}>
                   <item.icon size={16} />
                 </span>
-                <span className="text-sm font-semibold text-white tracking-wide">{item.label}</span>
+                <span className="text-sm font-semibold" style={{ color: '#1a1a1a' }}>{item.label}</span>
               </button>
             ))}
           </div>
@@ -148,7 +149,7 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
             {isLogPage && logIcon ? (
               logIcon
             ) : (
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white">{title}</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: '#1a1a1a' }}>{title}</span>
             )}
           </div>
           <div className="flex items-center justify-end w-12">
