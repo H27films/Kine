@@ -361,7 +361,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
       if (!ex.lastSets || ex.lastSets.length === 0) return;
       setAddedExercises(prev => prev.map(e => {
         if (e.exercise.id !== id) return e;
-        return { ...e, sets: [...e.lastSets!], copied: true, loadedMax: false };
+        return { ...e, sets: [...ex.lastSets!], copied: true, loadedMax: false };
       }));
     }
   };
@@ -487,10 +487,11 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
     left: 0,
     right: 0,
     zIndex: 50,
-    backgroundColor: '#000000',
-    borderRadius: 0,
+    backgroundColor: '#f2f2f2',
+    borderRadius: '12px',
     overflow: 'hidden',
-    boxShadow: '0 16px 40px rgba(0,0,0,0.8)',
+    boxShadow: '0 16px 40px rgba(0,0,0,0.12)',
+    border: '1px solid rgba(0,0,0,0.08)',
   };
 
   const renderExerciseDropdown = () => {
@@ -509,7 +510,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
         const label = TYPE2_LABELS[t2] || t2;
         items.push(
           <div key={`header-${t2}`} style={{
-            borderTop: items.length > 0 ? '1px solid rgba(255,255,255,0.35)' : 'none',
+            borderTop: items.length > 0 ? '1px solid rgba(0,0,0,0.06)' : 'none',
             padding: '10px 16px 6px 16px',
           }}>
             <span style={{
@@ -517,7 +518,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
               fontWeight: 800,
               letterSpacing: '0.12em',
               textTransform: 'uppercase',
-              color: 'rgba(255,255,255,0.9)',
+              color: 'rgba(26,26,26,0.5)',
             }}>{label}</span>
           </div>
         );
@@ -533,24 +534,24 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
             alignItems: 'center',
             justifyContent: 'space-between',
             borderBottom: 'none',
-            backgroundColor: alreadyAdded ? 'rgba(255,255,255,0.04)' : 'transparent',
+            backgroundColor: alreadyAdded ? 'rgba(0,0,0,0.04)' : 'transparent',
             cursor: 'pointer',
           }}
         >
           <div>
-            <span style={{ color: alreadyAdded ? '#555' : '#cccccc', fontSize: '0.875rem' }}>
+            <span style={{ color: alreadyAdded ? 'rgba(26,26,26,0.35)' : '#1a1a1a', fontSize: '0.875rem' }}>
               {ex.exercise_name.charAt(0).toUpperCase() + ex.exercise_name.slice(1).toLowerCase()}
             </span>
             {ex.info_notes && (
-              <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.7rem', display: 'block', marginTop: '2px' }}>
+              <span style={{ color: 'rgba(26,26,26,0.3)', fontSize: '0.7rem', display: 'block', marginTop: '2px' }}>
                 {ex.info_notes}
               </span>
             )}
           </div>
           <div style={{
             width: 28, height: 28, borderRadius: '50%',
-            backgroundColor: alreadyAdded ? '#ef4444' : '#ffffff',
-            color: alreadyAdded ? '#ffffff' : '#1a1a1a',
+            backgroundColor: alreadyAdded ? '#ef4444' : '#1a1a1a',
+            color: alreadyAdded ? '#ffffff' : '#ffffff',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             flexShrink: 0,
           }}>
@@ -575,10 +576,10 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
         marginBottom: selectedGroup ? '0px' : '1rem',
       }}>
         <div className="flex items-start">
-          <div className="text-[3.25rem] font-black leading-none tracking-tighter text-white flex-shrink-0">
+          <div className="text-[3.25rem] font-black leading-none tracking-tighter flex-shrink-0" style={{ color: '#1a1a1a' }}>
             {fmtVol(thisWeekTotal)}
             {lastWeekTotal > 0 && (
-              <div style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.45)', marginTop: '6px', letterSpacing: '-0.01em', lineHeight: 1 }}>
+              <div style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(26,26,26,0.45)', marginTop: '6px', letterSpacing: '-0.01em', lineHeight: 1 }}>
                 LAST WEEK {Math.round(lastWeekTotal).toLocaleString()} KG
               </div>
             )}
@@ -588,7 +589,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                 style={{
                   background: 'none', border: 'none',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  cursor: 'pointer', color: '#ffffff', flexShrink: 0,
+                  cursor: 'pointer', color: '#1a1a1a', flexShrink: 0,
                   marginTop: '16px', transition: 'all 0.2s',
                 }}
               >
@@ -598,13 +599,13 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
           </div>
           <div className="flex flex-col ml-4 pt-1 flex-1 min-w-0">
             <div className="flex items-start justify-between">
-              <div style={{ fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2.5px', color: '#ffffff' }}>
+              <div style={{ fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2.5px', color: '#1a1a1a' }}>
                 VOLUME (KG)
               </div>
               {todayTotal > 0 && (
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginLeft: '12px', flexShrink: 0 }}>
-                  <span style={{ color: '#ffffff', fontWeight: 900, fontSize: '1.1rem', letterSpacing: '-0.02em', lineHeight: 1 }}>{Math.round(todayTotal).toLocaleString()}</span>
-                  <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 700, fontSize: '0.65rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>KG</span>
+                  <span style={{ color: '#1a1a1a', fontWeight: 900, fontSize: '1.1rem', letterSpacing: '-0.02em', lineHeight: 1 }}>{Math.round(todayTotal).toLocaleString()}</span>
+                  <span style={{ color: 'rgba(26,26,26,0.35)', fontWeight: 700, fontSize: '0.65rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>KG</span>
                 </div>
               )}
             </div>
@@ -612,13 +613,13 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
               <div style={{ display: 'flex', alignItems: 'center', marginTop: '6px' }}>
                 <div style={{
                   flex: 1, height: '8px',
-                  backgroundColor: 'rgba(255,255,255,0.22)',
+                  backgroundColor: 'rgba(26,26,26,0.08)',
                   borderRadius: '999px', position: 'relative', overflow: 'hidden',
                 }}>
                   <div style={{
                     position: 'absolute', right: 0, top: 0, bottom: 0,
                     width: `${Math.min(100, (todayTotal / 25000) * 100)}%`,
-                    background: 'linear-gradient(to right, #ffffff, rgba(255,255,255,0.45))',
+                    background: 'linear-gradient(to right, #1a1a1a, rgba(26,26,26,0.45))',
                     borderRadius: '999px', transition: 'width 0.6s ease',
                   }} />
                 </div>
@@ -632,10 +633,10 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
       {selectedGroup && todayTotal > 0 && (
         <div style={{ marginBottom: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-            <span style={{ color: '#ffffff', fontWeight: 900, fontSize: '1.5rem', letterSpacing: '-0.02em', lineHeight: 1 }}>
+            <span style={{ color: '#1a1a1a', fontWeight: 900, fontSize: '1.5rem', letterSpacing: '-0.02em', lineHeight: 1 }}>
               {Math.round(todayTotal).toLocaleString()}
             </span>
-            <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+            <span style={{ color: 'rgba(26,26,26,0.35)', fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
               KG TODAY
             </span>
           </div>
@@ -656,25 +657,25 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
               >
                 <div style={{
                   width: '52px', height: '52px', borderRadius: '50%',
-                  backgroundColor: selectedGroup === group ? '#ffffff' : 'transparent',
-                  border: selectedGroup === group ? '2px solid #ffffff' : '1px solid rgba(255,255,255,0.08)',
+                  backgroundColor: selectedGroup === group ? '#1a1a1a' : 'transparent',
+                  border: selectedGroup === group ? '2px solid #1a1a1a' : '1px solid rgba(0,0,0,0.12)',
                   background: selectedGroup === group
-                    ? '#ffffff'
-                    : 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.10) 30%, transparent 70%)',
+                    ? '#1a1a1a'
+                    : 'radial-gradient(circle at 30% 30%, rgba(26,26,26,0.12) 0%, rgba(26,26,26,0.05) 30%, transparent 70%)',
                   backgroundClip: 'padding-box',
                   boxShadow: selectedGroup === group
-                    ? '0 0 16px rgba(255,255,255,0.5)'
-                    : `0 0 8px rgba(255,255,255,0.12), 0 0 16px rgba(255,255,255,0.08), 0 0 26px rgba(255,255,255,0.05), 0 0 45px rgba(255,255,255,0.03), 4px 6px 20px rgba(0,0,0,0.40), inset 2px 2px 12px rgba(255,255,255,0.25), inset -2px -2px 10px rgba(255,255,255,0.03)`,
+                    ? '0 0 16px rgba(0,0,0,0.2)'
+                    : `0 0 8px rgba(0,0,0,0.06), 0 0 16px rgba(0,0,0,0.04), 0 0 26px rgba(0,0,0,0.02), 4px 6px 20px rgba(0,0,0,0.10), inset 2px 2px 12px rgba(255,255,255,0.25), inset -2px -2px 10px rgba(255,255,255,0.03)`,
                   transition: 'all 0.2s',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
                 }}>
                   {selectedGroup === group ? (
-                    <Check size={24} color="#000000" strokeWidth={3} />
+                    <Check size={24} color="#ffffff" strokeWidth={3} />
                   ) : (
                     <img src={`/icons/${group}.svg`} alt={group} style={{ width: '38px', height: '38px', objectFit: 'contain' }} />
                   )}
                 </div>
-                <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#ffffff' }}>
+                <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#1a1a1a' }}>
                   {group}
                 </span>
               </button>
@@ -686,8 +687,8 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
           <div ref={exerciseRef} className="relative">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0' }}>
               <div onClick={() => setExerciseOpen(o => !o)} style={textTriggerStyle}>
-                <span style={{ color: '#ffffff', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Choose Exercise</span>
-                <ChevronDown size={14} style={{ color: '#ffffff', transform: exerciseOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                <span style={{ color: '#1a1a1a', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Choose Exercise</span>
+                <ChevronDown size={14} style={{ color: '#1a1a1a', transform: exerciseOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
                 {addedExercises.length === 0 && savedWorkoutIds.length > 0 && (
@@ -698,7 +699,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                     onClick={e => { e.stopPropagation(); void handleApplySavedWorkoutTemplate(); }}
                     style={{
                       width: 30, height: 30, borderRadius: '50%',
-                      backgroundColor: '#ffffff', color: '#1a1a1a',
+                      backgroundColor: '#1a1a1a', color: '#ffffff',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       border: 'none',
                       cursor: applyingTemplate || Object.values(exercisesByGroup).flat().length === 0 ? 'default' : 'pointer',
@@ -709,7 +710,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                   </button>
                 )}
                 {exerciseOpen && (
-                  <button type="button" onClick={() => setExerciseOpen(false)} style={{ display: 'flex', alignItems: 'center', color: 'rgba(255,255,255,0.35)', padding: '4px' }}>
+                  <button type="button" onClick={() => setExerciseOpen(false)} style={{ display: 'flex', alignItems: 'center', color: 'rgba(26,26,26,0.35)', padding: '4px' }}>
                     <X size={16} strokeWidth={2} />
                   </button>
                 )}
@@ -742,17 +743,17 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                     onClick={(e) => { e.stopPropagation(); setShowClearConfirm(0); }}
                     style={{ ...textTriggerStyle, padding: 0, margin: 0, border: 'none', background: 'none', font: 'inherit' }}
                   >
-                    <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,80,80,0.55)' }}>CLEAR ALL</span>
-                    <X size={13} strokeWidth={2.2} style={{ color: 'rgba(255,80,80,0.55)' }} />
+                    <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(220,38,38,0.55)' }}>CLEAR ALL</span>
+                    <X size={13} strokeWidth={2.2} style={{ color: 'rgba(220,38,38,0.55)' }} />
                   </button>
                   {showClearConfirm !== null && (
                     <>
-                      <span style={{ fontSize: '0.55rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.4)' }}>Clear all?</span>
+                      <span style={{ fontSize: '0.55rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(26,26,26,0.4)' }}>Clear all?</span>
                       <button type="button" onClick={() => { setAddedExercises([]); setShowClearConfirm(null); }} style={{ ...textTriggerStyle, padding: 0, margin: 0, border: 'none', background: 'none', font: 'inherit' }}>
                         <span style={{ fontSize: '0.55rem', fontWeight: 800, color: '#22c55e' }}>YES</span>
                       </button>
                       <button type="button" onClick={() => setShowClearConfirm(null)} style={{ ...textTriggerStyle, padding: 0, margin: 0, border: 'none', background: 'none', font: 'inherit' }}>
-                        <span style={{ fontSize: '0.55rem', fontWeight: 700, color: 'rgba(255,80,80,0.55)' }}>CANCEL</span>
+                        <span style={{ fontSize: '0.55rem', fontWeight: 700, color: 'rgba(220,38,38,0.55)' }}>CANCEL</span>
                       </button>
                     </>
                   )}
@@ -772,17 +773,17 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
             onClick={(e) => { e.stopPropagation(); setShowClearConfirm(0); }}
             style={{ ...textTriggerStyle, padding: 0, margin: 0, border: 'none', background: 'none', font: 'inherit' }}
           >
-            <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,80,80,0.55)' }}>CLEAR ALL</span>
-            <X size={13} strokeWidth={2.2} style={{ color: 'rgba(255,80,80,0.55)' }} />
+            <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(220,38,38,0.55)' }}>CLEAR ALL</span>
+            <X size={13} strokeWidth={2.2} style={{ color: 'rgba(220,38,38,0.55)' }} />
           </button>
           {showClearConfirm !== null && (
             <>
-              <span style={{ fontSize: '0.55rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.4)' }}>Clear all?</span>
+              <span style={{ fontSize: '0.55rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(26,26,26,0.4)' }}>Clear all?</span>
               <button type="button" onClick={() => { setAddedExercises([]); setShowClearConfirm(null); }} style={{ ...textTriggerStyle, padding: 0, margin: 0, border: 'none', background: 'none', font: 'inherit' }}>
                 <span style={{ fontSize: '0.55rem', fontWeight: 800, color: '#22c55e' }}>YES</span>
               </button>
               <button type="button" onClick={() => setShowClearConfirm(null)} style={{ ...textTriggerStyle, padding: 0, margin: 0, border: 'none', background: 'none', font: 'inherit' }}>
-                <span style={{ fontSize: '0.55rem', fontWeight: 700, color: 'rgba(255,80,80,0.55)' }}>CANCEL</span>
+                <span style={{ fontSize: '0.55rem', fontWeight: 700, color: 'rgba(220,38,38,0.55)' }}>CANCEL</span>
               </button>
             </>
           )}
@@ -794,8 +795,8 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
           <div className="flex items-baseline gap-2 flex-wrap min-w-0">
             {grandTotal > 0 ? (
               <>
-                <span style={{ fontSize: '2.6rem', fontWeight: 900, lineHeight: 1, color: '#ffffff', letterSpacing: '-0.02em' }}>{grandTotal.toLocaleString()}</span>
-                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#ffffff', letterSpacing: '0.12em', textTransform: 'uppercase' }}>KG</span>
+                <span style={{ fontSize: '2.6rem', fontWeight: 900, lineHeight: 1, color: '#1a1a1a', letterSpacing: '-0.02em' }}>{grandTotal.toLocaleString()}</span>
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#1a1a1a', letterSpacing: '0.12em', textTransform: 'uppercase' }}>KG</span>
               </>
             ) : showEstGrandTotal ? (
               <>
@@ -809,10 +810,10 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
             <button
               onClick={() => setShowEntryCard(true)}
               style={{
-                background: 'none', border: '1px solid rgba(255,255,255,0.15)',
+                background: 'none', border: '1px solid rgba(0,0,0,0.15)',
                 borderRadius: '50%', width: 36, height: 36,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                cursor: 'pointer', color: '#ffffff', flexShrink: 0, transition: 'all 0.2s',
+                cursor: 'pointer', color: '#1a1a1a', flexShrink: 0, transition: 'all 0.2s',
               }}
             >
               <ArrowLeftFromLine size={18} strokeWidth={1.5} style={{ transform: 'rotate(180deg)' }} />
@@ -855,10 +856,10 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                   <div
                     className="flex items-center gap-4 py-4"
                     style={{
-                      borderBottom: ex.expanded ? 'none' : '1px solid rgba(255,255,255,0.06)',
+                      borderBottom: ex.expanded ? 'none' : '1px solid rgba(0,0,0,0.06)',
                       transform: ex.expanded ? 'none' : `translateX(${swipeOffset}px)`,
                       transition: swipeOffset === 0 ? 'transform 0.25s ease' : 'none',
-                      backgroundColor: '#000000', willChange: 'transform',
+                      backgroundColor: 'transparent', willChange: 'transform',
                     }}
                     onTouchStart={ex.expanded ? undefined : (e) => {
                       touchStartX.current[ex.exercise.id] = e.touches[0].clientX;
@@ -881,46 +882,46 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                       onClick={(e) => { e.stopPropagation(); loadLastSession(ex.exercise.id); }}
                       style={{
                         width: 32, height: 32, borderRadius: '50%',
-                        border: hasData || ex.logged ? 'none' : '2px solid rgba(255,255,255,0.2)',
-                        backgroundColor: hasData || ex.logged ? '#ffffff' : 'transparent',
+                        border: hasData || ex.logged ? 'none' : '2px solid rgba(26,26,26,0.2)',
+                        backgroundColor: hasData || ex.logged ? '#1a1a1a' : 'transparent',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         flexShrink: 0, transition: 'all 0.25s', cursor: 'pointer',
                       }}
                     >
-                      {(hasData || ex.logged) && <Check size={14} color="#1a1a1a" strokeWidth={3} />}
+                      {(hasData || ex.logged) && <Check size={14} color="#ffffff" strokeWidth={3} />}
                     </div>
 
                     <div className="flex-grow flex items-center justify-between" onClick={() => toggleExpanded(ex.exercise.id)} style={{ cursor: 'pointer' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                         <div>
-                          <p className="font-bold text-sm text-white">
+                          <p className="font-bold text-sm" style={{ color: '#1a1a1a' }}>
                             {ex.exercise.exercise_name.charAt(0).toUpperCase() + ex.exercise.exercise_name.slice(1).toLowerCase()}
                           </p>
-                          <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                          <p className="text-xs mt-0.5" style={{ color: 'rgba(26,26,26,0.4)' }}>
                             {ex.expanded && ex.exercise.info_notes ? ex.exercise.info_notes : lastSummary}
                           </p>
                         </div>
                         {!ex.expanded && exTotal > 0 && (ex.pbThreshold ?? 0) > 0 && exTotal > (ex.pbThreshold ?? 0) && (
-                          <div style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                            <span style={{ fontSize: '0.6rem', fontWeight: 900, color: '#000000', letterSpacing: '0.05em' }}>PB</span>
+                          <div style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <span style={{ fontSize: '0.6rem', fontWeight: 900, color: '#ffffff', letterSpacing: '0.05em' }}>PB</span>
                           </div>
                         )}
                       </div>
-                      <div style={{ color: 'rgba(255,255,255,0.4)' }}>
+                      <div style={{ color: 'rgba(26,26,26,0.4)' }}>
                         {ex.expanded ? <ChevronUp size={20} /> : <ChevronRight size={20} />}
                       </div>
                     </div>
                   </div>
 
                   {ex.expanded && (
-                    <div className="pb-5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div className="pb-5" style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
                       <div className="flex items-center justify-between mb-4">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                           <div className="flex items-baseline gap-2 flex-wrap">
                             {exTotal > 0 && (
                               <>
-                                <span className="font-black" style={{ fontSize: '1.5rem', color: '#ffffff', lineHeight: 1 }}>{exTotal.toLocaleString()}</span>
-                                <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#ffffff' }}>KG</span>
+                                <span className="font-black" style={{ fontSize: '1.5rem', color: '#1a1a1a', lineHeight: 1 }}>{exTotal.toLocaleString()}</span>
+                                <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#1a1a1a' }}>KG</span>
                               </>
                             )}
                             {showEstHeader && (
@@ -932,8 +933,8 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                             )}
                           </div>
                           {exTotal > 0 && (ex.pbThreshold ?? 0) > 0 && exTotal > (ex.pbThreshold ?? 0) && (
-                            <div style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                              <span style={{ fontSize: '0.6rem', fontWeight: 900, color: '#000000', letterSpacing: '0.05em' }}>PB</span>
+                            <div style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                              <span style={{ fontSize: '0.6rem', fontWeight: 900, color: '#ffffff', letterSpacing: '0.05em' }}>PB</span>
                             </div>
                           )}
                         </div>
@@ -941,10 +942,10 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                           onClick={(e) => { e.stopPropagation(); toggleCopyFromLast(ex.exercise.id); }}
                           style={{
                             width: 30, height: 30, borderRadius: '50%',
-                            backgroundColor: ex.copied ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.08)',
-                            border: ex.copied ? '1px solid rgba(255,255,255,0.3)' : '1px solid rgba(255,255,255,0.12)',
+                            backgroundColor: ex.copied ? 'rgba(0,0,0,0.15)' : 'rgba(0,0,0,0.08)',
+                            border: ex.copied ? '1px solid rgba(0,0,0,0.3)' : '1px solid rgba(0,0,0,0.12)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            color: ex.copied ? '#ffffff' : 'rgba(255,255,255,0.55)',
+                            color: ex.copied ? '#1a1a1a' : 'rgba(26,26,26,0.55)',
                             cursor: 'pointer', flexShrink: 0, transition: 'all 0.2s',
                           }}
                         >
@@ -955,7 +956,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                       <div className="grid mb-2" style={{ gridTemplateColumns: '1.8rem 1fr 1fr 1fr', gap: '0.5rem' }}>
                         <div />
                         {['kg', 'reps', 'total'].map(h => (
-                          <p key={h} className="text-center text-[10px] font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.3)' }}>{h}</p>
+                          <p key={h} className="text-center text-[10px] font-bold uppercase tracking-widest" style={{ color: 'rgba(26,26,26,0.3)' }}>{h}</p>
                         ))}
                       </div>
 
@@ -963,49 +964,49 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                         const w = parseFloat(set.weight) || 0;
                         const rowTotal = w * set.reps * mult;
                         const rowHasData = set.weight !== '';
-                        const numColor = rowHasData ? '#ffffff' : 'rgba(255,255,255,0.25)';
+                        const numColor = rowHasData ? '#1a1a1a' : 'rgba(26,26,26,0.25)';
                         return (
                           <div key={idx} className="grid items-center mb-2" style={{ gridTemplateColumns: '1.8rem 1fr 1fr 1fr', gap: '0.5rem' }}>
                             <p className="font-black" style={{ fontSize: '1rem', color: numColor, lineHeight: 1, textAlign: 'center' }}>{idx + 1}</p>
-                            <div className="flex items-center justify-between rounded-lg py-2 px-2" style={{ backgroundColor: '#1b1b1b', border: '1px solid rgba(255,255,255,0.07)' }} onClick={e => e.stopPropagation()}>
-                              <button onClick={() => adjustWeight(ex.exercise.id, idx, -1)} style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>−</button>
+                            <div className="flex items-center justify-between rounded-lg py-2 px-2" style={{ backgroundColor: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.08)' }} onClick={e => e.stopPropagation()}>
+                              <button onClick={() => adjustWeight(ex.exercise.id, idx, -1)} style={{ color: 'rgba(0,0,0,0.5)', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>−</button>
                               <input
                                 type="number" inputMode="decimal" value={set.weight} placeholder="—"
                                 onChange={e => updateSet(ex.exercise.id, idx, 'weight', e.target.value)}
-                                style={{ background: 'transparent', border: 'none', outline: 'none', width: '100%', textAlign: 'center', fontSize: '0.875rem', fontWeight: 700, color: rowHasData ? '#ffffff' : 'rgba(255,255,255,0.3)', MozAppearance: 'textfield' }}
+                                style={{ background: 'transparent', border: 'none', outline: 'none', width: '100%', textAlign: 'center', fontSize: '0.875rem', fontWeight: 700, color: rowHasData ? '#1a1a1a' : 'rgba(26,26,26,0.3)', MozAppearance: 'textfield' }}
                               />
-                              <button onClick={() => adjustWeight(ex.exercise.id, idx, 1)} style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>+</button>
+                              <button onClick={() => adjustWeight(ex.exercise.id, idx, 1)} style={{ color: 'rgba(0,0,0,0.5)', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>+</button>
                             </div>
-                            <div className="flex items-center justify-between rounded-lg py-2 px-2" style={{ backgroundColor: '#1b1b1b', border: '1px solid rgba(255,255,255,0.07)' }} onClick={e => e.stopPropagation()}>
-                              <button onClick={() => updateSet(ex.exercise.id, idx, 'reps', Math.max(1, set.reps - 1))} style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}>−</button>
-                              <span className="font-bold" style={{ fontSize: '0.875rem', color: rowHasData ? '#ffffff' : 'rgba(255,255,255,0.3)' }}>{set.reps}</span>
-                              <button onClick={() => updateSet(ex.exercise.id, idx, 'reps', set.reps + 1)} style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}>+</button>
+                            <div className="flex items-center justify-between rounded-lg py-2 px-2" style={{ backgroundColor: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.08)' }} onClick={e => e.stopPropagation()}>
+                              <button onClick={() => updateSet(ex.exercise.id, idx, 'reps', Math.max(1, set.reps - 1))} style={{ color: 'rgba(0,0,0,0.5)', lineHeight: 1 }}>−</button>
+                              <span className="font-bold" style={{ fontSize: '0.875rem', color: rowHasData ? '#1a1a1a' : 'rgba(26,26,26,0.3)' }}>{set.reps}</span>
+                              <button onClick={() => updateSet(ex.exercise.id, idx, 'reps', set.reps + 1)} style={{ color: 'rgba(0,0,0,0.5)', lineHeight: 1 }}>+</button>
                             </div>
-                            <p className="text-center font-bold" style={{ fontSize: '0.875rem', color: '#ffffff' }}>{rowTotal > 0 ? rowTotal : '—'}</p>
+                            <p className="text-center font-bold" style={{ fontSize: '0.875rem', color: '#1a1a1a' }}>{rowTotal > 0 ? rowTotal : '—'}</p>
                           </div>
                         );
                       })}
 
                       <div className="flex items-center gap-5 mt-4 flex-wrap">
                         {ex.sets.length < 6 && (
-                          <button onClick={(e) => { e.stopPropagation(); addSet(ex.exercise.id); }} className="flex items-center gap-1 text-xs font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                          <button onClick={(e) => { e.stopPropagation(); addSet(ex.exercise.id); }} className="flex items-center gap-1 text-xs font-bold uppercase tracking-widest" style={{ color: 'rgba(26,26,26,0.35)' }}>
                             <Plus size={13} /><span>Set</span>
                           </button>
                         )}
-                        <button onClick={(e) => { e.stopPropagation(); removeExercise(ex.exercise.id); }} className="flex items-center gap-1 text-xs font-bold uppercase tracking-widest" style={{ color: 'rgba(255,80,80,0.55)' }}>
+                        <button onClick={(e) => { e.stopPropagation(); removeExercise(ex.exercise.id); }} className="flex items-center gap-1 text-xs font-bold uppercase tracking-widest" style={{ color: 'rgba(220,38,38,0.55)' }}>
                           <Minus size={13} /><span>Remove Ex.</span>
                         </button>
                         <button
                           onClick={(e) => { e.stopPropagation(); toggleFail(ex.exercise.id); }}
                           className="text-xs font-bold uppercase tracking-widest"
-                          style={{ padding: '3px 12px', borderRadius: '999px', border: ex.fail ? '1px solid rgba(255,80,80,0.7)' : '1px solid rgba(255,255,255,0.12)', backgroundColor: ex.fail ? 'rgba(255,80,80,0.15)' : 'transparent', color: ex.fail ? '#ff5050' : 'rgba(255,255,255,0.28)', transition: 'all 0.2s', letterSpacing: '0.1em' }}
+                          style={{ padding: '3px 12px', borderRadius: '999px', border: ex.fail ? '1px solid rgba(220,38,38,0.7)' : '1px solid rgba(0,0,0,0.12)', backgroundColor: ex.fail ? 'rgba(220,38,38,0.15)' : 'transparent', color: ex.fail ? '#dc2626' : 'rgba(26,26,26,0.28)', transition: 'all 0.2s', letterSpacing: '0.1em' }}
                         >
                           Fail
                         </button>
                         <button
                           onClick={(e) => { e.stopPropagation(); loadMaxSession(ex.exercise.id); }}
                           className="text-xs font-bold uppercase tracking-widest"
-                          style={{ padding: '3px 12px', borderRadius: '999px', border: '1px solid rgba(255,255,255,0.12)', backgroundColor: 'transparent', color: 'rgba(255,255,255,0.28)', transition: 'all 0.2s', letterSpacing: '0.1em' }}
+                          style={{ padding: '3px 12px', borderRadius: '999px', border: '1px solid rgba(0,0,0,0.12)', backgroundColor: 'transparent', color: 'rgba(26,26,26,0.28)', transition: 'all 0.2s', letterSpacing: '0.1em' }}
                         >
                           Max
                         </button>
@@ -1021,7 +1022,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
             onClick={handleLogAll}
             disabled={saving}
             className="w-full mt-8 py-4 rounded-full font-black uppercase tracking-widest text-sm active:scale-95 duration-150"
-            style={{ backgroundColor: saveSuccess ? '#22c55e' : '#ffffff', color: '#1a1c1c', boxShadow: '0 12px 32px rgba(0,0,0,0.4)', opacity: saving ? 0.7 : 1 }}
+            style={{ backgroundColor: saveSuccess ? '#22c55e' : '#1a1a1a', color: '#ffffff', boxShadow: '0 12px 32px rgba(0,0,0,0.12)', opacity: saving ? 0.7 : 1 }}
           >
             {saving ? 'Saving...' : saveSuccess ? '✓ Saved!' : 'Log Exercises'}
           </button>
