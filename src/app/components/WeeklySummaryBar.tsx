@@ -219,10 +219,7 @@ export const WeeklySummaryBar: React.FC = () => {
         paddingBottom: '10px',
         paddingLeft: '16px',
         paddingRight: '16px',
-        background: 'linear-gradient(135deg, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0.95) 100%)',
         borderRadius: '12px',
-        boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
-        border: '1px solid rgba(0,0,0,0.08)',
       }}
     >
       <ProgressRing

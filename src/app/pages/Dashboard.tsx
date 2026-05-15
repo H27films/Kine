@@ -159,6 +159,7 @@ const WeeklyChart: React.FC<{
             letterSpacing: '0.18em',
             textTransform: 'uppercase',
             color: '#1a1a1a',
+            fontFamily: "'Archivo', sans-serif",
           }}>Weekly</span>
           <button onClick={onPrev} disabled={!canPrev} style={{ opacity: !canPrev ? 0.2 : 0.55, background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}>
             <ChevronLeft size={18} color="#1a1a1a" />
@@ -257,7 +258,7 @@ const WeeklyChart: React.FC<{
               : 0;
             return (
               <div key={i} className="flex flex-col items-center h-full justify-end" style={{ flex: '1', maxWidth: '28px' }}>
-                <div style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(26,26,26,0.45)', marginBottom: '4px' }}>{barLabel}</div>
+                <div style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(26,26,26,0.45)', marginBottom: '4px', height: '14px', fontFamily: "'Archivo', sans-serif" }}>{barLabel}</div>
                 <div className="w-full relative transition-all" style={{ height: `${pct * 100}%`, backgroundColor: barColor, borderRadius: '9999px 9999px 0 0', minHeight: val > 0 ? '4px' : 0 }}>
                   {activeTab === 'Weights' && exerciseCount > 0 && (
                     <div style={{
@@ -287,7 +288,7 @@ const WeeklyChart: React.FC<{
                     </div>
                   )}
                 </div>
-                <div style={{ fontSize: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'rgba(26,26,26,0.45)', marginTop: '8px' }}>{days[i]}</div>
+                <div style={{ fontSize: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'rgba(26,26,26,0.45)', marginTop: '8px', fontFamily: "'Archivo', sans-serif" }}>{days[i]}</div>
               </div>
             );
           })}
@@ -679,6 +680,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
                 textTransform: 'uppercase',
                 letterSpacing: '2.5px',
                 color: '#1a1a1a',
+                fontFamily: "'Archivo', sans-serif",
               }}
             >
               {selectedActivity
@@ -757,7 +759,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
       </section>
 
       <section className="mb-4">
-        <div className={`rounded-lg ${dayWeights.length > 0 ? 'p-5' : 'p-3'} cursor-pointer`} style={{ backgroundColor: '#f2f2f2', borderLeft: '2px solid rgba(0,0,0,0.08)', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }} onClick={() => setWeightsExpanded(!weightsExpanded)}>
+        <div className={`rounded-lg ${dayWeights.length > 0 ? 'p-5' : 'p-3'} cursor-pointer`} style={{ backgroundColor: 'rgba(0,0,0,0.05)', borderLeft: '2px solid rgba(0,0,0,0.08)', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }} onClick={() => setWeightsExpanded(!weightsExpanded)}>
           <div className={`flex items-center justify-between ${dayWeights.length > 0 ? 'mb-4' : 'mb-0'}`}>
             <div className="flex items-center gap-2">
               <Dumbbell size={16} color="#1a1a1a" />
@@ -768,6 +770,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
                   textTransform: 'uppercase',
                   letterSpacing: '2px',
                   color: 'rgba(26,26,26,0.45)',
+                  fontFamily: "'Archivo', sans-serif",
                 }}
               >
                 Weights
@@ -784,7 +787,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
               justifyContent: 'center',
               flexShrink: 0,
             }}>
-              <span style={{ fontSize: '11px', fontWeight: 900, color: '#ffffff', lineHeight: 1 }}>
+              <span style={{ fontSize: '11px', fontWeight: 900, color: '#ffffff', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>
                 {dailyScore > 0 ? dailyScore : '—'}
               </span>
             </div>
@@ -804,7 +807,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
               </div>
             </>
           ) : (
-            <div className="text-[13px] font-medium py-1" style={{ color: 'rgba(26,26,26,0.3)' }}>No weights logged</div>
+            <div className="text-[13px] font-medium py-1" style={{ color: 'rgba(26,26,26,0.3)', fontFamily: "'Archivo', sans-serif" }}>No weights logged</div>
           )}
         </div>
       </section>
@@ -828,6 +831,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
               letterSpacing: '-0.03em',
               textTransform: 'uppercase',
               color: '#1a1a1a',
+              fontFamily: "'Archivo', sans-serif",
             }}>
               Monthly
             </div>
@@ -853,6 +857,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
             fontWeight: 700,
             letterSpacing: '0.06em',
             color: '#1a1a1a',
+            fontFamily: "'Archivo', sans-serif",
           }}>
             {(() => {
               const d = new Date();
