@@ -11,27 +11,27 @@ interface NavItem {
 export const BottomNav: React.FC<NavigationProps> = ({ currentPage, onNavigate }) => {
   const items: NavItem[] = [
     {
-      icon: <HomeIcon size={22} color="rgba(26,26,26,0.45)" />,
+      icon: <HomeIcon size={22} color="rgba(26,26,26,0.75)" />,
       activeIcon: <HomeIcon size={22} color="#ffffff" />,
       page: 'dashboard',
     },
     {
-      icon: <img src="/icons/dumbbell.svg" style={{ width: 21, height: 21, opacity: 0.45, filter: 'brightness(0)' }} alt="weights" />,
+      icon: <img src="/icons/dumbbell.svg" style={{ width: 21, height: 21, opacity: 0.75, filter: 'brightness(0)' }} alt="weights" />,
       activeIcon: <img src="/icons/dumbbell.svg" style={{ width: 21, height: 21, filter: 'brightness(0) invert(1)' }} alt="weights" />,
       page: 'weights',
     },
     {
-      icon: <RunningManIcon size={26} color="rgba(26,26,26,0.45)" />,
+      icon: <RunningManIcon size={26} color="rgba(26,26,26,0.75)" />,
       activeIcon: <RunningManIcon size={26} color="#ffffff" />,
       page: 'cardio',
     },
     {
-      icon: <CaloriesIcon size={22} color="rgba(26,26,26,0.45)" />,
+      icon: <CaloriesIcon size={22} color="rgba(26,26,26,0.75)" />,
       activeIcon: <CaloriesIcon size={22} color="#ffffff" />,
       page: 'calories',
     },
     {
-      icon: <ProfileIcon size={22} color="rgba(26,26,26,0.45)" />,
+      icon: <ProfileIcon size={22} color="rgba(26,26,26,0.75)" />,
       activeIcon: <ProfileIcon size={22} color="#ffffff" />,
       page: 'profile',
     },
@@ -63,7 +63,7 @@ export const BottomNav: React.FC<NavigationProps> = ({ currentPage, onNavigate }
             style={
               active
                 ? { backgroundColor: '#1a1a1a', color: '#ffffff', borderRadius: '9999px', transform: 'scale(1.1)' }
-                : { color: 'rgba(26,26,26,0.45)' }
+                : { color: 'rgba(26,26,26,0.75)' }
             }
           >
             {active ? item.activeIcon : item.icon}
