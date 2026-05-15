@@ -146,7 +146,7 @@ const WeeklyWeightsChart: React.FC = () => {
           const pct = bar.total > yMin ? Math.max((clampedVal - yMin) / (yMax - yMin), 0.04) : 0;
           const rawPct = yMax > yMin ? (bar.total - yMin) / (yMax - yMin) : 0;
           // Dark scale: low values → light gray, high values → near-black
-          const brightness = bar.total > yMin ? Math.round(30 + Math.max(rawPct, 0) * 150) : 0;
+          const brightness = bar.total > yMin ? Math.round(200 - Math.max(rawPct, 0) * 170) : 0;
           const barColor = bar.total > yMin ? `rgb(${brightness},${brightness},${brightness})` : 'rgba(0,0,0,0.08)';
           const displayValue = bar.total > 0 ? `${Math.round(bar.total / 1000)}k` : '';
 
