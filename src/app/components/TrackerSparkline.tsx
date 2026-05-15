@@ -58,13 +58,13 @@ const TrackerSparkline: React.FC<Props> = ({ weekChartData }) => {
               cx={x}
               cy={y}
               r={CIRCLE_RADIUS}
-              fill="rgba(255, 255, 255, 0.06)"
+              fill="rgba(0,0,0,0.06)"
             />
           );
         });
       })}
 
-      {/* Value stacked circles (greyish white) */}
+      {/* Value stacked circles (dark palette) */}
       {weekChartData.map((val, i) => {
         if (val <= 0) return null;
 
@@ -79,14 +79,14 @@ const TrackerSparkline: React.FC<Props> = ({ weekChartData }) => {
             <g key={`val-${i}-${circleIdx}`}>
               {isTop ? (
                 <>
-                  <circle cx={x} cy={y} r={CIRCLE_RADIUS + 1} fill="rgba(255, 255, 255, 0.15)" filter="url(#topCircleGlow)" />
-                  <circle cx={x} cy={y} r={CIRCLE_RADIUS} fill="white" />
-                  <text x={x} y={y - 6} textAnchor="middle" fill="rgba(255, 255, 255, 0.70)" fontSize="6" fontWeight="700">
+                  <circle cx={x} cy={y} r={CIRCLE_RADIUS + 1} fill="rgba(0,0,0,0.15)" filter="url(#topCircleGlow)" />
+                  <circle cx={x} cy={y} r={CIRCLE_RADIUS} fill="#1a1a1a" />
+                  <text x={x} y={y - 6} textAnchor="middle" fill="#ffffff" fontSize="6" fontWeight="700" fontFamily="'Archivo', sans-serif">
                     {val.toFixed(1)}
                   </text>
                 </>
               ) : (
-                <circle cx={x} cy={y} r={CIRCLE_RADIUS} fill="rgba(255, 255, 255, 0.35)" />
+                <circle cx={x} cy={y} r={CIRCLE_RADIUS} fill="rgba(0,0,0,0.35)" />
               )}
             </g>
           );
@@ -95,7 +95,7 @@ const TrackerSparkline: React.FC<Props> = ({ weekChartData }) => {
 
       {/* Day labels */}
       {sparkDays.map((d, k) => (
-        <text key={k} x={padLeft + (k / 6) * chartW} y={VH + 12} textAnchor="middle" fill="white" fontSize="4.5" fontWeight="700">
+        <text key={k} x={padLeft + (k / 6) * chartW} y={VH + 12} textAnchor="middle" fill="#1a1a1a" fontSize="4.5" fontWeight="700" fontFamily="'Archivo', sans-serif">
           {d}
         </text>
       ))}

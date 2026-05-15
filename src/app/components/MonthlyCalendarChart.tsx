@@ -12,7 +12,7 @@ interface MonthlyCalendarChartProps {
 const MonthlyCalendarChart: React.FC<MonthlyCalendarChartProps> = ({
   monthOffset,
   className = "rounded-lg mb-4",
-  containerStyle = { backgroundColor: '#121212', borderLeft: '2px solid #ffffff', padding: '32px 24px' },
+  containerStyle = { backgroundColor: '#f2f2f2', borderLeft: '2px solid rgba(0,0,0,0.08)', padding: '32px 24px' },
   tabs = ['SCORE', 'RUNNING', 'WEIGHTS'] as const,
   defaultTab = 'SCORE'
 }) => {
@@ -153,11 +153,12 @@ const MonthlyCalendarChart: React.FC<MonthlyCalendarChartProps> = ({
                 fontWeight: 700,
                 textTransform: 'uppercase',
                 letterSpacing: '1px',
-                color: selectedTab === tab ? '#ffffff' : 'rgba(255,255,255,0.4)',
+                color: selectedTab === tab ? '#1a1a1a' : 'rgba(26,26,26,0.45)',
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
                 marginRight: '20px',
+                fontFamily: "'Archivo', sans-serif",
               }}
             >
               {tab}
@@ -170,10 +171,10 @@ const MonthlyCalendarChart: React.FC<MonthlyCalendarChartProps> = ({
       {total > 0 && (
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-            <span style={{ fontSize: '1.6rem', fontWeight: 900, letterSpacing: '-0.02em', color: '#ffffff', lineHeight: 1 }}>
+            <span style={{ fontSize: '1.6rem', fontWeight: 900, letterSpacing: '-0.02em', color: '#1a1a1a', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>
               {selectedTab === 'WEIGHTS' ? Math.round(total).toLocaleString() : total}
             </span>
-            <span style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.12em' }}>
+            <span style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(26,26,26,0.45)', letterSpacing: '0.12em' }}>
               {selectedTab === 'WEIGHTS' ? 'KG' : selectedTab === 'SCORE' ? 'SCORE' : 'KM'}
             </span>
           </div>
@@ -182,13 +183,14 @@ const MonthlyCalendarChart: React.FC<MonthlyCalendarChartProps> = ({
               width: '28px',
               height: '28px',
               borderRadius: '50%',
-              backgroundColor: '#000000',
+              backgroundColor: '#1a1a1a',
               color: '#ffffff',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontSize: '10px',
-              fontWeight: 'bold'
+              fontWeight: 'bold',
+              fontFamily: "'Archivo', sans-serif",
             }}>
               {count}
             </div>
@@ -213,9 +215,10 @@ const MonthlyCalendarChart: React.FC<MonthlyCalendarChartProps> = ({
                   justifyContent: 'center',
                   fontSize: '8px',
                   fontWeight: 'bold',
-                  border: isFuture ? '1px solid rgba(211,211,211,0.35)' : (cell.value ? 'none' : '1px solid #ffffff'),
-                  color: isFuture ? 'transparent' : (cell.value ? '#000000' : 'transparent'),
-                  backgroundColor: isFuture ? 'transparent' : (cell.value ? '#ffffff' : 'transparent')
+                  border: isFuture ? '1px solid rgba(211,211,211,0.35)' : (cell.value ? 'none' : '1px solid rgba(0,0,0,0.08)'),
+                  color: isFuture ? 'transparent' : (cell.value ? '#ffffff' : 'transparent'),
+                  backgroundColor: isFuture ? 'transparent' : (cell.value ? '#1a1a1a' : 'transparent'),
+                  fontFamily: "'Archivo', sans-serif",
                 }}>
                   {isFuture ? '' : (cell.value ? (selectedTab === 'WEIGHTS' ? `${Math.round(cell.value / 1000)}k` : cell.value) : '')}
                 </div>

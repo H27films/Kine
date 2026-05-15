@@ -13,7 +13,8 @@ interface WeeklyGroupData {
 
 const sectionLabelStyle: React.CSSProperties = {
   fontSize: '15px', fontWeight: 900, letterSpacing: '0.2em',
-  textTransform: 'uppercase', color: '#ffffff', marginBottom: '1.25rem',
+  textTransform: 'uppercase', color: '#1a1a1a', marginBottom: '1.25rem',
+  fontFamily: "'Archivo', sans-serif",
 };
 
 const WeeklyVolumeSection: React.FC = () => {
@@ -82,15 +83,15 @@ const WeeklyVolumeSection: React.FC = () => {
                 disabled={!canGoBack}
                 style={{ opacity: canGoBack ? 0.6 : 0.2, background: 'none', border: 'none', cursor: canGoBack ? 'pointer' : 'default', padding: 0 }}
               >
-                <ChevronLeft size={18} color="white" />
-              </button>
-              <button
-                onClick={() => setWeekIdx(i => i - 1)}
-                disabled={!canGoForward}
-                style={{ opacity: canGoForward ? 0.6 : 0.2, background: 'none', border: 'none', cursor: canGoForward ? 'pointer' : 'default', padding: 0 }}
-              >
-                <ChevronRight size={18} color="white" />
-              </button>
+                 <ChevronLeft size={18} color="#1a1a1a" />
+               </button>
+               <button
+                 onClick={() => setWeekIdx(i => i - 1)}
+                 disabled={!canGoForward}
+                 style={{ opacity: canGoForward ? 0.6 : 0.2, background: 'none', border: 'none', cursor: canGoForward ? 'pointer' : 'default', padding: 0 }}
+               >
+                 <ChevronRight size={18} color="#1a1a1a" />
+               </button>
             </div>
           )}
         </div>
@@ -99,9 +100,9 @@ const WeeklyVolumeSection: React.FC = () => {
           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
         >
           {showWeekPicker ? (
-            <span style={{ color: '#ffffff', fontWeight: 800, fontSize: '0.85rem' }}>{availableWeeks[weekIdx]}</span>
+            <span style={{ color: '#1a1a1a', fontWeight: 800, fontSize: '0.85rem', fontFamily: "'Archivo', sans-serif" }}>{availableWeeks[weekIdx]}</span>
           ) : (
-            <Calendar size={18} style={{ color: 'rgba(255,255,255,0.4)' }} />
+            <Calendar size={18} style={{ color: 'rgba(26,26,26,0.45)' }} />
           )}
         </button>
       </div>
@@ -112,18 +113,18 @@ const WeeklyVolumeSection: React.FC = () => {
             <div key={group}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '0.6rem', paddingLeft: '2px', paddingRight: '2px' }}>
                 <div>
-                  <span style={{ color: '#ffffff', fontWeight: 700, fontSize: '1rem', letterSpacing: '-0.01em', display: 'block' }}>{group}</span>
-                  <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.7rem', fontWeight: 400, marginTop: '1px', display: 'block' }}>
+                  <span style={{ color: '#1a1a1a', fontWeight: 700, fontSize: '1rem', letterSpacing: '-0.01em', display: 'block', fontFamily: "'Archivo', sans-serif" }}>{group}</span>
+                  <span style={{ color: 'rgba(26,26,26,0.45)', fontSize: '0.7rem', fontWeight: 400, marginTop: '1px', display: 'block', fontFamily: "'Archivo', sans-serif" }}>
                     {weekIdx === 0 ? 'Last week' : 'Previous'}: {Math.round(lastWeek).toLocaleString()}kg
                   </span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
-                  <span style={{ color: '#ffffff', fontWeight: 900, fontSize: '1.4rem', letterSpacing: '-0.02em', lineHeight: 1 }}>{Math.round(total).toLocaleString()}</span>
-                  <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>kg</span>
+                  <span style={{ color: '#1a1a1a', fontWeight: 900, fontSize: '1.4rem', letterSpacing: '-0.02em', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>{Math.round(total).toLocaleString()}</span>
+                  <span style={{ color: 'rgba(26,26,26,0.45)', fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: "'Archivo', sans-serif" }}>kg</span>
                 </div>
               </div>
-              <div style={{ height: '44px', width: '100%', backgroundColor: '#1f1f1f', borderRadius: '999px', overflow: 'hidden', padding: '5px' }}>
-                <div style={{ height: '100%', width: `${pct}%`, background: 'linear-gradient(90deg, #c6c6c7 0%, #ffffff 100%)', borderRadius: '999px', boxShadow: '0 0 14px rgba(255,255,255,0.25)', transition: 'width 0.6s cubic-bezier(0.4,0,0.2,1)' }} />
+              <div style={{ height: '44px', width: '100%', backgroundColor: 'rgba(26,26,26,0.1)', borderRadius: '999px', overflow: 'hidden', padding: '5px' }}>
+                <div style={{ height: '100%', width: `${pct}%`, background: '#1a1a1a', borderRadius: '999px', boxShadow: '0 8px 24px rgba(0,0,0,0.12)', transition: 'width 0.6s cubic-bezier(0.4,0,0.2,1)' }} />
               </div>
             </div>
           );

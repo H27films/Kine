@@ -15,10 +15,11 @@ const sectionLabelStyle: React.CSSProperties = {
   fontSize: '13px',
   fontWeight: 700,
   letterSpacing: '1.5px',
-  color: '#ffffff',
+  color: '#1a1a1a',
   lineHeight: 1,
   margin: 0,
   textTransform: 'uppercase',
+  fontFamily: "'Archivo', sans-serif",
 };
 
 const WeeklyWeightsChart: React.FC = () => {
@@ -98,18 +99,18 @@ const WeeklyWeightsChart: React.FC = () => {
   const avgExercises = bars.length > 0 ? Math.round(bars.reduce((s, b) => s + b.count, 0) / bars.length) : 0;
 
   return (
-    <div className="rounded-lg p-6 relative" style={{ backgroundColor: '#121212' }}>
+    <div className="rounded-lg p-6 relative" style={{ backgroundColor: '#f2f2f2', border: '1px solid rgba(0,0,0,0.08)', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <p style={{ ...sectionLabelStyle, marginBottom: 0 }}>7 WEEKS</p>
           <button onClick={onGoOlder} disabled={!canGoOlder} style={{ opacity: canGoOlder ? 0.55 : 0.2, background: 'none', border: 'none', cursor: canGoOlder ? 'pointer' : 'default', padding: 0, display: 'flex', alignItems: 'center' }}>
-            <ChevronLeft size={18} color="white" />
+            <ChevronLeft size={18} color="#1a1a1a" />
           </button>
           <button onClick={onGoNewer} disabled={!canGoNewer} style={{ opacity: canGoNewer ? 0.55 : 0.2, background: 'none', border: 'none', cursor: canGoNewer ? 'pointer' : 'default', padding: 0, display: 'flex', alignItems: 'center' }}>
-            <ChevronRight size={18} color="white" />
+            <ChevronRight size={18} color="#1a1a1a" />
           </button>
         </div>
-        <span style={{ fontSize: '0.85rem', fontWeight: 700, letterSpacing: '0.06em', color: '#ffffff', marginRight: '6px' }}>{weekRange}</span>
+        <span style={{ fontSize: '0.85rem', fontWeight: 700, letterSpacing: '0.06em', color: '#1a1a1a', marginRight: '6px' }}>{weekRange}</span>
       </div>
 
       <div className="flex items-baseline gap-1 mb-5">
@@ -117,8 +118,9 @@ const WeeklyWeightsChart: React.FC = () => {
           fontSize: '1.6rem',
           fontWeight: 900,
           letterSpacing: '-0.02em',
-          color: '#ffffff',
+          color: '#1a1a1a',
           lineHeight: 1,
+          fontFamily: "'Archivo', sans-serif",
         }}>
           {displayAvg}
         </span>
@@ -126,15 +128,15 @@ const WeeklyWeightsChart: React.FC = () => {
           <span style={{
             fontSize: '10px',
             fontWeight: 700,
-            color: 'rgba(255,255,255,0.4)',
+            color: 'rgba(26,26,26,0.45)',
             letterSpacing: '0.12em',
           }}>
             KG
           </span>
         )}
         <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', marginLeft: '8px' }}>
-          <span style={{ color: '#ffffff' }}> / {avgExercises}</span>
-          <span style={{ color: 'rgba(255,255,255,0.35)' }}> EX</span>
+          <span style={{ color: '#1a1a1a' }}> / {avgExercises}</span>
+          <span style={{ color: 'rgba(26,26,26,0.45)' }}> EX</span>
         </span>
       </div>
 
@@ -143,13 +145,14 @@ const WeeklyWeightsChart: React.FC = () => {
           const clampedVal = Math.min(Math.max(bar.total, yMin), yMax);
           const pct = bar.total > yMin ? Math.max((clampedVal - yMin) / (yMax - yMin), 0.04) : 0;
           const rawPct = yMax > yMin ? (bar.total - yMin) / (yMax - yMin) : 0;
-          const brightness = bar.total > yMin ? Math.round(80 + Math.max(rawPct, 0) * 175) : 0;
-          const barColor = bar.total > yMin ? `rgb(${brightness},${brightness},${brightness})` : 'rgba(255,255,255,0.05)';
+          // Dark scale: low values → light gray, high values → near-black
+          const brightness = bar.total > yMin ? Math.round(30 + Math.max(rawPct, 0) * 150) : 0;
+          const barColor = bar.total > yMin ? `rgb(${brightness},${brightness},${brightness})` : 'rgba(0,0,0,0.08)';
           const displayValue = bar.total > 0 ? `${Math.round(bar.total / 1000)}k` : '';
 
           return (
             <div key={bar.weekNumber} className="flex flex-col items-center h-full justify-end" style={{ flex: '1', maxWidth: '28px' }}>
-              <div style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.6)', marginBottom: '4px', height: '14px' }}>{displayValue}</div>
+              <div style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(26,26,26,0.45)', marginBottom: '4px', height: '14px', fontFamily: "'Archivo', sans-serif" }}>{displayValue}</div>
               <div className="w-full relative transition-all" style={{ height: `${pct * 100}%`, backgroundColor: barColor, borderRadius: '9999px 9999px 0 0', minHeight: bar.total > yMin ? '4px' : 0 }}>
                 {bar.count > 0 && (
                   <div style={{
@@ -164,23 +167,30 @@ const WeeklyWeightsChart: React.FC = () => {
                       width: '16px',
                       height: '16px',
                       borderRadius: '50%',
-                      backgroundColor: '#000000',
+                      backgroundColor: '#ffffff',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       fontSize: '10px',
                       fontWeight: 700,
-                      color: '#ffffff',
+                      color: '#1a1a1a',
                       lineHeight: 1,
+                      fontFamily: "'Archivo', sans-serif",
                     }}>
                       {bar.count}
                     </div>
                   </div>
                 )}
               </div>
-              <div style={{ fontSize: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#ffffff', marginTop: '8px' }}>{bar.weekNumber}</div>
+              <div style={{ fontSize: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#1a1a1a', marginTop: '8px', fontFamily: "'Archivo', sans-serif" }}>{bar.weekNumber}</div>
             </div>
           );
+        })}
+      </div>
+
+      <div className="absolute inset-0 pointer-events-none rounded-lg" style={{ opacity: 0.025, background: 'radial-gradient(circle at top right, #1a1a1a, transparent, transparent)' }} />
+    </div>
+  );
         })}
       </div>
 

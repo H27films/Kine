@@ -21,7 +21,8 @@ interface Props {
 
 const sectionLabelStyle: React.CSSProperties = {
   fontSize: '15px', fontWeight: 900, letterSpacing: '0.2em',
-  textTransform: 'uppercase', color: '#ffffff', marginBottom: '1.25rem',
+  textTransform: 'uppercase', color: '#1a1a1a', marginBottom: '1.25rem',
+  fontFamily: "'Archivo', sans-serif",
 };
 
 const RecentLogsSection: React.FC<Props> = ({ refreshKey }) => {
@@ -146,7 +147,7 @@ const RecentLogsSection: React.FC<Props> = ({ refreshKey }) => {
     <section>
       <div className="flex justify-between items-center mb-6">
         <p style={sectionLabelStyle}>Recent Logs</p>
-        <Clock size={15} style={{ color: 'rgba(255,255,255,0.5)', marginBottom: '1.25rem' }} />
+        <Clock size={15} style={{ color: 'rgba(26,26,26,0.45)', marginBottom: '1.25rem' }} />
       </div>
        <div className="space-y-3">
          {recentLogs.map((log, index) => {
@@ -159,32 +160,32 @@ const RecentLogsSection: React.FC<Props> = ({ refreshKey }) => {
            return (
              <>
                 {showDateSeparator && (
-                  <div key={`sep-${log.id}`} className="w-full h-[0.5px] bg-white my-2" />
+                   <div key={`sep-${log.id}`} className="w-full h-[0.5px] bg-[#1a1a1a] opacity-20 my-2" />
                 )}
-               <div key={log.id} className="rounded-lg overflow-hidden" style={{ backgroundColor: '#1b1b1b' }}>
-               {/* Collapsed / header row */}
-               <div
-                 className="flex items-center gap-4 p-4 cursor-pointer"
-                 onClick={() => {
-                   const expanding = !isExpanded;
-                   setExpandedLogId(expanding ? log.id : null);
-                   setDeleteConfirmId(null);
-                   if (expanding) initEditSets(log);
-                 }}
-               >
-                 <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#353535' }}>
-                   <Dumbbell size={16} color="white" />
-                 </div>
-                 <div className="flex-grow min-w-0">
-                   <p className="font-bold text-sm text-white truncate uppercase tracking-wide">
-                     {log.name}
-                   </p>
-                   {lastSet && (
-                     <p className="text-[10px] uppercase tracking-widest mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                       {log.setsData.length} Sets · {lastSet.r} Reps · {lastSet.w} kg
-                     </p>
-                   )}
-                 </div>
+               <div key={log.id} className="rounded-lg overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0.95) 100%)', boxShadow: '0 8px 24px rgba(0,0,0,0.12)', border: '1px solid rgba(0,0,0,0.08)' }}>
+                {/* Collapsed / header row */}
+                <div
+                  className="flex items-center gap-4 p-4 cursor-pointer"
+                  onClick={() => {
+                    const expanding = !isExpanded;
+                    setExpandedLogId(expanding ? log.id : null);
+                    setDeleteConfirmId(null);
+                    if (expanding) initEditSets(log);
+                  }}
+                >
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'rgba(0,0,0,0.04)' }}>
+                    <Dumbbell size={16} color="#1a1a1a" />
+                  </div>
+                  <div className="flex-grow min-w-0">
+                    <p className="font-bold text-sm text-[#1a1a1a] truncate uppercase tracking-wide">
+                      {log.name}
+                    </p>
+                    {lastSet && (
+                      <p className="text-[10px] uppercase tracking-widest mt-0.5" style={{ color: 'rgba(26,26,26,0.45)', fontFamily: "'Archivo', sans-serif" }}>
+                        {log.setsData.length} Sets · {lastSet.r} Reps · {lastSet.w} kg
+                      </p>
+                    )}
+                  </div>
                  {(() => {
                    const liveTotal = isExpanded
                      ? (editSets[log.id] || []).reduce((acc, s) => {
@@ -197,105 +198,105 @@ const RecentLogsSection: React.FC<Props> = ({ refreshKey }) => {
                      ? (log.pb === 'PB' && liveTotal >= log.weight)
                      : (log.pb === 'PB');
                    return (
-                     <>
-                       {isStillPB && (
-                         <div style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                           <span style={{ fontSize: '0.6rem', fontWeight: 900, color: '#000000', letterSpacing: '0.05em' }}>PB</span>
-                         </div>
-                       )}
-                       {displayWeight > 0 && (
-                         <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px', flexShrink: 0, marginLeft: 'auto', alignSelf: 'flex-start', marginTop: '2px' }}>
-                           <span style={{ color: '#ffffff', fontWeight: 900, fontSize: '1.15rem', letterSpacing: '-0.02em', lineHeight: 1 }}>{Math.round(displayWeight).toLocaleString()}</span>
-                           <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 700, fontSize: '0.65rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>KG</span>
-                         </div>
-                       )}
-                     </>
+                      <>
+                        {isStillPB && (
+                          <div style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <span style={{ fontSize: '0.6rem', fontWeight: 900, color: '#ffffff', letterSpacing: '0.05em' }}>PB</span>
+                          </div>
+                        )}
+                        {displayWeight > 0 && (
+                          <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px', flexShrink: 0, marginLeft: 'auto', alignSelf: 'flex-start', marginTop: '2px' }}>
+                            <span style={{ color: '#1a1a1a', fontWeight: 900, fontSize: '1.15rem', letterSpacing: '-0.02em', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>{Math.round(displayWeight).toLocaleString()}</span>
+                            <span style={{ color: 'rgba(26,26,26,0.45)', fontWeight: 700, fontSize: '0.65rem', letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: "'Archivo', sans-serif" }}>KG</span>
+                          </div>
+                        )}
+                      </>
                    );
                  })()}
                </div>
 
-              {/* Expanded section */}
-              {isExpanded && (
-                <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', padding: '12px 16px 16px' }}>
-                  {/* Column headers */}
-                  <div className="grid mb-2" style={{ gridTemplateColumns: '1.8rem 1fr 1fr 1fr', gap: '0.5rem' }}>
-                    <div />
-                    {['kg', 'reps', 'total'].map(h => (
-                      <p key={h} className="text-center text-[10px] font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.3)' }}>{h}</p>
-                    ))}
+               {/* Expanded section */}
+               {isExpanded && (
+                 <div style={{ borderTop: '1px solid rgba(0,0,0,0.08)', padding: '12px 16px 16px', background: 'rgba(255,255,255,0.65)', borderBottomLeftRadius: 14, borderBottomRightRadius: 14 }}>
+                   {/* Column headers */}
+                   <div className="grid mb-2" style={{ gridTemplateColumns: '1.8rem 1fr 1fr 1fr', gap: '0.5rem' }}>
+                     <div />
+                     {['kg', 'reps', 'total'].map(h => (
+                       <p key={h} className="text-center text-[10px] font-bold uppercase tracking-widest" style={{ color: 'rgba(26,26,26,0.45)', fontFamily: "'Archivo', sans-serif" }}>{h}</p>
+                     ))}
+                   </div>
+
+                    {/* Set rows — only show originally-logged (non-zero) sets */}
+                    {sets.map((s, idx) => {
+                      if ((log.allSets[idx]?.w || 0) === 0) return null;
+                      const w = parseFloat(s.w) || 0;
+                      const rowTotal = w * s.r * log.multiplier;
+                      const hasData = s.w !== '' && w > 0;
+                      const numColor = hasData ? '#1a1a1a' : 'rgba(0,0,0,0.25)';
+                     return (
+                       <div key={idx} className="grid items-center mb-2" style={{ gridTemplateColumns: '1.8rem 1fr 1fr 1fr', gap: '0.5rem' }}>
+                         <p className="font-black text-center" style={{ fontSize: '1rem', color: numColor, lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>{idx + 1}</p>
+
+                         <div className="flex items-center justify-between rounded-lg py-2 px-2" style={{ backgroundColor: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.08)' }}>
+                           <button onClick={() => adjustRecentWeight(log.id, idx, -1)} style={{ color: 'rgba(0,0,0,0.5)', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>−</button>
+                           <input
+                             type="number"
+                             inputMode="decimal"
+                             value={s.w}
+                             placeholder="—"
+                             onChange={e => setEditSets(prev => {
+                               const updated = [...(prev[log.id] || [])];
+                               updated[idx] = { ...updated[idx], w: e.target.value };
+                               return { ...prev, [log.id]: updated };
+                             })}
+                             style={{ background: 'transparent', border: 'none', outline: 'none', width: '100%', textAlign: 'center', fontSize: '0.875rem', fontWeight: 700, color: hasData ? '#1a1a1a' : 'rgba(0,0,0,0.25)', MozAppearance: 'textfield', fontFamily: "'Archivo', sans-serif" }}
+                           />
+                           <button onClick={() => adjustRecentWeight(log.id, idx, 1)} style={{ color: 'rgba(0,0,0,0.5)', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>+</button>
+                         </div>
+
+                         <div className="flex items-center justify-between rounded-lg py-2 px-2" style={{ backgroundColor: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.08)' }}>
+                           <button onClick={() => adjustRecentReps(log.id, idx, -1)} style={{ color: 'rgba(0,0,0,0.5)', lineHeight: 1 }}>−</button>
+                           <span className="font-bold" style={{ fontSize: '0.875rem', color: hasData ? '#1a1a1a' : 'rgba(0,0,0,0.25)', fontFamily: "'Archivo', sans-serif" }}>{s.r}</span>
+                           <button onClick={() => adjustRecentReps(log.id, idx, 1)} style={{ color: 'rgba(0,0,0,0.5)', lineHeight: 1 }}>+</button>
+                         </div>
+
+                         <p className="text-center font-bold" style={{ fontSize: '0.875rem', color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>{rowTotal > 0 ? rowTotal : ''}</p>
+                       </div>
+                     );
+                   })}
+
+                   {/* Save + Delete */}
+                   <div className="flex items-center gap-3 mt-4">
+                     <button
+                       onClick={(e) => { e.stopPropagation(); saveRecentLog(log.id); }}
+                       style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '1px', color: savingLogId === log.id ? 'rgba(0,0,0,0.3)' : '#1a1a1a', padding: '6px 14px', border: '1px solid rgba(0,0,0,0.08)', borderRadius: '6px', backgroundColor: 'rgba(0,0,0,0.06)', transition: 'all 0.15s' }}
+                     >
+                       {savingLogId === log.id ? 'SAVING…' : 'SAVE'}
+                     </button>
+                     <button
+                       onClick={(e) => { e.stopPropagation(); setDeleteConfirmId(log.id); }}
+                       style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 700, letterSpacing: '1px', color: 'rgba(220,38,38,0.7)', padding: '6px 0', background: 'none', border: 'none', cursor: 'pointer' }}
+                     >
+                       <X size={13} strokeWidth={2.5} />
+                       DELETE ENTRY
+                     </button>
+                   </div>
+
+                   {/* Delete confirm */}
+                   {isConfirming && (
+                     <div className="flex items-center gap-3 mt-3">
+                       <span style={{ fontSize: '11px', color: 'rgba(26,26,26,0.55)', flex: 1 }}>Delete this entry?</span>
+                       <button onClick={() => deleteLog(log.id)} style={{ fontSize: '11px', fontWeight: 700, color: '#dc2626', padding: '6px 14px', border: '1px solid rgba(220,38,38,0.4)', borderRadius: '6px', backgroundColor: 'rgba(220,38,38,0.1)' }}>
+                         Yes, Delete
+                       </button>
+                       <button onClick={() => setDeleteConfirmId(null)} style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(26,26,26,0.4)', padding: '6px 14px', border: '1px solid rgba(0,0,0,0.08)', borderRadius: '6px', background: 'rgba(0,0,0,0.06)', cursor: 'pointer' }}>
+                         Cancel
+                       </button>
+                     </div>
+                   )}
                   </div>
-
-                   {/* Set rows — only show originally-logged (non-zero) sets */}
-                   {sets.map((s, idx) => {
-                     if ((log.allSets[idx]?.w || 0) === 0) return null;
-                     const w = parseFloat(s.w) || 0;
-                     const rowTotal = w * s.r * log.multiplier;
-                     const hasData = s.w !== '' && w > 0;
-                     const numColor = hasData ? '#ffffff' : 'rgba(255,255,255,0.25)';
-                    return (
-                      <div key={idx} className="grid items-center mb-2" style={{ gridTemplateColumns: '1.8rem 1fr 1fr 1fr', gap: '0.5rem' }}>
-                        <p className="font-black text-center" style={{ fontSize: '1rem', color: numColor, lineHeight: 1 }}>{idx + 1}</p>
-
-                        <div className="flex items-center justify-between rounded-lg py-2 px-2" style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.07)' }}>
-                          <button onClick={() => adjustRecentWeight(log.id, idx, -1)} style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>−</button>
-                          <input
-                            type="number"
-                            inputMode="decimal"
-                            value={s.w}
-                            placeholder="—"
-                            onChange={e => setEditSets(prev => {
-                              const updated = [...(prev[log.id] || [])];
-                              updated[idx] = { ...updated[idx], w: e.target.value };
-                              return { ...prev, [log.id]: updated };
-                            })}
-                            style={{ background: 'transparent', border: 'none', outline: 'none', width: '100%', textAlign: 'center', fontSize: '0.875rem', fontWeight: 700, color: hasData ? '#ffffff' : 'rgba(255,255,255,0.3)', MozAppearance: 'textfield' }}
-                          />
-                          <button onClick={() => adjustRecentWeight(log.id, idx, 1)} style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>+</button>
-                        </div>
-
-                        <div className="flex items-center justify-between rounded-lg py-2 px-2" style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.07)' }}>
-                          <button onClick={() => adjustRecentReps(log.id, idx, -1)} style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}>−</button>
-                          <span className="font-bold" style={{ fontSize: '0.875rem', color: hasData ? '#ffffff' : 'rgba(255,255,255,0.3)' }}>{s.r}</span>
-                          <button onClick={() => adjustRecentReps(log.id, idx, 1)} style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}>+</button>
-                        </div>
-
-                        <p className="text-center font-bold" style={{ fontSize: '0.875rem', color: '#ffffff' }}>{rowTotal > 0 ? rowTotal : ''}</p>
-                      </div>
-                    );
-                  })}
-
-                  {/* Save + Delete */}
-                  <div className="flex items-center gap-3 mt-4">
-                    <button
-                      onClick={(e) => { e.stopPropagation(); saveRecentLog(log.id); }}
-                      style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '1px', color: savingLogId === log.id ? 'rgba(255,255,255,0.3)' : '#ffffff', padding: '6px 14px', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '6px', backgroundColor: 'rgba(255,255,255,0.06)' }}
-                    >
-                      {savingLogId === log.id ? 'SAVING…' : 'SAVE'}
-                    </button>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setDeleteConfirmId(log.id); }}
-                      style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 700, letterSpacing: '1px', color: 'rgba(255,80,80,0.7)', padding: '6px 0' }}
-                    >
-                      <X size={13} strokeWidth={2.5} />
-                      DELETE ENTRY
-                    </button>
-                  </div>
-
-                  {/* Delete confirm */}
-                  {isConfirming && (
-                    <div className="flex items-center gap-3 mt-3">
-                      <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.55)', flex: 1 }}>Delete this entry?</span>
-                      <button onClick={() => deleteLog(log.id)} style={{ fontSize: '11px', fontWeight: 700, color: '#ff4444', padding: '6px 14px', border: '1px solid rgba(255,68,68,0.4)', borderRadius: '6px', backgroundColor: 'rgba(255,68,68,0.1)' }}>
-                        Yes, Delete
-                      </button>
-                      <button onClick={() => setDeleteConfirmId(null)} style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.4)', padding: '6px 14px', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px' }}>
-                        Cancel
-                      </button>
-                    </div>
-                  )}
-                 </div>
-               )}
-             </div>
+                )}
+              </div>
              </>
            );
          })}

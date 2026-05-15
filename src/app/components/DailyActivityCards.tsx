@@ -136,9 +136,9 @@ const IconSVG: React.FC<{ iconKey: IconKey; color: string; size?: number }> = ({
 const Chip: React.FC<{ iconKey: IconKey; value: string }> = ({ iconKey, value }) => (
   <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
     <span style={{ display: 'flex', alignItems: 'center' }}>
-      <IconSVG iconKey={iconKey} color="rgba(255,255,255,0.4)" size={13} />
+      <IconSVG iconKey={iconKey} color="rgba(26,26,26,0.45)" size={13} />
     </span>
-    <span style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.6)' }}>{value}</span>
+    <span style={{ fontSize: '11px', fontWeight: 700, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>{value}</span>
   </div>
 );
 
@@ -161,12 +161,12 @@ const DayCard: React.FC<{ day: DayData }> = ({ day }) => {
     <div
       style={{
         minWidth: '172px',
-        backgroundColor: '#111111',
+        background: 'linear-gradient(135deg, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0.95) 100%)',
         borderRadius: '14px',
         padding: '16px',
         display: 'flex',
         flexDirection: 'column',
-        borderLeft: '2px solid rgba(255,255,255,0.7)',
+        borderLeft: '2px solid rgba(0,0,0,0.08)',
         flexShrink: 0,
         position: 'relative',
       }}
@@ -179,11 +179,11 @@ const DayCard: React.FC<{ day: DayData }> = ({ day }) => {
           fontSize: '1rem',
           fontWeight: 900,
           letterSpacing: '-0.04em',
-          color: '#ffffff',
+          color: '#1a1a1a',
           lineHeight: 1,
-
+          fontFamily: "'Archivo', sans-serif",
         }}>
-          <span style={{ color: 'rgba(255,255,255,0.25)', marginRight: '5px', fontWeight: 800 }}>SCORE</span> <span style={{ fontWeight: 800 }}>{day.totalScore}</span>
+          <span style={{ color: 'rgba(26,26,26,0.25)', marginRight: '5px', fontWeight: 800 }}>SCORE</span> <span style={{ fontWeight: 800 }}>{day.totalScore}</span>
         </div>
       )}
       {/* Row 1: Day label + calories */}
@@ -194,21 +194,22 @@ const DayCard: React.FC<{ day: DayData }> = ({ day }) => {
             fontWeight: 800,
             letterSpacing: '0.08em',
             textTransform: 'uppercase',
-            color: isToday ? '#ffffff' : 'rgba(255,255,255,0.55)',
+            fontFamily: "'Archivo', sans-serif",
+            color: isToday ? '#1a1a1a' : 'rgba(26,26,26,0.45)',
           }}>
             {label}
           </div>
           {/* Always show date */}
-          <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', marginTop: '2px' }}>
+          <div style={{ fontSize: '10px', color: 'rgba(26,26,26,0.3)', marginTop: '2px', fontFamily: "'Archivo', sans-serif" }}>
             {formatDisplayDate(day.date)}
           </div>
         </div>
         {hasCalories && (
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '13px', fontWeight: 700, color: 'rgba(255,255,255,0.9)', lineHeight: 1 }}>
+            <div style={{ fontSize: '13px', fontWeight: 700, color: '#1a1a1a', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>
               {day.calories.toLocaleString()}
             </div>
-            <div style={{ fontSize: '9px', fontWeight: 600, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.06em', marginTop: '2px' }}>
+            <div style={{ fontSize: '9px', fontWeight: 600, color: 'rgba(26,26,26,0.45)', letterSpacing: '0.06em', marginTop: '2px', fontFamily: "'Archivo', sans-serif" }}>
               KCAL
             </div>
           </div>
@@ -220,10 +221,10 @@ const DayCard: React.FC<{ day: DayData }> = ({ day }) => {
         {hasCardio && (
           <>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-              <span style={{ fontSize: '2.8rem', fontWeight: 900, letterSpacing: '-0.04em', color: '#ffffff', lineHeight: 1 }}>
+              <span style={{ fontSize: '2.8rem', fontWeight: 900, letterSpacing: '-0.04em', color: '#1a1a1a', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>
                 {totalKm.toFixed(1)}
               </span>
-              <span style={{ fontSize: '13px', fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.06em' }}>
+              <span style={{ fontSize: '13px', fontWeight: 700, color: 'rgba(26,26,26,0.45)', letterSpacing: '0.06em', fontFamily: "'Archivo', sans-serif" }}>
                 KM
               </span>
             </div>
@@ -252,10 +253,10 @@ const DayCard: React.FC<{ day: DayData }> = ({ day }) => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {day.totalWeightKg > 0 && (
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-                <span style={{ fontSize: '1.5rem', fontWeight: 900, letterSpacing: '-0.03em', color: 'rgba(255,255,255,0.85)', lineHeight: 1 }}>
+                <span style={{ fontSize: '1.5rem', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>
                   {fmtWeightFull(day.totalWeightKg)}
                 </span>
-                <span style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.06em' }}>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(26,26,26,0.45)', letterSpacing: '0.06em', fontFamily: "'Archivo', sans-serif" }}>
                   KG
                 </span>
               </div>
@@ -264,8 +265,8 @@ const DayCard: React.FC<{ day: DayData }> = ({ day }) => {
               {day.muscleGroups.map(g => (
                 <span key={g} style={{
                   fontSize: '10px', fontWeight: 700, letterSpacing: '0.04em',
-                  color: 'rgba(255,255,255,0.7)', backgroundColor: 'rgba(255,255,255,0.08)',
-                  borderRadius: '6px', padding: '3px 8px',
+                  color: '#1a1a1a', backgroundColor: 'rgba(0,0,0,0.06)',
+                  borderRadius: '6px', padding: '3px 8px', fontFamily: "'Archivo', sans-serif",
                 }}>
                   {g}
                 </span>
@@ -371,8 +372,9 @@ export const DailyActivityCards: React.FC = () => {
         fontWeight: 800,
         letterSpacing: '-0.03em',
         textTransform: 'uppercase',
-        color: '#ffffff',
+        color: '#1a1a1a',
         marginBottom: '1.25rem',
+        fontFamily: "'Archivo', sans-serif",
       }}>
         Daily
       </div>

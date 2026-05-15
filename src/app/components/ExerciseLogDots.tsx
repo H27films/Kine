@@ -115,10 +115,10 @@ const ExerciseLogDots: React.FC<Props> = ({ exercises, saveSuccess }) => {
             width: 32,
             height: 32,
             borderRadius: '50%',
-            backgroundColor: 'white',
+            backgroundColor: '#1a1a1a',
             flexShrink: 0,
             cursor: 'pointer',
-            boxShadow: '0 0 12px rgba(255,255,255,0.5)',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
           }}
         />
 
@@ -128,10 +128,11 @@ const ExerciseLogDots: React.FC<Props> = ({ exercises, saveSuccess }) => {
             style={{
               fontSize: 10,
               fontWeight: 700,
-              color: 'rgba(255,255,255,0.45)',
+              color: 'rgba(26,26,26,0.45)',
               letterSpacing: '0.25em',
               textTransform: 'uppercase',
               marginBottom: 4,
+              fontFamily: "'Archivo', sans-serif",
             }}
           >
             {ex.exercise_name?.toUpperCase()}
@@ -166,23 +167,26 @@ const ExerciseLogDots: React.FC<Props> = ({ exercises, saveSuccess }) => {
                   style={{
                     fontSize: 24,
                     fontWeight: 900,
-                    color: '#ffffff',
+                    color: '#1a1a1a',
                     letterSpacing: '-0.04em',
-                    background: 'transparent',
+                    background: 'rgba(0,0,0,0.04)',
+                    borderRadius: 8,
+                    padding: '4px 8px',
                     border: 'none',
                     outline: 'none',
                     width: '5ch',
-                    padding: 0,
                     WebkitAppearance: 'none',
                     MozAppearance: 'textfield',
+                    fontFamily: "'Archivo', sans-serif",
                   } as React.CSSProperties}
                 />
                 <span
                   style={{
                     fontSize: 11,
                     fontWeight: 700,
-                    color: 'rgba(255,255,255,0.45)',
+                    color: 'rgba(26,26,26,0.45)',
                     letterSpacing: '0.15em',
+                    fontFamily: "'Archivo', sans-serif",
                   }}
                 >
                   KM
@@ -195,9 +199,10 @@ const ExerciseLogDots: React.FC<Props> = ({ exercises, saveSuccess }) => {
             <div
               style={{
                 fontSize: 10,
-                color: 'rgba(255,255,255,0.35)',
+                color: 'rgba(26,26,26,0.35)',
                 marginTop: 3,
                 letterSpacing: '0.1em',
+                fontFamily: "'Archivo', sans-serif",
               }}
             >
               TOTAL {total.toFixed(1)} KM
@@ -255,6 +260,7 @@ const ExerciseLogDots: React.FC<Props> = ({ exercises, saveSuccess }) => {
                       letterSpacing: '0.15em',
                       color: '#ffffff',
                       lineHeight: 1,
+                      fontFamily: "'Archivo', sans-serif",
                     }}
                   >
                     {entry.sessions.length}
@@ -265,8 +271,8 @@ const ExerciseLogDots: React.FC<Props> = ({ exercises, saveSuccess }) => {
                     width: 12,
                     height: 12,
                     borderRadius: '50%',
-                    backgroundColor: 'white',
-                    boxShadow: '0 0 8px rgba(255,255,255,0.8)',
+                    backgroundColor: '#1a1a1a',
+                    boxShadow: '0 0 8px rgba(0,0,0,0.2)',
                   }}
                 />
               </div>

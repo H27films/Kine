@@ -104,8 +104,8 @@ const ExerciseIconBar: React.FC<Props> = ({ exercises, selectedExercise, onSelec
           e.exercise_name?.toLowerCase().includes(MATCH_KEYWORDS[key])
         );
         const isSelected = selectedKey === key;
-        const color = isSelected ? '#000000' : '#ffffff';
-        const bg = isSelected ? '#ffffff' : 'rgba(255,255,255,0.18)';
+        const color = isSelected ? '#ffffff' : '#1a1a1a';
+        const bg = isSelected ? '#1a1a1a' : 'rgba(0,0,0,0.06)';
         return (
           <button
             key={key}

@@ -61,7 +61,7 @@ const ProgressRing: React.FC<ProgressRingProps> = ({ label, value, pct }) => {
             cy={size / 2}
             r={radius}
             fill="none"
-            stroke="rgba(255,255,255,0.08)"
+            stroke="rgba(0,0,0,0.08)"
             strokeWidth={strokeWidth}
           />
 
@@ -72,7 +72,7 @@ const ProgressRing: React.FC<ProgressRingProps> = ({ label, value, pct }) => {
               cy={size / 2}
               r={radius}
               fill="none"
-              stroke="rgba(200,220,255,0.95)"
+              stroke="#1a1a1a"
               strokeWidth={strokeWidth}
               strokeDasharray={circumference}
               strokeDashoffset={offset}
@@ -97,11 +97,11 @@ const ProgressRing: React.FC<ProgressRingProps> = ({ label, value, pct }) => {
         >
           <div
             style={{
-              fontFamily: "'Space Grotesk', sans-serif",
+              fontFamily: "'Archivo', sans-serif",
               fontSize: '9px',
               fontWeight: 800,
               letterSpacing: '1.5px',
-              color: 'rgba(255,255,255,0.75)',
+              color: '#1a1a1a',
               textTransform: 'uppercase',
               lineHeight: 1,
             }}
@@ -110,10 +110,10 @@ const ProgressRing: React.FC<ProgressRingProps> = ({ label, value, pct }) => {
           </div>
           <div
             style={{
-              fontFamily: "'Space Grotesk', sans-serif",
+              fontFamily: "'Archivo', sans-serif",
               fontSize: '11px',
               fontWeight: 700,
-              color: 'rgba(255,255,255,0.6)',
+              color: 'rgba(26,26,26,0.45)',
               lineHeight: 1,
             }}
           >
@@ -122,10 +122,10 @@ const ProgressRing: React.FC<ProgressRingProps> = ({ label, value, pct }) => {
         </div>
       </div>
 
-      {/* Total value below ring — number bright white, unit grey */}
+      {/* Total value below ring */}
       <div
         style={{
-          fontFamily: "'Space Grotesk', sans-serif",
+          fontFamily: "'Archivo', sans-serif",
           fontSize: '13px',
           fontWeight: 700,
           letterSpacing: '0.5px',
@@ -133,9 +133,9 @@ const ProgressRing: React.FC<ProgressRingProps> = ({ label, value, pct }) => {
           lineHeight: 1,
         }}
       >
-        <span style={{ color: 'rgba(255,255,255,0.95)', fontSize: '13px' }}>{numericPart}</span>
+        <span style={{ color: '#1a1a1a', fontSize: '13px' }}>{numericPart}</span>
         {hasUnit && (
-          <span style={{ color: 'rgba(255,255,255,0.4)', marginLeft: 2, fontSize: '9px' }}>{unitPart}</span>
+          <span style={{ color: 'rgba(26,26,26,0.45)', marginLeft: 2, fontSize: '9px' }}>{unitPart}</span>
         )}
       </div>
     </div>
@@ -217,8 +217,12 @@ export const WeeklySummaryBar: React.FC = () => {
         boxSizing: 'border-box',
         paddingTop: '10px',
         paddingBottom: '10px',
-        paddingLeft: 0,
-        paddingRight: 0,
+        paddingLeft: '16px',
+        paddingRight: '16px',
+        background: 'linear-gradient(135deg, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0.95) 100%)',
+        borderRadius: '12px',
+        boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+        border: '1px solid rgba(0,0,0,0.08)',
       }}
     >
       <ProgressRing

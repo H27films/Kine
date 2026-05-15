@@ -6,16 +6,16 @@ export const CARDIO_DISPLAY: Record<string, { label: string; icon: React.ReactNo
     label: 'Run',
     icon: (
       <svg width="18" height="18" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="25" y="18" width="35" height="3" rx="1.5" fill="white"/>
-        <rect x="15" y="28" width="25" height="3" rx="1.5" fill="white"/>
-        <rect x="5" y="38" width="30" height="3" rx="1.5" fill="white"/>
-        <rect x="20" y="48" width="25" height="3" rx="1.5" fill="white"/>
-        <rect x="15" y="58" width="25" height="3" rx="1.5" fill="white"/>
-        <circle cx="72" cy="22" r="6" fill="white"/>
-        <path d="M48 38L65 28L75 35L85 45" stroke="white" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M65 28L55 45L40 38" stroke="white" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M55 45L65 65L70 85" stroke="white" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M55 45L45 55L22 62" stroke="white" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
+        <rect x="25" y="18" width="35" height="3" rx="1.5" fill="#1a1a1a"/>
+        <rect x="15" y="28" width="25" height="3" rx="1.5" fill="#1a1a1a"/>
+        <rect x="5" y="38" width="30" height="3" rx="1.5" fill="#1a1a1a"/>
+        <rect x="20" y="48" width="25" height="3" rx="1.5" fill="#1a1a1a"/>
+        <rect x="15" y="58" width="25" height="3" rx="1.5" fill="#1a1a1a"/>
+        <circle cx="72" cy="22" r="6" fill="#1a1a1a"/>
+        <path d="M48 38L65 28L75 35L85 45" stroke="#1a1a1a" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M65 28L55 45L40 38"        stroke="#1a1a1a" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M55 45L65 65L70 85"        stroke="#1a1a1a" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M55 45L45 55L22 62"        stroke="#1a1a1a" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
     ),
   },
@@ -23,11 +23,11 @@ export const CARDIO_DISPLAY: Record<string, { label: string; icon: React.ReactNo
     label: 'Row',
     icon: (
       <svg width="18" height="18" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="50" cy="25" r="5" fill="white"/>
-        <path d="M50 30L45 50L55 55L65 45" stroke="white" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M45 50L40 60H55" stroke="white" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M65 45L75 45V35" stroke="white" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M30 65H80" stroke="white" strokeWidth="5" strokeLinecap="round"/>
+        <circle cx="50" cy="25" r="5" fill="#1a1a1a"/>
+        <path d="M50 30L45 50L55 55L65 45" stroke="#1a1a1a" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M45 50L40 60H55"          stroke="#1a1a1a" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M65 45L75 45V35"          stroke="#1a1a1a" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M30 65H80"                stroke="#1a1a1a" strokeWidth="5" strokeLinecap="round"/>
       </svg>
     ),
   },
@@ -35,11 +35,11 @@ export const CARDIO_DISPLAY: Record<string, { label: string; icon: React.ReactNo
     label: 'Cycle',
     icon: (
       <svg width="18" height="18" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="25" cy="70" r="15" stroke="white" strokeWidth="5" fill="none"/>
-        <circle cx="75" cy="70" r="15" stroke="white" strokeWidth="5" fill="none"/>
-        <path d="M25 70L45 45H65L75 70" stroke="white" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M45 45L55 30H65" stroke="white" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
-        <circle cx="55" cy="25" r="4" fill="white"/>
+        <circle cx="25" cy="70" r="15" stroke="#1a1a1a" strokeWidth="5" fill="none"/>
+        <circle cx="75" cy="70" r="15" stroke="#1a1a1a" strokeWidth="5" fill="none"/>
+        <path d="M25 70L45 45H65L75 70" stroke="#1a1a1a" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M45 45L55 30H65"       stroke="#1a1a1a" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
+        <circle cx="55" cy="25" r="4" fill="#1a1a1a"/>
       </svg>
     ),
   },
@@ -47,16 +47,16 @@ export const CARDIO_DISPLAY: Record<string, { label: string; icon: React.ReactNo
     label: 'Walk',
     icon: (
       <svg width="18" height="18" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M40 70C40 80 30 85 25 80C20 75 25 60 30 50C35 40 45 40 45 50C45 60 40 60 40 70Z" fill="white"/>
-        <circle cx="25" cy="40" r="3" fill="white"/>
-        <circle cx="32" cy="35" r="3" fill="white"/>
-        <circle cx="40" cy="35" r="3" fill="white"/>
-        <circle cx="48" cy="40" r="3" fill="white"/>
-        <path d="M60 70C60 80 70 85 75 80C80 75 75 60 70 50C65 40 55 40 55 50C55 60 60 60 60 70Z" fill="white"/>
-        <circle cx="75" cy="40" r="3" fill="white"/>
-        <circle cx="68" cy="35" r="3" fill="white"/>
-        <circle cx="60" cy="35" r="3" fill="white"/>
-        <circle cx="52" cy="40" r="3" fill="white"/>
+        <path d="M40 70C40 80 30 85 25 80C20 75 25 60 30 50C35 40 45 40 45 50C45 60 40 60 40 70Z" fill="#1a1a1a"/>
+        <circle cx="25" cy="40" r="3" fill="#1a1a1a"/>
+        <circle cx="32" cy="35" r="3" fill="#1a1a1a"/>
+        <circle cx="40" cy="35" r="3" fill="#1a1a1a"/>
+        <circle cx="48" cy="40" r="3" fill="#1a1a1a"/>
+        <path d="M60 70C60 80 70 85 75 80C80 75 75 60 70 50C65 40 55 40 55 50C55 60 60 60 60 70Z" fill="#1a1a1a"/>
+        <circle cx="75" cy="40" r="3" fill="#1a1a1a"/>
+        <circle cx="68" cy="35" r="3" fill="#1a1a1a"/>
+        <circle cx="60" cy="35" r="3" fill="#1a1a1a"/>
+        <circle cx="52" cy="40" r="3" fill="#1a1a1a"/>
       </svg>
     ),
   },
@@ -64,16 +64,16 @@ export const CARDIO_DISPLAY: Record<string, { label: string; icon: React.ReactNo
     label: 'Cross-Trainer',
     icon: (
       <svg width="18" height="18" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="20" y="75" width="50" height="8" fill="white"/>
-        <rect x="35" y="70" width="35" height="5" fill="white"/>
-        <rect x="56" y="65" width="14" height="5" fill="white"/>
-        <path d="M62 65V45L68 40" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-        <circle cx="47" cy="23" r="6" fill="white"/>
-        <path d="M47 28L40 45" stroke="white" strokeWidth="9" strokeLinecap="round"/>
-        <path d="M47 30L55 38L60 38" stroke="white" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M47 30L35 35L28 42" stroke="white" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M40 45L45 55L52 65" stroke="white" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M40 45L35 60L28 70" stroke="white" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round"/>
+        <rect x="20" y="75" width="50" height="8" fill="#1a1a1a"/>
+        <rect x="35" y="70" width="35" height="5" fill="#1a1a1a"/>
+        <rect x="56" y="65" width="14" height="5" fill="#1a1a1a"/>
+        <path d="M62 65V45L68 40" stroke="#1a1a1a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+        <circle cx="47" cy="23" r="6" fill="#1a1a1a"/>
+        <path d="M47 28L40 45"    stroke="#1a1a1a" strokeWidth="9" strokeLinecap="round"/>
+        <path d="M47 30L55 38L60 38" stroke="#1a1a1a" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M47 30L35 35L28 42" stroke="#1a1a1a" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M40 45L45 55L52 65" stroke="#1a1a1a" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M40 45L35 60L28 70" stroke="#1a1a1a" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
     ),
   },
@@ -126,14 +126,15 @@ const CardioChartSection: React.FC<CardioChartSectionProps> = ({
               style={{ opacity: selectedActivity && !isSelected ? 0.3 : 1 }}
               onClick={() => setSelectedActivity(isSelected ? null : key)}
             >
-              <div style={{ color: 'rgba(255,255,255,0.85)' }}>{display.icon}</div>
+              <div style={{ color: '#1a1a1a' }}>{display.icon}</div>
               <div
                 style={{
                   fontSize: '11px',
                   fontWeight: 700,
                   letterSpacing: '0.5px',
-                  color: '#ffffff',
+                  color: '#1a1a1a',
                   whiteSpace: 'nowrap',
+                  fontFamily: "'Archivo', sans-serif",
                 }}
               >
                 {display.label}{hasData ? ` ${totalKm}km` : ''}
@@ -145,14 +146,14 @@ const CardioChartSection: React.FC<CardioChartSectionProps> = ({
 
       {/* Calories progress bar */}
       <div style={{ marginTop: '14px' }}>
-        <div style={{ height: todayCalories > 0 ? '32px' : '16px', width: '100%', backgroundColor: '#1a1a1a', borderRadius: '999px', overflow: 'hidden', padding: todayCalories > 0 ? '4px' : '2px' }}>
+        <div style={{ height: todayCalories > 0 ? '32px' : '16px', width: '100%', backgroundColor: 'rgba(26,26,26,0.1)', borderRadius: '999px', overflow: 'hidden', padding: todayCalories > 0 ? '4px' : '2px' }}>
           <div
             style={{
               height: '100%',
               width: todayCalories > 0 ? `${Math.min((todayCalories / 1500) * 100, 100)}%` : '0%',
-              background: todayCalories > 0 ? 'linear-gradient(90deg, #c6c6c7 0%, #ffffff 100%)' : 'transparent',
+              background: '#1a1a1a',
               borderRadius: '999px',
-              boxShadow: todayCalories > 0 ? '0 0 14px rgba(255,255,255,0.25)' : 'none',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
               transition: 'all 0.6s cubic-bezier(0.4,0,0.2,1)',
               display: 'flex',
               alignItems: 'center',
@@ -161,7 +162,7 @@ const CardioChartSection: React.FC<CardioChartSectionProps> = ({
             }}
           >
             {todayCalories > 0 && (
-              <span style={{ fontSize: '10px', fontWeight: 800, color: '#1a1a1a', whiteSpace: 'nowrap', letterSpacing: '0.5px' }}>
+              <span style={{ fontSize: '10px', fontWeight: 800, color: '#ffffff', whiteSpace: 'nowrap', letterSpacing: '0.5px', fontFamily: "'Archivo', sans-serif" }}>
                 {todayCalories.toLocaleString()} kcal
               </span>
             )}
@@ -252,27 +253,27 @@ const CardioChartSection: React.FC<CardioChartSectionProps> = ({
                   <feGaussianBlur stdDeviation="3" />
                 </filter>
                 <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
-                  <feDropShadow dx="1" dy="1" stdDeviation="1" flood-color="rgba(255,255,255,0.5)" />
+                  <feDropShadow dx="1" dy="1" stdDeviation="1" flood-color="rgba(0,0,0,0.15)" />
                 </filter>
                 <filter id="dotBlur" x="-100%" y="-100%" width="300%" height="300%">
                   <feGaussianBlur stdDeviation="2.5" />
                 </filter>
                 <linearGradient id="fadeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="white" stopOpacity="0.15" />
-                  <stop offset="100%" stopColor="white" stopOpacity="0.075" />
+                  <stop offset="0%" stopColor="#1a1a1a" stopOpacity="0.15" />
+                  <stop offset="100%" stopColor="#1a1a1a" stopOpacity="0.075" />
                 </linearGradient>
                 <linearGradient id="dropLineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="white" stopOpacity="1" />
-                  <stop offset="70%" stopColor="white" stopOpacity="0.4" />
-                  <stop offset="100%" stopColor="white" stopOpacity="0.15" />
+                  <stop offset="0%" stopColor="#1a1a1a" stopOpacity="1" />
+                  <stop offset="70%" stopColor="#1a1a1a" stopOpacity="0.4" />
+                  <stop offset="100%" stopColor="#1a1a1a" stopOpacity="0.15" />
                 </linearGradient>
               </defs>
 
               {solidPath && (
-                <path d={solidPath} fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d={solidPath} fill="none" stroke="rgba(0,0,0,0.03)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               )}
               {fadedPath && (
-                <path d={fadedPath} fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d={fadedPath} fill="none" stroke="rgba(0,0,0,0.03)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               )}
 
               {/* Subtle vertical droplines continuously along the entire curve */}
@@ -315,7 +316,7 @@ const CardioChartSection: React.FC<CardioChartSectionProps> = ({
                       y1={yStart}
                       x2={x}
                       y2={yEnd}
-                      stroke={`rgba(255,255,255,${opacity.toFixed(2)})`}
+                      stroke={`rgba(0,0,0,${opacity.toFixed(2)})`}
                       strokeWidth="1.2"
                     />
                   );
@@ -331,11 +332,11 @@ const CardioChartSection: React.FC<CardioChartSectionProps> = ({
                 const dotRadius = 2 + sizeRatio * 2; // 2px to 4px
                 return (
                   <g key={p.i}>
-                    {/* Main white dropline */}
-                    <line x1={p.x} y1={p.y} x2={p.x} y2={padTop + chartH} stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" />
-                    <circle cx={p.x} cy={p.y} r={glowRadius} fill="rgba(255,255,255,0.18)" filter="url(#dotBlur)" />
-                    <circle cx={p.x} cy={p.y} r={dotRadius} fill="white" />
-                    <text x={p.x} y={p.y - 9} textAnchor="middle" fill="rgba(255,255,255,0.70)" fontSize="7" fontWeight="700">
+                    {/* Main dark dropline */}
+                    <line x1={p.x} y1={p.y} x2={p.x} y2={padTop + chartH} stroke="#1a1a1a" strokeWidth="1.5" strokeLinecap="round" />
+                    <circle cx={p.x} cy={p.y} r={glowRadius} fill="rgba(0,0,0,0.18)" filter="url(#dotBlur)" />
+                    <circle cx={p.x} cy={p.y} r={dotRadius} fill="#1a1a1a" />
+                    <text x={p.x} y={p.y - 9} textAnchor="middle" fill="#ffffff" fontSize="7" fontWeight="700" fontFamily="'Archivo', sans-serif">
                       {p.val.toFixed(1)}
                     </text>
                   </g>
@@ -343,7 +344,7 @@ const CardioChartSection: React.FC<CardioChartSectionProps> = ({
               })}
 
               {sparkData.map((_, k) => (
-                <text key={k} x={padLeft + (k / 6) * chartW} y={VH + 12} textAnchor="middle" fill="white" fontSize="7" fontWeight="700">
+                <text key={k} x={padLeft + (k / 6) * chartW} y={VH + 12} textAnchor="middle" fill="#1a1a1a" fontSize="7" fontWeight="700" fontFamily="'Archivo', sans-serif">
                   {sparkDays[k]}
                 </text>
               ))}

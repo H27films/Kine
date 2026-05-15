@@ -224,12 +224,13 @@ export const CardioTypeChart: React.FC = () => {
                 fontWeight: 700,
                 textTransform: 'uppercase',
                 letterSpacing: '1.5px',
-                color: viewMode === mode ? '#ffffff' : 'rgba(255,255,255,0.28)',
+                color: viewMode === mode ? '#1a1a1a' : 'rgba(26,26,26,0.35)',
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
                 transition: 'all 0.15s',
                 padding: 0,
+                fontFamily: "'Archivo', sans-serif",
               }}
             >
               {mode === 'weekly' ? 'Week' : 'Month'}
@@ -241,24 +242,24 @@ export const CardioTypeChart: React.FC = () => {
               disabled={!canGoBack}
               style={{ opacity: canGoBack ? 0.55 : 0.2, background: 'none', border: 'none', cursor: canGoBack ? 'pointer' : 'default', padding: 0, display: 'flex', alignItems: 'center' }}
             >
-              <ChevronLeft size={18} color="white" />
+              <ChevronLeft size={18} color="#1a1a1a" />
             </button>
             <button
               onClick={onForward}
               disabled={!canGoForward}
               style={{ opacity: canGoForward ? 0.55 : 0.2, background: 'none', border: 'none', cursor: canGoForward ? 'pointer' : 'default', padding: 0, display: 'flex', alignItems: 'center' }}
             >
-              <ChevronRight size={18} color="white" />
+              <ChevronRight size={18} color="#1a1a1a" />
             </button>
           </div>
         </div>
-        <span style={{ fontSize: '0.95rem', fontWeight: 700, letterSpacing: '0.06em', color: '#ffffff', marginRight: '6px' }}>
+        <span style={{ fontSize: '0.95rem', fontWeight: 700, letterSpacing: '0.06em', color: '#1a1a1a', marginRight: '6px', fontFamily: "'Archivo', sans-serif" }}>
           {viewMode === 'weekly' ? currentWeekNum : monthBounds.label}
         </span>
       </div>
 
       {/* Chart box */}
-      <div className="rounded-lg p-5" style={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff' }}>
+      <div className="rounded-lg p-5" style={{ backgroundColor: '#f2f2f2', borderLeft: '2px solid rgba(0,0,0,0.08)' }}>
 
         {/* Top row: type selector + count */}
         <div className="flex items-center justify-between mb-3">
@@ -272,11 +273,12 @@ export const CardioTypeChart: React.FC = () => {
                 fontWeight: 700,
                 textTransform: 'uppercase',
                 letterSpacing: '1.5px',
-                color: '#ffffff',
+                color: '#1a1a1a',
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
                 padding: 0,
+                fontFamily: "'Archivo', sans-serif",
               }}
             >
               {TYPE_LABELS[selectedType]}
@@ -286,11 +288,11 @@ export const CardioTypeChart: React.FC = () => {
                 position: 'absolute',
                 top: 'calc(100% + 8px)',
                 left: 0,
-                backgroundColor: '#1c1c1c',
+                backgroundColor: 'rgba(0,0,0,0.04)',
                 borderRadius: 8,
                 overflow: 'hidden',
                 zIndex: 50,
-                boxShadow: '0 16px 40px rgba(0,0,0,0.85)',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
                 minWidth: 155,
               }}>
                 {CARDIO_TYPES.map(type => (
@@ -302,11 +304,12 @@ export const CardioTypeChart: React.FC = () => {
                       cursor: 'pointer',
                       fontSize: '11px',
                       fontWeight: selectedType === type ? 700 : 400,
-                      color: selectedType === type ? '#ffffff' : 'rgba(255,255,255,0.45)',
-                      backgroundColor: selectedType === type ? 'rgba(255,255,255,0.07)' : 'transparent',
+                      color: selectedType === type ? '#1a1a1a' : 'rgba(26,26,26,0.45)',
+                      backgroundColor: selectedType === type ? 'rgba(0,0,0,0.06)' : 'transparent',
                       letterSpacing: '0.8px',
                       textTransform: 'uppercase',
-                      borderBottom: '1px solid rgba(255,255,255,0.06)',
+                      borderBottom: '1px solid rgba(0,0,0,0.08)',
+                      fontFamily: "'Archivo', sans-serif",
                     }}
                   >
                     {TYPE_LABELS[type]}
@@ -322,12 +325,12 @@ export const CardioTypeChart: React.FC = () => {
               width: '20px',
               height: '20px',
               borderRadius: '50%',
-              backgroundColor: '#ffffff',
+              backgroundColor: '#1a1a1a',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-              <span style={{ fontSize: '10px', fontWeight: 800, color: '#000000', lineHeight: 1 }}>
+              <span style={{ fontSize: '10px', fontWeight: 800, color: '#ffffff', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>
                 {viewMode === 'weekly' ? weeklyCount : monthlyCount}
               </span>
             </div>
@@ -336,10 +339,10 @@ export const CardioTypeChart: React.FC = () => {
 
         {/* Total only */}
         <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '20px' }}>
-          <span style={{ fontSize: '1.6rem', fontWeight: 900, letterSpacing: '-0.02em', color: '#ffffff', lineHeight: 1 }}>
+          <span style={{ fontSize: '1.6rem', fontWeight: 900, letterSpacing: '-0.02em', color: '#1a1a1a', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>
             {total}
           </span>
-          <span style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.12em' }}>KM</span>
+          <span style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(26,26,26,0.45)', letterSpacing: '0.12em', fontFamily: "'Archivo', sans-serif" }}>KM</span>
         </div>
 
         {/* Bar chart */}
@@ -359,7 +362,7 @@ export const CardioTypeChart: React.FC = () => {
                   top: 0,
                   bottom: 0,
                   width: '1px',
-                  backgroundColor: 'rgba(255,255,255,0.08)',
+                  backgroundColor: 'rgba(0,0,0,0.08)',
                   pointerEvents: 'none',
                 }} />
               );
@@ -373,36 +376,37 @@ export const CardioTypeChart: React.FC = () => {
             const avg = nonZero.reduce((a, b) => a + b, 0) / nonZero.length;
             const avgPct = avg / rawMax;
             return (
-              <div style={{
-                position: 'absolute',
-                left: 0,
-                right: 0,
-                bottom: `${avgPct * 100}%`,
-                height: '1px',
-                borderTop: '1px dashed rgba(255,255,255,0.35)',
-                pointerEvents: 'none',
-                zIndex: 10,
-                overflow: 'visible',
-              }}>
-                <span style={{
-                  position: 'absolute',
-                  right: -1,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  fontSize: '9px',
-                  fontWeight: 800,
-                  color: '#000000',
-                  backgroundColor: '#ffffff',
-                  borderRadius: '999px',
-                  padding: '2px 6px',
-                  letterSpacing: '0.3px',
-                  lineHeight: 1.4,
-                  whiteSpace: 'nowrap',
-                  zIndex: 20,
-                }}>
-                  {+avg.toFixed(1)}
-                </span>
-              </div>
+               <div style={{
+                 position: 'absolute',
+                 left: 0,
+                 right: 0,
+                 bottom: `${avgPct * 100}%`,
+                 height: '1px',
+                 borderTop: '1px dashed rgba(0,0,0,0.35)',
+                 pointerEvents: 'none',
+                 zIndex: 10,
+                 overflow: 'visible',
+               }}>
+                 <span style={{
+                   position: 'absolute',
+                   right: -1,
+                   top: '50%',
+                   transform: 'translateY(-50%)',
+                   fontSize: '9px',
+                   fontWeight: 800,
+                   color: '#ffffff',
+                   backgroundColor: '#1a1a1a',
+                   borderRadius: '999px',
+                   padding: '2px 6px',
+                   letterSpacing: '0.3px',
+                   lineHeight: 1.4,
+                   whiteSpace: 'nowrap',
+                   zIndex: 20,
+                   fontFamily: "'Archivo', sans-serif",
+                 }}>
+                   {+avg.toFixed(1)}
+                 </span>
+               </div>
             );
           })()}
 
@@ -412,20 +416,21 @@ export const CardioTypeChart: React.FC = () => {
             const isPeak = !isWeekly && i === monthlyPeakIdx && val > 0;
 
             // Monthly: same opacity scheme as 30-day chart
-            // Weekly: keep existing brightness-scaled rgb approach
+            // Weekly: keep existing visual scaling — inverted to dark palette
             let barColor: string;
             let barGlow: string | undefined;
             if (isWeekly) {
-              const brightness = val > 0 ? Math.round(80 + (val / rawMax) * 175) : 0;
+              // Dark scale: lower values = lighter gray, higher = black
+              const brightness = val > 0 ? Math.round(30 + (val / rawMax) * 120) : 0;
               barColor = val > 0
                 ? `rgb(${brightness},${brightness},${brightness})`
-                : 'rgba(255,255,255,0.05)';
+                : 'rgba(0,0,0,0.08)';
             } else {
               const opacity = val > 0
                 ? (isPeak ? 1 : val >= monthlyAvg ? 0.65 : 0.22)
                 : 0.07;
-              barColor = `rgba(255,255,255,${opacity})`;
-              if (isPeak) barGlow = '0 0 8px rgba(255,255,255,0.55), 0 0 16px rgba(255,255,255,0.25)';
+              barColor = `rgba(0,0,0,${opacity})`;
+              if (isPeak) barGlow = '0 0 8px rgba(0,0,0,0.35), 0 0 16px rgba(0,0,0,0.15)';
             }
 
               const barLabel = val > 0 ? `${displayDataForLabels[i].toFixed(1)}` : '';
@@ -442,10 +447,11 @@ export const CardioTypeChart: React.FC = () => {
                    <div style={{
                      fontSize: '9px',
                      fontWeight: 700,
-                     color: val > 0 ? `rgba(255,255,255,${labelOpacity})` : 'transparent',
+                     color: val > 0 ? `rgba(26,26,26,${labelOpacity})` : 'transparent',
                      marginBottom: '4px',
                      lineHeight: 1,
                      whiteSpace: 'nowrap',
+                     fontFamily: "'Archivo', sans-serif",
                    }}>
                      {barLabel}
                    </div>
@@ -457,11 +463,12 @@ export const CardioTypeChart: React.FC = () => {
                     transform: 'translateX(-50%)',
                     fontSize: '9px',
                     fontWeight: isPeak ? 800 : 700,
-                    color: `rgba(255,255,255,${labelOpacity})`,
+                    color: `rgba(26,26,26,${labelOpacity})`,
                     lineHeight: 1,
                     whiteSpace: 'nowrap',
                     pointerEvents: 'none',
                     zIndex: 5,
+                    fontFamily: "'Archivo', sans-serif",
                   }}>
                     {barLabel}
                   </div>
@@ -486,14 +493,15 @@ export const CardioTypeChart: React.FC = () => {
                         width: '20px',
                         height: '20px',
                         borderRadius: '50%',
-                        backgroundColor: 'black',
+                        backgroundColor: '#1a1a1a',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         fontSize: '8px',
                         fontWeight: 'bold',
-                        color: 'white',
+                        color: '#ffffff',
                         zIndex: 1,
+                        fontFamily: "'Archivo', sans-serif",
                       }}>
                         {weeklySpeeds[i]}
                       </div>
@@ -507,8 +515,9 @@ export const CardioTypeChart: React.FC = () => {
                     fontWeight: 700,
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px',
-                    color: 'rgba(255,255,255,0.55)',
+                    color: 'rgba(26,26,26,0.45)',
                     marginTop: '4px',
+                    fontFamily: "'Archivo', sans-serif",
                   }}>
                     {DAY_SHORT[i]}
                   </div>
