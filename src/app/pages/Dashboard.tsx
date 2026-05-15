@@ -228,7 +228,7 @@ const WeeklyChart: React.FC<{
           {activeTab === 'Weights' && effectiveWeekNumber !== null && (() => {
             const exerciseTotal = (weightsExerciseCounts[effectiveWeekNumber] || []).reduce((s, c) => s + c, 0);
             return (
-              <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', marginLeft: '8px' }}>
+              <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', marginLeft: '8px', fontFamily: "'Archivo', sans-serif" }}>
                 <span style={{ color: '#1a1a1a' }}> / {exerciseTotal}</span>
                 <span style={{ color: 'rgba(26,26,26,0.45)' }}> EX</span>
               </span>
@@ -241,7 +241,7 @@ const WeeklyChart: React.FC<{
             const clampedVal = Math.min(Math.max(val, yMin), yMax);
             const pct = val > 0 ? Math.max((clampedVal - yMin) / (yMax - yMin), 0.04) : 0;
             const rawPct = rawMax > 0 ? val / rawMax : 0;
-            const brightness = Math.round(80 + rawPct * 175);
+            const brightness = Math.round(210 - rawPct * 180);
             const barColor = val > 0 ? `rgb(${brightness},${brightness},${brightness})` : 'rgba(26,26,26,0.04)';
             let barLabel = '';
             if (val > 0) {
@@ -688,14 +688,10 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
                 : 'MOVEMENT (KM)'}
             </div>
             {selectedActivity && (
-              <div className="text-[11px] font-medium mt-1" style={{ color: 'rgba(26,26,26,0.45)' }}>
-                This week
-              </div>
+              <div className="text-[11px] font-medium" style={{ color: 'rgba(26,26,26,0.45)', fontFamily: "'Archivo', sans-serif" }}>This week</div>
             )}
             {!selectedActivity && yesterdayMovement > 0 && (
-              <div className="text-[11px] font-medium mt-1" style={{ color: 'rgba(26,26,26,0.45)' }}>
-                Yesterday {yesterdayMovement.toFixed(1)} km
-              </div>
+              <div className="text-[11px] font-medium" style={{ color: 'rgba(26,26,26,0.45)', fontFamily: "'Archivo', sans-serif" }}>Yesterday {yesterdayMovement.toFixed(1)} km</div>
             )}
           </div>
           
@@ -800,7 +796,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
               <div className="mt-4 space-y-2">
                 {dayWeights.map((ex, i) => (
                   <div key={i} className="flex items-center justify-between">
-                    <span className="text-[11px] font-medium" style={{ color: 'rgba(26,26,26,0.6)' }}>{toTitleCase(ex.name)}</span>
+                      <span className="text-[11px] font-medium" style={{ color: 'rgba(26,26,26,0.6)', fontFamily: "'Archivo', sans-serif" }}>{toTitleCase(ex.name)}</span>
                     <span className="text-[12px] font-bold" style={{ color: '#1a1a1a' }}>{Math.round(ex.weight).toLocaleString()} kg</span>
                   </div>
                 ))}
