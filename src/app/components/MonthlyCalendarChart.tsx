@@ -174,7 +174,7 @@ const MonthlyCalendarChart: React.FC<MonthlyCalendarChartProps> = ({
             <span style={{ fontSize: '1.6rem', fontWeight: 900, letterSpacing: '-0.02em', color: '#1a1a1a', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>
               {selectedTab === 'WEIGHTS' ? Math.round(total).toLocaleString() : total}
             </span>
-            <span style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(26,26,26,0.45)', letterSpacing: '0.12em' }}>
+                <span style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(26,26,26,0.45)', letterSpacing: '0.12em', fontFamily: "'Archivo', sans-serif" }}>
               {selectedTab === 'WEIGHTS' ? 'KG' : selectedTab === 'SCORE' ? 'SCORE' : 'KM'}
             </span>
           </div>
