@@ -161,7 +161,7 @@ const DayCard: React.FC<{ day: DayData }> = ({ day }) => {
     <div
       style={{
         minWidth: '172px',
-        background: 'linear-gradient(135deg, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0.95) 100%)',
+        backgroundColor: 'rgba(0,0,0,0.05)',
         borderRadius: '14px',
         padding: '16px',
         display: 'flex',

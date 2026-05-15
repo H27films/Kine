@@ -176,7 +176,7 @@ const WeeklyChart: React.FC<{
         }}>{weekLabel}</span>
       </div>
 
-      <div className="rounded-lg p-5" style={{ backgroundColor: '#f2f2f2', borderLeft: '2px solid rgba(0,0,0,0.08)', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
+      <div className="rounded-lg p-5" style={{ backgroundColor: 'rgba(0,0,0,0.05)', borderLeft: '2px solid rgba(0,0,0,0.08)', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
         {/* Tabs only — chevrons moved above */}
         <div className="flex items-center mb-3">
           <div className="flex gap-4">
@@ -280,6 +280,7 @@ const WeeklyChart: React.FC<{
                         fontWeight: 700,
                         color: '#ffffff',
                         lineHeight: 1,
+                        fontFamily: "'Archivo', sans-serif",
                       }}>
                         {exerciseCount}
                       </div>
@@ -860,7 +861,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
             })()}
           </span>
         </div>
-        <MonthlyCalendarChart monthOffset={monthlyOffset} containerStyle={{ backgroundColor: '#f2f2f2', borderLeft: '2px solid rgba(0,0,0,0.08)', boxShadow: '0 8px 24px rgba(0,0,0,0.12)', padding: '32px 24px' }} />
+        <MonthlyCalendarChart monthOffset={monthlyOffset} containerStyle={{ backgroundColor: 'rgba(0,0,0,0.05)', borderLeft: '2px solid rgba(0,0,0,0.08)', boxShadow: '0 8px 24px rgba(0,0,0,0.12)', padding: '32px 24px' }} />
       </section>
 
       <section className="mt-8">
