@@ -646,7 +646,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
                   fontWeight: 700,
                   letterSpacing: '1.5px',
                   marginBottom: '8px',
-                  color: showWeeklySummary ? 'rgba(26,26,26,0.3)' : 'rgba(26,26,26,0.45)',
+                  color: showWeeklySummary ? 'rgba(26,26,26,0.5)' : 'rgba(26,26,26,0.8)',
                 }}
               >
                 {['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'][i]}
@@ -657,7 +657,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
                     ? 'bg-[#1a1a1a] text-white'
                     : day.isToday
                     ? 'border-2 border-black/20 text-[#1a1a1a]'
-                    : 'text-[rgba(26,26,26,0.3)]'
+                     : 'text-[rgba(26,26,26,0.55)]'
                 }`}
               >
                 {day.dayOfWeek}
