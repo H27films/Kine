@@ -150,15 +150,18 @@ const MonthlyCalendarChart: React.FC<MonthlyCalendarChartProps> = ({
               onClick={() => setSelectedTab(tab)}
               style={{
                 fontSize: '12px',
-                fontWeight: 700,
+                fontWeight: 600,
                 textTransform: 'uppercase',
-                letterSpacing: '1px',
-                color: selectedTab === tab ? '#1a1a1a' : 'rgba(26,26,26,0.45)',
+                letterSpacing: '1.5px',
+                paddingBottom: '4px',
+                color: selectedTab === tab ? '#1a1a1a' : 'rgba(26,26,26,0.35)',
+                borderBottom: selectedTab === tab ? '2px solid #1a1a1a' : '2px solid transparent',
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
                 marginRight: '20px',
                 fontFamily: "'Archivo', sans-serif",
+                transition: 'all 0.15s',
               }}
             >
               {tab}

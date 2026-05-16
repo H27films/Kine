@@ -186,12 +186,12 @@ const WeeklyChart: React.FC<{
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 style={{
-                  fontSize: '10px',
-                  fontWeight: 700,
+                  fontSize: '12px',
+                  fontWeight: 600,
                   textTransform: 'uppercase',
                   letterSpacing: '1.5px',
                   paddingBottom: '4px',
-                  color: activeTab === tab ? '#1a1a1a' : 'rgba(26,26,26,0.45)',
+                  color: activeTab === tab ? '#1a1a1a' : 'rgba(26,26,26,0.35)',
                   borderBottom: activeTab === tab ? '2px solid #1a1a1a' : '2px solid transparent',
                   background: 'none',
                   border: 'none',
@@ -258,7 +258,7 @@ const WeeklyChart: React.FC<{
               : 0;
             return (
               <div key={i} className="flex flex-col items-center h-full justify-end" style={{ flex: '1', maxWidth: '28px' }}>
-                <div style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(26,26,26,0.45)', marginBottom: '4px', height: '14px', fontFamily: "'Archivo', sans-serif" }}>{barLabel}</div>
+                <div style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(26,26,26,0.85)', marginBottom: '4px', height: '14px', fontFamily: "'Archivo', sans-serif" }}>{barLabel}</div>
                 <div className="w-full relative transition-all" style={{ height: `${pct * 100}%`, backgroundColor: barColor, borderRadius: '9999px 9999px 0 0', minHeight: val > 0 ? '4px' : 0 }}>
                   {activeTab === 'Weights' && exerciseCount > 0 && (
                     <div style={{
@@ -277,7 +277,7 @@ const WeeklyChart: React.FC<{
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: '10px',
+                  fontSize: '12px',
                         fontWeight: 700,
                         color: '#ffffff',
                         lineHeight: 1,
@@ -288,7 +288,7 @@ const WeeklyChart: React.FC<{
                     </div>
                   )}
                 </div>
-                <div style={{ fontSize: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'rgba(26,26,26,0.45)', marginTop: '8px', fontFamily: "'Archivo', sans-serif" }}>{days[i]}</div>
+                <div style={{ fontSize: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'rgba(26,26,26,0.85)', marginTop: '8px', fontFamily: "'Archivo', sans-serif" }}>{days[i]}</div>
               </div>
             );
           })}
@@ -783,7 +783,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
               justifyContent: 'center',
               flexShrink: 0,
             }}>
-              <span style={{ fontSize: '11px', fontWeight: 900, color: '#ffffff', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>
+              <span style={{ fontSize: '12px', fontWeight: 900, color: '#ffffff', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>
                 {dailyScore > 0 ? dailyScore : '—'}
               </span>
             </div>
