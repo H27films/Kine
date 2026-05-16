@@ -210,8 +210,8 @@ const RecentLogsSection: React.FC<Props> = ({ refreshKey }) => {
                         )}
                         {displayWeight > 0 && (
                           <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px', flexShrink: 0, marginLeft: 'auto', alignSelf: 'flex-start', marginTop: '2px' }}>
-                            <span style={{ color: '#1a1a1a', fontWeight: 900, fontSize: '1.15rem', letterSpacing: '-0.02em', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>{Math.round(displayWeight).toLocaleString()}</span>
-                            <span style={{ color: 'rgba(26,26,26,0.45)', fontWeight: 700, fontSize: '0.65rem', letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: "'Archivo', sans-serif" }}>KG</span>
+                            <span style={{ color: '#1a1a1a', fontWeight: 800, fontSize: '1.15rem', letterSpacing: '-0.02em', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>{Math.round(displayWeight).toLocaleString()}</span>
+                            <span style={{ color: 'rgba(26,26,26,0.6)', fontWeight: 500, fontSize: '0.65rem', letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: "'Archivo', sans-serif" }}>KG</span>
                           </div>
                         )}
                       </>
@@ -241,7 +241,7 @@ const RecentLogsSection: React.FC<Props> = ({ refreshKey }) => {
                        <div key={idx} className="grid items-center mb-2" style={{ gridTemplateColumns: '1.8rem 1fr 1fr 1fr', gap: '0.5rem' }}>
                          <p className="font-black text-center" style={{ fontSize: '1rem', color: numColor, lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>{idx + 1}</p>
 
-                         <div className="flex items-center justify-between rounded-lg py-2 px-2" style={{ backgroundColor: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.08)' }}>
+                         <div className="flex items-center justify-between rounded-lg py-2 px-2" style={{ backgroundColor: 'rgba(0,0,0,0.04)' }}>
                            <button onClick={() => adjustRecentWeight(log.id, idx, -1)} style={{ color: 'rgba(0,0,0,0.5)', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>−</button>
                            <input
                              type="number"
@@ -258,7 +258,7 @@ const RecentLogsSection: React.FC<Props> = ({ refreshKey }) => {
                            <button onClick={() => adjustRecentWeight(log.id, idx, 1)} style={{ color: 'rgba(0,0,0,0.5)', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>+</button>
                          </div>
 
-                         <div className="flex items-center justify-between rounded-lg py-2 px-2" style={{ backgroundColor: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.08)' }}>
+                         <div className="flex items-center justify-between rounded-lg py-2 px-2" style={{ backgroundColor: 'rgba(0,0,0,0.04)' }}>
                            <button onClick={() => adjustRecentReps(log.id, idx, -1)} style={{ color: 'rgba(0,0,0,0.5)', lineHeight: 1 }}>−</button>
                            <span className="font-bold" style={{ fontSize: '0.875rem', color: hasData ? '#1a1a1a' : 'rgba(0,0,0,0.25)', fontFamily: "'Archivo', sans-serif" }}>{s.r}</span>
                            <button onClick={() => adjustRecentReps(log.id, idx, 1)} style={{ color: 'rgba(0,0,0,0.5)', lineHeight: 1 }}>+</button>
