@@ -848,9 +848,9 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                     <div style={{
                       position: 'absolute', right: 0, top: 0, bottom: 0,
                       width: 80, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      backgroundColor: '#ef4444',
+                      backgroundColor: 'rgba(0,0,0,0.08)',
                     }}>
-                      <span style={{ color: '#fff', fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.1em' }}>REMOVE</span>
+                      <span style={{ color: 'rgba(0,0,0,0.8)', fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.1em' }}>REMOVE</span>
                     </div>
                   )}
                   <div
