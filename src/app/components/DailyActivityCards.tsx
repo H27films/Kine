@@ -195,12 +195,12 @@ const DayCard: React.FC<{ day: DayData }> = ({ day }) => {
             letterSpacing: '0.08em',
             textTransform: 'uppercase',
             fontFamily: "'Archivo', sans-serif",
-            color: isToday ? '#1a1a1a' : 'rgba(26,26,26,0.45)',
+            color: isToday ? '#1a1a1a' : 'rgba(26,26,26,0.6)',
           }}>
             {label}
           </div>
           {/* Always show date */}
-          <div style={{ fontSize: '10px', color: 'rgba(26,26,26,0.3)', marginTop: '2px', fontFamily: "'Archivo', sans-serif" }}>
+          <div style={{ fontSize: '11px', color: 'rgba(26,26,26,0.7)', marginTop: '2px', fontFamily: "'Archivo', sans-serif" }}>
             {formatDisplayDate(day.date)}
           </div>
         </div>
