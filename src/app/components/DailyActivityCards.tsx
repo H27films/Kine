@@ -369,8 +369,8 @@ export const DailyActivityCards: React.FC = () => {
     <section>
       <div style={{
         fontSize: '1.15rem',
-        fontWeight: 800,
-        letterSpacing: '-0.03em',
+        fontWeight: 700,
+        letterSpacing: '0.15em',
         textTransform: 'uppercase',
         color: '#1a1a1a',
         marginBottom: '1.25rem',

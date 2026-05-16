@@ -155,8 +155,8 @@ const WeeklyChart: React.FC<{
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{
             fontSize: '1.1rem',
-            fontWeight: 800,
-            letterSpacing: '0.18em',
+            fontWeight: 700,
+            letterSpacing: '0.15em',
             textTransform: 'uppercase',
             color: '#1a1a1a',
             fontFamily: "'Archivo', sans-serif",
@@ -822,10 +822,10 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <div style={{
-              fontSize: '1.15rem',
-              fontWeight: 800,
-              letterSpacing: '-0.03em',
-              textTransform: 'uppercase',
+            fontSize: '1.15rem',
+            fontWeight: 700,
+            letterSpacing: '0.15em',
+            textTransform: 'uppercase',
               color: '#1a1a1a',
               fontFamily: "'Archivo', sans-serif",
             }}>
