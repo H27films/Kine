@@ -166,7 +166,7 @@ const RecentLogsSection: React.FC<Props> = ({ refreshKey }) => {
                 {showDateSeparator && (
                    <div key={`sep-${log.id}`} className="w-full h-[0.5px] bg-[#1a1a1a] opacity-20 my-2" />
                 )}
-               <div key={log.id} className="rounded-lg overflow-hidden" style={{ backgroundColor: 'rgba(0,0,0,0.05)', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
+               <div key={log.id} className="rounded-lg overflow-hidden"                  style={{ backgroundColor: 'rgba(0,0,0,0.05)', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
                 {/* Collapsed / header row */}
                 <div
                   className="flex items-center gap-4 p-4 cursor-pointer"
@@ -221,7 +221,7 @@ const RecentLogsSection: React.FC<Props> = ({ refreshKey }) => {
 
                {/* Expanded section */}
                {isExpanded && (
-                 <div style={{ borderTop: '1px solid rgba(0,0,0,0.08)', padding: '12px 16px 16px', background: 'rgba(255,255,255,0.65)', borderBottomLeftRadius: 14, borderBottomRightRadius: 14 }}>
+                  <div style={{ borderTop: '1px solid rgba(0,0,0,0.08)', padding: '12px 16px 16px', background: 'rgba(0,0,0,0.05)', borderBottomLeftRadius: 14, borderBottomRightRadius: 14 }}>
                    {/* Column headers */}
                    <div className="grid mb-2" style={{ gridTemplateColumns: '1.8rem 1fr 1fr 1fr', gap: '0.5rem' }}>
                      <div />
