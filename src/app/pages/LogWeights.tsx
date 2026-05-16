@@ -52,7 +52,7 @@ const makeDefaultSets = (): SetRow[] =>
   Array.from({ length: 4 }, () => ({ weight: '', reps: 10 }));
 
 const STORAGE_KEY = 'kine_logweights_v1';
-const EST_SLATE = '#94A3B8';
+const EST_SLATE = '#4B5F7A';
 
 const fetchSavedWorkoutIds = async (): Promise<number[]> => {
   const { data } = await supabase
@@ -579,7 +579,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
           <div className="text-[3.25rem] font-black leading-none tracking-tighter flex-shrink-0" style={{ color: '#1a1a1a' }}>
             {fmtVol(thisWeekTotal)}
             {lastWeekTotal > 0 && (
-              <div style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(26,26,26,0.45)', marginTop: '6px', letterSpacing: '-0.01em', lineHeight: 1 }}>
+              <div style={{ fontSize: '13px', fontWeight: 500, color: 'rgba(26,26,26,0.85)', marginTop: '6px', letterSpacing: '0.08em', lineHeight: 1 }}>
                 LAST WEEK {Math.round(lastWeekTotal).toLocaleString()} KG
               </div>
             )}

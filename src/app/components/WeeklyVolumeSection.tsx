@@ -117,7 +117,7 @@ const WeeklyVolumeSection: React.FC = () => {
             <div key={group}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '0.6rem', paddingLeft: '2px', paddingRight: '2px' }}>
                 <div>
-                  <span style={{ color: '#1a1a1a', fontWeight: 500, fontSize: '1rem', letterSpacing: '-0.01em', display: 'block', fontFamily: "'Archivo', sans-serif", textTransform: 'uppercase' }}>{group}</span>
+                  <span style={{ color: '#1a1a1a', fontWeight: 550, fontSize: '1rem', letterSpacing: '-0.01em', display: 'block', fontFamily: "'Archivo', sans-serif", textTransform: 'uppercase' }}>{group}</span>
                   <span style={{ color: 'rgba(26,26,26,0.75)', fontSize: '12px', fontWeight: 400, marginTop: '1px', display: 'block', fontFamily: "'Archivo', sans-serif" }}>
                     {weekIdx === 0 ? 'Last week' : 'Previous'}: {Math.round(lastWeek).toLocaleString()}kg
                   </span>
