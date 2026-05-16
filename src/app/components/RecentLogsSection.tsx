@@ -221,7 +221,7 @@ const RecentLogsSection: React.FC<Props> = ({ refreshKey }) => {
 
                {/* Expanded section */}
                {isExpanded && (
-                  <div style={{ borderTop: '1px solid rgba(0,0,0,0.08)', padding: '12px 16px 16px', background: 'rgba(0,0,0,0.05)', borderBottomLeftRadius: 14, borderBottomRightRadius: 14 }}>
+                   <div style={{ padding: '16px' }}>
                    {/* Column headers */}
                    <div className="grid mb-2" style={{ gridTemplateColumns: '1.8rem 1fr 1fr 1fr', gap: '0.5rem' }}>
                      <div />
