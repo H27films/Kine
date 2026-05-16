@@ -20,8 +20,12 @@ interface Props {
 }
 
 const sectionLabelStyle: React.CSSProperties = {
-  fontSize: '15px', fontWeight: 900, letterSpacing: '0.2em',
-  textTransform: 'uppercase', color: '#1a1a1a', marginBottom: '1.25rem',
+  fontSize: '1.1rem',
+  fontWeight: 700,
+  letterSpacing: '0.15em',
+  textTransform: 'uppercase',
+  color: '#1a1a1a',
+  marginBottom: '1.25rem',
   fontFamily: "'Archivo', sans-serif",
 };
 

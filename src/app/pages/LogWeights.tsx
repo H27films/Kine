@@ -550,7 +550,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
           </div>
           <div style={{
             width: 28, height: 28, borderRadius: '50%',
-            backgroundColor: alreadyAdded ? '#ef4444' : '#1a1a1a',
+            backgroundColor: alreadyAdded ? 'rgba(0,0,0,0.15)' : '#1a1a1a',
             color: alreadyAdded ? '#ffffff' : '#ffffff',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             flexShrink: 0,
