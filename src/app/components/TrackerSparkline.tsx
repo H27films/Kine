@@ -44,17 +44,18 @@ const TrackerSparkline: React.FC<Props> = ({ weekChartData }) => {
         </filter>
       </defs>
 
-      {/* Background stacked circles - continuous full width grid */}
+      {/* Background stacked circles - 7 data columns + 3 intermediate columns between each */}
       {Array.from({ length: maxCircles }).map((_, circleIdx) => {
         const y = padTop + chartH - (circleIdx * CIRCLE_STEP) - CIRCLE_RADIUS;
-        const dotsPerRow = Math.floor(chartW / (CIRCLE_RADIUS * 2 + 0.5));
-        const dotSpacing = chartW / dotsPerRow;
 
-        return Array.from({ length: dotsPerRow }).map((_, dotIdx) => {
-          const x = padLeft + dotIdx * dotSpacing + dotSpacing / 2;
+        // 7 data columns with 3 grid columns between each = 25 total columns
+        const totalCols = 7 + 6 * 3; // 25
+
+        return Array.from({ length: totalCols }).map((_, gcIdx) => {
+          const x = padLeft + (gcIdx / (totalCols - 1)) * chartW;
           return (
             <circle
-              key={`bg-${circleIdx}-${dotIdx}`}
+              key={`bg-${circleIdx}-${gcIdx}`}
               cx={x}
               cy={y}
               r={CIRCLE_RADIUS}
