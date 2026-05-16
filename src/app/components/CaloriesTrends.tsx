@@ -176,7 +176,7 @@ const CaloriesTrends: React.FC = () => {
       <h3 className="text-[13px] font-black uppercase tracking-[0.2em] mb-6" style={{ color: '#1a1a1a' }}>
         Performance Trends
       </h3>
-      <div className="space-y-10 p-5 rounded-xl" style={{ backgroundColor: 'rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0.08)', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
+      <div className="space-y-10">
 
         {/* === Weekly Calories Chart === */}
         <div>
