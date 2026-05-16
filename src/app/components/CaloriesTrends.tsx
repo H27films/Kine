@@ -214,10 +214,10 @@ const CaloriesTrends: React.FC = () => {
               const isPeakBar = !isCurrentWeek && h > 0 && i === weeklyMaxBarIndex;
               const editable = isBarEditable(i);
 
-              let bgColor = h > 0 ? 'rgba(26,26,26,0.65)' : 'rgba(26,26,26,0.08)';
-if (isToday) bgColor = '#1a1a1a';
-              if (isPeakBar) bgColor = '#1a1a1a';
-              const labelColor = (isToday || isPeakBar) ? '#ffffff' : 'rgba(26,26,26,0.45)';
+let bgColor = h > 0 ? '#1a1a1a' : 'rgba(26,26,26,0.08)';
+              if (isToday) bgColor = '#2f2f2f';
+              if (isPeakBar) bgColor = '#404040';
+              const labelColor = '#ffffff';
 
               return (
                 <div
@@ -227,7 +227,7 @@ if (isToday) bgColor = '#1a1a1a';
                   style={{
                     height: `${barPct}%`,
                     backgroundColor: bgColor,
-                    boxShadow: isPeakBar ? '0 0 8px rgba(255,255,255,0.6), 0 0 20px rgba(255,255,255,0.25)' : 'none',
+                    boxShadow: isPeakBar ? '0 0 8px rgba(64,64,64,0.6), 0 0 20px rgba(64,64,64,0.25)' : 'none',
                     position: 'relative',
                     display: 'flex',
                     alignItems: 'flex-end',
@@ -257,7 +257,7 @@ if (isToday) bgColor = '#1a1a1a';
           <div className="flex justify-between mt-3" style={{ gap: 4 }}>
             {weekDays.map((d, i) => (
               <div key={i} className="flex-1 flex flex-col items-center">
-                <span style={{ fontSize: '8px', fontWeight: 700, color: 'rgba(255,255,255,0.85)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <span style={{ fontSize: '8px', fontWeight: 700, color: '#1a1a1a', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                   {d}
                 </span>
               </div>
