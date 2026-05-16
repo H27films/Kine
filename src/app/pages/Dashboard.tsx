@@ -652,13 +652,14 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
                 {['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'][i]}
               </span>
               <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
+                className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all ${
                   day.isSelected
                     ? 'bg-[#1a1a1a] text-white'
                     : day.isToday
                     ? 'border-2 border-black/20 text-[#1a1a1a]'
-                     : 'text-[rgba(26,26,26,0.55)]'
+                     : 'text-[rgba(26,26,26,0.85)]'
                 }`}
+                style={{ fontFamily: "'Archivo', sans-serif" }}
               >
                 {day.dayOfWeek}
               </div>
