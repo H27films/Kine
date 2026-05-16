@@ -35,6 +35,7 @@ const RecentLogsSection: React.FC<Props> = ({ refreshKey }) => {
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
   const [editSets, setEditSets] = useState<Record<number, { w: string; r: number }[]>>({});
   const [savingLogId, setSavingLogId] = useState<number | null>(null);
+  const [hoveredSave, setHoveredSave] = useState(false);
 
   const loadRecent = useCallback(async () => {
     const { data } = await supabase
@@ -271,16 +272,18 @@ const RecentLogsSection: React.FC<Props> = ({ refreshKey }) => {
 
                    {/* Save + Delete */}
                    <div className="flex items-center gap-3 mt-4">
-                     <button
-                       onClick={(e) => { e.stopPropagation(); saveRecentLog(log.id); }}
-                       style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '1px', color: savingLogId === log.id ? 'rgba(0,0,0,0.3)' : '#1a1a1a', padding: '6px 14px', border: '1px solid rgba(0,0,0,0.08)', borderRadius: '6px', backgroundColor: 'rgba(0,0,0,0.06)', transition: 'all 0.15s' }}
-                     >
+                      <button
+                        onClick={(e) => { e.stopPropagation(); saveRecentLog(log.id); }}
+                        style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '1px', color: savingLogId === log.id ? 'rgba(255,255,255,0.3)' : '#ffffff', padding: '6px 14px', borderRadius: '6px', transition: 'all 0.15s', cursor: 'pointer', background: hoveredSave ? 'rgba(0,0,0,0.06)' : '#1a1a1a' }}
+                        onMouseEnter={() => setHoveredSave(true)}
+                        onMouseLeave={() => setHoveredSave(false)}
+                      >
                        {savingLogId === log.id ? 'SAVING…' : 'SAVE'}
                      </button>
-                     <button
-                       onClick={(e) => { e.stopPropagation(); setDeleteConfirmId(log.id); }}
-                       style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 700, letterSpacing: '1px', color: 'rgba(220,38,38,0.7)', padding: '6px 0', background: 'none', border: 'none', cursor: 'pointer' }}
-                     >
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setDeleteConfirmId(log.id); }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.55)', background: 'linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.10) 100%)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -1px 0 rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.08)', backdropFilter: 'blur(8px)', cursor: 'pointer', color: '#1a1a1a', fontSize: '11px', fontWeight: 500, letterSpacing: '0.04em', transition: 'all 0.15s' }}
+                    >
                        <X size={13} strokeWidth={2.5} />
                        DELETE ENTRY
                      </button>
