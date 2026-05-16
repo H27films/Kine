@@ -32,6 +32,8 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
   const [distance, setDistance] = useState('');
   const [minutes, setMinutes] = useState('');
   const [seconds, setSeconds] = useState('');
+  const [calories, setCalories] = useState('');
+  const [calorieConversion, setCalorieConversion] = useState<number>(1);
 
 
   const [nonTrackerExercises, setNonTrackerExercises] = useState<Exercise[]>([]);
@@ -55,6 +57,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
 
 
   const isRunning = selectedExercise?.exercise_name?.toUpperCase() === 'RUNNING';
+  const isCycling = selectedExercise?.exercise_name?.toUpperCase() === 'CYCLE';
 
   // Scroll to exercise section when pre-selected cardio is Running, Row, or Cross Trainer
   useEffect(() => {
@@ -93,6 +96,32 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
     };
     loadExercises();
   }, [initialSelectedActivity]);
+
+  // Fetch calorie-to-km conversion rate from app_settings
+  useEffect(() => {
+    const loadConversion = async () => {
+      const { data } = await supabase
+        .from('app_settings')
+        .select('value')
+        .eq('key', 'calorie_to_km_conversion')
+        .single();
+      if (data && data.value) {
+        setCalorieConversion(Number(data.value));
+      }
+    };
+    loadConversion();
+  }, []);
+
+  // Auto-populate distance from calories using the conversion rate
+  useEffect(() => {
+    const calNum = parseFloat(calories);
+    if (calNum > 0 && calorieConversion > 0) {
+      const km = +(calNum / calorieConversion).toFixed(1);
+      setDistance(km.toString());
+    } else if (!calNum || calNum <= 0) {
+      setDistance('');
+    }
+  }, [calories, calorieConversion]);
 
   useEffect(() => {
     const loadWeeklyTotal = async () => {
@@ -340,7 +369,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
         const km = parseFloat(distance);
         const totalCardio = +(km * Number(selectedExercise.multiplier)).toFixed(2);
         const timeStr = isRunning && (minutes || seconds)
-          ? `00:${(minutes || '0').padStart(2, '0')}:${(seconds || '0').padStart(2, '0')}`
+          ? `00:${(minutes || '0').padStart(2,'0')}:${(seconds || '0').padStart(2,'0')}`
           : null;
         const { error } = await supabase.from('workouts').insert({
           date: today, week, day, type: 'CARDIO',
@@ -360,6 +389,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
       setDistance('');
       setMinutes('');
       setSeconds('');
+      setCalories('');
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (e: any) {
       setSaveError(e.message || 'Failed to save');
@@ -385,7 +415,8 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
 
   const hasAnyInput =
     (trackerDistance && parseFloat(trackerDistance) > 0) ||
-    (distance && parseFloat(distance) > 0);
+    (distance && parseFloat(distance) > 0) ||
+    (calories && parseFloat(calories) > 0);
 
   // 30-day period label
   const periodLabel = thirtyDayOffset === 0
@@ -516,6 +547,19 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
                 className="text-[2.5rem] font-black tracking-tighter w-16 text-left p-0" style={{ backgroundColor: 'transparent', border: 'none', color: '#1a1a1a' }} />
               <span style={{ ...labelStyle }}>SEC</span>
             </div>
+          </div>
+          <div style={separatorStyle} />
+        </section>
+      )}
+
+      {/* Calories — only shown for Cycling */}
+      {isCycling && (
+        <section className="mb-8">
+          <label style={{ ...labelStyle, display: 'block', marginBottom: 8, marginTop: 8 }}>Calories</label>
+          <div className="flex items-baseline gap-4">
+            <input type="text" value={calories} onChange={e => setCalories(e.target.value)} placeholder="0"
+              className="text-[2.5rem] font-black tracking-tighter w-full p-0" style={{ backgroundColor: 'transparent', border: 'none', color: '#1a1a1a' }} />
+            <span className="text-[1rem] font-bold" style={{ color: 'rgba(26,26,26,0.85)', letterSpacing: '0.2em', paddingLeft: '4px' }}>KCAL</span>
           </div>
           <div style={separatorStyle} />
         </section>
