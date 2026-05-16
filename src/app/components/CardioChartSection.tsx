@@ -336,7 +336,7 @@ const CardioChartSection: React.FC<CardioChartSectionProps> = ({
                     <line x1={p.x} y1={p.y} x2={p.x} y2={padTop + chartH} stroke="#1a1a1a" strokeWidth="1.5" strokeLinecap="round" />
                     <circle cx={p.x} cy={p.y} r={glowRadius} fill="rgba(0,0,0,0.18)" filter="url(#dotBlur)" />
                     <circle cx={p.x} cy={p.y} r={dotRadius} fill="#1a1a1a" />
-                    <text x={p.x} y={p.y - 9} textAnchor="middle" fill="#1a1a1a" fontSize="7" fontWeight="700" fontFamily="'Archivo', sans-serif">
+                    <text x={p.x} y={p.y - 9} textAnchor="middle" fill="#1a1a1a" fontSize="7" fontWeight="600" fontFamily="'Archivo', sans-serif">
                       {p.val.toFixed(1)}
                     </text>
                   </g>
@@ -344,7 +344,7 @@ const CardioChartSection: React.FC<CardioChartSectionProps> = ({
               })}
 
               {sparkData.map((_, k) => (
-                <text key={k} x={padLeft + (k / 6) * chartW} y={VH + 12} textAnchor="middle" fill="#1a1a1a" fontSize="7" fontWeight="700" fontFamily="'Archivo', sans-serif">
+                <text key={k} x={padLeft + (k / 6) * chartW} y={VH + 12} textAnchor="middle" fill="#1a1a1a" fontSize="7" fontWeight="500" fontFamily="'Archivo', sans-serif">
                   {sparkDays[k]}
                 </text>
               ))}
