@@ -102,42 +102,26 @@ const ExerciseLogDots: React.FC<Props> = ({ exercises, saveSuccess }) => {
       <div
         ref={containerRef}
         style={{
-          display: 'flex',
-          alignItems: 'center',
           marginBottom: 12,
-          gap: 14,
         }}
       >
-        {/* Collapse dot */}
+        {/* Exercise name header — full width, above the rows */}
         <div
-          onClick={() => setExpandedKey(null)}
           style={{
-            width: 32,
-            height: 32,
-            borderRadius: '50%',
-            backgroundColor: '#1a1a1a',
-            flexShrink: 0,
-            cursor: 'pointer',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+            fontSize: 10,
+            fontWeight: 700,
+            color: 'rgba(26,26,26,0.8)',
+            letterSpacing: '0.25em',
+            textTransform: 'uppercase',
+            marginBottom: 6,
+            fontFamily: "'Archivo', sans-serif",
           }}
-        />
+        >
+          {ex.exercise_name?.toUpperCase()}
+        </div>
 
-        {/* Session details */}
-        <div style={{ flex: 1 }}>
-          <div
-            style={{
-              fontSize: 10,
-              fontWeight: 700,
-              color: 'rgba(26,26,26,0.45)',
-              letterSpacing: '0.25em',
-              textTransform: 'uppercase',
-              marginBottom: 4,
-              fontFamily: "'Archivo', sans-serif",
-            }}
-          >
-            {ex.exercise_name?.toUpperCase()}
-          </div>
-
+        {/* Dot + entry boxes — each session on its own row */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, paddingLeft: 20 }}>
           {kSessions.map((session) => {
             const editVal = editValues[session.id] ?? String(session.km);
             return (
@@ -145,12 +129,22 @@ const ExerciseLogDots: React.FC<Props> = ({ exercises, saveSuccess }) => {
                 key={session.id}
                 style={{
                   display: 'flex',
-                  alignItems: 'baseline',
-                  gap: 4,
+                  alignItems: 'center',
+                  gap: 8,
                   lineHeight: 1.15,
-                  marginBottom: 2,
                 }}
               >
+                <div
+                  onClick={() => setExpandedKey(null)}
+                  style={{
+                    width: 14,
+                    height: 14,
+                    borderRadius: '50%',
+                    backgroundColor: '#1a1a1a',
+                    flexShrink: 0,
+                    cursor: 'pointer',
+                  }}
+                />
                 <input
                   type="number"
                   inputMode="decimal"
@@ -167,7 +161,7 @@ const ExerciseLogDots: React.FC<Props> = ({ exercises, saveSuccess }) => {
                   style={{
                     fontSize: 24,
                     fontWeight: 900,
-                    color: '#1a1a1a',
+                    color: 'rgba(26,26,26,0.8)',
                     letterSpacing: '-0.04em',
                     background: 'rgba(0,0,0,0.04)',
                     borderRadius: 8,
@@ -194,20 +188,6 @@ const ExerciseLogDots: React.FC<Props> = ({ exercises, saveSuccess }) => {
               </div>
             );
           })}
-
-          {kSessions.length > 1 && (
-            <div
-              style={{
-                fontSize: 10,
-                color: 'rgba(26,26,26,0.35)',
-                marginTop: 3,
-                letterSpacing: '0.1em',
-                fontFamily: "'Archivo', sans-serif",
-              }}
-            >
-              TOTAL {total.toFixed(1)} KM
-            </div>
-          )}
         </div>
       </div>
     );
