@@ -215,7 +215,7 @@ const MonthlyCalendarChart: React.FC<MonthlyCalendarChartProps> = ({
                   justifyContent: 'center',
                   fontSize: '8px',
                   fontWeight: 'bold',
-                  border: isFuture ? '1px solid rgba(211,211,211,0.35)' : (cell.value ? 'none' : '1px solid rgba(0,0,0,0.08)'),
+                  border: isFuture ? '0.5px solid rgba(0,0,0,0.25)' : (cell.value ? 'none' : '1px solid #000000'),
                   color: isFuture ? 'transparent' : (cell.value ? '#ffffff' : 'transparent'),
                   backgroundColor: isFuture ? 'transparent' : (cell.value ? '#1a1a1a' : 'transparent'),
                   fontFamily: "'Archivo', sans-serif",
