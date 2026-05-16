@@ -167,7 +167,7 @@ const RecentLogsSection: React.FC<Props> = ({ refreshKey }) => {
                 {showDateSeparator && (
                    <div key={`sep-${log.id}`} className="w-full h-[1px] bg-[#1a1a1a] opacity-80 my-2" />
                 )}
-               <div key={log.id} className="rounded-lg overflow-hidden"                  style={{ backgroundColor: 'rgba(0,0,0,0.05)', boxShadow: '0 5px 12px rgba(0,0,0,0.08)' }}>
+               <div key={log.id} className="rounded-lg overflow-hidden"                  style={{ backgroundColor: 'rgba(0,0,0,0.05)', boxShadow: '0 3px 10px rgba(0,0,0,0.08)' }}>
                 {/* Collapsed / header row */}
                 <div
                   className="flex items-center gap-4 p-4 cursor-pointer"
