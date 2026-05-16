@@ -105,23 +105,24 @@ const ExerciseLogDots: React.FC<Props> = ({ exercises, saveSuccess }) => {
           marginBottom: 12,
         }}
       >
-        {/* Exercise name header — full width, above the rows */}
+        {/* Exercise name header — indented */}
         <div
           style={{
-            fontSize: 10,
+            fontSize: 11,
             fontWeight: 700,
             color: 'rgba(26,26,26,0.8)',
             letterSpacing: '0.25em',
             textTransform: 'uppercase',
-            marginBottom: 6,
+            marginBottom: 8,
+            paddingLeft: 22,
             fontFamily: "'Archivo', sans-serif",
           }}
         >
           {ex.exercise_name?.toUpperCase()}
         </div>
 
-        {/* Dot + entry boxes — each session on its own row */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, paddingLeft: 20 }}>
+        {/* Dot + entry boxes — each session on its own row, dots at left edge */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           {kSessions.map((session) => {
             const editVal = editValues[session.id] ?? String(session.km);
             return (
