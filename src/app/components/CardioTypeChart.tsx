@@ -288,7 +288,7 @@ export const CardioTypeChart: React.FC = () => {
                 position: 'absolute',
                 top: 'calc(100% + 8px)',
                 left: 0,
-                backgroundColor: 'rgba(0,0,0,0.04)',
+                backgroundColor: '#ffffff',
                 borderRadius: 8,
                 overflow: 'hidden',
                 zIndex: 50,
@@ -304,8 +304,8 @@ export const CardioTypeChart: React.FC = () => {
                       cursor: 'pointer',
                       fontSize: '11px',
                       fontWeight: selectedType === type ? 700 : 400,
-                      color: selectedType === type ? '#1a1a1a' : 'rgba(26,26,26,0.45)',
-                      backgroundColor: selectedType === type ? 'rgba(0,0,0,0.06)' : 'transparent',
+                      color: '#1a1a1a',
+                      backgroundColor: selectedType === type ? 'rgba(0,0,0,0.06)' : '#ffffff',
                       letterSpacing: '0.8px',
                       textTransform: 'uppercase',
                       borderBottom: '1px solid rgba(0,0,0,0.08)',
@@ -420,11 +420,9 @@ export const CardioTypeChart: React.FC = () => {
             let barColor: string;
             let barGlow: string | undefined;
             if (isWeekly) {
-              // Dark scale: lower values = lighter gray, higher = black
-              const brightness = val > 0 ? Math.round(30 + (val / rawMax) * 120) : 0;
-              barColor = val > 0
-                ? `rgb(${brightness},${brightness},${brightness})`
-                : 'rgba(0,0,0,0.08)';
+              const opacity = val > 0 ? (isPeak ? 1 : val >= weeklyAvg ? 0.65 : 0.22) : 0.07;
+              barColor = `rgba(0,0,0,${opacity})`;
+              if (isPeak) barGlow = '0 0 8px rgba(0,0,0,0.35), 0 0 16px rgba(0,0,0,0.15)';
             } else {
               const opacity = val > 0
                 ? (isPeak ? 1 : val >= monthlyAvg ? 0.65 : 0.22)
