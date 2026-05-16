@@ -52,7 +52,7 @@ const makeDefaultSets = (): SetRow[] =>
   Array.from({ length: 4 }, () => ({ weight: '', reps: 10 }));
 
 const STORAGE_KEY = 'kine_logweights_v1';
-const EST_SLATE = '#4B5F7A';
+const EST_SLATE = '#868E96';
 
 const fetchSavedWorkoutIds = async (): Promise<number[]> => {
   const { data } = await supabase
