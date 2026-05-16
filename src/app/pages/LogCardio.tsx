@@ -369,7 +369,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
   };
 
   const labelStyle = {
-    color: '#c6c6c6',
+    color: 'rgba(26,26,26,0.45)',
     fontSize: '0.75rem',
     textTransform: 'uppercase' as const,
     letterSpacing: '0.3em',
@@ -379,7 +379,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
   const separatorStyle = {
     height: 1,
     width: '100%',
-    backgroundColor: 'rgba(71,71,71,0.35)',
+    backgroundColor: 'rgba(0,0,0,0.08)',
     marginTop: 8,
   };
 
@@ -412,7 +412,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
         {/* Row 1: Big number left, MOVEMENT (KM) label right (tappable to toggle input) */}
         <div className="flex items-start" style={{ marginBottom: 14 }}>
           <div
-            className="text-[3.25rem] font-black leading-none tracking-tighter text-white flex-shrink-0"
+            className="text-[3.25rem] font-black leading-none tracking-tighter flex-shrink-0" style={{color: '#1a1a1a'}}
             style={{ cursor: 'pointer' }}
             onClick={() => setTrackerInputVisible(v => !v)}
           >
@@ -421,7 +421,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
           <div className="flex flex-col justify-center ml-4 pt-3 flex-1 min-w-0">
             <div className="flex items-center justify-between">
               <div
-                style={{ fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2.5px', color: '#ffffff', cursor: 'pointer' }}
+                style={{ fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2.5px', color: '#1a1a1a', cursor: 'pointer' }}
                 onClick={() => setTrackerInputVisible(v => !v)}
               >
                 MOVEMENT (KM)
@@ -429,7 +429,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
               {sparklineClicked && (
                 <button
                   onClick={() => setShowTrackerEdit(true)}
-                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#ffffff', opacity: 0.7, lineHeight: 1 }}
+                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#1a1a1a', opacity: 0.7, lineHeight: 1 }}
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
@@ -438,7 +438,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
               )}
             </div>
             {lastWeekTotal > 0 && (
-              <div className="text-[11px] font-medium mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              <div className="text-[11px] font-medium mt-1"                 style={{ color: 'rgba(26,26,26,0.45)' }}>
                 Last week {lastWeekTotal.toFixed(1)} km
               </div>
             )}
@@ -447,21 +447,21 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
 
          {/* Row 2: Full-width distance input — shown when MOVEMENT tapped */}
          {trackerInputVisible && <div style={{ marginBottom: 14 }}>
-           <label style={{ ...labelStyle, display: 'block', marginBottom: 8, color: '#ffffff' }}>TRACKER</label>
+           <label style={{ ...            labelStyle, display: 'block', marginBottom: 8, color: '#1a1a1a' }}>TRACKER</label>
            <div className="flex items-baseline gap-3">
              <input
                type="text"
                value={trackerDistance}
                 onChange={e => setTrackerDistance(e.target.value)}
                placeholder="0.0"
-               className="text-[2.5rem] font-black tracking-tighter text-white w-full p-0"
+               className="text-[2.5rem] font-black tracking-tighter w-full p-0" style={{color: '#1a1a1a'}}
                 style={{
                   backgroundColor: 'transparent',
                   border: 'none',
-                  color: trackerDistance ? '#9ba4b0' : '#a0a0a0'
+                  color: trackerDistance ? '#1a1a1a' : 'rgba(26,26,26,0.45)'
                 }}
              />
-             <span className="text-[1rem] font-black tracking-tighter" style={{ color: '#c6c6c6' }}>KM</span>
+              <span className="text-[1rem] font-black tracking-tighter" style={{ color: 'rgba(26,26,26,0.45)' }}>KM</span>
            </div>
             <div style={separatorStyle} />
           </div>}
@@ -486,7 +486,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
         </div>
 
         {/* Distance */}
-        <label style={{ ...labelStyle, display: 'block', marginBottom: 8, color: selectedExercise ? '#ffffff' : '#c6c6c6' }}>
+        <label style={{ ...labelStyle, display: 'block', marginBottom: 8,             color: selectedExercise ? '#1a1a1a' : 'rgba(26,26,26,0.45)' }}>
           {selectedExercise ? selectedExercise.exercise_name?.toUpperCase() : 'Distance'}
         </label>
         <div className="flex items-baseline gap-4">
@@ -495,7 +495,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
             value={distance}
             onChange={e => setDistance(e.target.value)}
             placeholder="0.0"
-            className="text-[2.5rem] font-black tracking-tighter text-white w-full p-0"
+            className="text-[2.5rem] font-black tracking-tighter w-full p-0" style={{color: '#1a1a1a'}}
             style={{ backgroundColor: 'transparent', border: 'none' }}
           />
           <span className="text-[1rem] font-black tracking-tighter" style={{ color: '#c6c6c6' }}>KM</span>
@@ -510,13 +510,13 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
           <div className="flex items-baseline gap-4">
             <div className="flex items-baseline gap-2">
               <input type="text" value={minutes} onChange={e => setMinutes(e.target.value)} placeholder="00"
-                className="text-[2.5rem] font-black tracking-tighter text-white w-16 text-left p-0"
+                className="text-[2.5rem] font-black tracking-tighter w-16 text-left p-0" style={{color: '#1a1a1a'}}
                 style={{ backgroundColor: 'transparent', border: 'none' }} />
               <span style={{ ...labelStyle }}>MIN</span>
             </div>
             <div className="flex items-baseline gap-2">
               <input type="text" value={seconds} onChange={e => setSeconds(e.target.value)} placeholder="00"
-                className="text-[2.5rem] font-black tracking-tighter text-white w-16 text-left p-0"
+                className="text-[2.5rem] font-black tracking-tighter w-16 text-left p-0" style={{color: '#1a1a1a'}}
                 style={{ backgroundColor: 'transparent', border: 'none' }} />
               <span style={{ ...labelStyle }}>SEC</span>
             </div>
@@ -531,7 +531,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
         onClick={handleCommit}
         disabled={saving || !hasAnyInput}
         className="w-full rounded-full py-5 text-[0.75rem] uppercase tracking-[0.4em] font-black active:scale-95 transition-all"
-        style={{ backgroundColor: saveSuccess ? '#22c55e' : '#ffffff', color: '#000000', boxShadow: '0 12px 32px rgba(0,0,0,0.4)', opacity: saving || !hasAnyInput ? 0.6 : 1, marginBottom: 48 }}>
+        style={{ backgroundColor: saveSuccess ? '#22c55e' : '#1a1a1a', color: '#ffffff', boxShadow: '0 12px 32px rgba(0,0,0,0.12)', opacity: saving || !hasAnyInput ? 0.6 : 1, marginBottom: 48 }}>
         {saving ? 'Saving...' : saveSuccess ? '✓ Session Saved!' : 'Log Session'}
       </button>
 
@@ -542,11 +542,11 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
       <section className="mb-10">
         <div style={{ paddingLeft: '2px', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: '14px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', color: '#ffffff' }}>Monthly</span>
+            <span style={{ fontSize: '14px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', color: '#1a1a1a' }}>Monthly</span>
             <button
               onClick={() => setMonthlyOffset(o => o - 1)}
               disabled={monthlyOffset <= minMonthlyOffset}
-              style={{ background: 'none', border: 'none', padding: '0 8px', cursor: monthlyOffset <= minMonthlyOffset ? 'default' : 'pointer', opacity: monthlyOffset <= minMonthlyOffset ? 0.2 : 0.85, color: '#fff', fontSize: '24px', lineHeight: 1 }}
+              style={{ background: 'none', border: 'none', padding: '0 8px', cursor: monthlyOffset <= minMonthlyOffset ? 'default' : 'pointer', opacity: monthlyOffset <= minMonthlyOffset ? 0.2 : 0.85, color: '#1a1a1a', fontSize: '24px', lineHeight: 1 }}
             >‹</button>
             <button
               onClick={() => setMonthlyOffset(o => o + 1)}
@@ -561,7 +561,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
         <MonthlyCalendarChart
           monthOffset={monthlyOffset}
           className="p-6 rounded-xl relative mb-4"
-          containerStyle={{ backgroundColor: '#121212', borderLeft: '2px solid #ffffff' }}
+            containerStyle={{ backgroundColor: 'rgba(0,0,0,0.05)', borderLeft: '2px solid rgba(0,0,0,0.08)', border: '1px solid rgba(0,0,0,0.08)', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}
           tabs={['RUNNING', 'ROW', 'CROSS TRAINER']}
           defaultTab="RUNNING"
         />
@@ -570,7 +570,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
       {/* 30-day chart */}
       <section className="mb-2" style={{ marginTop: isRunning ? 0 : 0 }}>
         <div style={{ paddingLeft: '2px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: '14px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', color: '#ffffff' }}>Movement</span>
+            <span style={{ fontSize: '14px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', color: '#1a1a1a' }}>Movement</span>
           <button
             onClick={() => setThirtyDayOffset(o => o + 1)}
             disabled={!hasOlderCardioData}
@@ -582,16 +582,16 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
             style={{ background: 'none', border: 'none', padding: '0 8px', cursor: thirtyDayOffset === 0 ? 'default' : 'pointer', opacity: thirtyDayOffset === 0 ? 0.2 : 0.85, color: '#fff', fontSize: '24px', lineHeight: 1 }}
           >›</button>
         </div>
-        <div className="p-6 rounded-xl relative" style={{ backgroundColor: '#121212' }}>
+        <div className="p-6 rounded-xl relative" style={{ backgroundColor: 'rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0.08)', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
           {/* Inside box header: 30 DAYS left, total+avg stacked on right */}
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
             {/* 30 DAYS — left, smaller, not bold */}
-            <h3 style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '1.5px', color: '#ffffff', lineHeight: 1, margin: 0, textTransform: 'uppercase' }}>{periodLabel}</h3>
+            <h3 style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '1.5px', color: '#1a1a1a', lineHeight: 1, margin: 0, textTransform: 'uppercase' }}>{periodLabel}</h3>
 
             {/* Total only — right */}
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 3 }}>
-              <span style={{ fontSize: '1.1rem', fontWeight: 900, letterSpacing: '-0.05em', color: '#ffffff', lineHeight: 1 }}>{total30}</span>
-              <span style={{ fontSize: '0.6rem', fontWeight: 700, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>km</span>
+              <span style={{ fontSize: '1.1rem', fontWeight: 900, letterSpacing: '-0.05em', color: '#1a1a1a', lineHeight: 1 }}>{total30}</span>
+              <span style={{ fontSize: '0.6rem', fontWeight: 700, color: 'rgba(26,26,26,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>km</span>
             </div>
           </div>
 
@@ -636,7 +636,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
                     <g key={i}>
                       <path
                         d={semiBar(x, y, barW, barH)}
-                        fill={`rgba(255,255,255,${opacity})`}
+                        fill={`rgba(26,26,26,${opacity})`}
                         filter={isPeak ? 'url(#barGlow30)' : undefined}
                       />
                       {isPeak && (
@@ -666,7 +666,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
                       <line
                         x1={0} y1={avgLineY}
                         x2={pillX - 3} y2={avgLineY}
-                        stroke="rgba(255,255,255,0.28)"
+                        stroke="rgba(26,26,26,0.28)"
                         strokeWidth="0.75"
                         strokeDasharray="4 3"
                       />

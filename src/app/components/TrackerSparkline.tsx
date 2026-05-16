@@ -81,7 +81,7 @@ const TrackerSparkline: React.FC<Props> = ({ weekChartData }) => {
                 <>
                   <circle cx={x} cy={y} r={CIRCLE_RADIUS + 1} fill="rgba(0,0,0,0.15)" filter="url(#topCircleGlow)" />
                   <circle cx={x} cy={y} r={CIRCLE_RADIUS} fill="#1a1a1a" />
-                  <text x={x} y={y - 6} textAnchor="middle" fill="#ffffff" fontSize="6" fontWeight="700" fontFamily="'Archivo', sans-serif">
+                  <text x={x} y={y - 6} textAnchor="middle" fill="#1a1a1a" fontSize="6" fontWeight="700" fontFamily="'Archivo', sans-serif">
                     {val.toFixed(1)}
                   </text>
                 </>
