@@ -186,18 +186,18 @@ const CaloriesTrends: React.FC = () => {
               <span style={trendLabelStyle}>
                 {weeklyAvg > 0 ? `${weeklyAvg.toLocaleString()} KCAL` : '\u2014 KCAL'}
               </span>
-              <button
-                onClick={() => setCalWeekOffset(o => o - 1)}
-                style={{ background: 'none', border: 'none', padding: '2px 1px', cursor: 'pointer', color: 'rgba(26,26,26,0.45)', display: 'flex', alignItems: 'center' }}
-              >
-                <ChevronLeft size={13} />
-              </button>
-              <button
-                onClick={() => setCalWeekOffset(o => Math.min(o + 1, 0))}
-                style={{ background: 'none', border: 'none', padding: '2px 1px', cursor: 'pointer', color: calWeekOffset < 0 ? 'rgba(26,26,26,0.45)' : 'rgba(26,26,26,0.18)', display: 'flex', alignItems: 'center' }}
-              >
-                <ChevronRight size={13} />
-              </button>
+               <button
+                 onClick={() => setCalWeekOffset(o => o - 1)}
+                 style={{ background: 'none', border: 'none', padding: '2px 1px', cursor: 'pointer', color: '#000000', display: 'flex', alignItems: 'center' }}
+               >
+                 <ChevronLeft size={14} />
+               </button>
+               <button
+                 onClick={() => setCalWeekOffset(o => Math.min(o + 1, 0))}
+                 style={{ background: 'none', border: 'none', padding: '2px 1px', cursor: 'pointer', color: calWeekOffset < 0 ? '#000000' : 'rgba(0,0,0,0.18)', display: 'flex', alignItems: 'center' }}
+               >
+                 <ChevronRight size={14} />
+               </button>
             </div>
             {calWeekNumber !== null && (
               <span style={trendLabelStyle}>{calWeekNumber}</span>
@@ -273,26 +273,26 @@ let bgColor = h > 0 ? '#1a1a1a' : 'rgba(26,26,26,0.08)';
               <span style={trendLabelStyle}>
                 {monthlyAvg > 0 ? `${monthlyAvg.toLocaleString()} KCAL` : '\u2014 KCAL'}
               </span>
-              <button
-                onClick={() => setMonthOffset(o => Math.max(o - 1, minMonthOffset))}
-                style={{
-                  background: 'none', border: 'none', padding: '2px 1px', cursor: 'pointer',
-                  color: monthOffset > minMonthOffset ? 'rgba(161,161,170,1)' : 'rgba(161,161,170,0.25)',
-                  display: 'flex', alignItems: 'center'
-                }}
-              >
-                <ChevronLeft size={13} />
-              </button>
-              <button
-                onClick={() => setMonthOffset(o => Math.min(o + 1, 0))}
-                style={{
-                  background: 'none', border: 'none', padding: '2px 1px', cursor: 'pointer',
-                  color: monthOffset < 0 ? 'rgba(161,161,170,1)' : 'rgba(161,161,170,0.25)',
-                  display: 'flex', alignItems: 'center'
-                }}
-              >
-                <ChevronRight size={13} />
-              </button>
+               <button
+                 onClick={() => setMonthOffset(o => Math.max(o - 1, minMonthOffset))}
+                 style={{
+                   background: 'none', border: 'none', padding: '2px 1px', cursor: 'pointer',
+                   color: monthOffset > minMonthOffset ? '#000000' : 'rgba(0,0,0,0.25)',
+                   display: 'flex', alignItems: 'center'
+                 }}
+               >
+                 <ChevronLeft size={14} />
+               </button>
+               <button
+                 onClick={() => setMonthOffset(o => Math.min(o + 1, 0))}
+                 style={{
+                   background: 'none', border: 'none', padding: '2px 1px', cursor: 'pointer',
+                   color: monthOffset < 0 ? '#000000' : 'rgba(0,0,0,0.25)',
+                   display: 'flex', alignItems: 'center'
+                 }}
+               >
+                 <ChevronRight size={14} />
+               </button>
             </div>
             <span style={trendLabelStyle}>{monthName}</span>
           </div>
