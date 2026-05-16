@@ -216,8 +216,8 @@ const CaloriesTrends: React.FC = () => {
 
 let bgColor = h > 0 ? '#1a1a1a' : 'rgba(26,26,26,0.08)';
               if (isToday) bgColor = '#2f2f2f';
-              if (isPeakBar) bgColor = '#404040';
-              const labelColor = '#ffffff';
+               if (isPeakBar) bgColor = '#ffffff';
+               const labelColor = isPeakBar ? '#000000' : '#ffffff';
 
               return (
                 <div
@@ -307,7 +307,7 @@ let bgColor = h > 0 ? '#1a1a1a' : 'rgba(26,26,26,0.08)';
 
                 let bgColor = h > 0 ? (h >= monthlyMax * 0.7 ? '#1a1a1a' : 'rgba(26,26,26,0.65)') : 'rgba(26,26,26,0.08)';
                 if (isToday) bgColor = '#1a1a1a';
-                if (isPeakBar) bgColor = '#1a1a1a';
+                if (isPeakBar) bgColor = '#ffffff';
 
                 return (
                   <div
