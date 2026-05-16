@@ -323,9 +323,10 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
               let border = '1.5px solid rgba(26,26,26,0.18)';
               let textColor = 'rgba(26,26,26,0.45)';
               let glowShadow = 'none';
-              if (rating === 'GOOD') { border = '1px solid #90c9a0'; textColor = '#90c9a0'; glowShadow = '0 0 8px rgba(144,201,160,0.75), 0 0 18px rgba(144,201,160,0.3)'; }
-              else if (rating === 'BAD') { border = '1px solid #ef4444'; textColor = '#ef4444'; glowShadow = '0 0 8px rgba(239,68,68,0.75), 0 0 18px rgba(239,68,68,0.3)'; }
-              else if (rating === 'OK') { border = '1px solid rgba(26,26,26,0.75)'; textColor = 'rgba(26,26,26,0.9)'; glowShadow = '0 0 8px rgba(26,26,26,0.25), 0 0 18px rgba(26,26,26,0.1)'; }
+
+              if (rating === 'GOOD') { border = '1px solid #90c9a0'; textColor = '#90c9a0'; glowShadow = '0 0 6px rgba(144,201,160,0.75), 0 0 15px rgba(144,201,160,0.3)'; }
+              else if (rating === 'BAD') { border = '1px solid #b02828'; textColor = '#b02828'; glowShadow = '0 0 6px rgba(176,40,40,0.75), 0 0 15px rgba(176,40,40,0.3)'; }
+              else if (rating === 'OK') { border = '1px solid rgba(26,26,26,0.75)'; textColor = 'rgba(26,26,26,0.9)'; glowShadow = '0 0 6px rgba(26,26,26,0.25), 0 0 15px rgba(26,26,26,0.1)'; }
               const showLine = i > 0 && rating !== null && prevRating !== null;
               return (
                 <React.Fragment key={i}>
@@ -336,7 +337,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
                     width: 28, height: 28, borderRadius: '50%',
                     backgroundColor: 'transparent', border,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    opacity: isFuture && !rating ? 0.35 : 1,
+                    opacity: isFuture && !rating ? 0.50 : 1,
                     flexShrink: 0,
                     boxShadow: rating ? glowShadow : 'none',
                   }}>
@@ -351,7 +352,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
               {ratingButtons.map(btn => (
                 <button key={btn.value} onClick={() => setFoodRating(btn.value)}
                   className="flex-1 py-4 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95"
-                   style={{ backgroundColor: foodRating === btn.value ? '#1a1a1a' : 'rgba(0,0,0,0.1)', border: foodRating === btn.value ? '1px solid #1a1a1a' : 'none', color: foodRating === btn.value ? '#ffffff' : 'rgba(26,26,26,0.6)' }}>
+                   style={{ backgroundColor: foodRating === btn.value ? '#1a1a1a' : 'rgba(0,0,0,0.07)', border: foodRating === btn.value ? '1px solid #1a1a1a' : 'none', color: foodRating === btn.value ? '#ffffff' : 'rgba(26,26,26,0.8)' }}>
                   {btn.label}
                 </button>
               ))}

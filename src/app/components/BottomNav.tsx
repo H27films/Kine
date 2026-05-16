@@ -11,7 +11,7 @@ interface NavItem {
 export const BottomNav: React.FC<NavigationProps> = ({ currentPage, onNavigate }) => {
   const items: NavItem[] = [
     {
-      icon: <HomeIcon size={22} color="rgba(26,26,26,0.75)" />,
+      icon: <HomeIcon size={22} color="rgba(26,26,26,0.90)" />,
       activeIcon: <HomeIcon size={22} color="#ffffff" />,
       page: 'dashboard',
     },
@@ -21,17 +21,17 @@ export const BottomNav: React.FC<NavigationProps> = ({ currentPage, onNavigate }
       page: 'weights',
     },
     {
-      icon: <RunningManIcon size={26} color="rgba(26,26,26,0.75)" />,
+      icon: <RunningManIcon size={26} color="rgba(26,26,26,0.90)" />,
       activeIcon: <RunningManIcon size={26} color="#ffffff" />,
       page: 'cardio',
     },
     {
-      icon: <CaloriesIcon size={22} color="rgba(26,26,26,0.75)" />,
+      icon: <CaloriesIcon size={22} color="rgba(26,26,26,0.90)" />,
       activeIcon: <CaloriesIcon size={22} color="#ffffff" />,
       page: 'calories',
     },
     {
-      icon: <ProfileIcon size={22} color="rgba(26,26,26,0.75)" />,
+      icon: <ProfileIcon size={22} color="rgba(26,26,26,0.90)" />,
       activeIcon: <ProfileIcon size={22} color="#ffffff" />,
       page: 'profile',
     },
@@ -63,7 +63,7 @@ export const BottomNav: React.FC<NavigationProps> = ({ currentPage, onNavigate }
             style={
               active
                 ? { backgroundColor: '#1a1a1a', color: '#ffffff', borderRadius: '9999px', transform: 'scale(1.1)' }
-                : { color: 'rgba(26,26,26,0.75)' }
+                : { color: 'rgba(26,26,26,0.90)' }
             }
           >
             {active ? item.activeIcon : item.icon}
