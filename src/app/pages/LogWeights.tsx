@@ -730,7 +730,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                     onClick={handleSaveWorkoutTemplate}
                     style={{ ...textTriggerStyle, padding: 0, margin: 0, border: 'none', background: 'none', font: 'inherit', color: EST_SLATE }}
                   >
-                    <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: EST_SLATE }}>SAVE WORKOUT</span>
+                    <span style={{ fontSize: '0.7rem', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#1a1a1a' }}>SAVE WORKOUT</span>
                     <Save size={13} strokeWidth={2.2} style={{ color: EST_SLATE }} />
                   </button>
                   {templateSaveFlash && (
@@ -743,8 +743,8 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                     onClick={(e) => { e.stopPropagation(); setShowClearConfirm(0); }}
                     style={{ ...textTriggerStyle, padding: 0, margin: 0, border: 'none', background: 'none', font: 'inherit' }}
                   >
-                    <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(220,38,38,0.55)' }}>CLEAR ALL</span>
-                    <X size={13} strokeWidth={2.2} style={{ color: 'rgba(220,38,38,0.55)' }} />
+                    <span style={{ fontSize: '0.7rem', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#1a1a1a' }}>CLEAR ALL</span>
+                    <X size={13} strokeWidth={2.2} style={{ color: EST_SLATE }} />
                   </button>
                   {showClearConfirm !== null && (
                     <>
@@ -773,8 +773,8 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
             onClick={(e) => { e.stopPropagation(); setShowClearConfirm(0); }}
             style={{ ...textTriggerStyle, padding: 0, margin: 0, border: 'none', background: 'none', font: 'inherit' }}
           >
-            <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(220,38,38,0.55)' }}>CLEAR ALL</span>
-            <X size={13} strokeWidth={2.2} style={{ color: 'rgba(220,38,38,0.55)' }} />
+            <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#1a1a1a' }}>CLEAR ALL</span>
+            <X size={13} strokeWidth={2.2} style={{ color: EST_SLATE }} />
           </button>
           {showClearConfirm !== null && (
             <>
