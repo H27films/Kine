@@ -351,7 +351,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
               {ratingButtons.map(btn => (
                 <button key={btn.value} onClick={() => setFoodRating(btn.value)}
                   className="flex-1 py-4 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95"
-                  style={{ backgroundColor: foodRating === btn.value ? '#1a1a1a' : 'rgba(0,0,0,0.04)', border: foodRating === btn.value ? '1px solid #1a1a1a' : '1px solid rgba(0,0,0,0.08)', color: foodRating === btn.value ? '#ffffff' : 'rgba(26,26,26,0.45)' }}>
+                   style={{ backgroundColor: foodRating === btn.value ? '#1a1a1a' : 'rgba(0,0,0,0.1)', border: foodRating === btn.value ? '1px solid #1a1a1a' : 'none', color: foodRating === btn.value ? '#ffffff' : 'rgba(26,26,26,0.6)' }}>
                   {btn.label}
                 </button>
               ))}
