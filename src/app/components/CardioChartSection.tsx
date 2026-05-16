@@ -264,8 +264,8 @@ const CardioChartSection: React.FC<CardioChartSectionProps> = ({
                 </linearGradient>
                 <linearGradient id="dropLineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
                   <stop offset="0%" stopColor="#1a1a1a" stopOpacity="1" />
-                  <stop offset="70%" stopColor="#1a1a1a" stopOpacity="0.4" />
-                  <stop offset="100%" stopColor="#1a1a1a" stopOpacity="0.15" />
+                  <stop offset="60%" stopColor="#1a1a1a" stopOpacity="0.6" />
+                  <stop offset="100%" stopColor="#1a1a1a" stopOpacity="0.35" />
                 </linearGradient>
               </defs>
 
@@ -305,7 +305,7 @@ const CardioChartSection: React.FC<CardioChartSectionProps> = ({
                 
                 for (let s = 0; s < segments; s++) {
                   const progress = s / segments;
-                  const opacity = 0.12 + (0.38 * progress); // 12% at curve -> 50% at bottom
+                  const opacity = 0.10 + (0.38 * progress); // 10% at curve -> 48% at bottom
                   const yStart = y + lineHeight * (s / segments);
                   const yEnd = y + lineHeight * ((s + 1) / segments);
                   
@@ -333,7 +333,7 @@ const CardioChartSection: React.FC<CardioChartSectionProps> = ({
                 return (
                   <g key={p.i}>
                     {/* Main dark dropline */}
-                    <line x1={p.x} y1={p.y} x2={p.x} y2={padTop + chartH} stroke="#1a1a1a" strokeWidth="1.5" strokeLinecap="round" />
+                    <line x1={p.x} y1={p.y} x2={p.x} y2={padTop + chartH} stroke="rgba(0,0,0,0.95)" strokeWidth="1.3" strokeLinecap="round" />
                     <circle cx={p.x} cy={p.y} r={glowRadius} fill="rgba(0,0,0,0.18)" filter="url(#dotBlur)" />
                     <circle cx={p.x} cy={p.y} r={dotRadius} fill="#1a1a1a" />
                     <text x={p.x} y={p.y - 9} textAnchor="middle" fill="#1a1a1a" fontSize="7" fontWeight="600" fontFamily="'Archivo', sans-serif">
