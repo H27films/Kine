@@ -268,15 +268,15 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <span className="text-[13px] uppercase tracking-[0.2em] font-black" style={{ color: '#1a1a1a' }}>Food Rating</span>
-                    <button onClick={() => setWeekOffset(o => o - 1)} style={{ background: 'none', border: 'none', padding: '4px 2px', cursor: 'pointer', color: 'rgba(26,26,26,0.45)', display: 'flex', alignItems: 'center' }}>
+                    <button onClick={() => setWeekOffset(o => o - 1)} style={{ background: 'none', border: 'none', padding: '4px 2px', cursor: 'pointer', color: 'rgba(26,26,26,0.75)', display: 'flex', alignItems: 'center' }}>
                       <ChevronLeft size={16} />
                     </button>
-                    <button onClick={() => setWeekOffset(o => Math.min(o + 1, 0))} style={{ background: 'none', border: 'none', padding: '4px 2px', cursor: 'pointer', color: weekOffset < 0 ? 'rgba(26,26,26,0.45)' : 'rgba(26,26,26,0.18)', display: 'flex', alignItems: 'center' }}>
+                    <button onClick={() => setWeekOffset(o => Math.min(o + 1, 0))} style={{ background: 'none', border: 'none', padding: '4px 2px', cursor: 'pointer', color: weekOffset < 0 ? 'rgba(26,26,26,0.75)' : 'rgba(26,26,26,0.35)', display: 'flex', alignItems: 'center' }}>
                       <ChevronRight size={16} />
                     </button>
                   </div>
                   {weekNumber !== null && (
-                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'rgba(26,26,26,0.45)', letterSpacing: '0.1em' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'rgba(26,26,26,0.75)', letterSpacing: '0.1em' }}>
                       {weekNumber}
                     </span>
                   )}
