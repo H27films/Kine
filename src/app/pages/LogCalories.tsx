@@ -246,9 +246,8 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
             <div style={{ flex: '0 0 auto', display: 'flex', flexDirection: 'column' }}>
               <label className="block text-[13px] uppercase tracking-[0.2em] font-black mb-4" style={{ color: '#1a1a1a' }}>Total Calories</label>
               <input type="number" value={calories} onChange={e => setCalories(e.target.value)} placeholder="0000"
-                className="text-7xl font-black tracking-tighter text-white p-0 placeholder:text-[#94A3B8]"
-                style={{ backgroundColor: 'transparent', border: 'none', width: '4ch', flex: 1 }} />
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] mt-2 block" style={{ color: 'rgba(161,161,170,1)' }}>kcal today</span>
+                className="text-7xl font-black tracking-tighter p-0 placeholder:text-[#94A3B8]" style={{ color: '#1a1a1a', backgroundColor: 'transparent', border: 'none', width: '4ch', flex: 1 }} />
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] mt-2 block" style={{ color: 'rgba(26,26,26,0.6)' }}>kcal today</span>
             </div>
             <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'stretch' }}>
               <CaloriesSparkline weeklyBars={weeklyBars} onClick={() => setChartExpanded(true)} />
@@ -284,8 +283,8 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-                    <span className="text-7xl font-black tracking-tighter text-white" style={{ lineHeight: 1 }}>{foodScore}</span>
-                    <span className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: 'rgba(161,161,170,1)' }}>/{maxScore}</span>
+                    <span className="text-7xl font-black tracking-tighter" style={{ lineHeight: 1, color: '#1a1a1a' }}>{foodScore}</span>
+                    <span className="text-sm font-medium tracking-[0.2em]" style={{ color: 'rgba(26,26,26,0.6)' }}>/{maxScore}</span>
                   </div>
                   {daysWithRating > 0 && (
                     <svg width={54} height={54} viewBox={`0 0 54 54`}>

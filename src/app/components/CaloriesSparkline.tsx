@@ -74,7 +74,7 @@ color: '#1a1a1a',
             lineHeight: 1,
           }}>
             {avgKcal !== null ? avgKcal.toLocaleString() : '\u2014'}
-            <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.08em', color: 'rgba(26,26,26,0.45)', marginLeft: 4 }}>KCAL</span>
+            <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.08em', color: 'rgba(26,26,26,0.8)', marginLeft: 4 }}>KCAL</span>
           </div>
         </div>
 
@@ -160,7 +160,7 @@ color: '#1a1a1a',
         marginBottom: 4,
       }}>
         {avgKcal !== null ? avgKcal.toLocaleString() : '\u2014'}
-        <span style={{ fontSize: '8px', fontWeight: 700, letterSpacing: '0.08em', color: 'rgba(26,26,26,0.45)', marginLeft: 3 }}>KCAL</span>
+        <span style={{ fontSize: '8px', fontWeight: 700, letterSpacing: '0.08em', color: 'rgba(26,26,26,0.8)', marginLeft: 3 }}>KCAL</span>
       </div>
 
       {/* Horizontal bars — grow right to left */}
