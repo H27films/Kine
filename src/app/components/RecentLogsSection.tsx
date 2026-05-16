@@ -151,7 +151,7 @@ const RecentLogsSection: React.FC<Props> = ({ refreshKey }) => {
     <section>
       <div className="flex justify-between items-center mb-3">
         <p style={sectionLabelStyle}>Recent Logs</p>
-        <Clock size={15} style={{ color: 'rgba(26,26,26,0.45)', marginBottom: '1.25rem' }} />
+        <Clock size={15} style={{ color: 'rgba(26,26,26,0.8)', marginBottom: '1.25rem' }} />
       </div>
        <div className="space-y-3">
          {recentLogs.map((log, index) => {

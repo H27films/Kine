@@ -106,7 +106,7 @@ const WeeklyVolumeSection: React.FC = () => {
           {showWeekPicker ? (
             <span style={{ color: '#1a1a1a', fontWeight: 800, fontSize: '0.85rem', fontFamily: "'Archivo', sans-serif" }}>{availableWeeks[weekIdx]}</span>
           ) : (
-            <Calendar size={18} style={{ color: 'rgba(26,26,26,0.45)' }} />
+            <Calendar size={18} style={{ color: 'rgba(26,26,26,0.8)' }} />
           )}
         </button>
       </div>
