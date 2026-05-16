@@ -547,10 +547,10 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
             <button
               onClick={() => setMonthlyOffset(o => o + 1)}
               disabled={monthlyOffset >= maxMonthlyOffset}
-              style={{ background: 'none', border: 'none', padding: '0 8px', cursor: monthlyOffset >= maxMonthlyOffset ? 'default' : 'pointer', opacity: monthlyOffset >= maxMonthlyOffset ? 0.2 : 0.85, color: '#fff', fontSize: '24px', lineHeight: 1 }}
+              style={{ background: 'none', border: 'none', padding: '0 8px', cursor: monthlyOffset >= maxMonthlyOffset ? 'default' : 'pointer', opacity: monthlyOffset >= maxMonthlyOffset ? 0.2 : 0.85, color: '#1a1a1a', fontSize: '24px', lineHeight: 1 }}
             >›</button>
           </div>
-          <span style={{ fontSize: '14px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', color: '#ffffff' }}>
+           <span style={{ fontSize: '14px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', color: '#1a1a1a' }}>
             {new Date(new Date().getFullYear(), new Date().getMonth() + monthlyOffset, 1).toLocaleDateString('en-US', { month: 'long' }).toUpperCase()}
           </span>
         </div>
