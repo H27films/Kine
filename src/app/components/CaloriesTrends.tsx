@@ -22,8 +22,8 @@ const fmtDate = (d: Date) =>
 
 const trendLabelStyle: React.CSSProperties = {
   fontSize: '11px',
-  fontWeight: 700,
-  color: 'rgba(26,26,26,0.45)',
+  fontWeight: 600,
+  color: '#000000',
   letterSpacing: '0.3em',
   textTransform: 'uppercase',
 };
