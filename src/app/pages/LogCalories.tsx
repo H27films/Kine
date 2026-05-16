@@ -330,7 +330,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
               return (
                 <React.Fragment key={i}>
                   {i > 0 && (
-                    <div style={{ flex: 1, height: 1.5, backgroundColor: showLine ? 'rgba(26,26,26,0.35)' : 'transparent' }} />
+                    <div style={{ flex: 1, height: 1, backgroundColor: showLine ? 'rgba(26,26,26,0.75)' : 'transparent' }} />
                   )}
                   <div style={{
                     width: 28, height: 28, borderRadius: '50%',
