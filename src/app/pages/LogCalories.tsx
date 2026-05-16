@@ -284,7 +284,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
                     <span className="text-7xl font-black tracking-tighter" style={{ lineHeight: 1, color: '#1a1a1a' }}>{foodScore}</span>
-                    <span className="text-sm font-medium tracking-[0.2em]" style={{ color: 'rgba(26,26,26,0.6)' }}>/{maxScore}</span>
+                    <span className="text-sm tracking-[0.2em]" style={{ fontWeight: 550, color: 'rgba(26,26,26,0.75)' }}>/{maxScore}</span>
                   </div>
                   {daysWithRating > 0 && (
                     <svg width={54} height={54} viewBox={`0 0 54 54`}>
