@@ -264,7 +264,7 @@ export const CardioTypeChart: React.FC = () => {
       </div>
 
       {/* Chart box */}
-      <div className="rounded-lg p-5" style={{ backgroundColor: 'rgba(0,0,0,0.05)', boxShadow: '0 5px 12px rgba(0,0,0,0.08)' }}>
+      <div className="rounded-lg p-5" style={{ backgroundColor: 'rgba(0,0,0,0.05)', borderLeft: '2px solid rgba(0,0,0,0.9)', boxShadow: '0 5px 12px rgba(0,0,0,0.08)' }}>
 
         {/* Top row: type selector + count */}
         <div className="flex items-center justify-between mb-3">

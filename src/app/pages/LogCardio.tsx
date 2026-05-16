@@ -557,7 +557,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
         <MonthlyCalendarChart
           monthOffset={monthlyOffset}
           className="p-6 rounded-xl relative mb-4"
-             containerStyle={{ backgroundColor: 'rgba(0,0,0,0.05)', boxShadow: '0 5px 12px rgba(0,0,0,0.08)' }}
+             containerStyle={{ backgroundColor: 'rgba(0,0,0,0.05)', borderLeft: '2px solid rgba(0,0,0,0.9)', boxShadow: '0 5px 12px rgba(0,0,0,0.08)' }}
           tabs={['RUNNING', 'ROW', 'CROSS TRAINER']}
           defaultTab="RUNNING"
         />
@@ -578,7 +578,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
             style={{ background: 'none', border: 'none', padding: '0 8px', cursor: thirtyDayOffset === 0 ? 'default' : 'pointer', opacity: thirtyDayOffset === 0 ? 0.2 : 0.85, color: '#fff', fontSize: '24px', lineHeight: 1 }}
           >›</button>
         </div>
-        <div className="p-6 rounded-xl relative" style={{ backgroundColor: 'rgba(0,0,0,0.05)', boxShadow: '0 5px 12px rgba(0,0,0,0.08)' }}>
+        <div className="p-6 rounded-xl relative" style={{ backgroundColor: 'rgba(0,0,0,0.05)', borderLeft: '2px solid rgba(0,0,0,0.9)', boxShadow: '0 5px 12px rgba(0,0,0,0.08)' }}>
           {/* Inside box header: 30 DAYS left, total+avg stacked on right */}
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
             {/* 30 DAYS — left, smaller, not bold */}
