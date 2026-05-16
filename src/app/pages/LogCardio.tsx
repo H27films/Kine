@@ -460,7 +460,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
                    color: trackerDistance ? '#1a1a1a' : 'rgba(26,26,26,0.45)'
                  }}
              />
-              <span className="text-[1rem] font-black tracking-tighter" style={{ color: 'rgba(26,26,26,0.45)' }}>KM</span>
+               <span className="text-[1rem] font-bold" style={{ color: 'rgba(26,26,26,0.85)', letterSpacing: '0.2em', paddingLeft: '4px' }}>KM</span>
            </div>
             <div style={separatorStyle} />
           </div>}
@@ -496,7 +496,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
             placeholder="0.0"
             className="text-[2.5rem] font-black tracking-tighter w-full p-0" style={{ backgroundColor: 'transparent', border: 'none', color: '#1a1a1a' }}
           />
-          <span className="text-[1rem] font-black tracking-tighter" style={{ color: '#c6c6c6' }}>KM</span>
+           <span className="text-[1rem] font-bold" style={{ color: 'rgba(26,26,26,0.85)', letterSpacing: '0.2em', paddingLeft: '4px' }}>KM</span>
         </div>
         <div style={separatorStyle} />
       </section>
