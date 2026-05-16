@@ -503,8 +503,8 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
 
       {/* Duration — only shown for Running */}
       {isRunning && (
-        <section className="mb-4">
-          <label style={{ ...labelStyle, display: 'block', marginBottom: 8 }}>Duration</label>
+        <section className="mb-8">
+          <label style={{ ...labelStyle, display: 'block', marginBottom: 8, marginTop: 8 }}>Duration</label>
           <div className="flex items-baseline gap-4">
             <div className="flex items-baseline gap-2">
               <input type="text" value={minutes} onChange={e => setMinutes(e.target.value)} placeholder="00"
