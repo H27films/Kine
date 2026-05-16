@@ -640,7 +640,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
                           x={x + barW / 2}
                           y={y - 5}
                           textAnchor="middle"
-                          fill="white"
+                          fill="#1a1a1a"
                           fontSize="7"
                           fontWeight="800"
                         >
