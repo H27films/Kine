@@ -177,7 +177,7 @@ const WeeklyChart: React.FC<{
         }}>{weekLabel}</span>
       </div>
 
-      <div className="rounded-lg p-5" style={{ backgroundColor: 'rgba(0,0,0,0.05)', borderLeft: '2px solid rgba(0,0,0,0.08)', boxShadow: '0 5px 12px rgba(0,0,0,0.08)' }}>
+      <div className="rounded-lg p-5" style={{ backgroundColor: 'rgba(0,0,0,0.05)', borderLeft: '2px solid rgba(0,0,0,0.9)', boxShadow: '0 5px 12px rgba(0,0,0,0.08)' }}>
         {/* Tabs only — chevrons moved above */}
         <div className="flex items-center mb-3">
           <div className="flex gap-4">
@@ -755,7 +755,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
       </section>
 
       <section className="mb-4">
-        <div className={`rounded-lg ${dayWeights.length > 0 ? 'p-5' : 'p-3'} cursor-pointer`} style={{ backgroundColor: 'rgba(0,0,0,0.05)', borderLeft: '2px solid rgba(0,0,0,0.08)', boxShadow: '0 5px 12px rgba(0,0,0,0.08)' }} onClick={() => setWeightsExpanded(!weightsExpanded)}>
+        <div className={`rounded-lg ${dayWeights.length > 0 ? 'p-5' : 'p-3'} cursor-pointer`} style={{ backgroundColor: 'rgba(0,0,0,0.05)', borderLeft: '2px solid rgba(0,0,0,0.9)', boxShadow: '0 5px 12px rgba(0,0,0,0.08)' }} onClick={() => setWeightsExpanded(!weightsExpanded)}>
           <div className={`flex items-center justify-between ${dayWeights.length > 0 ? 'mb-4' : 'mb-0'}`}>
             <div className="flex items-center gap-2">
               <Dumbbell size={16} color="#1a1a1a" />
@@ -862,7 +862,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
             })()}
           </span>
         </div>
-        <MonthlyCalendarChart monthOffset={monthlyOffset} containerStyle={{ backgroundColor: 'rgba(0,0,0,0.05)', borderLeft: '2px solid rgba(0,0,0,0.08)', boxShadow: '0 5px 12px rgba(0,0,0,0.08)', padding: '32px 24px' }} />
+        <MonthlyCalendarChart monthOffset={monthlyOffset} containerStyle={{ backgroundColor: 'rgba(0,0,0,0.05)', borderLeft: '2px solid rgba(0,0,0,0.9)', boxShadow: '0 5px 12px rgba(0,0,0,0.08)', padding: '32px 24px' }} />
       </section>
 
       <section className="mt-8">

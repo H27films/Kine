@@ -166,7 +166,7 @@ const DayCard: React.FC<{ day: DayData }> = ({ day }) => {
         padding: '16px',
         display: 'flex',
         flexDirection: 'column',
-        borderLeft: '2px solid rgba(0,0,0,0.08)',
+        borderLeft: '2px solid rgba(0,0,0,0.9)',
         flexShrink: 0,
         position: 'relative',
       }}
