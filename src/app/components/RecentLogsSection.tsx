@@ -149,7 +149,7 @@ const RecentLogsSection: React.FC<Props> = ({ refreshKey }) => {
 
   return (
     <section>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-3">
         <p style={sectionLabelStyle}>Recent Logs</p>
         <Clock size={15} style={{ color: 'rgba(26,26,26,0.45)', marginBottom: '1.25rem' }} />
       </div>
@@ -164,9 +164,9 @@ const RecentLogsSection: React.FC<Props> = ({ refreshKey }) => {
            return (
              <>
                 {showDateSeparator && (
-                   <div key={`sep-${log.id}`} className="w-full h-[0.5px] bg-[#1a1a1a] opacity-20 my-2" />
+                   <div key={`sep-${log.id}`} className="w-full h-[1px] bg-[#1a1a1a] opacity-80 my-2" />
                 )}
-               <div key={log.id} className="rounded-lg overflow-hidden"                  style={{ backgroundColor: 'rgba(0,0,0,0.05)', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
+               <div key={log.id} className="rounded-lg overflow-hidden"                  style={{ backgroundColor: 'rgba(0,0,0,0.05)', boxShadow: '0 5px 12px rgba(0,0,0,0.08)' }}>
                 {/* Collapsed / header row */}
                 <div
                   className="flex items-center gap-4 p-4 cursor-pointer"

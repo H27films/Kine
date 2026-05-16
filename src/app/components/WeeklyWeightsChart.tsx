@@ -99,7 +99,7 @@ const WeeklyWeightsChart: React.FC = () => {
   const avgExercises = bars.length > 0 ? Math.round(bars.reduce((s, b) => s + b.count, 0) / bars.length) : 0;
 
   return (
-    <div className="rounded-lg p-6 relative" style={{ backgroundColor: 'rgba(0,0,0,0.05)', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
+    <div className="rounded-lg relative" style={{ backgroundColor: 'rgba(0,0,0,0.05)', borderLeft: '2px solid rgba(0,0,0,0.9)', boxShadow: '0 5px 12px rgba(0,0,0,0.08)', padding: '32px 24px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <p style={{ ...sectionLabelStyle, marginBottom: 0 }}>7 WEEKS</p>
