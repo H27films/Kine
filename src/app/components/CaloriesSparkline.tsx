@@ -41,7 +41,7 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars, expanded = false, onCl
               fontSize: '13px',
               fontWeight: 900,
               letterSpacing: '0.2em',
-              color: '#ffffff',
+              color: '#1a1a1a',
               textTransform: 'uppercase',
             }}>Total Calories</span>
             {/* Pencil icon — opens edit sheet */}
@@ -56,7 +56,7 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars, expanded = false, onCl
                   display: 'flex',
                   alignItems: 'center',
                   opacity: 0.85,
-                  color: '#ffffff',
+                  color: '#1a1a1a',
                 }}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -70,11 +70,11 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars, expanded = false, onCl
             fontSize: '17px',
             fontWeight: 900,
             letterSpacing: '-0.04em',
-            color: 'rgba(255,255,255,0.9)',
+color: '#1a1a1a',
             lineHeight: 1,
           }}>
             {avgKcal !== null ? avgKcal.toLocaleString() : '\u2014'}
-            <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.08em', color: 'rgba(255,255,255,0.35)', marginLeft: 4 }}>KCAL</span>
+            <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.08em', color: 'rgba(26,26,26,0.45)', marginLeft: 4 }}>KCAL</span>
           </div>
         </div>
 
@@ -83,8 +83,8 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars, expanded = false, onCl
           {weeklyBars.map((val, i) => {
             if (val <= 0) return null;
             const rawPct = rawMax > 0 ? val / rawMax : 0;
-            const brightness = Math.round(80 + rawPct * 175);
-            const barColor = `rgb(${brightness},${brightness},${brightness})`;
+            const opacity = Math.max(0.22, Math.min(1, rawPct));
+            const barColor = `rgba(26,26,26,${opacity})`;
             const fillPct = Math.max(rawPct * 100, 8);
 
             return (
@@ -92,7 +92,7 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars, expanded = false, onCl
                 <div style={{
                   flex: 1,
                   height: 20,
-                  backgroundColor: 'rgba(255,255,255,0.05)',
+                  backgroundColor: 'rgba(26,26,26,0.08)',
                   borderRadius: '9999px 0 0 9999px',
                   overflow: 'hidden',
                   position: 'relative',
@@ -115,7 +115,7 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars, expanded = false, onCl
                     fontSize: '10px',
                     fontWeight: 800,
                     letterSpacing: '-0.02em',
-                    color: brightness > 160 ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.85)',
+                    color: 'rgba(26,26,26,0.7)',
                     whiteSpace: 'nowrap',
                     pointerEvents: 'none',
                   }}>
@@ -127,7 +127,7 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars, expanded = false, onCl
                   fontSize: '12px',
                   fontWeight: 700,
                   letterSpacing: '0.05em',
-                  color: '#ffffff',
+                  color: '#1a1a1a',
                   flexShrink: 0,
                   textAlign: 'right',
                 }}>
@@ -154,23 +154,21 @@ const CaloriesSparkline: React.FC<Props> = ({ weeklyBars, expanded = false, onCl
         fontSize: '15px',
         fontWeight: 900,
         letterSpacing: '-0.04em',
-        color: 'rgba(255,255,255,0.9)',
+        color: '#1a1a1a',
         lineHeight: 1,
         flexShrink: 0,
         marginBottom: 4,
       }}>
         {avgKcal !== null ? avgKcal.toLocaleString() : '\u2014'}
-        <span style={{ fontSize: '8px', fontWeight: 700, letterSpacing: '0.08em', color: 'rgba(255,255,255,0.35)', marginLeft: 3 }}>KCAL</span>
+        <span style={{ fontSize: '8px', fontWeight: 700, letterSpacing: '0.08em', color: 'rgba(26,26,26,0.45)', marginLeft: 3 }}>KCAL</span>
       </div>
 
       {/* Horizontal bars — grow right to left */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly', gap: 3 }}>
         {weeklyBars.map((val, i) => {
           const rawPct = rawMax > 0 ? val / rawMax : 0;
-          const brightness = val > 0 ? Math.round(80 + rawPct * 175) : 0;
-          const barColor = val > 0
-            ? `rgb(${brightness},${brightness},${brightness})`
-            : 'rgba(255,255,255,0.05)';
+          const opacity = val > 0 ? Math.max(0.22, Math.min(1, rawPct)) : 0.08;
+          const barColor = `rgba(26,26,26,${opacity})`;
           const fillPct = val > 0 ? Math.max(rawPct * 100, 6) : 8;
 
           return (

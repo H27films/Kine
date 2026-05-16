@@ -244,7 +244,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
         ) : (
           <div style={{ display: 'flex', alignItems: 'stretch', width: '100%', gap: 0 }}>
             <div style={{ flex: '0 0 auto', display: 'flex', flexDirection: 'column' }}>
-              <label className="block text-[13px] uppercase tracking-[0.2em] font-black mb-4" style={{ color: '#ffffff' }}>Total Calories</label>
+              <label className="block text-[13px] uppercase tracking-[0.2em] font-black mb-4" style={{ color: '#1a1a1a' }}>Total Calories</label>
               <input type="number" value={calories} onChange={e => setCalories(e.target.value)} placeholder="0000"
                 className="text-7xl font-black tracking-tighter text-white p-0 placeholder:text-[#94A3B8]"
                 style={{ backgroundColor: 'transparent', border: 'none', width: '4ch', flex: 1 }} />
@@ -268,16 +268,16 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span className="text-[13px] uppercase tracking-[0.2em] font-black" style={{ color: '#ffffff' }}>Food Rating</span>
-                    <button onClick={() => setWeekOffset(o => o - 1)} style={{ background: 'none', border: 'none', padding: '4px 2px', cursor: 'pointer', color: 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center' }}>
+                    <span className="text-[13px] uppercase tracking-[0.2em] font-black" style={{ color: '#1a1a1a' }}>Food Rating</span>
+                    <button onClick={() => setWeekOffset(o => o - 1)} style={{ background: 'none', border: 'none', padding: '4px 2px', cursor: 'pointer', color: 'rgba(26,26,26,0.45)', display: 'flex', alignItems: 'center' }}>
                       <ChevronLeft size={16} />
                     </button>
-                    <button onClick={() => setWeekOffset(o => Math.min(o + 1, 0))} style={{ background: 'none', border: 'none', padding: '4px 2px', cursor: 'pointer', color: weekOffset < 0 ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.18)', display: 'flex', alignItems: 'center' }}>
+                    <button onClick={() => setWeekOffset(o => Math.min(o + 1, 0))} style={{ background: 'none', border: 'none', padding: '4px 2px', cursor: 'pointer', color: weekOffset < 0 ? 'rgba(26,26,26,0.45)' : 'rgba(26,26,26,0.18)', display: 'flex', alignItems: 'center' }}>
                       <ChevronRight size={16} />
                     </button>
                   </div>
                   {weekNumber !== null && (
-                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.1em' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'rgba(26,26,26,0.45)', letterSpacing: '0.1em' }}>
                       {weekNumber}
                     </span>
                   )}
@@ -301,11 +301,11 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
                           <circle
                             key={i}
                             cx={x} cy={y} r={2.8}
-                            fill={i < filled ? 'rgba(255,255,255,0.90)' : 'rgba(255,255,255,0.10)'}
+                            fill={i < filled ? 'rgba(26,26,26,0.90)' : 'rgba(26,26,26,0.10)'}
                           />
                         );
                       })}
-                      <text x={27} y={31} textAnchor="middle" fill="rgba(255,255,255,0.80)" fontSize="11" fontWeight="700">
+                      <text x={27} y={31} textAnchor="middle" fill="rgba(26,26,26,0.80)" fontSize="11" fontWeight="700">
                         {Math.round(pct * 100)}%
                       </text>
                     </svg>
@@ -321,17 +321,17 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
               const today = new Date();
               const todayIdx = today.getDay() === 0 ? 6 : today.getDay() - 1;
               const isFuture = weekOffset === 0 && i > todayIdx;
-              let border = '1.5px solid rgba(255,255,255,0.38)';
-              let textColor = 'rgba(255,255,255,0.5)';
+              let border = '1.5px solid rgba(26,26,26,0.18)';
+              let textColor = 'rgba(26,26,26,0.45)';
               let glowShadow = 'none';
               if (rating === 'GOOD') { border = '2px solid #90c9a0'; textColor = '#90c9a0'; glowShadow = '0 0 8px rgba(144,201,160,0.75), 0 0 18px rgba(144,201,160,0.3)'; }
               else if (rating === 'BAD') { border = '2px solid #ef4444'; textColor = '#ef4444'; glowShadow = '0 0 8px rgba(239,68,68,0.75), 0 0 18px rgba(239,68,68,0.3)'; }
-              else if (rating === 'OK') { border = '2px solid rgba(255,255,255,0.75)'; textColor = 'rgba(255,255,255,0.9)'; glowShadow = '0 0 8px rgba(255,255,255,0.45), 0 0 18px rgba(255,255,255,0.15)'; }
+              else if (rating === 'OK') { border = '2px solid rgba(26,26,26,0.75)'; textColor = 'rgba(26,26,26,0.9)'; glowShadow = '0 0 8px rgba(26,26,26,0.25), 0 0 18px rgba(26,26,26,0.1)'; }
               const showLine = i > 0 && rating !== null && prevRating !== null;
               return (
                 <React.Fragment key={i}>
                   {i > 0 && (
-                    <div style={{ flex: 1, height: 1.5, backgroundColor: showLine ? 'rgba(255,255,255,0.75)' : 'transparent' }} />
+                    <div style={{ flex: 1, height: 1.5, backgroundColor: showLine ? 'rgba(26,26,26,0.35)' : 'transparent' }} />
                   )}
                   <div style={{
                     width: 28, height: 28, borderRadius: '50%',
@@ -352,7 +352,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
               {ratingButtons.map(btn => (
                 <button key={btn.value} onClick={() => setFoodRating(btn.value)}
                   className="flex-1 py-4 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95"
-                  style={{ backgroundColor: foodRating === btn.value ? '#ffffff' : '#121212', border: foodRating === btn.value ? '1px solid #ffffff' : '1px solid rgba(255,255,255,0.05)', color: foodRating === btn.value ? '#000000' : 'rgba(161,161,170,1)' }}>
+                  style={{ backgroundColor: foodRating === btn.value ? '#1a1a1a' : 'rgba(0,0,0,0.04)', border: foodRating === btn.value ? '1px solid #1a1a1a' : '1px solid rgba(0,0,0,0.08)', color: foodRating === btn.value ? '#ffffff' : 'rgba(26,26,26,0.45)' }}>
                   {btn.label}
                 </button>
               ))}
@@ -366,7 +366,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
           onClick={() => setBodySectionOpen(!bodySectionOpen)}
           className="w-full flex justify-between items-center mb-6 bg-transparent border-none p-0 cursor-pointer"
         >
-          <span className="text-[13px] uppercase tracking-[0.2em] font-black" style={{ color: '#ffffff' }}>Body Measurements</span>
+          <span className="text-[13px] uppercase tracking-[0.2em] font-black" style={{ color: '#1a1a1a' }}>Body Measurements</span>
           <svg 
             className={`transition-transform duration-200 ${bodySectionOpen ? 'rotate-180' : ''}`} 
             width="20" 
@@ -395,11 +395,11 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
                 return (
                   <label key={field.label} htmlFor={field.id} className="flex justify-between items-center p-5 rounded-lg cursor-text"
                     style={{
-                      backgroundColor: isFocused ? '#ffffff' : '#121212',
-                      border: isFocused ? '1px solid #ffffff' : '1px solid rgba(255,255,255,0.05)',
+                      backgroundColor: isFocused ? 'rgba(0,0,0,0.04)' : 'rgba(0,0,0,0.04)',
+                      border: isFocused ? '1px solid rgba(0,0,0,0.18)' : '1px solid rgba(0,0,0,0.08)',
                       transition: 'background-color 0.15s, border-color 0.15s',
                     }}>
-                    <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: isFocused ? '#000000' : '#ffffff' }}>{field.label}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: isFocused ? '#1a1a1a' : 'rgba(26,26,26,0.45)' }}>{field.label}</span>
                     <div style={{ position: 'relative', width: '6rem', textAlign: 'right' }}>
                       {showHint && (
                         <span className="text-lg font-black tracking-tight" style={{ color: '#9ba4b0', pointerEvents: 'none', userSelect: 'none' }}>
@@ -417,7 +417,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
                         className="text-right text-lg font-black tracking-tight p-0"
                         style={{
                           backgroundColor: 'transparent', border: 'none', outline: 'none',
-                          color: isFocused ? '#000000' : '#ffffff',
+                          color: '#1a1a1a',
                           width: showHint ? '0' : '100%',
                           opacity: showHint ? 0 : 1,
                           position: showHint ? 'absolute' : 'relative',
@@ -437,7 +437,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
 
       <button onClick={handleSave} disabled={saving}
         className="w-full font-black uppercase tracking-widest text-[10px] py-5 rounded-full mt-4 active:scale-[0.98] transition-all mb-16"
-        style={{ backgroundColor: saveSuccess ? '#22c55e' : '#ffffff', color: '#000000', opacity: saving ? 0.7 : 1 }}>
+        style={{ backgroundColor: saveSuccess ? '#22c55e' : '#1a1a1a', color: '#ffffff', opacity: saving ? 0.7 : 1 }}>
         {saving ? 'Saving...' : saveSuccess ? '✓ Saved!' : 'Update Metrics'}
       </button>
 

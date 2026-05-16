@@ -23,7 +23,7 @@ const fmtDate = (d: Date) =>
 const trendLabelStyle: React.CSSProperties = {
   fontSize: '11px',
   fontWeight: 700,
-  color: 'rgba(161,161,170,1)',
+  color: 'rgba(26,26,26,0.45)',
   letterSpacing: '0.3em',
   textTransform: 'uppercase',
 };
@@ -173,10 +173,10 @@ const CaloriesTrends: React.FC = () => {
 
   return (
     <section className="mb-8">
-      <h3 className="text-[13px] font-black uppercase tracking-[0.2em] mb-6" style={{ color: '#ffffff' }}>
+      <h3 className="text-[13px] font-black uppercase tracking-[0.2em] mb-6" style={{ color: '#1a1a1a' }}>
         Performance Trends
       </h3>
-      <div className="space-y-10">
+      <div className="space-y-10 p-5 rounded-xl" style={{ backgroundColor: 'rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0.08)', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
 
         {/* === Weekly Calories Chart === */}
         <div>
@@ -188,13 +188,13 @@ const CaloriesTrends: React.FC = () => {
               </span>
               <button
                 onClick={() => setCalWeekOffset(o => o - 1)}
-                style={{ background: 'none', border: 'none', padding: '2px 1px', cursor: 'pointer', color: 'rgba(161,161,170,1)', display: 'flex', alignItems: 'center' }}
+                style={{ background: 'none', border: 'none', padding: '2px 1px', cursor: 'pointer', color: 'rgba(26,26,26,0.45)', display: 'flex', alignItems: 'center' }}
               >
                 <ChevronLeft size={13} />
               </button>
               <button
                 onClick={() => setCalWeekOffset(o => Math.min(o + 1, 0))}
-                style={{ background: 'none', border: 'none', padding: '2px 1px', cursor: 'pointer', color: calWeekOffset < 0 ? 'rgba(161,161,170,1)' : 'rgba(161,161,170,0.25)', display: 'flex', alignItems: 'center' }}
+                style={{ background: 'none', border: 'none', padding: '2px 1px', cursor: 'pointer', color: calWeekOffset < 0 ? 'rgba(26,26,26,0.45)' : 'rgba(26,26,26,0.18)', display: 'flex', alignItems: 'center' }}
               >
                 <ChevronRight size={13} />
               </button>
@@ -214,11 +214,10 @@ const CaloriesTrends: React.FC = () => {
               const isPeakBar = !isCurrentWeek && h > 0 && i === weeklyMaxBarIndex;
               const editable = isBarEditable(i);
 
-              let bgColor = h > 0 ? '#3f3f46' : '#18181b';
-              if (isToday) bgColor = '#ffffff';
-              if (isPeakBar) bgColor = '#ffffff';
-
-              const labelColor = (isToday || isPeakBar) ? '#000000' : '#ffffff';
+              let bgColor = h > 0 ? 'rgba(26,26,26,0.65)' : 'rgba(26,26,26,0.08)';
+if (isToday) bgColor = '#1a1a1a';
+              if (isPeakBar) bgColor = '#1a1a1a';
+              const labelColor = (isToday || isPeakBar) ? '#ffffff' : 'rgba(26,26,26,0.45)';
 
               return (
                 <div
@@ -306,9 +305,9 @@ const CaloriesTrends: React.FC = () => {
                 const isToday = monthOffset === 0 && i === new Date().getDate() - 1;
                 const isPeakBar = monthlyBars.length > 0 && h > 0 && i === monthlyPeakIdx;
 
-                let bgColor = h > 0 ? (h >= monthlyMax * 0.7 ? '#3f3f46' : 'rgba(24,24,27,0.7)') : 'rgba(24,24,27,0.3)';
-                if (isToday) bgColor = '#ffffff';
-                if (isPeakBar) bgColor = '#ffffff';
+                let bgColor = h > 0 ? (h >= monthlyMax * 0.7 ? '#1a1a1a' : 'rgba(26,26,26,0.65)') : 'rgba(26,26,26,0.08)';
+                if (isToday) bgColor = '#1a1a1a';
+                if (isPeakBar) bgColor = '#1a1a1a';
 
                 return (
                   <div
@@ -317,7 +316,7 @@ const CaloriesTrends: React.FC = () => {
                     style={{
                       height: `${Math.max(pct, h > 0 ? 3 : 0)}%`,
                       backgroundColor: bgColor,
-                      boxShadow: isPeakBar ? '0 0 6px rgba(255,255,255,0.5), 0 0 16px rgba(255,255,255,0.2)' : 'none',
+                      boxShadow: isPeakBar ? '0 0 6px rgba(26,26,26,0.35), 0 0 16px rgba(26,26,26,0.15)' : 'none',
                       position: 'relative',
                     }}
                   >
@@ -330,7 +329,7 @@ const CaloriesTrends: React.FC = () => {
                         marginBottom: '12px',
                         fontSize: '9px',
                         fontWeight: 700,
-                        color: '#ffffff',
+                        color: '#1a1a1a',
                         whiteSpace: 'nowrap',
                         letterSpacing: '0.01em',
                         lineHeight: 1,
