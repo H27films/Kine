@@ -527,7 +527,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
         onClick={handleCommit}
         disabled={saving || !hasAnyInput}
         className="w-full rounded-full py-5 text-[0.75rem] uppercase tracking-[0.4em] font-black active:scale-95 transition-all"
-        style={{ backgroundColor: saveSuccess ? '#22c55e' : '#1a1a1a', color: '#ffffff', boxShadow: '0 12px 32px rgba(0,0,0,0.12)', opacity: saving || !hasAnyInput ? 0.6 : 1, marginBottom: 48 }}>
+        style={{ backgroundColor: saveSuccess ? '#22c55e' : '#000000', color: '#ffffff', boxShadow: '0 12px 32px rgba(0,0,0,0.12)', opacity: saving || !hasAnyInput ? 0.8 : 0.9, marginBottom: 48 }}>
         {saving ? 'Saving...' : saveSuccess ? '✓ Session Saved!' : 'Log Session'}
       </button>
 
