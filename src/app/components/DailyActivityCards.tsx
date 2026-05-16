@@ -183,7 +183,7 @@ const DayCard: React.FC<{ day: DayData }> = ({ day }) => {
           lineHeight: 1,
           fontFamily: "'Archivo', sans-serif",
         }}>
-          <span style={{ color: 'rgba(26,26,26,0.25)', marginRight: '5px', fontWeight: 800 }}>SCORE</span> <span style={{ fontWeight: 800 }}>{day.totalScore}</span>
+          <span style={{ color: 'rgba(26,26,26,0.7)', marginRight: '5px', fontWeight: 550 }}>SCORE</span> <span style={{ fontWeight: 800 }}>{day.totalScore}</span>
         </div>
       )}
       {/* Row 1: Day label + calories */}
