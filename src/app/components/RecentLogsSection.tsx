@@ -181,11 +181,11 @@ const RecentLogsSection: React.FC<Props> = ({ refreshKey }) => {
                     <Dumbbell size={16} color="#1a1a1a" />
                   </div>
                   <div className="flex-grow min-w-0">
-                    <p className="font-bold text-sm text-[#1a1a1a] truncate uppercase tracking-wide">
+                     <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '14px', color: '#1a1a1a', textTransform: 'uppercase', letterSpacing: '0.05em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {log.name}
                     </p>
                     {lastSet && (
-                      <p className="text-[10px] uppercase tracking-widest mt-0.5" style={{ color: 'rgba(26,26,26,0.45)', fontFamily: "'Archivo', sans-serif" }}>
+                      <p className="text-[10px] uppercase tracking-widest mt-0.5" style={{ color: 'rgba(26,26,26,0.9)', fontFamily: "'Archivo', sans-serif" }}>
                         {log.setsData.length} Sets · {lastSet.r} Reps · {lastSet.w} kg
                       </p>
                     )}
