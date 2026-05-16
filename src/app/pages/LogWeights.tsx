@@ -672,7 +672,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                   {selectedGroup === group ? (
                     <Check size={24} color="#ffffff" strokeWidth={3} />
                   ) : (
-                    <img src={`/icons/${group}.svg`} alt={group} style={{ width: '38px', height: '38px', objectFit: 'contain' }} />
+                      <img src={group === 'Legs' ? '/icons/NewLeg.svg' : `/icons/${group}.svg`} alt={group} style={{ width: '38px', height: '38px', objectFit: 'contain' }} />
                   )}
                 </div>
                 <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#1a1a1a' }}>
