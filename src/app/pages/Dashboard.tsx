@@ -762,10 +762,10 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
               <span
                 style={{
                   fontSize: '10px',
-                  fontWeight: 700,
+                  fontWeight: 650,
                   textTransform: 'uppercase',
                   letterSpacing: '2px',
-                  color: 'rgba(26,26,26,0.45)',
+                  color: 'rgba(26,26,26,0.8)',
                   fontFamily: "'Archivo', sans-serif",
                 }}
               >
@@ -796,7 +796,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
               <div className="mt-4 space-y-2">
                 {dayWeights.map((ex, i) => (
                   <div key={i} className="flex items-center justify-between">
-                      <span className="text-[11px] font-medium" style={{ color: 'rgba(26,26,26,0.6)', fontFamily: "'Archivo', sans-serif" }}>{toTitleCase(ex.name)}</span>
+                      <span className="text-[11px] font-medium" style={{ color: 'rgba(26,26,26,0.9)', fontFamily: "'Archivo', sans-serif" }}>{toTitleCase(ex.name)}</span>
                     <span className="text-[12px] font-bold" style={{ color: '#1a1a1a' }}>{Math.round(ex.weight).toLocaleString()} kg</span>
                   </div>
                 ))}
