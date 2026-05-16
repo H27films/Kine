@@ -192,6 +192,11 @@ export const CardioTypeChart: React.FC = () => {
     const monthlyMaxVal = Math.max(...monthlyData, 0);
     const monthlyPeakIdx = monthlyMaxVal > 0 ? monthlyData.findIndex(v => v === monthlyMaxVal) : -1;
 
+    const weeklyNonZero = weeklyData.filter(v => v > 0);
+    const weeklyAvg = weeklyNonZero.length > 0
+      ? weeklyNonZero.reduce((a, b) => a + b, 0) / weeklyNonZero.length
+      : 0;
+
   const currentWeekNum = availableWeeks[weekIdx] ?? '—';
   const monthBounds = getMonthBounds(monthOffset);
 

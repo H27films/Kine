@@ -412,8 +412,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
         {/* Row 1: Big number left, MOVEMENT (KM) label right (tappable to toggle input) */}
         <div className="flex items-start" style={{ marginBottom: 14 }}>
           <div
-            className="text-[3.25rem] font-black leading-none tracking-tighter flex-shrink-0" style={{color: '#1a1a1a'}}
-            style={{ cursor: 'pointer' }}
+            className="text-[3.25rem] font-black leading-none tracking-tighter flex-shrink-0" style={{ color: '#1a1a1a', cursor: 'pointer' }}
             onClick={() => setTrackerInputVisible(v => !v)}
           >
             {weeklyTotal.toFixed(1)}
@@ -454,12 +453,12 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
                value={trackerDistance}
                 onChange={e => setTrackerDistance(e.target.value)}
                placeholder="0.0"
-               className="text-[2.5rem] font-black tracking-tighter w-full p-0" style={{color: '#1a1a1a'}}
-                style={{
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  color: trackerDistance ? '#1a1a1a' : 'rgba(26,26,26,0.45)'
-                }}
+                className="text-[2.5rem] font-black tracking-tighter w-full p-0"
+                 style={{
+                   backgroundColor: 'transparent',
+                   border: 'none',
+                   color: trackerDistance ? '#1a1a1a' : 'rgba(26,26,26,0.45)'
+                 }}
              />
               <span className="text-[1rem] font-black tracking-tighter" style={{ color: 'rgba(26,26,26,0.45)' }}>KM</span>
            </div>
@@ -495,8 +494,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
             value={distance}
             onChange={e => setDistance(e.target.value)}
             placeholder="0.0"
-            className="text-[2.5rem] font-black tracking-tighter w-full p-0" style={{color: '#1a1a1a'}}
-            style={{ backgroundColor: 'transparent', border: 'none' }}
+            className="text-[2.5rem] font-black tracking-tighter w-full p-0" style={{ backgroundColor: 'transparent', border: 'none', color: '#1a1a1a' }}
           />
           <span className="text-[1rem] font-black tracking-tighter" style={{ color: '#c6c6c6' }}>KM</span>
         </div>
@@ -510,14 +508,12 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
           <div className="flex items-baseline gap-4">
             <div className="flex items-baseline gap-2">
               <input type="text" value={minutes} onChange={e => setMinutes(e.target.value)} placeholder="00"
-                className="text-[2.5rem] font-black tracking-tighter w-16 text-left p-0" style={{color: '#1a1a1a'}}
-                style={{ backgroundColor: 'transparent', border: 'none' }} />
+                className="text-[2.5rem] font-black tracking-tighter w-16 text-left p-0" style={{ backgroundColor: 'transparent', border: 'none', color: '#1a1a1a' }} />
               <span style={{ ...labelStyle }}>MIN</span>
             </div>
             <div className="flex items-baseline gap-2">
               <input type="text" value={seconds} onChange={e => setSeconds(e.target.value)} placeholder="00"
-                className="text-[2.5rem] font-black tracking-tighter w-16 text-left p-0" style={{color: '#1a1a1a'}}
-                style={{ backgroundColor: 'transparent', border: 'none' }} />
+                className="text-[2.5rem] font-black tracking-tighter w-16 text-left p-0" style={{ backgroundColor: 'transparent', border: 'none', color: '#1a1a1a' }} />
               <span style={{ ...labelStyle }}>SEC</span>
             </div>
           </div>
