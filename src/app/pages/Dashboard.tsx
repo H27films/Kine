@@ -161,10 +161,10 @@ const WeeklyChart: React.FC<{
             color: '#1a1a1a',
             fontFamily: "'Archivo', sans-serif",
           }}>Weekly</span>
-          <button onClick={onPrev} disabled={!canPrev} style={{ opacity: !canPrev ? 0.2 : 0.55, background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}>
+          <button onClick={onPrev} disabled={!canPrev} style={{ opacity: !canPrev ? 0.2 : 0.9, background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}>
             <ChevronLeft size={18} color="#1a1a1a" />
           </button>
-          <button onClick={onNext} disabled={!canNext} style={{ opacity: !canNext ? 0.2 : 0.55, background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}>
+          <button onClick={onNext} disabled={!canNext} style={{ opacity: !canNext ? 0.2 : 0.9, background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}>
             <ChevronRight size={18} color="#1a1a1a" />
           </button>
         </div>
@@ -835,14 +835,14 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
               <button
                 onClick={() => setMonthlyOffset(o => Math.max(o - 1, monthlyMinOffset))}
                 disabled={monthlyOffset <= monthlyMinOffset}
-                style={{ opacity: monthlyOffset <= monthlyMinOffset ? 0.2 : 0.55, background: 'none', border: 'none', cursor: monthlyOffset <= monthlyMinOffset ? 'default' : 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
+                style={{ opacity: monthlyOffset <= monthlyMinOffset ? 0.2 : 0.9, background: 'none', border: 'none', cursor: monthlyOffset <= monthlyMinOffset ? 'default' : 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
               >
                 <ChevronLeft size={18} color="#1a1a1a" />
               </button>
               <button
                 onClick={() => setMonthlyOffset(o => Math.min(o + 1, monthlyMaxOffset))}
                 disabled={monthlyOffset >= monthlyMaxOffset}
-                style={{ opacity: monthlyOffset >= monthlyMaxOffset ? 0.2 : 0.55, background: 'none', border: 'none', cursor: monthlyOffset >= monthlyMaxOffset ? 'default' : 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
+                style={{ opacity: monthlyOffset >= monthlyMaxOffset ? 0.2 : 0.9, background: 'none', border: 'none', cursor: monthlyOffset >= monthlyMaxOffset ? 'default' : 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
               >
                 <ChevronRight size={18} color="#1a1a1a" />
               </button>

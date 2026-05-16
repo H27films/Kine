@@ -373,7 +373,7 @@ export const DailyActivityCards: React.FC = () => {
         letterSpacing: '0.15em',
         textTransform: 'uppercase',
         color: '#1a1a1a',
-        marginBottom: '1.25rem',
+        marginBottom: '0.5rem',
         fontFamily: "'Archivo', sans-serif",
       }}>
         Daily
