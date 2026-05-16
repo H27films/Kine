@@ -420,14 +420,15 @@ export const CardioTypeChart: React.FC = () => {
             const isWeekly = viewMode === 'weekly';
             const isPeak = !isWeekly && i === monthlyPeakIdx && val > 0;
 
-            // Monthly: same opacity scheme as 30-day chart
-            // Weekly: keep existing visual scaling — inverted to dark palette
+            // Monthly: opacity levels based on average; Weekly: opacity proportional to max
             let barColor: string;
             let barGlow: string | undefined;
             if (isWeekly) {
-              const opacity = val > 0 ? (isPeak ? 1 : val >= weeklyAvg ? 0.65 : 0.22) : 0.07;
+              const ratio = rawMax > 0 ? val / rawMax : 0;
+              const minOpacity = 0.3;
+              const maxOpacity = 1.0;
+              const opacity = val > 0 ? minOpacity + ratio * (maxOpacity - minOpacity) : 0.07;
               barColor = `rgba(0,0,0,${opacity})`;
-              if (isPeak) barGlow = '0 0 8px rgba(0,0,0,0.35), 0 0 16px rgba(0,0,0,0.15)';
             } else {
               const opacity = val > 0
                 ? (isPeak ? 1 : val >= monthlyAvg ? 0.65 : 0.22)
