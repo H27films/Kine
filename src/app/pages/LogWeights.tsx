@@ -907,7 +907,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                           </div>
                         )}
                       </div>
-                      <div style={{ color: 'rgba(26,26,26,0.4)' }}>
+                      <div style={{ color: 'rgba(26,26,26,0.8)' }}>
                         {ex.expanded ? <ChevronUp size={20} /> : <ChevronRight size={20} />}
                       </div>
                     </div>
