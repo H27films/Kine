@@ -570,12 +570,12 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
           <button
             onClick={() => setThirtyDayOffset(o => o + 1)}
             disabled={!hasOlderCardioData}
-            style={{ background: 'none', border: 'none', padding: '0 8px', cursor: !hasOlderCardioData ? 'default' : 'pointer', opacity: !hasOlderCardioData ? 0.2 : 0.85, color: '#fff', fontSize: '24px', lineHeight: 1 }}
+            style={{ background: 'none', border: 'none', padding: '0 8px', cursor: !hasOlderCardioData ? 'default' : 'pointer', opacity: !hasOlderCardioData ? 0.2 : 0.85, color: '#1a1a1a', fontSize: '24px', lineHeight: 1 }}
           >‹</button>
-          <button
-            onClick={() => setThirtyDayOffset(o => o - 1)}
-            disabled={thirtyDayOffset === 0}
-            style={{ background: 'none', border: 'none', padding: '0 8px', cursor: thirtyDayOffset === 0 ? 'default' : 'pointer', opacity: thirtyDayOffset === 0 ? 0.2 : 0.85, color: '#fff', fontSize: '24px', lineHeight: 1 }}
+        <button
+          onClick={() => setThirtyDayOffset(o => o - 1)}
+          disabled={thirtyDayOffset === 0}
+          style={{ background: 'none', border: 'none', padding: '0 8px', cursor: thirtyDayOffset === 0 ? 'default' : 'pointer', opacity: thirtyDayOffset === 0 ? 0.2 : 0.85, color: '#1a1a1a', fontSize: '24px', lineHeight: 1 }}
           >›</button>
         </div>
         <div className="p-6 rounded-xl relative" style={{ backgroundColor: 'rgba(0,0,0,0.05)', borderLeft: '2px solid rgba(0,0,0,0.9)', boxShadow: '0 5px 12px rgba(0,0,0,0.08)' }}>

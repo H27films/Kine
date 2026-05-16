@@ -245,17 +245,13 @@ export const CardioTypeChart: React.FC = () => {
             <button
               onClick={onBack}
               disabled={!canGoBack}
-              style={{ opacity: canGoBack ? 0.55 : 0.2, background: 'none', border: 'none', cursor: canGoBack ? 'pointer' : 'default', padding: 0, display: 'flex', alignItems: 'center' }}
-            >
-              <ChevronLeft size={18} color="#1a1a1a" />
-            </button>
+              style={{ background: 'none', border: 'none', padding: '0 8px', cursor: canGoBack ? 'pointer' : 'default', opacity: canGoBack ? 0.85 : 0.2, color: '#1a1a1a', fontSize: '24px', lineHeight: 1 }}
+            >‹</button>
             <button
               onClick={onForward}
               disabled={!canGoForward}
-              style={{ opacity: canGoForward ? 0.55 : 0.2, background: 'none', border: 'none', cursor: canGoForward ? 'pointer' : 'default', padding: 0, display: 'flex', alignItems: 'center' }}
-            >
-              <ChevronRight size={18} color="#1a1a1a" />
-            </button>
+              style={{ background: 'none', border: 'none', padding: '0 8px', cursor: canGoForward ? 'pointer' : 'default', opacity: canGoForward ? 0.85 : 0.2, color: '#1a1a1a', fontSize: '24px', lineHeight: 1 }}
+            >›</button>
           </div>
         </div>
         <span style={{ fontSize: '0.95rem', fontWeight: 700, letterSpacing: '0.06em', color: '#1a1a1a', marginRight: '6px', fontFamily: "'Archivo', sans-serif" }}>
