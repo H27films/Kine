@@ -323,9 +323,9 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
               let border = '1.5px solid rgba(26,26,26,0.18)';
               let textColor = 'rgba(26,26,26,0.45)';
               let glowShadow = 'none';
-              if (rating === 'GOOD') { border = '2px solid #90c9a0'; textColor = '#90c9a0'; glowShadow = '0 0 8px rgba(144,201,160,0.75), 0 0 18px rgba(144,201,160,0.3)'; }
-              else if (rating === 'BAD') { border = '2px solid #ef4444'; textColor = '#ef4444'; glowShadow = '0 0 8px rgba(239,68,68,0.75), 0 0 18px rgba(239,68,68,0.3)'; }
-              else if (rating === 'OK') { border = '2px solid rgba(26,26,26,0.75)'; textColor = 'rgba(26,26,26,0.9)'; glowShadow = '0 0 8px rgba(26,26,26,0.25), 0 0 18px rgba(26,26,26,0.1)'; }
+              if (rating === 'GOOD') { border = '1px solid #90c9a0'; textColor = '#90c9a0'; glowShadow = '0 0 8px rgba(144,201,160,0.75), 0 0 18px rgba(144,201,160,0.3)'; }
+              else if (rating === 'BAD') { border = '1px solid #ef4444'; textColor = '#ef4444'; glowShadow = '0 0 8px rgba(239,68,68,0.75), 0 0 18px rgba(239,68,68,0.3)'; }
+              else if (rating === 'OK') { border = '1px solid rgba(26,26,26,0.75)'; textColor = 'rgba(26,26,26,0.9)'; glowShadow = '0 0 8px rgba(26,26,26,0.25), 0 0 18px rgba(26,26,26,0.1)'; }
               const showLine = i > 0 && rating !== null && prevRating !== null;
               return (
                 <React.Fragment key={i}>
