@@ -152,7 +152,7 @@ const WeeklyWeightsChart: React.FC = () => {
 
           return (
             <div key={bar.weekNumber} className="flex flex-col items-center h-full justify-end" style={{ flex: '1', maxWidth: '28px' }}>
-              <div style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(26,26,26,0.45)', marginBottom: '4px', height: '14px', fontFamily: "'Archivo', sans-serif" }}>{displayValue}</div>
+              <div style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(26,26,26,0.80)', marginBottom: '4px', height: '14px', fontFamily: "'Archivo', sans-serif" }}>{displayValue}</div>
               <div className="w-full relative transition-all" style={{ height: `${pct * 100}%`, backgroundColor: barColor, borderRadius: '9999px 9999px 0 0', minHeight: bar.total > yMin ? '4px' : 0 }}>
                 {bar.count > 0 && (
                   <div style={{
