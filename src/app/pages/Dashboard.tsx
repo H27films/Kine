@@ -762,7 +762,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
               <Dumbbell size={16} color="#1a1a1a" />
               <span
                 style={{
-                  fontSize: '10px',
+                  fontSize: '11px',
                   fontWeight: 650,
                   textTransform: 'uppercase',
                   letterSpacing: '2px',
@@ -792,7 +792,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
           {dayWeights.length > 0 ? (
             <>
               <div className="text-4xl font-black tracking-tight" style={{ color: '#1a1a1a' }}>
-                {Math.round(dayWeightsTotal).toLocaleString()} <span className="text-lg font-bold" style={{ color: 'rgba(26,26,26,0.45)' }}>KG</span>
+                {Math.round(dayWeightsTotal).toLocaleString()} <span style={{ fontSize: '15px', fontWeight: 500, letterSpacing: '0.08em', color: 'rgba(26,26,26,0.7)' }}>KG</span>
               </div>
               <div className="mt-4 space-y-2">
                 {dayWeights.map((ex, i) => (
