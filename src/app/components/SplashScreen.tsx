@@ -13,11 +13,13 @@ const SplashScreen: React.FC<Props> = ({ onComplete }) => {
   const dotCount = 8;
 
   useEffect(() => {
-    // Animate dots converging - 1.5s duration
+    // Animate dots converging - 1.2s duration
     let frame = 0;
+    const totalFrames = 75; // 1.2s at 16ms
+    const logoAppearFrame = 66; // 1.05s at 16ms
     const interval = setInterval(() => {
       frame++;
-      const progress = Math.min(1, frame / 90);
+      const progress = Math.min(1, frame / totalFrames);
       const eased = 1 - Math.pow(1 - progress, 3);
 
       const newDots = [];
@@ -31,19 +33,20 @@ const SplashScreen: React.FC<Props> = ({ onComplete }) => {
       }
       setDots(newDots);
 
-      // Logo appears at 1.3s, intertwined with spiral ending
-      if (frame >= 78 && logoOpacity === 0) {
+      // Logo appears at 1.05s, intertwined with spiral ending
+      if (frame >= logoAppearFrame && logoOpacity === 0) {
         setLogoOpacity(1);
         setLogoScale(1);
       }
 
-      if (frame >= 90) {
+      if (frame >= totalFrames) {
         clearInterval(interval);
-        // Logo holds longer on screen
+        // Logo holds from 1.2s to 2.0s (800ms hold)
         setTimeout(() => {
           setFadeOut(true);
-          setTimeout(onComplete, 500);
-        }, 1200);
+          // Fade from 2.0s to 2.7s (700ms), dashboard appears at 2.62s
+          setTimeout(onComplete, 620);
+        }, 800);
       }
     }, 16);
 
@@ -62,7 +65,7 @@ const SplashScreen: React.FC<Props> = ({ onComplete }) => {
         alignItems: 'center',
         justifyContent: 'center',
         opacity: fadeOut ? 0 : 1,
-        transition: 'opacity 0.5s ease',
+        transition: 'opacity 0.7s ease',
         pointerEvents: fadeOut ? 'none' : 'auto',
         overflow: 'hidden',
       }}
