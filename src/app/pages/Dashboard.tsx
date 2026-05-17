@@ -20,8 +20,8 @@ const toTitleCase = (str: string) =>
 
 
 
-const CARDIO_ALWAYS = ['TRACKER', 'RUNNING', 'ROW', 'CROSS TRAINER'];
-const CARDIO_CONDITIONAL = ['WALKING', 'CYCLE'];
+const CARDIO_ALWAYS = ['TRACKER', 'RUNNING', 'ROW', 'CROSS TRAINER', 'WALKING', 'CYCLE'];
+const CARDIO_CONDITIONAL: string[] = [];
 
 interface DayActivity {
   exercise_id: number;
