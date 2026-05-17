@@ -515,7 +515,7 @@ export const CardioTypeChart: React.FC = () => {
                     fontWeight: 700,
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px',
-                    color: 'rgba(26,26,26,0.45)',
+                    color: 'rgba(26,26,26,0.85)',
                     marginTop: '4px',
                     fontFamily: "'Archivo', sans-serif",
                   }}>
