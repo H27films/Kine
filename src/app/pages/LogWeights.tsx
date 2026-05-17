@@ -613,17 +613,20 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
               </div>
             )}
             {!selectedGroup && addedExercises.length === 0 && (
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '17px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
                 <button
-                  onClick={() => setShowEntryCard(true)}
-                  style={{
-                    background: 'none', border: 'none',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    cursor: 'pointer', color: '#1a1a1a', transition: 'all 0.2s',
-                  }}
-                >
-                  <ArrowLeftFromLine size={20} strokeWidth={1.5} style={{ transform: 'rotate(180deg)' }} />
-                </button>
+  onClick={() => setShowEntryCard(true)}
+  style={{
+    background: 'none',
+    border: '0.5px solid rgba(0,0,0,0.55)',
+    borderRadius: '50%',
+    width: 32, height: 32,
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    cursor: 'pointer', color: '#1a1a1a', transition: 'all 0.2s',
+  }}
+>
+  <ArrowLeftFromLine size={18} strokeWidth={1.5} style={{ transform: 'rotate(180deg)' }} />
+</button>
               </div>
             )}
           </div>
