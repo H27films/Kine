@@ -70,7 +70,7 @@ const WeeklyVolumeCompact: React.FC<WeeklyVolumeCompactProps> = ({ selectedWeekN
                 style={{
                   height: '100%',
                   width: `${pct}%`,
-                  background: 'linear-gradient(90deg, rgba(0,0,0,0.08) 0%, rgba(26,26,26,0.25) 100%)',
+                  background: 'linear-gradient(90deg, rgba(0,0,0,0.08) 0%, #1a1a1a 100%)',
                   borderRadius: '999px',
                   boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
                   transition: 'width 0.5s cubic-bezier(0.4,0,0.2,1)',
