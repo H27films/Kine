@@ -78,7 +78,7 @@ const App: React.FC = () => {
   return (
     <>
       {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
-      <div className="min-h-screen" style={{ backgroundColor: '#f2f2f2', color: '#1a1a1a', fontFamily: "'Inter Variable', 'Inter', system-ui, sans-serif", opacity: showSplash ? 0 : 1, transition: 'opacity 0.4s ease' }}>
+      <div className="min-h-screen" style={{ backgroundColor: '#f2f2f2', color: '#1a1a1a', fontFamily: "'Inter Variable', 'Inter', system-ui, sans-serif" }}>
       {hideChrome ? (
         <Suspense fallback={<></>}>
           {renderPage()}

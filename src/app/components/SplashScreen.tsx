@@ -102,8 +102,8 @@ const SplashScreen: React.FC<Props> = ({ onComplete }) => {
           src="/KineLogo2.svg"
           alt="Kine"
           style={{
-            width: 180,
-            height: 180,
+            width: 260,
+            height: 260,
             objectFit: 'contain',
             display: 'block',
             filter: 'drop-shadow(0 0 20px rgba(0,0,0,0.06))',
