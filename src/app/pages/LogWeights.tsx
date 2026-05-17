@@ -575,26 +575,13 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
         transition: 'max-height 0.35s ease, opacity 0.25s ease, margin 0.35s ease',
         marginBottom: selectedGroup ? '0px' : '1rem',
       }}>
-        <div className="flex items-start">
+        <div className="flex items-start w-full">
           <div className="text-[3.25rem] font-black leading-none tracking-tighter flex-shrink-0" style={{ color: '#1a1a1a' }}>
             {fmtVol(thisWeekTotal)}
             {lastWeekTotal > 0 && (
               <div style={{ fontSize: '13px', fontWeight: 500, color: 'rgba(26,26,26,0.85)', marginTop: '6px', letterSpacing: '0.08em', lineHeight: 1 }}>
                 LAST WEEK {Math.round(lastWeekTotal).toLocaleString()} KG
               </div>
-            )}
-            {!selectedGroup && addedExercises.length === 0 && (
-              <button
-                onClick={() => setShowEntryCard(true)}
-                style={{
-                  background: 'none', border: 'none',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  cursor: 'pointer', color: '#1a1a1a', flexShrink: 0,
-                  marginTop: '16px', transition: 'all 0.2s',
-                }}
-              >
-                <ArrowLeftFromLine size={18} strokeWidth={1.5} style={{ transform: 'rotate(180deg)' }} />
-              </button>
             )}
           </div>
           <div className="flex flex-col ml-4 pt-1 flex-1 min-w-0">
@@ -623,6 +610,20 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                     borderRadius: '999px', transition: 'width 0.6s ease',
                   }} />
                 </div>
+              </div>
+            )}
+            {!selectedGroup && addedExercises.length === 0 && (
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '17px' }}>
+                <button
+                  onClick={() => setShowEntryCard(true)}
+                  style={{
+                    background: 'none', border: 'none',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    cursor: 'pointer', color: '#1a1a1a', transition: 'all 0.2s',
+                  }}
+                >
+                  <ArrowLeftFromLine size={20} strokeWidth={1.5} style={{ transform: 'rotate(180deg)' }} />
+                </button>
               </div>
             )}
           </div>
