@@ -579,7 +579,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
           <div className="text-[3.25rem] font-black leading-none tracking-tighter flex-shrink-0" style={{ color: '#1a1a1a' }}>
             {fmtVol(thisWeekTotal)}
             {lastWeekTotal > 0 && (
-              <div style={{ fontSize: '13px', fontWeight: 500, color: 'rgba(26,26,26,0.85)', marginTop: '6px', letterSpacing: '0.08em', lineHeight: 1 }}>
+              <div style={{ fontSize: '13px', fontWeight: 500, color: 'rgba(26,26,26,0.85)', marginTop: '7px', letterSpacing: '0.08em', lineHeight: 1 }}>
                 LAST WEEK {Math.round(lastWeekTotal).toLocaleString()} KG
               </div>
             )}
@@ -613,7 +613,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
               </div>
             )}
             {!selectedGroup && addedExercises.length === 0 && (
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '12px' }}>
                 <button
   onClick={() => setShowEntryCard(true)}
   style={{
