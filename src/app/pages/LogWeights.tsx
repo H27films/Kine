@@ -573,7 +573,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
         opacity: selectedGroup ? 0 : 1,
         overflow: 'hidden',
         transition: 'max-height 0.35s ease, opacity 0.25s ease, margin 0.35s ease',
-        marginBottom: selectedGroup ? '0px' : '1rem',
+        marginBottom: selectedGroup ? '0px' : '1.5rem',
       }}>
         <div className="flex items-start w-full">
           <div className="text-[3.25rem] font-black leading-none tracking-tighter flex-shrink-0" style={{ color: '#1a1a1a' }}>
