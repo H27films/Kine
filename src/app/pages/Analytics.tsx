@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Home, ChevronDown, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { supabase, getISOWeek } from '../../lib/supabase';
 import { Page } from '../../types';
 import { MaxStatsCard } from '../components/MaxStatsCard';
 import { RunningManIcon, CaloriesIcon } from '../components/NavIcons';
@@ -61,7 +61,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
   // FIX: separate refs for category and period dropdowns
   const categoryRef = useRef<HTMLDivElement>(null);
   const periodRef = useRef<HTMLDivElement>(null);
-  const [currentWeek, setCurrentWeek] = useState(66);
+  const [currentWeek, setCurrentWeek] = useState<number | null>(null);
   const currentMonth = (() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
@@ -80,7 +80,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
   const isFood = category === 'FOOD';
   const isScore = category === 'SCORE';
 
-  const selectedWeek = currentWeek + weekOffset;
+  const selectedWeek = (currentWeek ?? 0) + weekOffset;
 
   const getSelectedMonth = () => {
     const [year, month] = currentMonth.split('-').map(Number);
@@ -97,19 +97,25 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
     return { daysInMonth, label };
   };
 
+  // Set current week from today's date — deterministic, always correct
   useEffect(() => {
-    const loadData = async () => {
+    setCurrentWeek(getISOWeek());
+  }, []);
+
+  // Load min/max week bounds from DB for navigation limits
+  useEffect(() => {
+    let cancelled = false;
+    const loadBounds = async () => {
       const { data } = await supabase
         .from('workouts')
         .select('week, date')
         .not('week', 'is', null)
         .order('week');
 
-      if (data && data.length > 0) {
+      if (data && data.length > 0 && !cancelled) {
         const weeks = [...new Set((data as any[]).map(r => r.week as number))].sort((a, b) => a - b);
         setMinWeek(weeks[0]);
         setMaxWeek(weeks[weeks.length - 1]);
-        setCurrentWeek(weeks[weeks.length - 1]);
 
         const dates = (data as any[]).map(r => r.date).filter(Boolean).sort();
         if (dates.length > 0) {
@@ -121,7 +127,8 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
         }
       }
     };
-    loadData();
+    loadBounds();
+    return () => { cancelled = true; };
   }, []);
 
   // FIX: guard each close behind its own ref check so clicking inside a
@@ -281,6 +288,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
   };
 
   useEffect(() => {
+    if (currentWeek === null) return; // wait until loadData sets the real max week
     setWeekOffset(0);
     setMonthOffset(0);
     setSelectedBarIdx(null);
@@ -289,7 +297,10 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [category, timePeriod, currentWeek, currentMonth]);
 
-  useEffect(() => { loadChartData(); }, [weekOffset, monthOffset, timePeriod]);
+  useEffect(() => {
+    if (currentWeek === null) return;
+    loadChartData();
+  }, [weekOffset, monthOffset, timePeriod]);
 
   const minValue = Math.min(...data.map(d => d.value), 0);
   const maxValue = Math.max(...data.map(d => d.value), minValue + 1);
