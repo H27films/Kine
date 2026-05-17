@@ -56,7 +56,7 @@ const SplashScreen: React.FC<Props> = ({ onComplete }) => {
         position: 'fixed',
         inset: 0,
         zIndex: 9999,
-        backgroundColor: '#000000',
+        backgroundColor: '#f7f7f7',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -77,12 +77,12 @@ const SplashScreen: React.FC<Props> = ({ onComplete }) => {
               width: i < 4 ? 5 : 3,
               height: i < 4 ? 5 : 3,
               borderRadius: '50%',
-              backgroundColor: '#ffffff',
+              backgroundColor: '#1a1a1a',
               left: dot.x,
               top: dot.y,
               transform: 'translate(-50%, -50%)',
               opacity: dot.opacity,
-              boxShadow: `0 0 ${4 + dot.x * 0.1}px rgba(255,255,255,0.4)`,
+              boxShadow: `0 0 ${4 + dot.x * 0.1}px rgba(0,0,0,0.15)`,
             }}
           />
         ))}
@@ -99,14 +99,14 @@ const SplashScreen: React.FC<Props> = ({ onComplete }) => {
         }}
       >
         <img
-          src="/KineLogo.svg"
+          src="/KineLogo2.svg"
           alt="Kine"
           style={{
-            width: 160,
-            height: 160,
+            width: 180,
+            height: 180,
             objectFit: 'contain',
             display: 'block',
-            filter: 'drop-shadow(0 0 30px rgba(255,255,255,0.12))',
+            filter: 'drop-shadow(0 0 20px rgba(0,0,0,0.06))',
           }}
         />
       </div>
