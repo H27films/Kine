@@ -57,7 +57,7 @@ const WeeklyVolumeCompact: React.FC<WeeklyVolumeCompactProps> = ({ selectedWeekN
         return (
           <div key={group}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-              <span style={{ color: '#1a1a1a', fontWeight: 700, fontSize: '10px', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: "'Archivo', sans-serif" }}>{group}</span>
+              <span style={{ color: '#1a1a1a', fontWeight: 650, fontSize: '12px', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: "'Archivo', sans-serif" }}>{group}</span>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
                 <span style={{ color: '#1a1a1a', fontWeight: 900, fontSize: '14px', letterSpacing: '-0.02em', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>
                   {Math.round(total).toLocaleString()}

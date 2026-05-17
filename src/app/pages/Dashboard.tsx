@@ -755,7 +755,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
         />
       </section>
 
-      <section className="mb-4">
+      <section className="mb-6">
         <div className={`rounded-lg ${dayWeights.length > 0 ? 'p-5' : 'p-3'} cursor-pointer`} style={{ backgroundColor: 'rgba(0,0,0,0.05)', borderLeft: '2px solid rgba(0,0,0,0.9)', boxShadow: '0 5px 12px rgba(0,0,0,0.08)' }} onClick={() => setWeightsExpanded(!weightsExpanded)}>
           <div className={`flex items-center justify-between ${dayWeights.length > 0 ? 'mb-4' : 'mb-0'}`}>
             <div className="flex items-center gap-2">
@@ -810,7 +810,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
       </section>
 
       {weightsExpanded && (
-        <section className="mb-4 mt-0">
+        <section className="mb-4 mt-1.5">
           <WeeklyVolumeCompact selectedWeekNumber={selectedWeekNumber} allWeekNumbers={allWeekNumbers} />
         </section>
       )}
