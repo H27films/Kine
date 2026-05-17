@@ -173,7 +173,7 @@ const CardioChartSection: React.FC<CardioChartSectionProps> = ({
       {selectedActivity && activityWeeklyData[selectedActivity] && (() => {
         const sparkData = activityWeeklyData[selectedActivity];
         const sparkDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-        const BASE_KM = selectedActivity === 'ROW' ? 0.1 : 0.3;
+        const BASE_KM = (selectedActivity === 'ROW' || selectedActivity === 'CYCLE') ? 0.1 : 0.3;
         const VW = 280;
         const VH = 110;
         const padTop = 20;
