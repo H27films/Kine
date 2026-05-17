@@ -266,7 +266,11 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
     }
 
     const points = labels.map((label, i) => {
-      let val = Math.round(values[i]);
+      const raw = values[i];
+      if (isCardio || isTracker) {
+        return { label, value: +raw.toFixed(1) };
+      }
+      let val = Math.round(raw);
       if (isCalories && timePeriod === 'PERIOD') val = Math.round(val / 7);
       if (isScore && timePeriod === 'PERIOD') val = Math.round(val / 7);
       return { label, value: val };
@@ -565,13 +569,13 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
                 {showBg && (
                   <div style={{ position: 'absolute', bottom: 0, left: '10%', right: '10%', top: 0, backgroundColor: 'rgba(0,0,0,0.02)', borderRadius: '2px 2px 0 0' }} />
                 )}
-                {isSelected && (
-                  <div style={{ position: 'absolute', bottom: '100%', left: '50%', transform: 'translateX(-50%)', marginBottom: '4px', whiteSpace: 'nowrap' }}>
-                    <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', fontWeight: 900, color: '#1a1a1a', backgroundColor: 'rgba(0,0,0,0.06)', padding: '3px 8px', borderRadius: '4px' }}>
-                       {isScore || isFood ? d.value.toLocaleString() : `${(isCardio || isTracker) ? d.value.toFixed(1) : d.value.toLocaleString()} ${metricLabel}`}
-                    </span>
-                  </div>
-                )}
+        {isSelected && (
+          <div style={{ position: 'absolute', bottom: '100%', left: '50%', transform: 'translateX(-50%)', marginBottom: '4px', whiteSpace: 'nowrap' }}>
+            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', fontWeight: 900, color: '#1a1a1a', backgroundColor: 'rgba(0,0,0,0.06)', padding: '3px 8px', borderRadius: '4px' }}>
+               {isScore || isFood ? d.value.toLocaleString() : `${(isCardio || isTracker) ? d.value.toFixed(1) : d.value.toLocaleString()} ${metricLabel}`}
+            </span>
+          </div>
+        )}
                 {!hideZeroBar && (
                   <div
                     onClick={() => showTooltip && setSelectedBarIdx(isSelected ? null : i)}
