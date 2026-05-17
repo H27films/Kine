@@ -81,7 +81,8 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
         paddingTop: 'env(safe-area-inset-top)',
         height: 'calc(4rem + env(safe-area-inset-top))',
         paddingBottom: '0',
-        borderBottom: '1px solid rgba(0,0,0,0.08)',
+        borderBottom: '1px solid rgba(0,0,0,0.03)',
+        boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
       }}
     >
       <div className="relative flex items-center w-12" ref={menuRef}>
