@@ -593,7 +593,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                   marginTop: '16px', transition: 'all 0.2s',
                 }}
               >
-                <ArrowLeftFromLine size={16} strokeWidth={1.5} style={{ transform: 'rotate(180deg)' }} />
+                <ArrowLeftFromLine size={18} strokeWidth={1.5} style={{ transform: 'rotate(180deg)' }} />
               </button>
             )}
           </div>
