@@ -166,7 +166,7 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
           <div className="flex items-center justify-end" style={{ width: 48 }}>
             <button
               onClick={() => setShowScoreLabel(v => !v)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, WebkitTapHighlightColor: 'transparent', display: 'flex', alignItems: 'center', gap: '2px' }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, WebkitTapHighlightColor: 'transparent', display: 'flex', alignItems: 'center', gap: '8px' }}
             >
               {showScoreLabel && (
                 <span style={{
