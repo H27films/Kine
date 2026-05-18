@@ -65,7 +65,7 @@ const TrackerSparkline: React.FC<Props> = ({ weekChartData }) => {
         });
       })}
 
-      {/* Value stacked circles (dark palette) */}
+      {/* Value stacked circles — gradient from light at bottom to dark at top */}
       {weekChartData.map((val, i) => {
         if (val <= 0) return null;
 
@@ -87,7 +87,7 @@ const TrackerSparkline: React.FC<Props> = ({ weekChartData }) => {
                   </text>
                 </>
               ) : (
-                  <circle cx={x} cy={y} r={CIRCLE_RADIUS} fill="#9e9e9e" />
+                  <circle cx={x} cy={y} r={CIRCLE_RADIUS} fill={`rgba(0,0,0,${((circleIdx + 1) / circleCount) * 0.75})`} />
               )}
             </g>
           );
