@@ -102,8 +102,7 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
         paddingTop: 'env(safe-area-inset-top)',
         height: 'calc(4rem + env(safe-area-inset-top))',
         paddingBottom: '0',
-        borderBottom: '1px solid rgba(0,0,0,0.03)',
-        boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
+        boxShadow: '0 1px 1px rgba(0,0,0,0.01)',
       }}
     >
       <div className="relative flex items-center w-12" ref={menuRef}>
@@ -218,6 +217,18 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
           </div>
         </>
       )}
+      {/* Gradient bottom line */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: '1px',
+          background: 'linear-gradient(to right, rgba(0,0,0,0.05), rgba(0,0,0,0.9), rgba(0,0,0,0.05))',
+          pointerEvents: 'none',
+        }}
+      />
     </header>
   );
 };
