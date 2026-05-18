@@ -318,6 +318,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
 
   const [todayCalories, setTodayCalories] = useState<number>(0);
   const [foodRating, setFoodRating] = useState<string>('BAD'); // BAD, OK, or GOOD
+  const [showFoodRatingLabel, setShowFoodRatingLabel] = useState(false);
   const [cardioWeeks, setCardioWeeks] = useState<WeekData[]>([]);
   const [weightsWeeks, setWeightsWeeks] = useState<WeekData[]>([]);
   const [weightsExerciseCounts, setWeightsExerciseCounts] = useState<Record<number, number[]>>({});
@@ -698,25 +699,47 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
           
           {/* Food Rating Circles - Vertical */}
           {!selectedActivity && (
-            <div className="flex flex-col items-center justify-center ml-4" style={{ marginTop: '12px', gap: '5px' }}>
-              {/* Always show top circle (grey) */}
-              <div className="w-3.5 h-3.5 rounded-full" style={{ 
-                backgroundColor: '#1a1a1a'
-              }}></div>
-              {/* Show middle circle only for OK and GOOD */}
-              {(foodRating === 'OK' || foodRating === 'GOOD') && (
-                <div className="w-3.5 h-3.5 rounded-full" style={{ 
-                  backgroundColor: 'rgba(26,26,26,0.55)'
-                }}></div>
+            <div
+              className="flex items-center justify-center ml-4"
+              style={{ marginTop: '10px', gap: showFoodRatingLabel ? '10px' : '5px', cursor: 'pointer' }}
+              onClick={() => setShowFoodRatingLabel(v => !v)}
+            >
+              {showFoodRatingLabel && (
+                <span style={{
+                  fontSize: '10px',
+                  fontWeight: 600,
+                  letterSpacing: '0.2em',
+                  color: 'rgba(26,26,26,0.8)',
+                  textTransform: 'uppercase',
+                  fontFamily: "'Archivo', sans-serif",
+                  whiteSpace: 'nowrap',
+                  textAlign: 'center',
+                  lineHeight: 1.25,
+                }}>
+                  FOOD<br />RATING
+                </span>
               )}
-              {/* Show bottom circle only for GOOD */}
-              {foodRating === 'GOOD' && (
+              <div className="flex flex-col items-center justify-center" style={{ gap: '5px' }}>
+                {/* Always show top circle (grey) */}
                 <div className="w-3.5 h-3.5 rounded-full" style={{ 
-                  backgroundColor: 'rgba(26,26,26,0.25)'
+                  backgroundColor: '#1a1a1a'
                 }}></div>
-              )}
+                {/* Show middle circle only for OK and GOOD */}
+                {(foodRating === 'OK' || foodRating === 'GOOD') && (
+                  <div className="w-3.5 h-3.5 rounded-full" style={{ 
+                    backgroundColor: 'rgba(26,26,26,0.55)'
+                  }}></div>
+                )}
+                {/* Show bottom circle only for GOOD */}
+                {foodRating === 'GOOD' && (
+                  <div className="w-3.5 h-3.5 rounded-full" style={{ 
+                    backgroundColor: 'rgba(26,26,26,0.25)'
+                  }}></div>
+                )}
+              </div>
             </div>
           )}
+          
           
           {selectedActivity && (
             <div
