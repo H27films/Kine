@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Menu, ArrowLeft, BarChart3 } from 'lucide-react';
 import { Page } from '../../types';
 import { RunningManIcon as NewRunningManIcon, CaloriesIcon as NewCaloriesIcon, ProfileIcon as NewProfileIcon } from './NavIcons';
+import { supabase } from '../../lib/supabase';
 
 interface HeaderProps {
   title: string;
@@ -37,7 +38,9 @@ type IconComponent = React.ComponentType<any>;
 
 export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNavigate, onToggleWeeklySummary }) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [score, setScore] = useState<number>(0);
   const menuRef = useRef<HTMLDivElement>(null);
+  const isDashboard = !title;
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -49,6 +52,25 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [menuOpen]);
 
+  // Fetch today's score on dashboard page
+  useEffect(() => {
+    if (!isDashboard) return;
+    const load = async () => {
+      const today = new Intl.DateTimeFormat('en-CA', {
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        timeZone: 'Asia/Kuala_Lumpur',
+      }).format(new Date());
+      const { data } = await supabase
+        .from('workouts')
+        .select('total_score')
+        .eq('date', today)
+        .not('total_score', 'is', null)
+        .limit(1);
+      setScore(data && data.length > 0 ? Number(data[0].total_score) : 0);
+    };
+    load();
+  }, [isDashboard]);
+
   const menuItems: { label: string; icon: IconComponent; page: Page }[] = [
     { label: 'Weights',  icon: DumbbellIcon,                                                    page: 'weights'   },
     { label: 'Cardio',   icon: ({ size }: { size?: number }) => <NewRunningManIcon size={size} />, page: 'cardio'    },
@@ -57,8 +79,6 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
     { label: 'Weights+', icon: DumbbellIcon,                                                    page: 'weights-plus' },
     { label: 'Run+',     icon: ({ size }: { size?: number }) => <NewRunningManIcon size={size} />, page: 'running-plus' },
   ];
-
-  const isDashboard = !title;
 
   const getLogIcon = () => {
     if (currentPage === 'weights') return <img src="/icons/dumbbell.svg" style={{ width: 20, height: 20 }} alt="weights" />;
@@ -142,7 +162,21 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
               </span>
             </button>
           </div>
-          <div className="w-12" />
+          <div className="flex items-center justify-end" style={{ width: 48, overflow: 'hidden' }}>
+            <span style={{
+              fontSize: '28px',
+              fontWeight: 200,
+              letterSpacing: '0.06em',
+              lineHeight: 1,
+              fontFamily: "'Archivo', sans-serif",
+              background: 'linear-gradient(to right, #1a1a1a 30%, rgba(26,26,26,0) 90%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}>
+              {score > 0 ? score : '—'}
+            </span>
+          </div>
         </>
       ) : (
         <>

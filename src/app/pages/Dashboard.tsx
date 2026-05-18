@@ -773,21 +773,23 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
                 Weights
               </span>
             </div>
-            {/* Score circle */}
-            <div style={{
-              width: 32,
-              height: 32,
-              borderRadius: '50%',
-              backgroundColor: '#1a1a1a',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
-            }}>
-              <span style={{ fontSize: '12px', fontWeight: 900, color: '#ffffff', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>
-                {dailyScore > 0 ? dailyScore : '—'}
-              </span>
-            </div>
+            {/* Exercise count circle — only show if there are weights today */}
+            {dayWeights.length > 0 && (
+              <div style={{
+                width: 32,
+                height: 32,
+                borderRadius: '50%',
+                backgroundColor: '#1a1a1a',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}>
+                <span style={{ fontSize: '12px', fontWeight: 900, color: '#ffffff', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>
+                  {dayWeights.length}
+                </span>
+              </div>
+            )}
           </div>
           {dayWeights.length > 0 ? (
             <>
