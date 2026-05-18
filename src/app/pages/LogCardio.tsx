@@ -521,7 +521,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
               )}
             </div>
             {lastWeekTotal > 0 && (
-              <div className="text-[11px] font-medium mt-1"                 style={{ color: 'rgba(26,26,26,0.45)' }}>
+              <div className="text-[11px] -mt-0.5"                 style={{ color: 'rgba(26,26,26,0.8)', fontWeight: 400 }}>
                 {weekOffset === 0 ? 'Last week' : 'Previous'} {lastWeekTotal.toFixed(1)} km
               </div>
             )}
