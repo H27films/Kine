@@ -506,7 +506,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
                   </svg>
                 </button>
               ) : (
-                <div className="flex items-center gap-3">
+                 <div className="flex items-center gap-5">
                   <button
                     onClick={() => setWeekOffset(o => Math.max(minWeekOffset, o + 1))}
                     disabled={weekOffset <= minWeekOffset}
