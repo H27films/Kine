@@ -237,9 +237,9 @@ const ExerciseLogDots: React.FC<Props> = ({ exercises, saveSuccess }) => {
                   <span
                     style={{
                       fontSize: 11,
-                      fontWeight: 900,
+                      fontWeight: 700,
                       letterSpacing: '0.15em',
-                      color: '#ffffff',
+                      color: '#000000',
                       lineHeight: 1,
                       fontFamily: "'Archivo', sans-serif",
                     }}
