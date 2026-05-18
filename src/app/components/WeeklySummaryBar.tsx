@@ -47,7 +47,7 @@ const ProgressRing: React.FC<ProgressRingProps> = ({ label, value, pct }) => {
         <svg width={size} height={size} style={{ display: 'block' }}>
           <defs>
             <filter id={filterId} x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
+              <feGaussianBlur stdDeviation="2" result="coloredBlur" />
               <feMerge>
                 <feMergeNode in="coloredBlur" />
                 <feMergeNode in="SourceGraphic" />
