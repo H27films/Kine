@@ -269,23 +269,17 @@ export const CardioTypeChart: React.FC = () => {
           <div style={{ position: 'relative' }}>
             <button
               onClick={() => setTypePickerOpen(o => !o)}
-              style={{
-                fontSize: '13px',
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: '1.5px',
-                color: '#1a1a1a',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                padding: 0,
-                fontFamily: "'Archivo', sans-serif",
-                background: 'none',
-                borderBottom: typePickerOpen ? '2px solid transparent' : '2px solid #1a1a1a',
-                cursor: 'pointer',
-                padding: 0,
-                fontFamily: "'Archivo', sans-serif",
-              }}
+                style={{
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '1.5px',
+                  color: '#1a1a1a',
+                  background: 'none',
+                  border: 'none',
+                  borderBottom: typePickerOpen ? '2px solid transparent' : '2px solid #1a1a1a',
+                  fontFamily: "'Archivo', sans-serif",
+                }}
             >
               {TYPE_LABELS[selectedType]}
             </button>
