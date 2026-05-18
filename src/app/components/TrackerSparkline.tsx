@@ -15,7 +15,7 @@ const TrackerSparkline: React.FC<Props> = ({ weekChartData }) => {
   const Y_MAX = Math.max(dataMax, Y_MIN + 1);
   const range = Y_MAX - Y_MIN;
   const VW = 200;
-  const VH = 120;
+  const VH = 110;
   const padTop = 10;
   const padBottom = 8;
   const padLeft = 6;
@@ -37,7 +37,7 @@ const TrackerSparkline: React.FC<Props> = ({ weekChartData }) => {
   const maxCircles = Math.floor(chartH / CIRCLE_STEP);
 
   return (
-    <svg width="100%" viewBox={`0 0 ${VW} ${VH + 14}`} style={{ overflow: 'visible', display: 'block' }}>
+    <svg width="100%" viewBox={`0 0 ${VW} ${VH + 10}`} style={{ overflow: 'visible', display: 'block' }}>
       <defs>
         <filter id="topCircleGlow" x="-100%" y="-100%" width="300%" height="300%">
           <feGaussianBlur stdDeviation="2" />
@@ -96,7 +96,7 @@ const TrackerSparkline: React.FC<Props> = ({ weekChartData }) => {
 
       {/* Day labels */}
       {sparkDays.map((d, k) => (
-        <text key={k} x={padLeft + (k / 6) * chartW} y={VH + 12} textAnchor="middle" fill="#1a1a1a" fontSize="4.5" fontWeight="700" fontFamily="'Archivo', sans-serif">
+        <text key={k} x={padLeft + (k / 6) * chartW} y={VH + 9} textAnchor="middle" fill="#1a1a1a" fontSize="4.5" fontWeight="700" fontFamily="'Archivo', sans-serif">
           {d}
         </text>
       ))}
