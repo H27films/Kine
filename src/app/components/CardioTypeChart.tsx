@@ -280,6 +280,11 @@ export const CardioTypeChart: React.FC = () => {
                 cursor: 'pointer',
                 padding: 0,
                 fontFamily: "'Archivo', sans-serif",
+                background: 'none',
+                borderBottom: typePickerOpen ? '2px solid transparent' : '2px solid #1a1a1a',
+                cursor: 'pointer',
+                padding: 0,
+                fontFamily: "'Archivo', sans-serif",
               }}
             >
               {TYPE_LABELS[selectedType]}
