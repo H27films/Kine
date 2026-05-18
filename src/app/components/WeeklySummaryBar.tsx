@@ -211,14 +211,14 @@ export const WeeklySummaryBar: React.FC = () => {
       style={{
         display: 'flex',
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        justifyContent: 'space-evenly',
         alignItems: 'flex-start',
         width: '100%',
         boxSizing: 'border-box',
         paddingTop: '10px',
         paddingBottom: '10px',
-        paddingLeft: '16px',
-        paddingRight: '16px',
+        paddingLeft: 0,
+        paddingRight: 0,
         borderRadius: '12px',
       }}
     >
