@@ -98,8 +98,8 @@ const ProgressRing: React.FC<ProgressRingProps> = ({ label, value, pct }) => {
           <div
             style={{
               fontFamily: "'Archivo', sans-serif",
-              fontSize: '9px',
-              fontWeight: 800,
+              fontSize: '8.5px',
+        fontWeight: 650,
               letterSpacing: '1.5px',
               color: '#1a1a1a',
               textTransform: 'uppercase',
@@ -112,8 +112,8 @@ const ProgressRing: React.FC<ProgressRingProps> = ({ label, value, pct }) => {
             style={{
               fontFamily: "'Archivo', sans-serif",
               fontSize: '11px',
-              fontWeight: 700,
-              color: 'rgba(26,26,26,0.45)',
+              fontWeight: 600,
+              color: 'rgba(26,26,26,0.75)',
               lineHeight: 1,
             }}
           >
@@ -135,7 +135,7 @@ const ProgressRing: React.FC<ProgressRingProps> = ({ label, value, pct }) => {
       >
         <span style={{ color: '#1a1a1a', fontSize: '13px' }}>{numericPart}</span>
         {hasUnit && (
-          <span style={{ color: 'rgba(26,26,26,0.45)', marginLeft: 2, fontSize: '9px' }}>{unitPart}</span>
+          <span style={{ color: 'rgba(26,26,26,0.65)', marginLeft: 2, fontSize: '9px', fontWeight: 450 }}>{unitPart}</span>
         )}
       </div>
     </div>
