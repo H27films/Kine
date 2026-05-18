@@ -162,20 +162,20 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
               </span>
             </button>
           </div>
-          <div className="flex items-center justify-end" style={{ width: 48, overflow: 'hidden' }}>
-            <span style={{
-              fontSize: '28px',
-              fontWeight: 200,
-              letterSpacing: '0.06em',
-              lineHeight: 1,
-              fontFamily: "'Archivo', sans-serif",
-              background: 'linear-gradient(to right, #1a1a1a 30%, rgba(26,26,26,0) 90%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
+          <div className="flex items-center justify-end" style={{ width: 48 }}>
+            <div style={{
+              width: 28,
+              height: 28,
+              borderRadius: '50%',
+              backgroundColor: '#1a1a1a',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}>
-              {score > 0 ? score : '—'}
-            </span>
+              <span style={{ fontSize: '10px', fontWeight: 700, color: '#f2f2f2', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>
+                {score > 0 ? score : '—'}
+              </span>
+            </div>
           </div>
         </>
       ) : (
