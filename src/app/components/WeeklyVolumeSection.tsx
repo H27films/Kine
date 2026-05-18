@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { supabase, getISOWeek } from '../../lib/supabase';
 
 const WEIGHT_TYPES = ['CHEST', 'BACK', 'LEGS'];
 const WEEKLY_MAX = 30000;
@@ -26,15 +26,15 @@ const WeeklyVolumeSection: React.FC = () => {
   const [availableWeeks, setAvailableWeeks] = useState<number[]>([]);
   const [weekIdx, setWeekIdx] = useState(0);
   const [showWeekPicker, setShowWeekPicker] = useState(false);
+  const [currentWeek] = useState<number>(() => getISOWeek(new Date()));
 
   const loadWeeklyData = async (weeks: number[], idx: number) => {
-    if (weeks.length === 0) return;
-    const currentWeek = weeks[idx] ?? 0;
-    const lastWeek = weeks[idx + 1] ?? 0;
+    const selectedWeek = idx === 0 ? currentWeek : (weeks[idx - 1] ?? currentWeek);
+    const prevWeek = idx === 0 ? (weeks[0] ?? currentWeek - 1) : (weeks[idx] ?? selectedWeek - 1);
 
     const [{ data: thisWeek }, { data: lastWeekData }] = await Promise.all([
-      supabase.from('workouts').select('type, total_weight').in('type', WEIGHT_TYPES).eq('week', currentWeek),
-      supabase.from('workouts').select('type, total_weight').in('type', WEIGHT_TYPES).eq('week', lastWeek),
+      supabase.from('workouts').select('type, total_weight').in('type', WEIGHT_TYPES).eq('week', selectedWeek),
+      supabase.from('workouts').select('type, total_weight').in('type', WEIGHT_TYPES).eq('week', prevWeek),
     ]);
 
     const sumByType = (rows: any[] | null, type: string) =>
@@ -48,7 +48,6 @@ const WeeklyVolumeSection: React.FC = () => {
     setWeeklyData(groups);
   };
 
-  // On mount: fetch weeks then immediately load weekly data — no extra round trip
   useEffect(() => {
     const init = async () => {
       const { data } = await supabase
@@ -66,7 +65,6 @@ const WeeklyVolumeSection: React.FC = () => {
     init();
   }, []);
 
-  // When user navigates weeks (not on initial mount)
   useEffect(() => {
     if (availableWeeks.length === 0) return;
     loadWeeklyData(availableWeeks, weekIdx);
@@ -74,6 +72,8 @@ const WeeklyVolumeSection: React.FC = () => {
 
   const canGoBack = weekIdx < availableWeeks.length - 1;
   const canGoForward = weekIdx > 0;
+
+  const displayedWeekNumber = weekIdx === 0 ? currentWeek : (availableWeeks[weekIdx - 1] ?? currentWeek);
 
   return (
     <section className="mb-10">
@@ -87,15 +87,15 @@ const WeeklyVolumeSection: React.FC = () => {
                 disabled={!canGoBack}
                 style={{ opacity: canGoBack ? 0.6 : 0.2, background: 'none', border: 'none', cursor: canGoBack ? 'pointer' : 'default', padding: 0 }}
               >
-                 <ChevronLeft size={18} color="#1a1a1a" />
-               </button>
-               <button
-                 onClick={() => setWeekIdx(i => i - 1)}
-                 disabled={!canGoForward}
-                 style={{ opacity: canGoForward ? 0.6 : 0.2, background: 'none', border: 'none', cursor: canGoForward ? 'pointer' : 'default', padding: 0 }}
-               >
-                 <ChevronRight size={18} color="#1a1a1a" />
-               </button>
+                <ChevronLeft size={18} color="#1a1a1a" />
+              </button>
+              <button
+                onClick={() => setWeekIdx(i => i - 1)}
+                disabled={!canGoForward}
+                style={{ opacity: canGoForward ? 0.6 : 0.2, background: 'none', border: 'none', cursor: canGoForward ? 'pointer' : 'default', padding: 0 }}
+              >
+                <ChevronRight size={18} color="#1a1a1a" />
+              </button>
             </div>
           )}
         </div>
@@ -104,7 +104,9 @@ const WeeklyVolumeSection: React.FC = () => {
           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
         >
           {showWeekPicker ? (
-            <span style={{ color: '#1a1a1a', fontWeight: 800, fontSize: '0.85rem', fontFamily: "'Archivo', sans-serif" }}>{availableWeeks[weekIdx]}</span>
+            <span style={{ color: '#1a1a1a', fontWeight: 800, fontSize: '0.85rem', fontFamily: "'Archivo', sans-serif" }}>
+              {displayedWeekNumber}
+            </span>
           ) : (
             <Calendar size={18} style={{ color: 'rgba(26,26,26,0.8)' }} />
           )}
