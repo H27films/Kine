@@ -73,7 +73,7 @@ const ProgressRing: React.FC<ProgressRingProps> = ({ label, value, pct }) => {
               r={radius}
               fill="none"
               stroke="#1a1a1a"
-              strokeWidth={strokeWidth}
+        strokeWidth={2.5}
               strokeDasharray={circumference}
               strokeDashoffset={offset}
               strokeLinecap="round"
