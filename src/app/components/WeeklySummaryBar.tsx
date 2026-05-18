@@ -216,7 +216,7 @@ export const WeeklySummaryBar: React.FC = () => {
         width: '100%',
         boxSizing: 'border-box',
         paddingTop: '10px',
-        paddingBottom: '10px',
+        paddingBottom: '6px',
         paddingLeft: 0,
         paddingRight: 0,
         borderRadius: '12px',
