@@ -318,7 +318,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
 
   const [todayCalories, setTodayCalories] = useState<number>(0);
   const [foodRating, setFoodRating] = useState<string>('BAD'); // BAD, OK, or GOOD
-  const [showFoodRatingLabel, setShowFoodRatingLabel] = useState(false);
+  const [showFoodRatingLabel, setShowFoodRatingLabel] = useState(true);
   const [cardioWeeks, setCardioWeeks] = useState<WeekData[]>([]);
   const [weightsWeeks, setWeightsWeeks] = useState<WeekData[]>([]);
   const [weightsExerciseCounts, setWeightsExerciseCounts] = useState<Record<number, number[]>>({});
@@ -707,9 +707,9 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
               {showFoodRatingLabel && (
                 <span style={{
                   fontSize: '10px',
-                  fontWeight: 600,
+                  fontWeight: 500,
                   letterSpacing: '0.2em',
-                  color: 'rgba(26,26,26,0.8)',
+                  color: 'rgba(26,26,26,0.9)',
                   textTransform: 'uppercase',
                   fontFamily: "'Archivo', sans-serif",
                   whiteSpace: 'nowrap',
