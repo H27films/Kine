@@ -626,7 +626,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
   return (
     <div className="-mt-2">
       {showWeeklySummary && (
-        <div style={{ marginLeft: '-1rem', marginRight: '-1rem', marginBottom: '1.5rem' }}>
+        <div className="mb-6">
           <WeeklySummaryBar />
         </div>
       )}

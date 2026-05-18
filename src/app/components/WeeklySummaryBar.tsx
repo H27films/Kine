@@ -211,7 +211,7 @@ export const WeeklySummaryBar: React.FC = () => {
       style={{
         display: 'flex',
         flexDirection: 'row',
-        justifyContent: 'space-evenly',
+        justifyContent: 'space-between',
         alignItems: 'flex-start',
         width: '100%',
         boxSizing: 'border-box',
