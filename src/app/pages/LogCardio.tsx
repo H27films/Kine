@@ -624,9 +624,39 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
         onClick={handleCommit}
         disabled={saving || !hasAnyInput}
         className="w-full rounded-full py-5 text-[0.75rem] uppercase tracking-[0.4em] font-black active:scale-95 transition-all"
-        style={{ backgroundColor: saveSuccess ? 'rgba(0,0,0,0.05)' : '#000000', color: saveSuccess ? '#1a1a1a' : '#ffffff', boxShadow: '0 12px 32px rgba(0,0,0,0.12)', opacity: saving || !hasAnyInput ? 0.8 : 0.9, marginBottom: 48 }}>
+        style={{
+          backgroundColor: saveSuccess ? 'rgba(0,0,0,0.07)' : '#000000',
+          color: saveSuccess ? '#1a1a1a' : '#ffffff',
+          boxShadow: '0 12px 32px rgba(0,0,0,0.12)',
+          opacity: saving || !hasAnyInput ? 0.8 : 0.9,
+          marginBottom: 48,
+          ...(saveSuccess ? {
+            position: 'relative' as const,
+            overflow: 'hidden' as const,
+          } : {}),
+        }}
+      >
         {saving ? 'Saving...' : saveSuccess ? '✓ Session Saved!' : 'Log Session'}
+        {saveSuccess && (
+          <span
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,0.45) 40%,rgba(255,255,255,0.85) 50%,rgba(255,255,255,0.45) 60%,rgba(255,255,255,0))',
+              borderRadius: '9999px',
+              animation: 'cardio-sweep 0.8s ease-in-out 1 forwards',
+              pointerEvents: 'none',
+            }}
+          />
+        )}
       </button>
+
+      <style>{`
+        @keyframes cardio-sweep {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+      `}</style>
 
       {/* Per-type cardio chart */}
       <CardioTypeChart />

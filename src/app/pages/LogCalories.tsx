@@ -437,9 +437,46 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
 
       <button onClick={handleSave} disabled={saving}
         className="w-full font-black uppercase tracking-widest text-[10px] py-5 rounded-full mt-4 active:scale-[0.98] transition-all mb-16"
-        style={{ backgroundColor: saveSuccess ? '#22c55e' : '#1a1a1a', color: '#ffffff', opacity: saving ? 0.7 : 1 }}>
+        style={{
+          backgroundColor: saveSuccess ? 'rgba(0,0,0,0.07)' : '#1a1a1a',
+          color: saveSuccess ? '#1a1a1a' : '#ffffff',
+          opacity: saving ? 0.7 : 1,
+          ...(saveSuccess ? {
+            position: 'relative' as const,
+            overflow: 'hidden' as const,
+          } : {}),
+          ...(saveSuccess ? {
+            '--sweep-progress': '0%',
+            animation: 'sweep-illuminate 1.5s ease-in-out forwards',
+            overflow: 'hidden' as const,
+          } : {}),
+        }}>
         {saving ? 'Saving...' : saveSuccess ? '✓ Saved!' : 'Update Metrics'}
+        {saveSuccess && (
+          <span
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,0.45) 40%,rgba(255,255,255,0.85) 50%,rgba(255,255,255,0.45) 60%,rgba(255,255,255,0))',
+              borderRadius: '9999px',
+              animation: 'sweep 0.8s ease-in-out 1 forwards',
+              pointerEvents: 'none',
+            }}
+          />
+        )}
       </button>
+
+      <style>{`
+        @keyframes sweep {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        @keyframes sweep-illuminate {
+          0%   { background-color: rgba(0,0,0,0.07); }
+          70%  { background-color: rgba(0,0,0,0.14); }
+          100% { background-color: rgba(0,0,0,0.07); }
+        }
+      `}</style>
 
       <CaloriesTrends />
 
