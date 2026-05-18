@@ -799,8 +799,8 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
             {/* Exercise count circle — only show if there are weights today */}
             {dayWeights.length > 0 && (
               <div style={{
-                width: 32,
-                height: 32,
+                width: 26,
+                height: 26,
                 borderRadius: '50%',
                 backgroundColor: '#1a1a1a',
                 display: 'flex',
@@ -808,7 +808,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
                 justifyContent: 'center',
                 flexShrink: 0,
               }}>
-                <span style={{ fontSize: '12px', fontWeight: 900, color: '#ffffff', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>
+                <span style={{ fontSize: '10px', fontWeight: 900, color: '#ffffff', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>
                   {dayWeights.length}
                 </span>
               </div>
