@@ -171,9 +171,9 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
               {showScoreLabel && (
                 <span style={{
                   fontSize: '10px',
-                  fontWeight: 600,
+                  fontWeight: 500,
                   letterSpacing: '0.2em',
-                  color: 'rgba(26,26,26,0.8)',
+                  color: 'rgba(26,26,26,0.9)',
                   textTransform: 'uppercase',
                   fontFamily: "'Archivo', sans-serif",
                   whiteSpace: 'nowrap',
