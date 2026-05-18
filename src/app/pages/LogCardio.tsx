@@ -54,6 +54,8 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
   const [monthlyOffset, setMonthlyOffset] = useState(0);
   const [minMonthlyOffset, setMinMonthlyOffset] = useState(0);
   const [maxMonthlyOffset, setMaxMonthlyOffset] = useState(0);
+  const [weekOffset, setWeekOffset] = useState(0);
+  const [minWeekOffset, setMinWeekOffset] = useState(0);
 
 
   const isRunning = selectedExercise?.exercise_name?.toUpperCase() === 'RUNNING';
@@ -123,16 +125,21 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
     }
   }, [calories, calorieConversion]);
 
+  // Helper: get Monday of the week at offset (0 = current week, 1 = 1 week ago, etc.)
+  const mondayForOffset = (offset: number): string => weeksAgoMonday(offset);
+
   useEffect(() => {
     const loadWeeklyTotal = async () => {
-      const thisMonday = currentWeekMonday();
-      // Check if any TRACKER entry exists this week
+      const startMonday = mondayForOffset(weekOffset);
+      const endMonday = mondayForOffset(weekOffset - 1);
+      // Check if any TRACKER entry exists in this week
       const { data: trackerCheck } = await supabase
         .from('workouts')
         .select('id')
         .eq('type', 'CARDIO')
         .eq('exercise_id', 82) // TRACKER
-        .gte('date', thisMonday)
+        .gte('date', startMonday)
+        .lt('date', endMonday)
         .limit(1);
       const useTrackerIds = trackerCheck && trackerCheck.length > 0;
       const ids = useTrackerIds ? TOTAL_CARDIO_IDS : NO_TRACKER_CARDIO_IDS;
@@ -142,27 +149,28 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
         .select('total_cardio')
         .eq('type', 'CARDIO')
         .in('exercise_id', ids)
-        .gte('date', thisMonday);
+        .gte('date', startMonday)
+        .lt('date', endMonday);
       if (data) {
         const total = (data as any[]).reduce((sum, r) => sum + Number(r.total_cardio || 0), 0);
         setWeeklyTotal(+total.toFixed(2));
       }
     };
     loadWeeklyTotal();
-  }, [saveSuccess]);
+  }, [saveSuccess, weekOffset]);
 
   useEffect(() => {
     const loadLastWeekTotal = async () => {
-      const lastMonday = weeksAgoMonday(1);
-      const thisMonday = currentWeekMonday();
-      // Check if any TRACKER entry exists last week
+      const selectedMonday = mondayForOffset(weekOffset);
+      const prevMonday = mondayForOffset(weekOffset + 1);
+      // Check if any TRACKER entry exists in the previous week
       const { data: trackerCheck } = await supabase
         .from('workouts')
         .select('id')
         .eq('type', 'CARDIO')
         .eq('exercise_id', 82) // TRACKER
-        .gte('date', lastMonday)
-        .lt('date', thisMonday)
+        .gte('date', prevMonday)
+        .lt('date', selectedMonday)
         .limit(1);
       const useTrackerIds = trackerCheck && trackerCheck.length > 0;
       const ids = useTrackerIds ? TOTAL_CARDIO_IDS : NO_TRACKER_CARDIO_IDS;
@@ -172,28 +180,30 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
         .select('total_cardio')
         .eq('type', 'CARDIO')
         .in('exercise_id', ids)
-        .gte('date', lastMonday)
-        .lt('date', thisMonday);
+        .gte('date', prevMonday)
+        .lt('date', selectedMonday);
       if (data) {
         const total = (data as any[]).reduce((sum, r) => sum + Number(r.total_cardio || 0), 0);
         setLastWeekTotal(+total.toFixed(2));
       }
     };
     loadLastWeekTotal();
-  }, [saveSuccess]);
+  }, [saveSuccess, weekOffset]);
 
   const DAY_ORDER = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
   useEffect(() => {
     const loadWeekChart = async () => {
-      const thisMonday = currentWeekMonday();
-      // Check if any TRACKER entry exists this week
+      const startMonday = mondayForOffset(weekOffset);
+      const endMonday = mondayForOffset(weekOffset - 1);
+      // Check if any TRACKER entry exists in this week
       const { data: trackerCheck } = await supabase
         .from('workouts')
         .select('id')
         .eq('type', 'CARDIO')
         .eq('exercise_id', 82) // TRACKER
-        .gte('date', thisMonday)
+        .gte('date', startMonday)
+        .lt('date', endMonday)
         .limit(1);
       const useTrackerIds = trackerCheck && trackerCheck.length > 0;
       const ids = useTrackerIds ? TOTAL_CARDIO_IDS : NO_TRACKER_CARDIO_IDS;
@@ -203,7 +213,8 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
         .select('day, total_cardio')
         .eq('type', 'CARDIO')
         .in('exercise_id', ids)
-        .gte('date', thisMonday)
+        .gte('date', startMonday)
+        .lt('date', endMonday)
         .not('day', 'is', null);
       if (data) {
         const days = Array(7).fill(0);
@@ -215,7 +226,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
       }
     };
     loadWeekChart();
-  }, [saveSuccess]);
+  }, [saveSuccess, weekOffset]);
 
 
 
@@ -296,6 +307,35 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
         }
       };
       calculateMonthlyLimits();
+    }, [saveSuccess]);
+
+    // Calculate minimum week offset (earliest available data)
+    useEffect(() => {
+      const calcMinWeekOffset = async () => {
+        try {
+          const { data: minData } = await supabase
+            .from('workouts')
+            .select('date')
+            .eq('type', 'CARDIO')
+            .in('exercise_id', TOTAL_CARDIO_IDS)
+            .order('date', { ascending: true })
+            .limit(1);
+
+          if (minData && minData.length > 0) {
+            const earliestDate = new Date(minData[0].date + 'T00:00:00Z');
+            const todayMalaysia = new Date(todayStr() + 'T00:00:00Z');
+            const diffMs = todayMalaysia.getTime() - earliestDate.getTime();
+            const diffWeeks = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24 * 7)));
+            setMinWeekOffset(-diffWeeks);
+          } else {
+            setMinWeekOffset(0);
+          }
+        } catch (error) {
+          console.error('Error calculating min week offset:', error);
+          setMinWeekOffset(0);
+        }
+      };
+      calcMinWeekOffset();
     }, [saveSuccess]);
 
     // Load today's TRACKER distance if exists
@@ -456,7 +496,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
               >
                 MOVEMENT (KM)
               </div>
-              {sparklineClicked && (
+              {sparklineClicked ? (
                 <button
                   onClick={() => setShowTrackerEdit(true)}
                   style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#1a1a1a', opacity: 0.7, lineHeight: 1 }}
@@ -465,11 +505,24 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
                     <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
                   </svg>
                 </button>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setWeekOffset(o => Math.max(minWeekOffset, o + 1))}
+                    disabled={weekOffset <= minWeekOffset}
+                    style={{ background: 'none', border: 'none', padding: 0, cursor: weekOffset <= minWeekOffset ? 'default' : 'pointer', color: '#1a1a1a', opacity: weekOffset <= minWeekOffset ? 0.2 : 0.85, fontSize: '24px', lineHeight: 1, display: 'flex', alignItems: 'center' }}
+                  >‹</button>
+                  <button
+                    onClick={() => setWeekOffset(o => o - 1)}
+                    disabled={weekOffset <= 0}
+                    style={{ background: 'none', border: 'none', padding: 0, cursor: weekOffset <= 0 ? 'default' : 'pointer', color: '#1a1a1a', opacity: weekOffset <= 0 ? 0.2 : 0.85, fontSize: '24px', lineHeight: 1, display: 'flex', alignItems: 'center' }}
+                  >›</button>
+                </div>
               )}
             </div>
             {lastWeekTotal > 0 && (
               <div className="text-[11px] font-medium mt-1"                 style={{ color: 'rgba(26,26,26,0.45)' }}>
-                Last week {lastWeekTotal.toFixed(1)} km
+                {weekOffset === 0 ? 'Last week' : 'Previous'} {lastWeekTotal.toFixed(1)} km
               </div>
             )}
           </div>
@@ -740,7 +793,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
 
       {/* Tracker Edit Sheet */}
       {showTrackerEdit && (
-        <TrackerEditSheet onClose={() => setShowTrackerEdit(false)} onSaved={() => { setShowTrackerEdit(false); setSaveSuccess(v => !v); }} />
+        <TrackerEditSheet weekOffset={weekOffset} onClose={() => setShowTrackerEdit(false)} onSaved={() => { setShowTrackerEdit(false); setSaveSuccess(v => !v); }} />
       )}
 
     </div>

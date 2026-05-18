@@ -27,13 +27,15 @@ const getDayForDate = (d: Date): string => {
   return dayMap[dayName] || dayName;
 };
 
-const getEditableDays = (): Date[] => {
+const getEditableDays = (weekOffset: number = 0): Date[] => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const days: Date[] = [];
+  // Shift the entire 7-day window backward by weekOffset weeks
+  // weekOffset=0 = current week, weekOffset=1 = last week, etc.
   for (let i = 6; i >= 0; i--) {
     const d = new Date(today);
-    d.setDate(today.getDate() - i);
+    d.setDate(today.getDate() - i - weekOffset * 7);
     days.push(d);
   }
   return days;
@@ -46,12 +48,13 @@ const fmtEditLabel = (d: Date): string =>
   `${DAY_ABBREVS[d.getDay()]} ${d.getDate()} ${MONTH_NAMES[d.getMonth()]}`;
 
 interface Props {
+  weekOffset?: number;
   onClose: () => void;
   onSaved: () => void;
 }
 
-const TrackerEditSheet: React.FC<Props> = ({ onClose, onSaved }) => {
-  const editableDays = getEditableDays();
+const TrackerEditSheet: React.FC<Props> = ({ weekOffset = 0, onClose, onSaved }) => {
+  const editableDays = getEditableDays(weekOffset);
   const [editRowValues, setEditRowValues] = useState<string[]>(Array(7).fill(''));
   const [editSaving, setEditSaving] = useState(false);
   const [focusedRow, setFocusedRow] = useState<number | null>(null);
