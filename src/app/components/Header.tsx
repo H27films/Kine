@@ -39,6 +39,7 @@ type IconComponent = React.ComponentType<any>;
 export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNavigate, onToggleWeeklySummary }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [score, setScore] = useState<number>(0);
+  const [showScoreLabel, setShowScoreLabel] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const isDashboard = !title;
 
@@ -163,19 +164,37 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
             </button>
           </div>
           <div className="flex items-center justify-end" style={{ width: 48 }}>
-            <div style={{
-              width: 28,
-              height: 28,
-              borderRadius: '50%',
-              backgroundColor: '#1a1a1a',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-              <span style={{ fontSize: '10px', fontWeight: 700, color: '#f2f2f2', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>
-                {score > 0 ? score : '—'}
-              </span>
-            </div>
+            <button
+              onClick={() => setShowScoreLabel(v => !v)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, WebkitTapHighlightColor: 'transparent', display: 'flex', alignItems: 'center', gap: '2px' }}
+            >
+              {showScoreLabel && (
+                <span style={{
+                  fontSize: '10px',
+                  fontWeight: 600,
+                  letterSpacing: '0.2em',
+                  color: 'rgba(26,26,26,0.8)',
+                  textTransform: 'uppercase',
+                  fontFamily: "'Archivo', sans-serif",
+                  whiteSpace: 'nowrap',
+                }}>
+                  SCORE
+                </span>
+              )}
+              <div style={{
+                width: 28,
+                height: 28,
+                borderRadius: '50%',
+                backgroundColor: '#1a1a1a',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <span style={{ fontSize: '10px', fontWeight: 700, color: '#f2f2f2', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>
+                  {score > 0 ? score : '—'}
+                </span>
+              </div>
+            </button>
           </div>
         </>
       ) : (
