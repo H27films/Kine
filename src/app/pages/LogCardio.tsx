@@ -558,7 +558,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
       </header>
 
       {/* EXERCISE section — icon picker */}
-      <section ref={exerciseSectionRef} className="mb-8" style={{ marginTop: 56 }}>
+      <section ref={exerciseSectionRef} className="mb-8" style={{ marginTop: 38 }}>
         <div style={{ marginBottom: 20 }}>
           <ExerciseLogDots exercises={nonTrackerExercises} saveSuccess={saveSuccess} />
           <ExerciseIconBar
