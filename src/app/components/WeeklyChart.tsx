@@ -380,9 +380,9 @@ const onNext = () => { if (canNext) { setWeek(allWeekNumbers[currentGlobalIdx - 
                                   const spd = calculateSpeed(entry.km, entry.time);
                                   if (spd === null) return null;
                                   return (
-                                    <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: '3px', marginRight: '3px' }}>
-                                      <span>{spd.toFixed(1)}</span>
-                                      <span style={{ fontSize: '8px', fontWeight: 300, color: 'rgba(26,26,26,0.4)', letterSpacing: '0.04em' }}>km/h</span>
+                                    <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: '3px', marginRight: '6px' }}>
+                                      <span style={{ fontSize: '11px', color: 'rgba(26,26,26,0.9)', fontWeight: 500, fontFamily: "'Archivo', sans-serif" }}>{spd.toFixed(1)}</span>
+                                      <span style={{ fontSize: '10px', fontWeight: 300, color: 'rgba(26,26,26,0.4)', letterSpacing: '0.04em', fontFamily: "'Archivo', sans-serif" }}>km/h</span>
                                     </span>
                                   );
                                 })()
@@ -419,9 +419,9 @@ const onNext = () => { if (canNext) { setWeek(allWeekNumbers[currentGlobalIdx - 
                                   const spd = calculateSpeed(entry.km, entry.time);
                                   if (spd === null) return null;
                                   return (
-                                    <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: '3px', marginRight: '3px' }}>
-                                      <span>{spd.toFixed(1)}</span>
-                                      <span style={{ fontSize: '8px', fontWeight: 300, color: 'rgba(26,26,26,0.4)', letterSpacing: '0.04em' }}>km/h</span>
+                                    <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: '3px', marginRight: '6px' }}>
+                                      <span style={{ fontSize: '11px', color: 'rgba(26,26,26,0.9)', fontWeight: 500, fontFamily: "'Archivo', sans-serif" }}>{spd.toFixed(1)}</span>
+                                      <span style={{ fontSize: '10px', fontWeight: 300, color: 'rgba(26,26,26,0.4)', letterSpacing: '0.04em', fontFamily: "'Archivo', sans-serif" }}>km/h</span>
                                     </span>
                                   );
                                 })()
