@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase, malaysiaDateStr } from '../../lib/supabase';
+import { CARDIO_DISPLAY } from './CardioChartSection';
 
 export type ChartTab = 'Cardio' | 'Weights' | 'Calories' | 'Score';
 
@@ -354,9 +355,14 @@ const onNext = () => { if (canNext) { setWeek(allWeekNumbers[currentGlobalIdx - 
               {cardioEntries.map((entry, i) => (
                 <div
                   key={`${entry.exercise_name}-${i}`}
-                  style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', padding: '1.5px 0' }}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.5px 0' }}
                 >
-                  <span style={{ fontSize: '12px', fontWeight: 500, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif", letterSpacing: '0.02em' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: 500, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif", letterSpacing: '0.02em' }}>
+                    {(() => {
+                      const key = entry.exercise_name.toUpperCase();
+                      const display = CARDIO_DISPLAY[key];
+                      return display ? <span style={{ color: '#1a1a1a', display: 'flex' }}>{display.icon}</span> : null;
+                    })()}
                     {entry.exercise_name ? entry.exercise_name.charAt(0).toUpperCase() + entry.exercise_name.slice(1).toLowerCase() : ''}
                   </span>
                   <span>
