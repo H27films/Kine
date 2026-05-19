@@ -140,7 +140,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
 
   return (
     <div>
-      {/* ── Weekly header ── */}
+      {/* ── Weekly heading (outside card, same as original) ── */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{
@@ -167,97 +167,90 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
         }}>{weekLabel}</span>
       </div>
 
-      {/* ── Card-box wrapper (one card — both chart layout + breakdown inside) ── */}
-      <div style={{ background: 'rgba(0,0,0,0.05)', borderLeft: '2px solid rgba(0,0,0,0.9)', boxShadow: '0 5px 12px rgba(0,0,0,0.08)', borderRadius: 8, overflow: 'hidden' }}>
+      {/* ── Single card box — MonthlyCalendarChart template ── */}
+      <div style={{ background: 'rgba(0,0,0,0.05)', borderLeft: '2px solid rgba(0,0,0,0.9)', boxShadow: '0 5px 12px rgba(0,0,0,0.08)', borderRadius: 8, padding: '32px 24px' }}>
 
-        {/* ── Chart area ── */}
-        <div style={{ padding: '20px' }}>
-          <div className="flex items-center mb-3">
-            <div className="flex gap-4">
-              {(['Cardio', 'Weights', 'Calories', 'Score'] as ChartTab[]).map(tab => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  style={{
-                    fontSize: '12px',
-                    fontWeight: 600,
-                    textTransform: 'uppercase',
-                    letterSpacing: '1.5px',
-                    paddingBottom: '4px',
-                    color: activeTab === tab ? '#1a1a1a' : 'rgba(26,26,26,0.35)',
-                    borderBottom: activeTab === tab ? '2px solid #1a1a1a' : '2px solid transparent',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s',
-                  }}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
+        {/* ── Tabs ── */}
+        <div style={{ marginBottom: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            {(['Cardio', 'Weights', 'Calories', 'Score'] as ChartTab[]).map(tab => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                style={{
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '1.5px',
+                  paddingBottom: '4px',
+                  color: activeTab === tab ? '#1a1a1a' : 'rgba(26,26,26,0.35)',
+                  borderBottom: activeTab === tab ? '2px solid #1a1a1a' : '2px solid transparent',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  marginRight: '20px',
+                  fontFamily: "'Archivo', sans-serif",
+                  transition: 'all 0.15s',
+                }}
+              >
+                {tab}
+              </button>
+            ))}
           </div>
+        </div>
 
-          <div className="flex items-baseline gap-1 mb-5">
-            <span style={{
-              fontSize: '1.6rem',
-              fontWeight: 900,
-              letterSpacing: '-0.02em',
-              color: '#1a1a1a',
-              lineHeight: 1,
-            }}>
-              {summaryParts.value}
+        {/* ── Summary value ── */}
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '30px' }}>
+          <span style={{ fontSize: '1.6rem', fontWeight: 900, letterSpacing: '-0.02em', color: '#1a1a1a', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>
+            {summaryParts.value}
+          </span>
+          {summaryParts.unit && (
+            <span style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(26,26,26,0.45)', letterSpacing: '0.12em', fontFamily: "'Archivo', sans-serif" }}>
+              {summaryParts.unit}
             </span>
-            {summaryParts.unit && (
-              <span style={{
-                fontSize: '10px',
-                fontWeight: 700,
-                color: 'rgba(26,26,26,0.45)',
-                letterSpacing: '0.12em',
-              }}>
-                {summaryParts.unit}
+          )}
+          {activeTab === 'Weights' && effectiveWeekNumber !== null && (() => {
+            const exerciseTotal = (weightsExerciseCounts[effectiveWeekNumber] || []).reduce((s, c) => s + c, 0);
+            return (
+              <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', fontFamily: "'Archivo', sans-serif" }}>
+                <span style={{ color: '#1a1a1a' }}> / {exerciseTotal}</span>
+                <span style={{ color: 'rgba(26,26,26,0.45)' }}> EX</span>
               </span>
-            )}
-            {activeTab === 'Weights' && effectiveWeekNumber !== null && (() => {
-              const exerciseTotal = (weightsExerciseCounts[effectiveWeekNumber] || []).reduce((s, c) => s + c, 0);
-              return (
-                <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', marginLeft: '8px', fontFamily: "'Archivo', sans-serif" }}>
-                  <span style={{ color: '#1a1a1a' }}> / {exerciseTotal}</span>
-                  <span style={{ color: 'rgba(26,26,26,0.45)' }}> EX</span>
-                </span>
-              );
-            })()}
-          </div>
+            );
+          })()}
+        </div>
 
-          <div className="flex items-end justify-between h-44" style={{ gap: '12px' }}>
-            {data.map((val, i) => {
-              const clampedVal = Math.min(Math.max(val, yMin), yMax);
-              const pct = val > 0 ? Math.max((clampedVal - yMin) / (yMax - yMin), 0.04) : 0;
-              const rawPct = rawMax > 0 ? val / rawMax : 0;
-              const brightness = Math.round(210 - rawPct * 180);
-              const barColor = val > 0 ? `rgb(${brightness},${brightness},${brightness})` : 'rgba(26,26,26,0.04)';
-              let barLabel = '';
-              if (val > 0) {
-                if (unit === 'kg') { barLabel = `${Math.round(val / 1000)}k`; }
-                else if (unit === 'km') { barLabel = `${+val.toFixed(1)}`; }
-                else { barLabel = `${Math.round(val)}`; }
-              }
-              const exerciseCount = activeTab === 'Weights' && effectiveWeekNumber !== null
-                ? (weightsExerciseCounts[effectiveWeekNumber]?.[i] ?? 0)
-                : 0;
-              return (
-                <div
-                  key={i}
-                  className="flex flex-col items-center h-full justify-end"
-                  style={{ flex: '1', maxWidth: '28px', cursor: activeTab === 'Cardio' && val > 0 ? 'pointer' : 'default' }}
-                  onClick={() => {
-                    if (activeTab === 'Cardio' && val > 0 && effectiveWeekNumber !== null) {
-                      handleBarClick(effectiveWeekNumber, i);
-                    }
-                  }}
-                >
-                  <div style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(26,26,26,0.85)', marginBottom: '4px', height: '14px', fontFamily: "'Archivo', sans-serif" }}>{barLabel}</div>
-                  <div className="w-full relative transition-all" style={{ height: `${pct * 100}%`, backgroundColor: barColor, borderRadius: '9999px 9999px 0 0', minHeight: val > 0 ? '4px' : 0 }}>
+        {/* ── Bar chart row ── */}
+        <div className="flex items-end justify-between" style={{ gap: '12px', marginTop: '40px' }}>
+          {data.map((val, i) => {
+            const clampedVal = Math.min(Math.max(val, yMin), yMax);
+            const pct = val > 0 ? Math.max((clampedVal - yMin) / (yMax - yMin), 0.04) : 0;
+            const rawPct = rawMax > 0 ? val / rawMax : 0;
+            const brightness = Math.round(210 - rawPct * 180);
+            const barColor = val > 0 ? `rgb(${brightness},${brightness},${brightness})` : 'rgba(26,26,26,0.04)';
+            let barLabel = '';
+            if (val > 0) {
+              if (unit === 'kg') { barLabel = `${Math.round(val / 1000)}k`; }
+              else if (unit === 'km') { barLabel = `${+val.toFixed(1)}`; }
+              else { barLabel = `${Math.round(val)}`; }
+            }
+            const exerciseCount = activeTab === 'Weights' && effectiveWeekNumber !== null
+              ? (weightsExerciseCounts[effectiveWeekNumber]?.[i] ?? 0)
+              : 0;
+            return (
+              <div
+                key={i}
+                className="flex flex-col items-center"
+                style={{ flex: '1', maxWidth: '28px', cursor: activeTab === 'Cardio' && val > 0 ? 'pointer' : 'default' }}
+                onClick={() => {
+                  if (activeTab === 'Cardio' && val > 0 && effectiveWeekNumber !== null) {
+                    handleBarClick(effectiveWeekNumber, i);
+                  }
+                }}
+              >
+                <div style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(26,26,26,0.85)', marginBottom: '4px', height: '14px', fontFamily: "'Archivo', sans-serif" }}>{barLabel}</div>
+                <div className="relative transition-all" style={{ flex: 1, minHeight: 0, width: '100%', display: 'flex', alignItems: 'flex-end' }}>
+                  <div className="relative w-full transition-all" style={{ width: '100%', minHeight: 0, backgroundColor: barColor, borderRadius: '9999px 9999px 0 0', height: val > 0 ? Math.max(pct * 100, 4) : 0 }}>
                     {activeTab === 'Weights' && exerciseCount > 0 && (
                       <div style={{ position: 'absolute', bottom: '5px', left: 0, right: 0, display: 'flex', justifyContent: 'center' }}>
                         <div style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700, color: '#ffffff', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>
@@ -266,16 +259,16 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
                       </div>
                     )}
                   </div>
-                  <div style={{ fontSize: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'rgba(26,26,26,0.85)', marginTop: '8px', fontFamily: "'Archivo', sans-serif" }}>{days[i]}</div>
                 </div>
-              );
-            })}
-          </div>
+                <div style={{ fontSize: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'rgba(26,26,26,0.85)', marginTop: '8px', fontFamily: "'Archivo', sans-serif" }}>{days[i]}</div>
+              </div>
+            );
+          })}
         </div>
 
-        {/* ── Divider before breakdown ── */}
+        {/* ── Cardio Day Breakdown (expanded inside the same card) ── */}
         {cardioDayDate && cardioEntries.length > 0 && (
-          <div style={{ borderTop: '1px solid rgba(0,0,0,0.08)', padding: '16px 20px 0' }}>
+          <div style={{ borderTop: '1px solid rgba(0,0,0,0.1)', padding: '16px 0 0' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
               <span
                 style={{
