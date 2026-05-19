@@ -41,6 +41,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
   const setWeek = onWeekChange || setInternalWeek;
 
   const [cardioDayDate, setCardioDayDate] = useState<string | null>(null);
+  const [closing, setClosing] = useState(false);
   const [cardioEntries, setCardioEntries] = useState<CardioEntry[]>([]);
 
   function getCardioDayDate(weekNumber: number, dayIndex: number): string | null {
@@ -80,7 +81,8 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
   const handleBarClick = (weekNumber: number, dayIndex: number) => {
     if (activeTab !== 'Cardio') return;
     const hit = cardioDayDate && controlledWeek === weekNumber;
-    if (hit) { setCardioDayDate(null); return; }
+    if (hit && cardioDayDate) { setClosing(true); return; }
+    setClosing(false);
     const date = getCardioDayDate(weekNumber, dayIndex);
     if (date) setCardioDayDate(date);
   };
@@ -270,52 +272,43 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
         </div>
 
         {/* ── Cardio Day Breakdown (expanded inside the same card) ── */}
-        {cardioDayDate && cardioEntries.length > 0 && (
-            <div style={{ borderTop: '1px solid rgba(0,0,0,0.75)', padding: '20px 0 0' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-              <span
-                style={{
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  color: '#1a1a1a',
-                  letterSpacing: '0.04em',
-                  fontFamily: "'Archivo', sans-serif",
-                }}
-              >
-                {(() => {
-                  const d = new Date(cardioDayDate + 'T12:00:00Z');
-                  const ms = d.getDay() === 0 ? 6 : d.getDay() - 1;
-                  const day = DAY_LABELS[ms];
-                  const date = d.getDate();
-                  const month = d.toLocaleString('en-US', { month: 'short' }).toUpperCase();
-                  return `${day} ${date} ${month}`;
-                })()}
-              </span>
-            </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2px' }}>
-              {cardioEntries.map((entry, i) => (
-                 <div
-                   key={`${entry.exercise_name}-${i}`}
-                   style={{
-                     display: 'flex',
-                     alignItems: 'baseline',
-                     justifyContent: 'space-between',
-                     padding: '1.5px 0',
-                   }}
-                 >
-                   <span style={{ fontSize: '12px', fontWeight: 500, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif", letterSpacing: '0.02em' }}>
-                     {entry.exercise_name ? entry.exercise_name.charAt(0).toUpperCase() + entry.exercise_name.slice(1).toLowerCase() : ''}
-                   </span>
-                   <span>
-                     <span style={{ fontSize: '14px', fontWeight: 600, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>
-                       {entry.km.toFixed(1)}
-                     </span>
-                     <span style={{ fontSize: '8px', fontWeight: 600, color: 'rgba(26,26,26,0.4)', marginLeft: '2px', letterSpacing: '0.04em' }}>
-                       KM
-                     </span>
-                   </span>
-                 </div>
-              ))}
+        {cardioDayDate && (
+          <div
+            className={closing ? 'animate-fade-out' : 'animate-fade-in'}
+            onAnimationEnd={() => { if (closing) { setCardioDayDate(null); setClosing(false); } }}
+            style={{ borderTop: '1px solid rgba(0,0,0,0.75)', padding: '20px 0 0' }}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                <span style={{ fontSize: '13px', fontWeight: 600, color: '#1a1a1a', letterSpacing: '0.04em', fontFamily: "'Archivo', sans-serif" }}>
+                  {(() => {
+                    const d = new Date(cardioDayDate + 'T12:00:00Z');
+                    const ms = d.getDay() === 0 ? 6 : d.getDay() - 1;
+                    const day = DAY_LABELS[ms];
+                    const date = d.getDate();
+                    const month = d.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+                    return `${day} ${date} ${month}`;
+                  })()}
+                </span>
+              </div>
+              {cardioEntries.length === 0 ? (
+                <div style={{ color: 'rgba(26,26,26,0.3)', fontFamily: "'Archivo', sans-serif", fontSize: '11px' }}>Loading<span className="animate-pulse">.</span><span className="animate-pulse" style={{ animationDelay: '0.15s' }}>.</span><span className="animate-pulse" style={{ animationDelay: '0.3s' }}>.</span></div>
+              ) : (
+                cardioEntries.map((entry, i) => (
+                  <div
+                    key={`${entry.exercise_name}-${i}`}
+                    style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', padding: '1.5px 0' }}
+                  >
+                    <span style={{ fontSize: '12px', fontWeight: 500, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif", letterSpacing: '0.02em' }}>
+                      {entry.exercise_name ? entry.exercise_name.charAt(0).toUpperCase() + entry.exercise_name.slice(1).toLowerCase() : ''}
+                    </span>
+                    <span>
+                      <span style={{ fontSize: '14px', fontWeight: 600, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>{entry.km.toFixed(1)}</span>
+                      <span style={{ fontSize: '8px', fontWeight: 600, color: 'rgba(26,26,26,0.4)', marginLeft: '2px', letterSpacing: '0.04em' }}>KM</span>
+                    </span>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         )}
