@@ -44,6 +44,8 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
   const [closing, setClosing] = useState(false);
   const [openDayIndex, setOpenDayIndex] = useState<number | null>(null);
   const [cardioEntries, setCardioEntries] = useState<CardioEntry[]>([]);
+  const [cardioLoading, setCardioLoading] = useState(false);
+const [cardioReady, setCardioReady] = useState(false);
   const outerRef = useRef<HTMLDivElement>(null);
 
   function getCardioDayDate(weekNumber: number, dayIndex: number): string | null {
@@ -55,6 +57,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
   useEffect(() => {
     if (!cardioDayDate) { setCardioEntries([]); return; }
     const load = async () => {
+      setCardioLoading(true);
       const { data } = await supabase
         .from('workouts')
         .select('km, exercises:exercise_id(exercise_name)')
@@ -63,7 +66,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
         .not('km', 'is', null)
         .gt('km', 0)
         .order('exercise_id');
-
+    
       if (data) {
         setCardioEntries(
           data
@@ -76,6 +79,8 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
       } else {
         setCardioEntries([]);
       }
+      setCardioLoading(false);
+      setCardioReady(true);
     };
     load();
   }, [cardioDayDate]);
@@ -296,10 +301,10 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
         </div>
 
         {/* ── Cardio Day Breakdown (expanded inside the same card) ── */}
-        {cardioDayDate && (
+        {cardioDayDate && cardioReady && (
           <div
             className={closing ? 'fade-out-block' : 'fade-in-block'}
-            onAnimationEnd={() => { if (closing) { setCardioDayDate(null); setOpenDayIndex(null); setClosing(false); } }}
+            onAnimationEnd={() => { if (closing) { setCardioDayDate(null); setOpenDayIndex(null); setCardioReady(false); setClosing(false); } }}
             onMouseDown={e => { e.stopPropagation(); setClosing(true); }}
             style={{ borderTop: '1px solid rgba(0,0,0,0.75)', padding: '20px 0 0', willChange: 'opacity, transform', cursor: 'pointer' }}
           >
