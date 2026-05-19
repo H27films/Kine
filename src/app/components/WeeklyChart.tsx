@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase, malaysiaDateStr } from '../../lib/supabase';
 
@@ -43,6 +43,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
   const [cardioDayDate, setCardioDayDate] = useState<string | null>(null);
   const [closing, setClosing] = useState(false);
   const [cardioEntries, setCardioEntries] = useState<CardioEntry[]>([]);
+  const outerRef = useRef<HTMLDivElement>(null);
 
   function getCardioDayDate(weekNumber: number, dayIndex: number): string | null {
     const monday = new Date('2025-01-06T00:00:00Z');
@@ -76,6 +77,18 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
       }
     };
     load();
+  }, [cardioDayDate]);
+
+  useEffect(() => {
+    if (!cardioDayDate) return;
+    const handler = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (outerRef.current && !outerRef.current.contains(t)) {
+        setClosing(true);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
   }, [cardioDayDate]);
 
   const handleBarClick = (weekNumber: number, dayIndex: number) => {
@@ -141,7 +154,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
   })();
 
   return (
-    <div>
+    <div ref={outerRef}>
       {/* ── Weekly heading (outside card, same as original) ── */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -276,7 +289,8 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
           <div
             className={closing ? 'fade-out-block' : 'fade-in-block'}
             onAnimationEnd={() => { if (closing) { setCardioDayDate(null); setClosing(false); } }}
-            style={{ borderTop: '1px solid rgba(0,0,0,0.75)', padding: '20px 0 0', willChange: 'opacity, transform' }}
+            onMouseDown={e => { e.stopPropagation(); setClosing(true); }}
+            style={{ borderTop: '1px solid rgba(0,0,0,0.75)', padding: '20px 0 0', willChange: 'opacity, transform', cursor: 'pointer' }}
           >
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2px', contain: 'layout' }}>
               <div style={{ marginBottom: '12px' }}>
