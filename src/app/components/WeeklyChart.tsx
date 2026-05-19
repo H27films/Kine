@@ -221,7 +221,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
         </div>
 
         {/* ── Bar chart row ── */}
-        <div className="flex items-end justify-between h-44" style={{ gap: '12px', marginTop: '40px' }}>
+        <div className="flex items-end justify-between h-44" style={{ gap: '12px', marginTop: '20px' }}>
           {data.map((val, i) => {
             const clampedVal = Math.min(Math.max(val, yMin), yMax);
             const pct = val > 0 ? Math.max((clampedVal - yMin) / (yMax - yMin), 0.04) : 0;
