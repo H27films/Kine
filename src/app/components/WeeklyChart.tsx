@@ -168,7 +168,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
       </div>
 
       {/* ── Single card box — MonthlyCalendarChart template ── */}
-      <div style={{ background: 'rgba(0,0,0,0.05)', borderLeft: '2px solid rgba(0,0,0,0.9)', boxShadow: '0 5px 12px rgba(0,0,0,0.08)', borderRadius: 8, padding: '32px 24px' }}>
+      <div style={{ background: 'rgba(0,0,0,0.05)', borderLeft: '2px solid rgba(0,0,0,0.9)', boxShadow: '0 5px 12px rgba(0,0,0,0.08)', borderRadius: 8, padding: '32px 24px 16px 24px' }}>
 
         {/* ── Tabs ── */}
         <div style={{ marginBottom: '20px' }}>
@@ -221,7 +221,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
         </div>
 
         {/* ── Bar chart row ── */}
-          <div className="flex items-end justify-between h-44" style={{ gap: '12px', marginBottom: '20px', marginTop: '20px' }}>
+          <div            className="flex items-end justify-between h-44" style={{ gap: '12px', marginBottom: '16px', marginTop: '20px' }}>
           {data.map((val, i) => {
             const clampedVal = Math.min(Math.max(val, yMin), yMax);
             const pct = val > 0 ? Math.max((clampedVal - yMin) / (yMax - yMin), 0.04) : 0;
@@ -271,7 +271,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
 
         {/* ── Cardio Day Breakdown (expanded inside the same card) ── */}
         {cardioDayDate && cardioEntries.length > 0 && (
-          <div style={{ borderTop: '1px solid rgba(0,0,0,0.75)', padding: '26px 0 0' }}>
+            <div style={{ borderTop: '1px solid rgba(0,0,0,0.75)', padding: '20px 0 0' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
               <span
                 style={{
@@ -292,7 +292,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
                 })()}
               </span>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2px' }}>
               {cardioEntries.map((entry, i) => (
                  <div
                    key={`${entry.exercise_name}-${i}`}
