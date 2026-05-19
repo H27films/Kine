@@ -434,7 +434,7 @@ let bgColor = h > 0 ? '#1a1a1a' : 'rgba(26,26,26,0.08)';
                 barColor = 'rgba(26,26,26,0.08)';
               } else if (pctOfMax >= 0.75) {
                 barColor = '#1a1a1a';
-              } else if (pctOfMax >= 0.5) {
+              } else if (pctOfMax >= 0.6) {
                 barColor = 'rgba(26,26,26,0.65)';
               } else {
                 barColor = 'rgba(26,26,26,0.25)';
