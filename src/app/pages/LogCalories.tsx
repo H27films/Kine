@@ -233,7 +233,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
   return (
     <div>
 
-      <section className="mb-16 space-y-12">
+      <section className="mb-8 space-y-6">
         {chartExpanded ? (
           <CaloriesSparkline
             weeklyBars={weeklyBars}
@@ -256,7 +256,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
         )}
       </section>
 
-      <section className="mb-16 space-y-12">
+      <section className="mb-16">
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {(() => {
             const foodScore = weeklyRatings.reduce((sum, r) => sum + (r === 'GOOD' ? 3 : r === 'OK' ? 2 : r === 'BAD' ? 0 : 0), 0);
