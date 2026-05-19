@@ -256,7 +256,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
         )}
       </section>
 
-      <section className="mb-16">
+      <section className="mb-7">
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {(() => {
             const foodScore = weeklyRatings.reduce((sum, r) => sum + (r === 'GOOD' ? 3 : r === 'OK' ? 2 : r === 'BAD' ? 0 : 0), 0);
@@ -373,7 +373,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
             height="20" 
             viewBox="0 0 24 24" 
             fill="none" 
-            stroke="white" 
+            stroke="#1a1a1a" 
             strokeWidth="2" 
             strokeLinecap="round" 
             strokeLinejoin="round"
