@@ -123,9 +123,9 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
     if (activeTab !== 'Cardio') return;
   
     const isSameBar =
-      cardioDayDate !== null &&
-      controlledWeek === weekNumber &&
-      openDayIndex === dayIndex;
+  cardioDayDate !== null &&
+  effectiveWeekNumber === weekNumber &&
+  openDayIndex === dayIndex;
   
     if (isSameBar) {
       setClosing(true);
@@ -253,7 +253,7 @@ const onNext = () => { if (canNext) { setWeek(allWeekNumbers[currentGlobalIdx - 
         </div>
 
         {/* ── Summary value ── */}
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '30px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '30px' }}>
           <span style={{ fontSize: '1.6rem', fontWeight: 900, letterSpacing: '-0.02em', color: '#1a1a1a', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>
             {summaryParts.value}
           </span>
@@ -380,14 +380,14 @@ const onNext = () => { if (canNext) { setWeek(allWeekNumbers[currentGlobalIdx - 
                                   const spd = calculateSpeed(entry.km, entry.time);
                                   if (spd === null) return null;
                                   return (
-                                    <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: '3px', marginRight: '6px' }}>
+                                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', marginRight: '6px' }}>
                                       <span style={{ fontSize: '11px', color: 'rgba(26,26,26,0.9)', fontWeight: 500, fontFamily: "'Archivo', sans-serif" }}>{spd.toFixed(1)}</span>
                                       <span style={{ fontSize: '10px', fontWeight: 300, color: 'rgba(26,26,26,0.4)', letterSpacing: '0.04em', fontFamily: "'Archivo', sans-serif" }}>km/h</span>
                                     </span>
                                   );
                                 })()
                               : null}
-                            <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: '2px' }}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
                               <span style={{ fontSize: '13px', fontWeight: 550, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>{entry.km.toFixed(1)}</span>
                               <span style={{ fontSize: '8px', fontWeight: 500, color: 'rgba(26,26,26,0.4)', letterSpacing: '0.04em' }}>KM</span>
                             </span>
@@ -419,14 +419,14 @@ const onNext = () => { if (canNext) { setWeek(allWeekNumbers[currentGlobalIdx - 
                                   const spd = calculateSpeed(entry.km, entry.time);
                                   if (spd === null) return null;
                                   return (
-                                    <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: '3px', marginRight: '6px' }}>
+                                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', marginRight: '6px' }}>
                                       <span style={{ fontSize: '11px', color: 'rgba(26,26,26,0.9)', fontWeight: 500, fontFamily: "'Archivo', sans-serif" }}>{spd.toFixed(1)}</span>
                                       <span style={{ fontSize: '10px', fontWeight: 300, color: 'rgba(26,26,26,0.4)', letterSpacing: '0.04em', fontFamily: "'Archivo', sans-serif" }}>km/h</span>
                                     </span>
                                   );
                                 })()
                               : null}
-                            <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: '2px' }}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
                               <span style={{ fontSize: '13px', fontWeight: 550, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>{entry.km.toFixed(1)}</span>
                               <span style={{ fontSize: '8px', fontWeight: 500, color: 'rgba(26,26,26,0.4)', letterSpacing: '0.04em' }}>KM</span>
                             </span>
