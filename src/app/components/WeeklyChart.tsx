@@ -262,9 +262,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
                       <div style={{ position: 'absolute', bottom: '5px', left: 0, right: 0, display: 'flex', justifyContent: 'center' }}>
                         <div style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700, color: '#ffffff', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>
                           {exerciseCount}
-          </div>
-        </div>
-
+                        </div>
                       </div>
                     )}
                   </div>
