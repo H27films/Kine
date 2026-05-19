@@ -13,6 +13,7 @@ export interface WeekData {
 interface CardioEntry {
   exercise_name: string;
   km: number;
+  time: string | null;
 }
 
 interface WeeklyChartProps {
@@ -26,6 +27,19 @@ interface WeeklyChartProps {
 }
 
 const DAY_LABELS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+
+const parseTimeToHours = (time: string | null): number | null => {
+  if (!time) return null;
+  const parts = time.split(':');
+  if (parts.length !== 3) return null;
+  return parseFloat(parts[0]) + parseFloat(parts[1]) / 60 + parseFloat(parts[2]) / 3600;
+};
+
+const calculateSpeed = (km: number, time: string | null): number | null => {
+  const hours = parseTimeToHours(time);
+  if (!hours || hours === 0) return null;
+  return km / hours;
+};
 
 export const WeeklyChart: React.FC<WeeklyChartProps> = ({
   cardioWeeks,
@@ -61,7 +75,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
       setCardioLoading(true);
       const { data } = await supabase
         .from('workouts')
-        .select('km, exercises:exercise_id(exercise_name)')
+        .select('km, time, exercises:exercise_id(exercise_name)')
         .eq('type', 'CARDIO')
         .eq('date', cardioDayDate)
         .not('km', 'is', null)
@@ -74,6 +88,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
             .map((r: any) => ({
               exercise_name: r.exercises?.exercise_name || 'Unknown',
               km: Number(r.km),
+              time: r.time ?? null,
             }))
             .sort((a, b) => {
               const aIsTracker = a.exercise_name.toUpperCase() === 'TRACKER';
@@ -328,7 +343,7 @@ const onNext = () => { if (canNext) { setWeek(allWeekNumbers[currentGlobalIdx - 
             onMouseDown={e => { e.stopPropagation(); setClosing(true); }}
             style={{ borderTop: '1px solid rgba(0,0,0,0.75)', padding: '20px 0 0', willChange: 'opacity, transform', cursor: 'pointer' }}
           >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2px', contain: 'layout' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 <div style={{ marginBottom: '12px' }}>
                   <span style={{ fontSize: '13px', fontWeight: 600, color: '#1a1a1a', letterSpacing: '0.04em', fontFamily: "'Archivo', sans-serif" }}>
                     {(() => {
@@ -359,9 +374,23 @@ const onNext = () => { if (canNext) { setWeek(allWeekNumbers[currentGlobalIdx - 
                               return display ? <span style={{ color: '#1a1a1a', display: 'flex', marginLeft: '8px', opacity: 0.9 }}>{display.icon}</span> : null;
                             })()}
                           </span>
-                          <span>
-                            <span style={{ fontSize: '13px', fontWeight: 550, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>{entry.km.toFixed(1)}</span>
-                            <span style={{ fontSize: '8px', fontWeight: 500, color: 'rgba(26,26,26,0.4)', marginLeft: '2px', letterSpacing: '0.04em' }}>KM</span>
+                          <span style={{ fontSize: '10px', fontWeight: 300, color: 'rgba(26,26,26,0.4)', letterSpacing: '0.04em', fontFamily: "'Archivo', sans-serif" }}>
+                            {entry.exercise_name.toUpperCase() === 'RUNNING'
+                              ? (() => {
+                                  const spd = calculateSpeed(entry.km, entry.time);
+                                  if (spd === null) return null;
+                                  return (
+                                    <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: '3px', marginRight: '3px' }}>
+                                      <span>{spd.toFixed(1)}</span>
+                                      <span style={{ fontSize: '8px', fontWeight: 300, color: 'rgba(26,26,26,0.4)', letterSpacing: '0.04em' }}>km/h</span>
+                                    </span>
+                                  );
+                                })()
+                              : null}
+                            <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: '2px' }}>
+                              <span style={{ fontSize: '13px', fontWeight: 550, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>{entry.km.toFixed(1)}</span>
+                              <span style={{ fontSize: '8px', fontWeight: 500, color: 'rgba(26,26,26,0.4)', letterSpacing: '0.04em' }}>KM</span>
+                            </span>
                           </span>
                         </div>
                       ))}
@@ -384,9 +413,23 @@ const onNext = () => { if (canNext) { setWeek(allWeekNumbers[currentGlobalIdx - 
                               return display ? <span style={{ color: '#1a1a1a', display: 'flex', marginLeft: '8px', opacity: 0.9 }}>{display.icon}</span> : null;
                             })()}
                           </span>
-                          <span>
-                            <span style={{ fontSize: '13px', fontWeight: 550, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>{entry.km.toFixed(1)}</span>
-                            <span style={{ fontSize: '8px', fontWeight: 500, color: 'rgba(26,26,26,0.4)', marginLeft: '2px', letterSpacing: '0.04em' }}>KM</span>
+                          <span style={{ fontSize: '10px', fontWeight: 300, color: 'rgba(26,26,26,0.4)', letterSpacing: '0.04em', fontFamily: "'Archivo', sans-serif" }}>
+                            {entry.exercise_name.toUpperCase() === 'RUNNING'
+                              ? (() => {
+                                  const spd = calculateSpeed(entry.km, entry.time);
+                                  if (spd === null) return null;
+                                  return (
+                                    <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: '3px', marginRight: '3px' }}>
+                                      <span>{spd.toFixed(1)}</span>
+                                      <span style={{ fontSize: '8px', fontWeight: 300, color: 'rgba(26,26,26,0.4)', letterSpacing: '0.04em' }}>km/h</span>
+                                    </span>
+                                  );
+                                })()
+                              : null}
+                            <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: '2px' }}>
+                              <span style={{ fontSize: '13px', fontWeight: 550, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>{entry.km.toFixed(1)}</span>
+                              <span style={{ fontSize: '8px', fontWeight: 500, color: 'rgba(26,26,26,0.4)', letterSpacing: '0.04em' }}>KM</span>
+                            </span>
                           </span>
                         </div>
                       ))}
