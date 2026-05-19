@@ -294,7 +294,20 @@ const [cardioReady, setCardioReady] = useState(false);
                     </div>
                   )}
                 </div>
-                <div style={{ fontSize: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'rgba(26,26,26,0.85)', marginTop: '8px', fontFamily: "'Archivo', sans-serif" }}>{days[i]}</div>
+                <div style={{
+  fontSize: '8px',
+  fontWeight: 700,
+  textTransform: 'uppercase',
+  letterSpacing: '0.5px',
+  color: 'rgba(26,26,26,0.85)',
+  marginTop: '8px',
+  fontFamily: "'Archivo', sans-serif",
+  padding: '2px 5px',
+  borderRadius: '999px',
+  background: openDayIndex === i ? 'rgba(0,0,0,0.07)' : 'transparent',
+  boxShadow: openDayIndex === i ? '0 3px 6px rgba(0,0,0,0.18)' : 'none',
+  transition: 'all 0.2s',
+}}>{days[i]}</div>
               </div>
             );
           })}
