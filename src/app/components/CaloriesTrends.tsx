@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { supabase, getISOWeek } from '../../lib/supabase';
 import CaloriesEditSheet from './CaloriesEditSheet';
 
 const weekDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 const MONTH_NAMES = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
 const CALORIES_EXERCISE_ID = 90;
+const FOOD_EXERCISE_ID = 89;
 
 const getMondayAtOffset = (offset: number): Date => {
   const today = new Date();
@@ -15,10 +16,20 @@ const getMondayAtOffset = (offset: number): Date => {
   monday.setHours(0, 0, 0, 0);
   return monday;
 };
-
 const fmtDate = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
+const todayMalaysiaDate = (): Date => {
+  const today = new Date();
+  return new Date(malaysiaDateStr(today) + 'T00:00:00Z');
+};
+const malaysiaDateStr = (d: Date): string => {
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    timeZone: 'Asia/Kuala_Lumpur',
+  });
+  return formatter.format(d);
+};
 
 const trendLabelStyle: React.CSSProperties = {
   fontSize: '11px',
@@ -41,6 +52,10 @@ const CaloriesTrends: React.FC = () => {
 
   const [showEditSheet, setShowEditSheet] = useState(false);
 
+  // Food rating weekly state
+  const [weekOff, setWeekOff] = useState(0); // 0 = current week, -1 = last week, etc.
+  const [weeklyFoodData, setWeeklyFoodData] = useState<number[]>(Array(7).fill(0));
+
   useEffect(() => {
     const fetchEarliest = async () => {
       const { data } = await supabase
@@ -62,6 +77,41 @@ const CaloriesTrends: React.FC = () => {
     };
     fetchEarliest();
   }, []);
+
+  useEffect(() => {
+    const loadFoodWeekly = async () => {
+      const currentWeek = getISOWeek(todayMalaysiaDate());
+      const endWeek = currentWeek + weekOff;
+      const startWeek = endWeek - 6;
+
+      const { data } = await supabase
+        .from('workouts')
+        .select('food_rating, week')
+        .eq('type', 'MEASUREMENT')
+        .eq('exercise_id', FOOD_EXERCISE_ID)
+        .not('food_rating', 'is', null)
+        .gte('week', startWeek)
+        .lte('week', endWeek);
+
+      const weekly: Record<number, number> = {};
+      if (data) {
+        for (const row of data as any[]) {
+          const wk = Number(row.week);
+          if (isNaN(wk)) continue;
+          const r = String(row.food_rating).toUpperCase();
+          const score = r === 'GOOD' ? 3 : r === 'OK' ? 2 : r === 'BAD' ? 0 : 0;
+          weekly[wk] = (weekly[wk] || 0) + score;
+        }
+      }
+      const result: number[] = [];
+      for (let i = 0; i < 7; i++) {
+        const wk = startWeek + i;
+        result.push(weekly[wk] || 0);
+      }
+      setWeeklyFoodData(result);
+    };
+    loadFoodWeekly();
+  }, [weekOff, refreshKey]);
 
   useEffect(() => {
     const loadWeekly = async () => {
@@ -170,6 +220,10 @@ const CaloriesTrends: React.FC = () => {
   const monthlyPeakIdx = monthlyBars.indexOf(Math.max(...monthlyBars));
 
   const todayDayIdx = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
+
+  // Week labels for the food rating chart (oldest → newest week number)
+  const currentWeekForLabel = getISOWeek(todayMalaysiaDate());
+  const weeklyFoodLabels = Array.from({ length: 7 }, (_, i) => String(currentWeekForLabel + weekOff - 6 + i));
 
   return (
     <section className="mb-8">
@@ -341,6 +395,87 @@ let bgColor = h > 0 ? '#1a1a1a' : 'rgba(26,26,26,0.08)';
                 );
               })}
             </div>
+          </div>
+        </div>
+
+        {/* === Weekly Food Rating Chart === */}
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span style={trendLabelStyle}>Weekly:&nbsp;</span>
+              <span style={trendLabelStyle}>Food Rating</span>
+              <button
+                onClick={() => setWeekOff(weekOff - 1)}
+                style={{ background: 'none', border: 'none', padding: '2px 1px', cursor: 'pointer', color: '#000000', display: 'flex', alignItems: 'center' }}
+              >
+                <ChevronLeft size={14} />
+              </button>
+              <button
+                onClick={() => setWeekOff(o => Math.min(o + 1, 0))}
+                style={{ background: 'none', border: 'none', padding: '2px 1px', cursor: 'pointer', color: weekOff < 0 ? '#000000' : 'rgba(0,0,0,0.18)', display: 'flex', alignItems: 'center' }}
+              >
+                <ChevronRight size={14} />
+              </button>
+            </div>
+          </div>
+
+          {/* Bars */}
+          <div className="flex items-end justify-between gap-1" style={{ height: '140px' }}>
+            {weeklyFoodData.map((h, i) => {
+              const pct = weeklyFoodData.length > 0 ? (h / 21) * 100 : 0;
+              const barPct = Math.max(pct, h > 0 ? 4 : 0);
+
+              let barColor: string;
+              if (h === 0) {
+                barColor = 'rgba(26,26,26,0.08)';
+              } else if (h >= 14) {
+                barColor = '#90c9a0';
+              } else if (h >= 5) {
+                barColor = '#1a1a1a';
+              } else {
+                barColor = '#b02828';
+              }
+
+              return (
+                <div
+                  key={i}
+                  className="flex-1 rounded-sm"
+                  style={{
+                    height: `${barPct}%`,
+                    backgroundColor: barColor,
+                    position: 'relative',
+                    display: 'flex',
+                    alignItems: 'flex-end',
+                    justifyContent: 'center',
+                    paddingBottom: '9px',
+                  }}
+                >
+                  {h > 0 && (
+                    <span style={{
+                      fontSize: '9px',
+                      fontWeight: 700,
+                      color: '#ffffff',
+                      letterSpacing: '0.01em',
+                      lineHeight: 1,
+                      whiteSpace: 'nowrap',
+                    }}>
+                      {h}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Week labels */}
+          <div className="flex justify-between mt-3" style={{ gap: 4 }}>
+            {weeklyFoodLabels.map((lbl, i) => (
+              <div key={i} className="flex-1 flex flex-col items-center">
+                <span style={{ fontSize: '8px', fontWeight: 700, color: '#1a1a1a', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  {lbl}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
 
