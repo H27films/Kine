@@ -328,49 +328,70 @@ const onNext = () => { if (canNext) { setWeek(allWeekNumbers[currentGlobalIdx - 
             onMouseDown={e => { e.stopPropagation(); setClosing(true); }}
             style={{ borderTop: '1px solid rgba(0,0,0,0.75)', padding: '20px 0 0', willChange: 'opacity, transform', cursor: 'pointer' }}
           >
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2px', contain: 'layout' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                <span style={{ fontSize: '13px', fontWeight: 600, color: '#1a1a1a', letterSpacing: '0.04em', fontFamily: "'Archivo', sans-serif" }}>
-                  {(() => {
-                    const d = new Date(cardioDayDate + 'T12:00:00Z');
-                    const ms = d.getDay() === 0 ? 6 : d.getDay() - 1;
-                    const day = DAY_LABELS[ms];
-                    const date = d.getDate();
-                    const month = d.toLocaleString('en-US', { month: 'short' }).toUpperCase();
-                    return `${day} ${date} ${month}`;
-                  })()}
-                </span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2px', contain: 'layout' }}>
+                <div style={{ marginBottom: '12px' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 600, color: '#1a1a1a', letterSpacing: '0.04em', fontFamily: "'Archivo', sans-serif" }}>
+                    {(() => {
+                      const d = new Date(cardioDayDate + 'T12:00:00Z');
+                      const ms = d.getDay() === 0 ? 6 : d.getDay() - 1;
+                      const day = DAY_LABELS[ms];
+                      const date = d.getDate();
+                      const month = d.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+                      return `${day} ${date} ${month}`;
+                    })()}
+                  </span>
+                </div>
                 {(() => {
-                  const count = cardioEntries.filter(e => e.exercise_name.toUpperCase() !== 'TRACKER').length;
-                  if (count === 0) return null;
+                  const normal = cardioEntries.filter(e => e.exercise_name.toUpperCase() !== 'TRACKER');
+                  const trackers = cardioEntries.filter(e => e.exercise_name.toUpperCase() === 'TRACKER');
                   return (
-                    <div style={{
-                      width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#1a1a1a',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: '10px', fontWeight: 700, color: '#ffffff', fontFamily: "'Archivo', sans-serif", flexShrink: 0,
-                    }}>{count}</div>
+                    <>
+                      {normal.map((entry, i) => (
+                        <div
+                          key={`normal-${entry.exercise_name}-${i}`}
+                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '2px 0' }}
+                        >
+                          <span style={{ display: 'flex', alignItems: 'center', fontSize: '12px', fontWeight: 500, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif", letterSpacing: '0.02em' }}>
+                            {entry.exercise_name ? entry.exercise_name.charAt(0).toUpperCase() + entry.exercise_name.slice(1).toLowerCase() : ''}
+                            {(() => {
+                              const key = entry.exercise_name.toUpperCase();
+                              const display = CARDIO_DISPLAY[key];
+                              return display ? <span style={{ color: '#1a1a1a', display: 'flex', marginLeft: '8px', opacity: 0.9 }}>{display.icon}</span> : null;
+                            })()}
+                          </span>
+                          <span>
+                            <span style={{ fontSize: '13px', fontWeight: 550, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>{entry.km.toFixed(1)}</span>
+                            <span style={{ fontSize: '8px', fontWeight: 500, color: 'rgba(26,26,26,0.4)', marginLeft: '2px', letterSpacing: '0.04em' }}>KM</span>
+                          </span>
+                        </div>
+                      ))}
+                      {trackers.map((entry, i) => (
+                        <div
+                          key={`tracker-${entry.exercise_name}-${i}`}
+                          style={{
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                            padding: '5px 12px', margin: '3px -12px 0 -12px',
+                            borderRadius: '6px',
+                            background: 'rgba(255,255,255,0.4)',
+                          }}
+                        >
+                          <span style={{ display: 'flex', alignItems: 'center', fontSize: '12px', fontWeight: 500, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif", letterSpacing: '0.02em' }}>
+                            {entry.exercise_name ? entry.exercise_name.charAt(0).toUpperCase() + entry.exercise_name.slice(1).toLowerCase() : ''}
+                            {(() => {
+                              const key = entry.exercise_name.toUpperCase();
+                              const display = CARDIO_DISPLAY[key];
+                              return display ? <span style={{ color: '#1a1a1a', display: 'flex', marginLeft: '8px', opacity: 0.9 }}>{display.icon}</span> : null;
+                            })()}
+                          </span>
+                          <span>
+                            <span style={{ fontSize: '13px', fontWeight: 550, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>{entry.km.toFixed(1)}</span>
+                            <span style={{ fontSize: '8px', fontWeight: 500, color: 'rgba(26,26,26,0.4)', marginLeft: '2px', letterSpacing: '0.04em' }}>KM</span>
+                          </span>
+                        </div>
+                      ))}
+                    </>
                   );
                 })()}
-              </div>
-              {cardioEntries.map((entry, i) => (
-                  <div
-                    key={`${entry.exercise_name}-${i}`}
-                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.5px 0' }}
-                  >
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '0px', fontSize: '12px', fontWeight: 500, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif", letterSpacing: '0.02em' }}>
-                      {entry.exercise_name ? entry.exercise_name.charAt(0).toUpperCase() + entry.exercise_name.slice(1).toLowerCase() : ''}
-                      {(() => {
-                        const key = entry.exercise_name.toUpperCase();
-                        const display = CARDIO_DISPLAY[key];
-                        return display ? <span style={{ color: '#1a1a1a', display: 'flex', marginLeft: '8px', opacity: 0.9 }}>{display.icon}</span> : null;
-                      })()}
-                    </span>
-                    <span>
-                      <span style={{ fontSize: '13px', fontWeight: 550, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>{entry.km.toFixed(1)}</span>
-                      <span style={{ fontSize: '8px', fontWeight: 500, color: 'rgba(26,26,26,0.4)', marginLeft: '2px', letterSpacing: '0.04em' }}>KM</span>
-                    </span>
-                  </div>
-              ))}
             </div>
           </div>
         )}
