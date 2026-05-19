@@ -74,7 +74,13 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
               exercise_name: r.exercises?.exercise_name || 'Unknown',
               km: Number(r.km),
             }))
-            .sort((a, b) => a.exercise_name.localeCompare(b.exercise_name))
+            .sort((a, b) => {
+              const aIsTracker = a.exercise_name.toUpperCase() === 'TRACKER';
+              const bIsTracker = b.exercise_name.toUpperCase() === 'TRACKER';
+              if (aIsTracker && !bIsTracker) return 1;
+              if (!aIsTracker && bIsTracker) return -1;
+              return a.exercise_name.localeCompare(b.exercise_name);
+            })
         );
       } else {
         setCardioEntries([]);
