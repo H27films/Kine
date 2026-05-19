@@ -292,7 +292,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
                 })()}
               </span>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
               {cardioEntries.map((entry, i) => (
                 <div
                   key={`${entry.exercise_name}-${i}`}
@@ -300,7 +300,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
                     display: 'flex',
                     alignItems: 'baseline',
                     justifyContent: 'space-between',
-                    padding: '4px 0',
+                    padding: '1.5px 0',
                   }}
                 >
                   <span style={{ fontSize: '12px', fontWeight: 500, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif", letterSpacing: '0.02em' }}>
