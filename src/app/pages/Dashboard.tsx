@@ -7,18 +7,18 @@ import { WeeklySummaryBar } from '../components/WeeklySummaryBar';
 import WeeklyVolumeCompact from '../components/WeeklyVolumeCompact';
 import CardioChartSection, { CARDIO_DISPLAY } from '../components/CardioChartSection';
 import MonthlyCalendarChart from '../components/MonthlyCalendarChart';
-import { supabase, weeksAgoMonday } from '../../lib/supabase';
+import { supabase, weeksAgoMonday, malaysiaDateStr } from '../../lib/supabase';
+import { WeeklyChart } from '../components/WeeklyChart';
+import type { WeekData } from '../components/WeeklyChart';
 
 type ChartTab = 'Cardio' | 'Weights' | 'Calories' | 'Score';
 
-const TOTAL_CARDIO_IDS = [82, 83, 87];          // Tracker + Row + Cycle
-const NO_TRACKER_CARDIO_IDS = [83, 84, 85, 86, 87]; // Row + Running + Walking + Cross Trainer + Cycle
+const TOTAL_CARDIO_IDS = [82, 83, 87];
+const NO_TRACKER_CARDIO_IDS = [83, 84, 85, 86, 87];
 const DAY_ORDER = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
 const toTitleCase = (str: string) =>
   str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
-
-
 
 const CARDIO_ALWAYS = ['TRACKER', 'RUNNING', 'ROW', 'CROSS TRAINER', 'WALKING', 'CYCLE'];
 const CARDIO_CONDITIONAL: string[] = [];
@@ -35,12 +35,6 @@ interface DayWeight {
   weight: number;
 }
 
-interface WeekData {
-  weekNumber: number;
-  days: number[];
-}
-
-// Returns Record<weekNumber, number[7]> — count of unique exercise_ids per day
 function groupWeightExerciseCounts(rows: { week: number; day: string; exercise_id: number }[]): Record<number, number[]> {
   const map: Record<number, Set<number>[]> = {};
   for (const r of rows) {
@@ -67,239 +61,7 @@ function groupByWeek(rows: { week: number; day: string; value: number }[]): Week
     .sort((a, b) => b.weekNumber - a.weekNumber);
 }
 
-/**
- * Convert a Date to YYYY-MM-DD in Malaysia local time (UTC+8).
- * Used for calendar and date filtering.
- */
-function malaysiaDateStr(d: Date): string {
-  const formatter = new Intl.DateTimeFormat('en-CA', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    timeZone: 'Asia/Kuala_Lumpur',
-  });
-  return formatter.format(d);
-}
-
-const WeeklyChart: React.FC<{
-  cardioWeeks: WeekData[];
-  weightsWeeks: WeekData[];
-  calorieWeeks: WeekData[];
-  scoreWeeks: WeekData[];
-  weightsExerciseCounts: Record<number, number[]>;
-  selectedWeekNumber?: number | null;
-  onWeekChange?: (week: number | null) => void;
-}> = ({ cardioWeeks, weightsWeeks, calorieWeeks, scoreWeeks, weightsExerciseCounts, selectedWeekNumber: propWeek, onWeekChange }) => {
-  const [activeTab, setActiveTab] = useState<ChartTab>('Cardio');
-  const [internalWeek, setInternalWeek] = useState<number | null>(null);
-  const controlledWeek = propWeek !== undefined ? propWeek : internalWeek;
-  const setWeek = onWeekChange || setInternalWeek;
-
-  const chartConfig: Record<ChartTab, { weeks: WeekData[]; unit: string }> = {
-    Cardio:   { weeks: cardioWeeks,  unit: 'km' },
-    Weights:  { weeks: weightsWeeks, unit: 'kg' },
-    Calories: { weeks: calorieWeeks, unit: '' },
-    Score:    { weeks: scoreWeeks,   unit: '' },
-  };
-
-  const { weeks, unit } = chartConfig[activeTab];
-
-  const allWeekNumbers = Array.from(
-    new Set([
-      ...cardioWeeks.map(w => w.weekNumber),
-      ...weightsWeeks.map(w => w.weekNumber),
-      ...calorieWeeks.map(w => w.weekNumber),
-      ...scoreWeeks.map(w => w.weekNumber),
-    ])
-  ).sort((a, b) => b - a);
-
-  const effectiveWeekNumber = controlledWeek ?? (allWeekNumbers[0] ?? null);
-  const current = weeks.find(w => w.weekNumber === effectiveWeekNumber) ?? null;
-  const data = current?.days || Array(7).fill(0);
-  const rawMax = Math.max(...data, 1);
-  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const weekLabel = effectiveWeekNumber !== null ? `${effectiveWeekNumber}` : '\u2014';
-
-  const currentGlobalIdx = effectiveWeekNumber !== null ? allWeekNumbers.indexOf(effectiveWeekNumber) : 0;
-  const canPrev = currentGlobalIdx < allWeekNumbers.length - 1;
-  const canNext = currentGlobalIdx > 0;
-  const onPrev = () => { if (canPrev) setWeek(allWeekNumbers[currentGlobalIdx + 1]); };
-  const onNext = () => { if (canNext) setWeek(allWeekNumbers[currentGlobalIdx - 1]); };
-
-  const yMin = activeTab === 'Cardio' ? 5 : activeTab === 'Calories' ? 500 : 0;
-  const yMax = activeTab === 'Cardio' ? 20 : activeTab === 'Score' ? Math.max(rawMax, 100) : rawMax;
-
-  const summaryParts = (() => {
-    const nonZero = data.filter(v => v > 0);
-    const total = data.reduce((s, v) => s + v, 0);
-    if (activeTab === 'Cardio') {
-      return { value: total > 0 ? total.toFixed(1) : '0.0', unit: 'KM' };
-    } else if (activeTab === 'Weights') {
-      const k = total / 1000;
-      return { value: total > 0 ? (k >= 10 ? `${Math.round(k)}K` : `${k.toFixed(1)}K`) : '0K', unit: '' };
-    } else if (activeTab === 'Calories') {
-      if (nonZero.length === 0) return { value: '\u2014', unit: 'Kcal' };
-      const avg = Math.round(total / nonZero.length);
-      return { value: avg.toLocaleString(), unit: 'Kcal' };
-    } else {
-      if (nonZero.length === 0) return { value: '\u2014', unit: '' };
-      const avg = Math.round(total / nonZero.length);
-      return { value: avg.toLocaleString(), unit: 'pts' };
-    }
-  })();
-
-  return (
-    <div>
-      {/* WEEKLY heading with chevrons + week number */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{
-            fontSize: '1.1rem',
-            fontWeight: 700,
-            letterSpacing: '0.15em',
-            textTransform: 'uppercase',
-            color: '#1a1a1a',
-            fontFamily: "'Archivo', sans-serif",
-          }}>Weekly</span>
-          <button onClick={onPrev} disabled={!canPrev} style={{ opacity: !canPrev ? 0.2 : 0.9, background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}>
-            <ChevronLeft size={18} color="#1a1a1a" />
-          </button>
-          <button onClick={onNext} disabled={!canNext} style={{ opacity: !canNext ? 0.2 : 0.9, background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}>
-            <ChevronRight size={18} color="#1a1a1a" />
-          </button>
-        </div>
-        <span style={{
-          fontSize: '0.95rem',
-          fontWeight: 700,
-          letterSpacing: '0.06em',
-          color: '#1a1a1a',
-          marginRight: '6px',
-        }}>{weekLabel}</span>
-      </div>
-
-      <div className="rounded-lg p-5" style={{ backgroundColor: 'rgba(0,0,0,0.05)', borderLeft: '2px solid rgba(0,0,0,0.9)', boxShadow: '0 5px 12px rgba(0,0,0,0.08)' }}>
-        {/* Tabs only — chevrons moved above */}
-        <div className="flex items-center mb-3">
-          <div className="flex gap-4">
-            {(['Cardio', 'Weights', 'Calories', 'Score'] as ChartTab[]).map(tab => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                style={{
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  textTransform: 'uppercase',
-                  letterSpacing: '1.5px',
-                  paddingBottom: '4px',
-                  color: activeTab === tab ? '#1a1a1a' : 'rgba(26,26,26,0.35)',
-                  borderBottom: activeTab === tab ? '2px solid #1a1a1a' : '2px solid transparent',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s',
-                }}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="flex items-baseline gap-1 mb-5">
-          <span style={{
-            fontSize: '1.6rem',
-            fontWeight: 900,
-            letterSpacing: '-0.02em',
-            color: '#1a1a1a',
-            lineHeight: 1,
-          }}>
-            {summaryParts.value}
-          </span>
-          {summaryParts.unit && (
-            <span style={{
-              fontSize: '10px',
-              fontWeight: 700,
-              color: 'rgba(26,26,26,0.45)',
-              letterSpacing: '0.12em',
-            }}>
-              {summaryParts.unit}
-            </span>
-          )}
-          {activeTab === 'Weights' && effectiveWeekNumber !== null && (() => {
-            const exerciseTotal = (weightsExerciseCounts[effectiveWeekNumber] || []).reduce((s, c) => s + c, 0);
-            return (
-              <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', marginLeft: '8px', fontFamily: "'Archivo', sans-serif" }}>
-                <span style={{ color: '#1a1a1a' }}> / {exerciseTotal}</span>
-                <span style={{ color: 'rgba(26,26,26,0.45)' }}> EX</span>
-              </span>
-            );
-          })()}
-        </div>
-
-        <div className="flex items-end justify-between h-44" style={{ gap: '12px' }}>
-          {data.map((val, i) => {
-            const clampedVal = Math.min(Math.max(val, yMin), yMax);
-            const pct = val > 0 ? Math.max((clampedVal - yMin) / (yMax - yMin), 0.04) : 0;
-            const rawPct = rawMax > 0 ? val / rawMax : 0;
-            const brightness = Math.round(210 - rawPct * 180);
-            const barColor = val > 0 ? `rgb(${brightness},${brightness},${brightness})` : 'rgba(26,26,26,0.04)';
-            let barLabel = '';
-            if (val > 0) {
-              if (unit === 'kg') {
-                barLabel = `${Math.round(val / 1000)}k`;
-              } else if (unit === 'km') {
-                barLabel = `${+val.toFixed(1)}`;
-              } else {
-                barLabel = `${Math.round(val)}`;
-              }
-            }
-            const exerciseCount = activeTab === 'Weights' && effectiveWeekNumber !== null
-              ? (weightsExerciseCounts[effectiveWeekNumber]?.[i] ?? 0)
-              : 0;
-            return (
-              <div key={i} className="flex flex-col items-center h-full justify-end" style={{ flex: '1', maxWidth: '28px' }}>
-                <div style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(26,26,26,0.85)', marginBottom: '4px', height: '14px', fontFamily: "'Archivo', sans-serif" }}>{barLabel}</div>
-                <div className="w-full relative transition-all" style={{ height: `${pct * 100}%`, backgroundColor: barColor, borderRadius: '9999px 9999px 0 0', minHeight: val > 0 ? '4px' : 0 }}>
-                  {activeTab === 'Weights' && exerciseCount > 0 && (
-                    <div style={{
-                      position: 'absolute',
-                      bottom: '5px',
-                      left: 0,
-                      right: 0,
-                      display: 'flex',
-                      justifyContent: 'center',
-                    }}>
-                      <div style={{
-                        width: '16px',
-                        height: '16px',
-                        borderRadius: '50%',
-                        backgroundColor: '#1a1a1a',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                  fontSize: '12px',
-                        fontWeight: 700,
-                        color: '#ffffff',
-                        lineHeight: 1,
-                        fontFamily: "'Archivo', sans-serif",
-                      }}>
-                        {exerciseCount}
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <div style={{ fontSize: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'rgba(26,26,26,0.85)', marginTop: '8px', fontFamily: "'Archivo', sans-serif" }}>{days[i]}</div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-};
-
 export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (page: Page, data?: any) => void }> = ({ showWeeklySummary = false, onNavigate }) => {
-  // ===== FIXED: Use Malaysia timezone for selected date =====
   const [selectedDate, setSelectedDate] = useState(() => malaysiaDateStr(new Date()));
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
   const [selectedWeekNumber, setSelectedWeekNumber] = useState<number | null>(null);
@@ -317,7 +79,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
   const [dayWeightsTotal, setDayWeightsTotal] = useState<number>(0);
 
   const [todayCalories, setTodayCalories] = useState<number>(0);
-  const [foodRating, setFoodRating] = useState<string>('BAD'); // BAD, OK, or GOOD
+  const [foodRating, setFoodRating] = useState<string>('BAD');
   const [showFoodRatingLabel, setShowFoodRatingLabel] = useState(true);
   const [cardioWeeks, setCardioWeeks] = useState<WeekData[]>([]);
   const [weightsWeeks, setWeightsWeeks] = useState<WeekData[]>([]);
@@ -328,7 +90,6 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
   const [activityWeeklyData, setActivityWeeklyData] = useState<Record<string, number[]>>({});
   const [refreshKey, setRefreshKey] = useState(0);
 
-  // Listen for data updates from TrackerEditSheet etc.
   useEffect(() => {
     const handler = () => setRefreshKey(k => k + 1);
     window.addEventListener('kine:data-updated', handler);
@@ -337,7 +98,6 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
 
   useEffect(() => {
     const loadCardio = async () => {
-      // ===== FIXED: Use Malaysia timezone =====
       const activeDateStr = selectedDate;
       const yesterday = new Date(selectedDate + 'T00:00:00Z');
       yesterday.setDate(yesterday.getDate() - 1);
@@ -382,7 +142,6 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
     };
     loadCardio();
 
-    // Today's score
     const loadTodayScore = async () => {
       const { data } = await supabase
         .from('workouts')
@@ -394,7 +153,6 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
     };
     loadTodayScore();
 
-    // Today's calories for progress bar
     const loadTodayCalories = async () => {
       const { data } = await supabase
         .from('workouts')
@@ -407,8 +165,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
       setTodayCalories(data && data.length > 0 ? Number(data[0].calories) : 0);
     };
     loadTodayCalories();
-    
-    // Today's food rating
+
     const loadFoodRating = async () => {
       const { data } = await supabase
         .from('workouts')
@@ -543,7 +300,6 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
     loadWeeklyCharts();
   }, [refreshKey]);
 
-  // Load min/max months for monthly navigation
   useEffect(() => {
     const loadMonthlyLimits = async () => {
       const { data: minData } = await supabase
@@ -578,13 +334,11 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
       todayActivities.some(a => a.exercise_name === key && a.km > 0)
     ),
   ].sort((a, b) => {
-    // Tracker always first
     if (a === 'TRACKER') return -1;
     if (b === 'TRACKER') return 1;
-    // Then activities with today's data (km > 0)
     const aHasData = todayActivities.some(act => act.exercise_name === a && act.km > 0);
     const bHasData = todayActivities.some(act => act.exercise_name === b && act.km > 0);
-    return (bHasData ? 1 : 0) - (aHasData ? 1 : 0); // Activities with data first
+    return (bHasData ? 1 : 0) - (aHasData ? 1 : 0);
   });
 
   const allWeekNumbers = Array.from(
@@ -601,7 +355,6 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
     : null;
   const displayMovement = weeklyActivityTotal !== null ? weeklyActivityTotal : totalMovement;
 
-  // ===== FIXED: Calendar generation using Malaysia timezone =====
   const getCalendarDates = () => {
     const today = new Date();
     const todayMalaysia = malaysiaDateStr(today);
@@ -632,7 +385,6 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
         </div>
       )}
 
-      {/* ===== FIXED: Calendar section with Malaysia timezone ===== */}
       {!showWeeklySummary && (
         <div className="flex justify-between items-center py-1 mb-1">
           {calendarDates.map((day, i) => (
@@ -658,7 +410,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
                     ? 'bg-[#1a1a1a] text-white'
                     : day.isToday
                     ? 'border-2 border-black/20 text-[#1a1a1a]'
-                     : 'text-[rgba(26,26,26,0.85)]'
+                    : 'text-[rgba(26,26,26,0.85)]'
                 }`}
                 style={{ fontFamily: "'Archivo', sans-serif" }}
               >
@@ -696,8 +448,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
               <div className="text-[11px] font-medium" style={{ color: 'rgba(26,26,26,0.45)', fontFamily: "'Archivo', sans-serif" }}>Yesterday {yesterdayMovement.toFixed(1)} km</div>
             )}
           </div>
-          
-          {/* Food Rating Circles - Vertical */}
+
           {!selectedActivity && (
             <div
               className="flex items-center justify-center ml-4"
@@ -720,27 +471,17 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
                 </span>
               )}
               <div className="flex flex-col items-center justify-center" style={{ gap: '5px' }}>
-                {/* Always show top circle (grey) */}
-                <div className="w-3.5 h-3.5 rounded-full" style={{ 
-                  backgroundColor: '#1a1a1a'
-                }}></div>
-                {/* Show middle circle only for OK and GOOD */}
+                <div className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: '#1a1a1a' }}></div>
                 {(foodRating === 'OK' || foodRating === 'GOOD') && (
-                  <div className="w-3.5 h-3.5 rounded-full" style={{ 
-                    backgroundColor: 'rgba(26,26,26,0.55)'
-                  }}></div>
+                  <div className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: 'rgba(26,26,26,0.55)' }}></div>
                 )}
-                {/* Show bottom circle only for GOOD */}
                 {foodRating === 'GOOD' && (
-                  <div className="w-3.5 h-3.5 rounded-full" style={{ 
-                    backgroundColor: 'rgba(26,26,26,0.25)'
-                  }}></div>
+                  <div className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: 'rgba(26,26,26,0.25)' }}></div>
                 )}
               </div>
             </div>
           )}
-          
-          
+
           {selectedActivity && (
             <div
               onClick={() => {
@@ -796,7 +537,6 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
                 Weights
               </span>
             </div>
-            {/* Exercise count circle — only show if there are weights today */}
             {dayWeights.length > 0 && (
               <div style={{
                 width: 26,
@@ -822,7 +562,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
               <div className="mt-4 space-y-2">
                 {dayWeights.map((ex, i) => (
                   <div key={i} className="flex items-center justify-between">
-                      <span className="text-[11px] font-medium" style={{ color: 'rgba(26,26,26,0.9)', fontFamily: "'Archivo', sans-serif" }}>{toTitleCase(ex.name)}</span>
+                    <span className="text-[11px] font-medium" style={{ color: 'rgba(26,26,26,0.9)', fontFamily: "'Archivo', sans-serif" }}>{toTitleCase(ex.name)}</span>
                     <span className="text-[12px] font-bold" style={{ color: '#1a1a1a' }}>{Math.round(ex.weight).toLocaleString()} kg</span>
                   </div>
                 ))}
@@ -841,17 +581,25 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
       )}
 
       <section className="mt-8">
-        <WeeklyChart cardioWeeks={cardioWeeks} weightsWeeks={weightsWeeks} calorieWeeks={calorieWeeks} scoreWeeks={scoreWeeks} weightsExerciseCounts={weightsExerciseCounts} selectedWeekNumber={selectedWeekNumber} onWeekChange={setSelectedWeekNumber} />
+        <WeeklyChart
+          cardioWeeks={cardioWeeks}
+          weightsWeeks={weightsWeeks}
+          calorieWeeks={calorieWeeks}
+          scoreWeeks={scoreWeeks}
+          weightsExerciseCounts={weightsExerciseCounts}
+          selectedWeekNumber={selectedWeekNumber}
+          onWeekChange={setSelectedWeekNumber}
+        />
       </section>
 
       <section className="mt-8">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <div style={{
-            fontSize: '1.15rem',
-            fontWeight: 700,
-            letterSpacing: '0.15em',
-            textTransform: 'uppercase',
+              fontSize: '1.15rem',
+              fontWeight: 700,
+              letterSpacing: '0.15em',
+              textTransform: 'uppercase',
               color: '#1a1a1a',
               fontFamily: "'Archivo', sans-serif",
             }}>
