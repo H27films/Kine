@@ -42,6 +42,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
 
   const [cardioDayDate, setCardioDayDate] = useState<string | null>(null);
   const [closing, setClosing] = useState(false);
+  const [openDayIndex, setOpenDayIndex] = useState<number | null>(null);
   const [cardioEntries, setCardioEntries] = useState<CardioEntry[]>([]);
   const outerRef = useRef<HTMLDivElement>(null);
 
@@ -93,9 +94,19 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
 
   const handleBarClick = (weekNumber: number, dayIndex: number) => {
     if (activeTab !== 'Cardio') return;
-    const hit = cardioDayDate && controlledWeek === weekNumber;
-    if (hit && cardioDayDate) { setClosing(true); return; }
+  
+    const isSameBar =
+      cardioDayDate !== null &&
+      controlledWeek === weekNumber &&
+      openDayIndex === dayIndex;
+  
+    if (isSameBar) {
+      setClosing(true);
+      return;
+    }
+  
     setClosing(false);
+    setOpenDayIndex(dayIndex);
     const date = getCardioDayDate(weekNumber, dayIndex);
     if (date) setCardioDayDate(date);
   };
@@ -288,7 +299,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
         {cardioDayDate && (
           <div
             className={closing ? 'fade-out-block' : 'fade-in-block'}
-            onAnimationEnd={() => { if (closing) { setCardioDayDate(null); setClosing(false); } }}
+            onAnimationEnd={() => { if (closing) { setCardioDayDate(null); setOpenDayIndex(null); setClosing(false); } }}
             onMouseDown={e => { e.stopPropagation(); setClosing(true); }}
             style={{ borderTop: '1px solid rgba(0,0,0,0.75)', padding: '20px 0 0', willChange: 'opacity, transform', cursor: 'pointer' }}
           >
