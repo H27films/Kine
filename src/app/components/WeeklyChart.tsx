@@ -45,7 +45,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
   const [openDayIndex, setOpenDayIndex] = useState<number | null>(null);
   const [cardioEntries, setCardioEntries] = useState<CardioEntry[]>([]);
   const [cardioLoading, setCardioLoading] = useState(false);
-const [cardioReady, setCardioReady] = useState(false);
+  const [cardioReady, setCardioReady] = useState(false);
   const outerRef = useRef<HTMLDivElement>(null);
 
   function getCardioDayDate(weekNumber: number, dayIndex: number): string | null {
@@ -294,18 +294,17 @@ const [cardioReady, setCardioReady] = useState(false);
                     </div>
                   )}
                 </div>
-                <div style={{
+                 <div style={{
   fontSize: '8px',
   fontWeight: 700,
   textTransform: 'uppercase',
   letterSpacing: '0.5px',
-  color: 'rgba(26,26,26,0.85)',
+  color: openDayIndex === i ? '#ffffff' : 'rgba(26,26,26,0.85)',
   marginTop: '8px',
   fontFamily: "'Archivo', sans-serif",
   padding: '2px 5px',
   borderRadius: '999px',
   background: openDayIndex === i ? 'rgba(0,0,0,0.85)' : 'transparent',
-color: openDayIndex === i ? '#ffffff' : 'rgba(26,26,26,0.85)',
   boxShadow: openDayIndex === i ? '0 3px 6px rgba(0,0,0,0.18)' : 'none',
   transition: 'all 0.2s',
 }}>{days[i]}</div>
