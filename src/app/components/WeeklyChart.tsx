@@ -303,7 +303,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
       </div>
 
       {/* ── Card ── */}
-      <div style={{ background: 'rgba(0,0,0,0.05)', borderLeft: '2px solid rgba(0,0,0,0.9)', boxShadow: '0 5px 12px rgba(0,0,0,0.08)', borderRadius: 8, padding: '32px 24px 20px 24px' }}>
+      <div style={{ background: 'rgba(0,0,0,0.05)', borderLeft: '2px solid rgba(0,0,0,0.9)', boxShadow: '0 5px 12px rgba(0,0,0,0.08)', borderRadius: 8, padding: '32px 24px 16px 24px' }}>
 
         {/* ── Tabs ── */}
         <div style={{ marginBottom: '20px' }}>
