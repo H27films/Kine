@@ -322,7 +322,7 @@ const onNext = () => { if (canNext) { setWeek(allWeekNumbers[currentGlobalIdx - 
             style={{ borderTop: '1px solid rgba(0,0,0,0.75)', padding: '20px 0 0', willChange: 'opacity, transform', cursor: 'pointer' }}
           >
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2px', contain: 'layout' }}>
-              <div style={{ marginBottom: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
                 <span style={{ fontSize: '13px', fontWeight: 600, color: '#1a1a1a', letterSpacing: '0.04em', fontFamily: "'Archivo', sans-serif" }}>
                   {(() => {
                     const d = new Date(cardioDayDate + 'T12:00:00Z');
@@ -333,6 +333,17 @@ const onNext = () => { if (canNext) { setWeek(allWeekNumbers[currentGlobalIdx - 
                     return `${day} ${date} ${month}`;
                   })()}
                 </span>
+                {(() => {
+                  const count = cardioEntries.filter(e => e.exercise_name.toUpperCase() !== 'TRACKER').length;
+                  if (count === 0) return null;
+                  return (
+                    <div style={{
+                      width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#1a1a1a',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: '10px', fontWeight: 700, color: '#ffffff', fontFamily: "'Archivo', sans-serif", flexShrink: 0,
+                    }}>{count}</div>
+                  );
+                })()}
               </div>
               {cardioEntries.map((entry, i) => (
                 <div
