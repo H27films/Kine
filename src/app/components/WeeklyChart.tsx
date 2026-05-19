@@ -221,7 +221,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
         </div>
 
         {/* ── Bar chart row ── */}
-        <div className="flex items-end justify-between" style={{ gap: '12px', marginTop: '40px' }}>
+        <div className="flex items-end justify-between h-44" style={{ gap: '12px', marginTop: '40px' }}>
           {data.map((val, i) => {
             const clampedVal = Math.min(Math.max(val, yMin), yMax);
             const pct = val > 0 ? Math.max((clampedVal - yMin) / (yMax - yMin), 0.04) : 0;
@@ -240,7 +240,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
             return (
               <div
                 key={i}
-                className="flex flex-col items-center"
+                className="flex h-full flex-col items-center justify-end"
                 style={{ flex: '1', maxWidth: '28px', cursor: activeTab === 'Cardio' && val > 0 ? 'pointer' : 'default' }}
                 onClick={() => {
                   if (activeTab === 'Cardio' && val > 0 && effectiveWeekNumber !== null) {
@@ -249,16 +249,19 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
                 }}
               >
                 <div style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(26,26,26,0.85)', marginBottom: '4px', height: '14px', fontFamily: "'Archivo', sans-serif" }}>{barLabel}</div>
-                <div className="relative transition-all" style={{ flex: 1, minHeight: 0, width: '100%', display: 'flex', alignItems: 'flex-end' }}>
-                  <div className="relative w-full transition-all" style={{ width: '100%', minHeight: 0, backgroundColor: barColor, borderRadius: '9999px 9999px 0 0', height: val > 0 ? Math.max(pct * 100, 4) : 0 }}>
-                    {activeTab === 'Weights' && exerciseCount > 0 && (
-                      <div style={{ position: 'absolute', bottom: '5px', left: 0, right: 0, display: 'flex', justifyContent: 'center' }}>
-                        <div style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700, color: '#ffffff', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>
-                          {exerciseCount}
-                        </div>
+                <div className="relative w-full rounded-t-[9999px] transition-all"
+                  style={{
+                    backgroundColor: barColor,
+                    height: val > 0 ? `${Math.max(pct * 100, 0.04)}%` : '4px',
+                    width: '100%',
+                  }}>
+                  {activeTab === 'Weights' && exerciseCount > 0 && (
+                    <div style={{ position: 'absolute', bottom: '5px', left: 0, right: 0, display: 'flex', justifyContent: 'center' }}>
+                      <div style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700, color: '#ffffff', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>
+                        {exerciseCount}
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
                 <div style={{ fontSize: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'rgba(26,26,26,0.85)', marginTop: '8px', fontFamily: "'Archivo', sans-serif" }}>{days[i]}</div>
               </div>
