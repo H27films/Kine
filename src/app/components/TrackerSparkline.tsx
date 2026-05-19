@@ -15,9 +15,9 @@ const TrackerSparkline: React.FC<Props> = ({ weekChartData }) => {
   const Y_MAX = Math.max(dataMax, Y_MIN + 1);
   const range = Y_MAX - Y_MIN;
   const VW = 200;
-  const VH = 110;
+  const VH = 115;
   const padTop = 10;
-  const padBottom = 8;
+  const padBottom = 5;
   const padLeft = 6;
   const padRight = 6;
   const chartW = VW - padLeft - padRight;
