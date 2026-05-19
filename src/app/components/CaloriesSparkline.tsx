@@ -115,7 +115,7 @@ color: '#1a1a1a',
                     fontSize: '10px',
                     fontWeight: 800,
                     letterSpacing: '-0.02em',
-                    color: 'rgba(26,26,26,0.7)',
+                    color: '#ffffff',
                     whiteSpace: 'nowrap',
                     pointerEvents: 'none',
                   }}>
