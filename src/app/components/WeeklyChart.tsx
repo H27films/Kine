@@ -144,8 +144,8 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
   const currentGlobalIdx = effectiveWeekNumber !== null ? allWeekNumbers.indexOf(effectiveWeekNumber) : 0;
   const canPrev = currentGlobalIdx < allWeekNumbers.length - 1;
   const canNext = currentGlobalIdx > 0;
-  const onPrev = () => { if (canPrev) setWeek(allWeekNumbers[currentGlobalIdx + 1]); };
-  const onNext = () => { if (canNext) setWeek(allWeekNumbers[currentGlobalIdx - 1]); };
+  const onPrev = () => { if (canPrev) { setWeek(allWeekNumbers[currentGlobalIdx + 1]); setOpenDayIndex(null); setCardioDayDate(null); setClosing(false); } };
+const onNext = () => { if (canNext) { setWeek(allWeekNumbers[currentGlobalIdx - 1]); setOpenDayIndex(null); setCardioDayDate(null); setClosing(false); } };
 
   const yMin = activeTab === 'Cardio' ? 5 : activeTab === 'Calories' ? 500 : 0;
   const yMax = activeTab === 'Cardio' ? 20 : activeTab === 'Score' ? Math.max(rawMax, 100) : rawMax;
