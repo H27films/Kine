@@ -125,34 +125,36 @@ const ExerciseLogDots: React.FC<Props> = ({ exercises, saveSuccess }) => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           {kSessions.map((session) => {
             const editVal = editValues[session.id] ?? String(session.km);
-            return (
-              <div
-                key={session.id}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  lineHeight: 1.15,
-                }}
-              >
+             return (
                 <div
-                  onClick={() => setExpandedKey(null)}
-                  style={{
-                    width: 14,
-                    height: 14,
-                    borderRadius: '50%',
-                    backgroundColor: '#1a1a1a',
-                    flexShrink: 0,
-                    cursor: 'pointer',
-                  }}
-                />
-                <input
-                  type="number"
-                  inputMode="decimal"
-                  value={editVal}
-                  onChange={e =>
-                    setEditValues(prev => ({ ...prev, [session.id]: e.target.value }))
-                  }
+                   key={session.id}
+                   onClick={() => setExpandedKey(null)}
+                   style={{
+                     display: 'flex',
+                     alignItems: 'center',
+                     gap: 8,
+                     lineHeight: 1.15,
+                   }}
+                 >
+                 <div
+                   style={{
+                     width: 14,
+                     height: 14,
+                     borderRadius: '50%',
+                     backgroundColor: '#1a1a1a',
+                     flexShrink: 0,
+                     cursor: 'pointer',
+                   }}
+                 />
+                 <input
+                   type="number"
+                   inputMode="decimal"
+                   value={editVal}
+                   onChange={e =>
+                     setEditValues(prev => ({ ...prev, [session.id]: e.target.value }))
+                   }
+                   onMouseDown={e => e.stopPropagation()}
+                  onClick={e => e.stopPropagation()}
                   onBlur={e => saveKm(session.id, e.target.value)}
                   onKeyDown={e => {
                     if (e.key === 'Enter') {
@@ -224,14 +226,14 @@ const ExerciseLogDots: React.FC<Props> = ({ exercises, saveSuccess }) => {
           >
             {entry && (
               <div
+                onClick={() => setExpandedKey(key)}
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  gap: 4,
+                  gap: 3,
                   cursor: 'pointer',
                 }}
-                onClick={() => setExpandedKey(key)}
               >
                 {entry.sessions.length > 1 && (
                   <span
