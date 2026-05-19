@@ -275,29 +275,21 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
               <span
                 style={{
-                  fontSize: '10px',
-                  fontWeight: 700,
-                  letterSpacing: '0.12em',
-                  textTransform: 'uppercase',
-                  color: 'rgba(26,26,26,0.45)',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  color: '#1a1a1a',
+                  letterSpacing: '0.04em',
                   fontFamily: "'Archivo', sans-serif",
                 }}
               >
                 {(() => {
                   const d = new Date(cardioDayDate + 'T12:00:00Z');
                   const ms = d.getDay() === 0 ? 6 : d.getDay() - 1;
-                  return DAY_LABELS[ms];
+                  const day = DAY_LABELS[ms];
+                  const date = d.getDate();
+                  const month = d.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+                  return `${day} ${date} ${month}`;
                 })()}
-              </span>
-              <span
-                style={{
-                  fontSize: '13px',
-                  fontWeight: 700,
-                  color: '#1a1a1a',
-                  fontFamily: "'Archivo', sans-serif",
-                }}
-              >
-                {cardioDayDate}
               </span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -306,21 +298,19 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
                   key={`${entry.exercise_name}-${i}`}
                   style={{
                     display: 'flex',
-                    alignItems: 'center',
+                    alignItems: 'baseline',
                     justifyContent: 'space-between',
-                    padding: '8px 12px',
-                    borderRadius: '6px',
-                    backgroundColor: 'rgba(255,255,255,0.6)',
+                    padding: '4px 0',
                   }}
                 >
-                  <span style={{ fontSize: '13px', fontWeight: 600, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>
+                  <span style={{ fontSize: '12px', fontWeight: 500, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif", letterSpacing: '0.02em' }}>
                     {entry.exercise_name}
                   </span>
                   <span>
-                    <span style={{ fontSize: '14px', fontWeight: 900, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>
                       {entry.km}
                     </span>
-                    <span style={{ fontSize: '9px', fontWeight: 700, color: 'rgba(26,26,26,0.4)', marginLeft: '3px', letterSpacing: '0.06em' }}>
+                    <span style={{ fontSize: '8px', fontWeight: 600, color: 'rgba(26,26,26,0.4)', marginLeft: '2px', letterSpacing: '0.04em' }}>
                       KM
                     </span>
                   </span>
