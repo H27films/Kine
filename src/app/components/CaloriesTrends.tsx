@@ -54,7 +54,7 @@ const CaloriesTrends: React.FC = () => {
 
   // Food rating weekly state
   const [weekOff, setWeekOff] = useState(0); // 0 = current week, -1 = last week, etc.
-  const [weeklyFoodData, setWeeklyFoodData] = useState<number[]>(Array(7).fill(0));
+  const [weeklyFoodData, setWeeklyFoodData] = useState<number[]>(Array(10).fill(0));
 
   useEffect(() => {
     const fetchEarliest = async () => {
@@ -82,7 +82,7 @@ const CaloriesTrends: React.FC = () => {
     const loadFoodWeekly = async () => {
       const currentWeek = getISOWeek(todayMalaysiaDate());
       const endWeek = currentWeek + weekOff;
-      const startWeek = endWeek - 6;
+      const startWeek = endWeek - 9;
 
       const { data } = await supabase
         .from('workouts')
@@ -104,7 +104,7 @@ const CaloriesTrends: React.FC = () => {
         }
       }
       const result: number[] = [];
-      for (let i = 0; i < 7; i++) {
+      for (let i = 0; i < 10; i++) {
         const wk = startWeek + i;
         result.push(weekly[wk] || 0);
       }
@@ -223,7 +223,7 @@ const CaloriesTrends: React.FC = () => {
 
   // Week labels for the food rating chart (oldest → newest week number)
   const currentWeekForLabel = getISOWeek(todayMalaysiaDate());
-  const weeklyFoodLabels = Array.from({ length: 7 }, (_, i) => String(currentWeekForLabel + weekOff - 6 + i));
+  const weeklyFoodLabels = Array.from({ length: 10 }, (_, i) => String(currentWeekForLabel + weekOff - 9 + i));
 
   return (
     <section className="mb-8">
@@ -422,18 +422,22 @@ let bgColor = h > 0 ? '#1a1a1a' : 'rgba(26,26,26,0.08)';
           {/* Bars */}
           <div className="flex items-end justify-between gap-1" style={{ height: '140px' }}>
             {weeklyFoodData.map((h, i) => {
-              const pct = weeklyFoodData.length > 0 ? (h / 21) * 100 : 0;
-              const barPct = Math.max(pct, h > 0 ? 4 : 0);
+              const MIN_DISPLAY = 5.5;
+              const MAX_VAL = 21;
+              const effectiveH = h > 0 ? Math.max(h, MIN_DISPLAY) : 0;
+              const displayVal = h > 0 && h < MIN_DISPLAY ? MIN_DISPLAY : h;
+              const barPct = h > 0 ? (effectiveH / MAX_VAL) * 100 : 0;
+              const pctOfMax = h / MAX_VAL;
 
               let barColor: string;
               if (h === 0) {
                 barColor = 'rgba(26,26,26,0.08)';
-              } else if (h >= 14) {
-                barColor = '#90c9a0';
-              } else if (h >= 5) {
+              } else if (pctOfMax >= 0.75) {
                 barColor = '#1a1a1a';
+              } else if (pctOfMax >= 0.5) {
+                barColor = 'rgba(26,26,26,0.65)';
               } else {
-                barColor = '#b02828';
+                barColor = 'rgba(26,26,26,0.25)';
               }
 
               return (
@@ -451,17 +455,17 @@ let bgColor = h > 0 ? '#1a1a1a' : 'rgba(26,26,26,0.08)';
                   }}
                 >
                   {h > 0 && (
-                    <span style={{
-                      fontSize: '9px',
-                      fontWeight: 700,
-                      color: '#ffffff',
-                      letterSpacing: '0.01em',
-                      lineHeight: 1,
-                      whiteSpace: 'nowrap',
-                    }}>
-                      {h}
-                    </span>
-                  )}
+  <span style={{
+    fontSize: '9px',
+    fontWeight: 700,
+    color: '#ffffff',
+    letterSpacing: '0.01em',
+    lineHeight: 1,
+    whiteSpace: 'nowrap',
+  }}>
+    {Math.round((h / 21) * 100)}%
+  </span>
+)}
                 </div>
               );
             })}
