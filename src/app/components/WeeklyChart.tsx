@@ -304,7 +304,8 @@ const [cardioReady, setCardioReady] = useState(false);
   fontFamily: "'Archivo', sans-serif",
   padding: '2px 5px',
   borderRadius: '999px',
-  background: openDayIndex === i ? 'rgba(0,0,0,0.07)' : 'transparent',
+  background: openDayIndex === i ? 'rgba(0,0,0,0.85)' : 'transparent',
+color: openDayIndex === i ? '#ffffff' : 'rgba(26,26,26,0.85)',
   boxShadow: openDayIndex === i ? '0 3px 6px rgba(0,0,0,0.18)' : 'none',
   transition: 'all 0.2s',
 }}>{days[i]}</div>
