@@ -45,11 +45,12 @@ const ExerciseLogDots: React.FC<Props> = ({ exercises, saveSuccess }) => {
     fetchSessions();
   }, [exercises, saveSuccess]);
 
-  // Click outside to collapse
+  // Click outside (on document) to collapse — only when something inside containerRef is NOT the target
   useEffect(() => {
     if (!expandedKey) return;
     const handler = (e: MouseEvent | TouchEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      const t = e.target as Node;
+      if (containerRef.current && !containerRef.current.contains(t)) {
         setExpandedKey(null);
       }
     };
