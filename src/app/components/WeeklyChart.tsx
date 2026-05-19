@@ -274,12 +274,12 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
         {/* ── Cardio Day Breakdown (expanded inside the same card) ── */}
         {cardioDayDate && (
           <div
-            className={closing ? 'animate-fade-out' : 'animate-fade-in'}
+            className={closing ? 'fade-out-block' : 'fade-in-block'}
             onAnimationEnd={() => { if (closing) { setCardioDayDate(null); setClosing(false); } }}
-            style={{ borderTop: '1px solid rgba(0,0,0,0.75)', padding: '20px 0 0' }}
+            style={{ borderTop: '1px solid rgba(0,0,0,0.75)', padding: '20px 0 0', willChange: 'opacity, transform' }}
           >
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2px', contain: 'layout' }}>
+              <div style={{ marginBottom: '12px' }}>
                 <span style={{ fontSize: '13px', fontWeight: 600, color: '#1a1a1a', letterSpacing: '0.04em', fontFamily: "'Archivo', sans-serif" }}>
                   {(() => {
                     const d = new Date(cardioDayDate + 'T12:00:00Z');
@@ -291,24 +291,20 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
                   })()}
                 </span>
               </div>
-              {cardioEntries.length === 0 ? (
-                <div style={{ color: 'rgba(26,26,26,0.3)', fontFamily: "'Archivo', sans-serif", fontSize: '11px' }}>Loading<span className="animate-pulse">.</span><span className="animate-pulse" style={{ animationDelay: '0.15s' }}>.</span><span className="animate-pulse" style={{ animationDelay: '0.3s' }}>.</span></div>
-              ) : (
-                cardioEntries.map((entry, i) => (
-                  <div
-                    key={`${entry.exercise_name}-${i}`}
-                    style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', padding: '1.5px 0' }}
-                  >
-                    <span style={{ fontSize: '12px', fontWeight: 500, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif", letterSpacing: '0.02em' }}>
-                      {entry.exercise_name ? entry.exercise_name.charAt(0).toUpperCase() + entry.exercise_name.slice(1).toLowerCase() : ''}
-                    </span>
-                    <span>
-                      <span style={{ fontSize: '14px', fontWeight: 600, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>{entry.km.toFixed(1)}</span>
-                      <span style={{ fontSize: '8px', fontWeight: 600, color: 'rgba(26,26,26,0.4)', marginLeft: '2px', letterSpacing: '0.04em' }}>KM</span>
-                    </span>
-                  </div>
-                ))
-              )}
+              {cardioEntries.map((entry, i) => (
+                <div
+                  key={`${entry.exercise_name}-${i}`}
+                  style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', padding: '1.5px 0' }}
+                >
+                  <span style={{ fontSize: '12px', fontWeight: 500, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif", letterSpacing: '0.02em' }}>
+                    {entry.exercise_name ? entry.exercise_name.charAt(0).toUpperCase() + entry.exercise_name.slice(1).toLowerCase() : ''}
+                  </span>
+                  <span>
+                    <span style={{ fontSize: '13px', fontWeight: 550, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>{entry.km.toFixed(1)}</span>
+                    <span style={{ fontSize: '8px', fontWeight: 500, color: 'rgba(26,26,26,0.4)', marginLeft: '2px', letterSpacing: '0.04em' }}>KM</span>
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         )}

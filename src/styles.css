@@ -42,18 +42,18 @@ input:focus {
   box-shadow: none;
 }
 
-/* Fade in / out */
+/* Fade in / out with transitions */
+.fade-in-block {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+.fade-out-block {
+  animation: fadeOut 0.15s ease-in forwards;
+}
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes fadeOut {
-  from { opacity: 1; }
-  to   { opacity: 0; }
-}
-.animate-fade-in {
-  animation: fadeIn 0.25s ease-out forwards;
-}
-.animate-fade-out {
-  animation: fadeOut 0.2s ease-in forwards;
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-4px); }
 }
