@@ -366,15 +366,16 @@ const onNext = () => { if (canNext) { setWeek(allWeekNumbers[currentGlobalIdx - 
                         </div>
                       ))}
                       {trackers.map((entry, i) => (
-                        <div
-                          key={`tracker-${entry.exercise_name}-${i}`}
-                          style={{
-                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                            padding: '5px 12px', margin: '3px -12px 0 -12px',
-                            borderRadius: '6px',
-                            background: 'rgba(255,255,255,0.4)',
-                          }}
-                        >
+                          <div
+                            key={`tracker-${entry.exercise_name}-${i}`}
+                            style={{
+                              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                              padding: '3px 6px 2px 6px',
+                              borderRadius: '6px',
+                              background: 'rgba(255,255,255,0.4)',
+                              marginLeft: '-6px', marginRight: '-6px', marginTop: '3px',
+                            }}
+                          >
                           <span style={{ display: 'flex', alignItems: 'center', fontSize: '12px', fontWeight: 500, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif", letterSpacing: '0.02em' }}>
                             {entry.exercise_name ? entry.exercise_name.charAt(0).toUpperCase() + entry.exercise_name.slice(1).toLowerCase() : ''}
                             {(() => {
