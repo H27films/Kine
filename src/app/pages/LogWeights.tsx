@@ -727,37 +727,63 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
             )}
 
             {selectedGroup && addedExercises.length > 1 && (
-              <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '10px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                   <button
                     type="button"
                     onClick={handleSaveWorkoutTemplate}
-                    style={{ ...textTriggerStyle, padding: 0, margin: 0, border: 'none', background: 'none', font: 'inherit', color: EST_SLATE }}
+                    style={{
+                      padding: '5px 14px',
+                      borderRadius: '999px',
+                      border: 'none',
+                      backgroundColor: 'rgba(0,0,0,0.06)',
+                      color: '#1a1a1a',
+                      fontSize: '0.7rem',
+                      fontWeight: 670,
+                      letterSpacing: '0.12em',
+                      textTransform: 'uppercase',
+                      cursor: 'pointer',
+                      fontFamily: "'Archivo', sans-serif",
+                      lineHeight: '18px',
+                      minWidth: '88px',
+                      textAlign: 'left',
+                    }}
                   >
-                    <span style={{ fontSize: '0.7rem', fontWeight: 670, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#1a1a1a' }}>SAVE WORKOUT</span>
-                    <Save size={13} strokeWidth={2.2} style={{ color: EST_SLATE }} />
+                    SAVE +
                   </button>
                   {templateSaveFlash && (
                     <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#22c55e', letterSpacing: '0.08em' }}>Saved</span>
                   )}
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                   <button
                     type="button"
-                    onClick={(e) => { e.stopPropagation(); setShowClearConfirm(0); }}
-                    style={{ ...textTriggerStyle, padding: 0, margin: 0, border: 'none', background: 'none', font: 'inherit' }}
+                    onClick={(e) => { e.stopPropagation(); setShowClearConfirm(prev => prev === null ? 0 : null); }}
+                    style={{
+                      padding: '5px 14px',
+                      borderRadius: '999px',
+                      border: 'none',
+                      backgroundColor: 'rgba(0,0,0,0.06)',
+                      color: '#1a1a1a',
+                      fontSize: '0.7rem',
+                      fontWeight: 670,
+                      letterSpacing: '0.12em',
+                      textTransform: 'uppercase',
+                      cursor: 'pointer',
+                      fontFamily: "'Archivo', sans-serif",
+                      lineHeight: '18px',
+                      minWidth: '88px',
+                    }}
                   >
-                    <span style={{ fontSize: '0.7rem', fontWeight: 670, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#1a1a1a' }}>CLEAR ALL</span>
-                    <X size={13} strokeWidth={2.2} style={{ color: EST_SLATE }} />
+                    CLEAR <span style={{ textTransform: 'none' }}>x</span>
                   </button>
                   {showClearConfirm !== null && (
                     <>
-                      <span style={{ fontSize: '0.55rem', fontWeight: 670, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(26,26,26,0.4)' }}>Clear all?</span>
                       <button type="button" onClick={() => { setAddedExercises([]); setShowClearConfirm(null); }} style={{ ...textTriggerStyle, padding: 0, margin: 0, border: 'none', background: 'none', font: 'inherit' }}>
-                        <span style={{ fontSize: '0.55rem', fontWeight: 800, color: '#22c55e' }}>YES</span>
+                        <span style={{ fontSize: '0.55rem', fontWeight: 800, color: '#1a1a1a', letterSpacing: '0.12em' }}>YES</span>
                       </button>
                       <button type="button" onClick={() => setShowClearConfirm(null)} style={{ ...textTriggerStyle, padding: 0, margin: 0, border: 'none', background: 'none', font: 'inherit' }}>
-                        <span style={{ fontSize: '0.55rem', fontWeight: 700, color: 'rgba(220,38,38,0.55)' }}>CANCEL</span>
+                        <span style={{ fontSize: '0.55rem', fontWeight: 700, color: 'rgba(26,26,26,0.75)', letterSpacing: '0.12em' }}>CANCEL</span>
                       </button>
                     </>
                   )}
@@ -774,20 +800,31 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
           <button
             type="button"
-            onClick={(e) => { e.stopPropagation(); setShowClearConfirm(0); }}
-            style={{ ...textTriggerStyle, padding: 0, margin: 0, border: 'none', background: 'none', font: 'inherit' }}
+            onClick={(e) => { e.stopPropagation(); setShowClearConfirm(prev => prev === null ? 0 : null); }}
+            style={{
+              padding: '5px 14px',
+              borderRadius: '999px',
+              border: 'none',
+              backgroundColor: 'rgba(0,0,0,0.06)',
+              color: '#1a1a1a',
+              fontSize: '0.7rem',
+              fontWeight: 670,
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              cursor: 'pointer',
+              fontFamily: "'Archivo', sans-serif",
+              lineHeight: '18px',
+            }}
           >
-            <span style={{ fontSize: '0.7rem', fontWeight: 670, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#1a1a1a' }}>CLEAR ALL</span>
-            <X size={13} strokeWidth={2.2} style={{ color: EST_SLATE }} />
+            CLEAR <span style={{ textTransform: 'none' }}>x</span>
           </button>
           {showClearConfirm !== null && (
             <>
-              <span style={{ fontSize: '0.55rem', fontWeight: 670, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(26,26,26,0.4)' }}>Clear all?</span>
               <button type="button" onClick={() => { setAddedExercises([]); setShowClearConfirm(null); }} style={{ ...textTriggerStyle, padding: 0, margin: 0, border: 'none', background: 'none', font: 'inherit' }}>
-                <span style={{ fontSize: '0.55rem', fontWeight: 800, color: '#22c55e' }}>YES</span>
+                <span style={{ fontSize: '0.55rem', fontWeight: 800, color: '#1a1a1a', letterSpacing: '0.12em' }}>YES</span>
               </button>
               <button type="button" onClick={() => setShowClearConfirm(null)} style={{ ...textTriggerStyle, padding: 0, margin: 0, border: 'none', background: 'none', font: 'inherit' }}>
-                <span style={{ fontSize: '0.55rem', fontWeight: 700, color: 'rgba(220,38,38,0.55)' }}>CANCEL</span>
+                <span style={{ fontSize: '0.55rem', fontWeight: 700, color: 'rgba(26,26,26,0.75)', letterSpacing: '0.12em' }}>CANCEL</span>
               </button>
             </>
           )}
