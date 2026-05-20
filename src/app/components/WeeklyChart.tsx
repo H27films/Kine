@@ -165,7 +165,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
               exercise_name: r.exercises?.exercise_name || 'Unknown',
               total_weight: Math.round(Number(r.total_weight)),
             }))
-            .sort((a, b) => a.exercise_name.localeCompare(b.exercise_name))
+            .sort((a, b) => b.total_weight - a.total_weight)
         );
       } else {
         setWeightsEntries([]);
@@ -607,7 +607,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
                     {entry.exercise_name ? entry.exercise_name.charAt(0).toUpperCase() + entry.exercise_name.slice(1).toLowerCase() : ''}
                   </span>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
-                    <span style={{ fontSize: '13px', fontWeight: 550, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>{entry.total_weight}</span>
+                    <span style={{ fontSize: '13px', fontWeight: 550, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>{Math.round(entry.total_weight).toLocaleString()}</span>
                     <span style={{ fontSize: '8px', fontWeight: 500, color: 'rgba(26,26,26,0.4)', letterSpacing: '0.04em' }}>KG</span>
                   </span>
                 </div>
