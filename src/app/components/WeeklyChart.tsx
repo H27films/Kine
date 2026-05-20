@@ -634,49 +634,35 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
                 const weightsScore = Math.min(Math.round((scoreWeightsTotal / 20000) * 100), 100);
                 const trackerScore = Math.min(Math.round((scoreTrackerTotal / 20)    * 100), 100);
                 const calorieScore = Math.min(Math.round((scoreCaloriesTotal / 1500) * 100), 100);
-                const rows: { label: string; raw: string; score: number; icon: React.ReactNode; number: string; unit: string }[] = [
-                  {
-                    label: 'Weights',
-                    raw: `${scoreWeightsTotal.toLocaleString()} kg`,
-                    score: weightsScore,
-                    icon: <img src="/icons/dumbbell.svg" style={{ width: 16, height: 16, filter: 'brightness(0)' }} alt="" />,
-                    number: scoreWeightsTotal.toLocaleString(),
-                    unit: 'kg',
-                  },
-                  {
-                    label: 'Tracker',
-                    raw: `${scoreTrackerTotal.toLocaleString()} km`,
-                    score: trackerScore,
-                    icon: <RunningManIcon size={16} color="#1a1a1a" />,
-                    number: scoreTrackerTotal.toLocaleString(),
-                    unit: 'km',
-                  },
-                  {
-                    label: 'Calories',
-                    raw: `${Math.round(scoreCaloriesTotal).toLocaleString()} kcal`,
-                    score: calorieScore,
-                    icon: <CaloriesIcon size={16} color="#1a1a1a" />,
-                    number: Math.round(scoreCaloriesTotal).toLocaleString(),
-                    unit: 'kcal',
-                  },
-                ];
-                return rows.map((row, i) => (
-                  <div key={`score-${row.label}-${i}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '2px 0' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 500, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif", letterSpacing: '0.02em' }}>
-                      <span>{row.label}</span>
-                      {row.icon}
-                    </span>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
-                        <span style={{ fontSize: '11px', fontWeight: 500, color: 'rgba(26,26,26,0.9)', fontFamily: "'Archivo', sans-serif" }}>{row.number}</span>
-                        <span style={{ fontSize: '10px', fontWeight: 300, color: 'rgba(26,26,26,0.4)', letterSpacing: '0.04em', fontFamily: "'Archivo', sans-serif" }}>{row.unit}</span>
+
+                const mkRow = (label: string, rawNumber: string, rawUnit: string, score: number, icon: React.ReactNode) => {
+                  const isZero = score === 0;
+                  return (
+                    <div key={`score-${label}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '2px 0' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: isZero ? 300 : 500, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif", letterSpacing: '0.02em', opacity: isZero ? 0.5 : 1 }}>
+                        <span>{label}</span>
+                        <span style={{ opacity: isZero ? 0.5 : 1 }}>{icon}</span>
                       </span>
-                      <span style={{ width: '22px', height: '22px', borderRadius: '50%', backgroundColor: 'rgba(26,26,26,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 700, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif", lineHeight: 1, flex: '0 0 22px' }}>
-                        {row.score}
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
+                          <span style={{ fontSize: '11px', fontWeight: 500, color: 'rgba(26,26,26,0.9)', fontFamily: "'Archivo', sans-serif" }}>{rawNumber}</span>
+                          <span style={{ fontSize: '10px', fontWeight: 300, color: 'rgba(26,26,26,0.4)', letterSpacing: '0.04em', fontFamily: "'Archivo', sans-serif" }}>{rawUnit}</span>
+                        </span>
+                        <span style={{ width: '22px', height: '22px', borderRadius: '50%', backgroundColor: 'rgba(26,26,26,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 700, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif", lineHeight: 1, flex: '0 0 22px' }}>
+                          {score}
+                        </span>
                       </span>
-                    </span>
-                  </div>
-                ));
+                    </div>
+                  );
+                };
+
+                return (
+                  <>
+                    {mkRow('Weights', scoreWeightsTotal.toLocaleString(), 'kg', weightsScore, <img src="/icons/dumbbell.svg" style={{ width: 16, height: 16, filter: 'brightness(0)' }} alt="" />)}
+                    {mkRow('Tracker', scoreTrackerTotal.toLocaleString(), 'km', trackerScore, <RunningManIcon size={16} color="#1a1a1a" />)}
+                    {mkRow('Calories', Math.round(scoreCaloriesTotal).toLocaleString(), 'kcal', calorieScore, <CaloriesIcon size={16} color="#1a1a1a" />)}
+                  </>
+                );
               })()}
             </div>
           </div>
