@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase, malaysiaDateStr } from '../../lib/supabase';
 import { CARDIO_DISPLAY } from './CardioChartSection';
+import { calcMovement, TOTAL_CARDIO_IDS } from '../../lib/cardio';
 
 export type ChartTab = 'Cardio' | 'Weights' | 'Calories' | 'Score';
 
@@ -14,6 +15,8 @@ interface CardioEntry {
   exercise_name: string;
   km: number;
   time: string | null;
+  exercise_id: number;
+  total_cardio: number;
 }
 
 interface WeightsEntry {
@@ -98,7 +101,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
       setCardioLoading(true);
       const { data } = await supabase
         .from('workouts')
-        .select('km, time, exercises:exercise_id(exercise_name)')
+        .select('km, time, total_cardio, exercise_id, exercises:exercise_id(exercise_name)')
         .eq('type', 'CARDIO')
         .eq('date', cardioDayDate)
         .not('km', 'is', null)
@@ -112,6 +115,8 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
               exercise_name: r.exercises?.exercise_name || 'Unknown',
               km: Number(r.km),
               time: r.time ?? null,
+              exercise_id: Number(r.exercise_id),
+              total_cardio: Number(r.total_cardio || 0),
             }))
             .sort((a, b) => {
               const aIsTracker = a.exercise_name.toUpperCase() === 'TRACKER';
@@ -482,22 +487,27 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
                         </span>
                       </div>
                     ))}
-                    {trackers.map((entry, i) => (
-                      <div key={`tracker-${entry.exercise_name}-${i}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '3px 6px 2px 6px', borderRadius: '6px', background: 'rgba(255,255,255,0.4)', marginLeft: '-6px', marginRight: '-6px', marginTop: '3px' }}>
-                        <span style={{ display: 'flex', alignItems: 'center', fontSize: '12px', fontWeight: 500, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif", letterSpacing: '0.02em' }}>
-                          {entry.exercise_name ? entry.exercise_name.charAt(0).toUpperCase() + entry.exercise_name.slice(1).toLowerCase() : ''}
-                          {(() => {
-                            const key = entry.exercise_name.toUpperCase();
-                            const display = CARDIO_DISPLAY[key];
-                            return display ? <span style={{ color: '#1a1a1a', display: 'flex', marginLeft: '8px', opacity: 0.9 }}>{display.icon}</span> : null;
-                          })()}
-                        </span>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
-                          <span style={{ fontSize: '13px', fontWeight: 550, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>{entry.km.toFixed(1)}</span>
-                          <span style={{ fontSize: '8px', fontWeight: 500, color: 'rgba(26,26,26,0.4)', letterSpacing: '0.04em' }}>KM</span>
-                        </span>
-                      </div>
-                    ))}
+                    {(() => {
+                      const movementValue = calcMovement(cardioEntries);
+                      if (movementValue === 0) return null;
+                      const trackerEntry = trackers[0];
+                      return (
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '3px 6px 2px 6px', borderRadius: '6px', background: 'rgba(255,255,255,0.4)', marginLeft: '-6px', marginRight: '-6px', marginTop: '3px' }}>
+                          <span style={{ display: 'flex', alignItems: 'center', fontSize: '12px', fontWeight: 500, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif", letterSpacing: '0.02em' }}>
+                            Movement
+                            {trackerEntry ? (() => {
+                              const key = trackerEntry.exercise_name.toUpperCase();
+                              const display = CARDIO_DISPLAY[key];
+                              return display ? <span style={{ color: '#1a1a1a', display: 'flex', marginLeft: '8px', opacity: 0.9 }}>{display.icon}</span> : null;
+                            })() : null}
+                          </span>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
+                            <span style={{ fontSize: '13px', fontWeight: 550, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>{movementValue.toFixed(1)}</span>
+                            <span style={{ fontSize: '8px', fontWeight: 500, color: 'rgba(26,26,26,0.4)', letterSpacing: '0.04em' }}>KM</span>
+                          </span>
+                        </div>
+                      );
+                    })()}
                   </>
                 );
               })()}
