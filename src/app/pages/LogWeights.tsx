@@ -477,6 +477,32 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
   }, 0);
   const showEstGrandTotal = addedExercises.length > 0 && grandTotal === 0;
 
+  const handleRandomList = async () => {
+    const allChest = exercisesByGroup['Chest'] || [];
+    const allBack = exercisesByGroup['Back'] || [];
+    const allLegs = exercisesByGroup['Legs'] || [];
+
+    const pickRandom = (arr: Exercise[], n: number): Exercise[] => {
+      const shuffled = [...arr].sort(() => Math.random() - 0.5);
+      return shuffled.slice(0, n);
+    };
+
+    // Pick 1 random leg exercise
+    if (allLegs.length === 0) return;
+    const legPick = pickRandom(allLegs, 1);
+
+    // Remaining 4 picks from all groups combined, avoiding duplicates
+    const allOthers = [...allChest, ...allBack, ...allLegs.filter(e => e.id !== legPick[0].id)];
+    const remainingPicks = pickRandom(allOthers, Math.min(4, allOthers.length));
+
+    const selected = [...legPick, ...remainingPicks];
+
+    // Add each exercise sequentially
+    for (const exercise of selected) {
+      await handleAddExercise(exercise);
+    }
+  };
+
   const textTriggerStyle: React.CSSProperties = {
     display: 'inline-flex', alignItems: 'center', gap: '6px', cursor: 'pointer', userSelect: 'none',
   };
@@ -1095,6 +1121,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
           onNavigate={onNavigate}
           savedWorkoutIds={savedWorkoutIds}
           onApplySavedTemplate={handleApplySavedWorkoutTemplate}
+          onRandomList={handleRandomList}
           onLogAll={handleLogAll}
         />
       )}

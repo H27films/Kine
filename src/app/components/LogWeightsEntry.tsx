@@ -39,6 +39,7 @@ interface LogWeightsEntryProps {
   showDailyTotalOnly?: boolean;
   savedWorkoutIds?: number[];
   onApplySavedTemplate?: () => void;
+  onRandomList?: () => void;
   onLogAll?: () => void;
 }
 
@@ -66,6 +67,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
   showDailyTotalOnly = false,
   savedWorkoutIds = [],
   onApplySavedTemplate = () => {},
+  onRandomList = () => {},
   onLogAll = () => {},
 }) => {
   const [activeExIndex, setActiveExIndex] = useState(0);
@@ -677,7 +679,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
 ) : (
             /* No exercises yet — show saved template prompt */
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '12px', paddingTop: '40px' }}>
-              {savedWorkoutIds.length > 0 ? (
+              {exercisesByGroup && Object.keys(exercisesByGroup).length > 0 ? (
                 <>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '12px' }}>
                     <button
@@ -699,6 +701,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                       </span>
                     </button>
                     <button
+                      onClick={onRandomList}
                       style={{
                         display: 'flex', alignItems: 'center', gap: '8px',
                         background: 'none', border: 'none', cursor: 'pointer', padding: 0,
@@ -725,7 +728,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                 </>
               ) : (
                 <span style={{ fontSize: '12px', color: 'rgba(26,26,26,0.35)', letterSpacing: '0.04em' }}>
-                  No saved workout — pick exercises above
+                  No exercises available
                 </span>
               )}
             </div>
