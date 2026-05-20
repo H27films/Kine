@@ -477,7 +477,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
   }, 0);
   const showEstGrandTotal = addedExercises.length > 0 && grandTotal === 0;
 
-  const handleRandomList = async () => {
+  const handleRandomList = async (group?: string) => {
     const allChest = exercisesByGroup['Chest'] || [];
     const allBack = exercisesByGroup['Back'] || [];
     const allLegs = exercisesByGroup['Legs'] || [];
@@ -487,15 +487,27 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
       return shuffled.slice(0, n);
     };
 
-    // Pick 1 random leg exercise
+    // Pick 1-2 random leg exercises
     if (allLegs.length === 0) return;
-    const legPick = pickRandom(allLegs, 1);
+    const legCount = Math.random() < 0.5 ? 1 : 2;
+    const legPicks = pickRandom(allLegs, Math.min(legCount, allLegs.length));
 
-    // Remaining 4 picks from all groups combined, avoiding duplicates
-    const allOthers = [...allChest, ...allBack, ...allLegs.filter(e => e.id !== legPick[0].id)];
-    const remainingPicks = pickRandom(allOthers, Math.min(4, allOthers.length));
+    let remainingPool: Exercise[];
+    if (group === 'Chest') {
+      // Chest + remaining legs
+      remainingPool = [...allChest, ...allLegs.filter(e => !legPicks.some(lp => lp.id === e.id))];
+    } else if (group === 'Back') {
+      // Back + remaining legs
+      remainingPool = [...allBack, ...allLegs.filter(e => !legPicks.some(lp => lp.id === e.id))];
+    } else {
+      // All groups
+      remainingPool = [...allChest, ...allBack, ...allLegs.filter(e => !legPicks.some(lp => lp.id === e.id))];
+    }
 
-    const selected = [...legPick, ...remainingPicks];
+    const remainingNeeded = 5 - legPicks.length;
+    const remainingPicks = pickRandom(remainingPool, Math.min(remainingNeeded, remainingPool.length));
+
+    const selected = [...legPicks, ...remainingPicks];
 
     // Add each exercise sequentially
     for (const exercise of selected) {
