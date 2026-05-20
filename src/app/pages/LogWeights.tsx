@@ -1131,7 +1131,6 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
           onAddExercise={(exercise) => handleAddExercise(exercise)}
           exercisesByGroup={exercisesByGroup}
           onNavigate={onNavigate}
-          savedWorkoutIds={savedWorkoutIds}
           onApplySavedTemplate={handleApplySavedWorkoutTemplate}
           onRandomList={handleRandomList}
           onLogAll={handleLogAll}

@@ -37,7 +37,6 @@ interface LogWeightsEntryProps {
   onNavigate?: (page: Page, data?: any) => void;
   showDoubleArrow?: boolean;
   showDailyTotalOnly?: boolean;
-  savedWorkoutIds?: number[];
   onApplySavedTemplate?: () => void;
   onRandomList?: (group?: string) => void;
   onLogAll?: () => void;
@@ -65,7 +64,6 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
   onNavigate,
   showDoubleArrow = true,
   showDailyTotalOnly = false,
-  savedWorkoutIds = [],
   onApplySavedTemplate = () => {},
   onRandomList = () => {},
   onLogAll = () => {},
@@ -708,26 +706,31 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                          </span>
                        </button>
                      )}
-                     <button
-                       onClick={() => {
-                         if (randomListExpanded) {
-                           onRandomList();
-                           setRandomListExpanded(false);
-                         } else {
-                           setRandomListExpanded(true);
-                         }
-                       }}
-                       style={{
-                         display: 'flex', alignItems: 'center', gap: '8px',
-                         background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-                       }}
-                     >
-                       <div style={{
-                         width: 32, height: 32, borderRadius: '50%',
-                         backgroundColor: '#1a1a1a',
-                         display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                       }}>
-                         <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <button
+                        onClick={() => {
+                          if (randomListExpanded) {
+                            onRandomList();
+                            setRandomListExpanded(false);
+                          } else {
+                            setRandomListExpanded(true);
+                          }
+                        }}
+                        style={{
+                          display: 'flex', flexDirection: randomListExpanded ? 'column' : 'row',
+                          alignItems: 'center', gap: randomListExpanded ? '6px' : '8px',
+                          background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                        }}
+                      >
+                        <div style={{
+                          width: randomListExpanded ? 40 : 32, height: randomListExpanded ? 40 : 32, borderRadius: '50%',
+                          backgroundColor: '#1a1a1a',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                        }}>
+                          <svg
+                            width={randomListExpanded ? 18 : 16} height={randomListExpanded ? 18 : 16}
+                            viewBox="0 0 24 24" fill="none" stroke="#ffffff"
+                            strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                          >
                            <polyline points="16 3 21 3 21 8" />
                            <line x1="4" y1="20" x2="21" y2="3" />
                            <polyline points="21 16 21 21 16 21" />
