@@ -687,59 +687,58 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '12px', paddingTop: '40px' }}>
               {exercisesByGroup && Object.keys(exercisesByGroup).length > 0 ? (
                 <>
-                  <div ref={randomListRef} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
-                    {!randomListExpanded && (
-                      <button
-                        onClick={onApplySavedTemplate}
-                        style={{
-                          display: 'flex', alignItems: 'center', gap: '8px',
-                          background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-                        }}
-                      >
-                        <div style={{
-                          width: 32, height: 32, borderRadius: '50%',
-                          backgroundColor: '#1a1a1a',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                        }}>
-                          <Plus size={16} color="#ffffff" strokeWidth={2.5} />
-                        </div>
-                        <span style={{ fontSize: '13px', fontWeight: 500, color: '#1a1a1a', letterSpacing: '0.02em' }}>
-                          ADD SAVED LIST
-                        </span>
-                      </button>
-                    )}
-                    <button
-                      onClick={() => {
-                        if (randomListExpanded) {
-                          onRandomList();
-                          setRandomListExpanded(false);
-                        } else {
-                          setRandomListExpanded(true);
-                        }
-                      }}
-                      style={{
-                        display: 'flex', flexDirection: randomListExpanded ? 'column' : 'row',
-                        alignItems: 'center', gap: randomListExpanded ? '6px' : '8px',
-                        background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-                      }}
-                    >
-                      <div style={{
-                        width: randomListExpanded ? 40 : 32, height: randomListExpanded ? 40 : 32, borderRadius: '50%',
-                        backgroundColor: '#1a1a1a',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                      }}>
-                        <svg width={randomListExpanded ? 18 : 16} height={randomListExpanded ? 18 : 16} viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="16 3 21 3 21 8" />
-                          <line x1="4" y1="20" x2="21" y2="3" />
-                          <polyline points="21 16 21 21 16 21" />
-                          <line x1="15" y1="15" x2="21" y2="21" />
-                          <line x1="4" y1="4" x2="9" y2="9" />
-                        </svg>
-                      </div>
-                      <span style={{ fontSize: '13px', fontWeight: 500, color: '#1a1a1a', letterSpacing: '0.02em' }}>
-                        RANDOM LIST
-                      </span>
-                    </button>
+                   <div ref={randomListRef} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+                     {!randomListExpanded && (
+                       <button
+                         onClick={onApplySavedTemplate}
+                         style={{
+                           display: 'flex', alignItems: 'center', gap: '8px',
+                           background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                         }}
+                       >
+                         <div style={{
+                           width: 32, height: 32, borderRadius: '50%',
+                           backgroundColor: '#1a1a1a',
+                           display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                         }}>
+                           <Plus size={16} color="#ffffff" strokeWidth={2.5} />
+                         </div>
+                         <span style={{ fontSize: '13px', fontWeight: 500, color: '#1a1a1a', letterSpacing: '0.02em' }}>
+                           ADD SAVED LIST
+                         </span>
+                       </button>
+                     )}
+                     <button
+                       onClick={() => {
+                         if (randomListExpanded) {
+                           onRandomList();
+                           setRandomListExpanded(false);
+                         } else {
+                           setRandomListExpanded(true);
+                         }
+                       }}
+                       style={{
+                         display: 'flex', alignItems: 'center', gap: '8px',
+                         background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                       }}
+                     >
+                       <div style={{
+                         width: 32, height: 32, borderRadius: '50%',
+                         backgroundColor: '#1a1a1a',
+                         display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                       }}>
+                         <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                           <polyline points="16 3 21 3 21 8" />
+                           <line x1="4" y1="20" x2="21" y2="3" />
+                           <polyline points="21 16 21 21 16 21" />
+                           <line x1="15" y1="15" x2="21" y2="21" />
+                           <line x1="4" y1="4" x2="9" y2="9" />
+                         </svg>
+                       </div>
+                       <span style={{ fontSize: '13px', fontWeight: 500, color: '#1a1a1a', letterSpacing: '0.02em' }}>
+                         RANDOM LIST
+                       </span>
+                     </button>
                     {randomListExpanded && (
                       <div style={{ display: 'flex', gap: '28px', marginTop: '8px', justifyContent: 'center' }}>
                         <button
