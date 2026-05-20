@@ -471,13 +471,13 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
                 </span>
               )}
               <div className="flex flex-col items-center justify-center" style={{ gap: '5px' }}>
-                <div className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: '#1a1a1a' }}></div>
-                {(foodRating === 'OK' || foodRating === 'GOOD') && (
-                  <div className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: 'rgba(26,26,26,0.55)' }}></div>
-                )}
-                {foodRating === 'GOOD' && (
-                  <div className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: 'rgba(26,26,26,0.25)' }}></div>
-                )}
+              <div className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: 'rgba(26,26,26,0.25)' }}></div>
+{(foodRating === 'OK' || foodRating === 'GOOD') && (
+  <div className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: 'rgba(26,26,26,0.55)' }}></div>
+)}
+{foodRating === 'GOOD' && (
+  <div className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: '#1a1a1a' }}></div>
+)}
               </div>
             </div>
           )}
