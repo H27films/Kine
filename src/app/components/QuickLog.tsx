@@ -120,8 +120,12 @@ export const QuickLog: React.FC = () => {
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginBottom: '8px', width: '100%' }}>
       <div style={{
-        flex: 1, background: 'rgba(0,0,0,0.025)',
-        boxShadow: '0 5px 12px rgba(0,0,0,0.08)', borderRadius: 8,
+        flex: 1,
+        background: 'linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.10) 100%)',
+        border: '1px solid rgba(255,255,255,0.55)',
+        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -1px 0 rgba(0,0,0,0.04), 0 5px 12px rgba(0,0,0,0.08)',
+        backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+        borderRadius: 8,
         padding: '14px 20px 16px 20px', boxSizing: 'border-box',
       }}>
         {/* Headers */}
