@@ -79,8 +79,16 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
   const [weightsLoadingDay, setWeightsLoadingDay] = useState(false);
   const [weightsReady, setWeightsReady] = useState(false);
 
-  const outerRef = useRef<HTMLDivElement>(null);
+  // Score state
+  const [scoreDayDate, setScoreDayDate] = useState<string | null>(null);
+  const [scoreClosing, setScoreClosing] = useState(false);
+  const [openScoreDayIndex, setOpenScoreDayIndex] = useState<number | null>(null);
+  const [scoreWeightsTotal, setScoreWeightsTotal] = useState<number>(0);
+  const [scoreTrackerTotal, setScoreTrackerTotal] = useState<number>(0);
+  const [scoreCaloriesTotal, setScoreCaloriesTotal] = useState<number>(0);
+  const [scoreLoading, setScoreLoading] = useState(false);
 
+  const outerRef = useRef<HTMLDivElement>(null);
   function getCardioDayDate(weekNumber: number, dayIndex: number): string | null {
     const monday = new Date('2025-01-06T00:00:00Z');
     monday.setDate(monday.getDate() + (weekNumber - 1) * 7 + dayIndex);
@@ -167,19 +175,57 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
     load();
   }, [weightsDayDate]);
 
-  // Outside click handler
+  // Score fetch
   useEffect(() => {
-    if (!cardioDayDate && !weightsDayDate) return;
+    if (!scoreDayDate) { setScoreWeightsTotal(0); setScoreTrackerTotal(0); setScoreCaloriesTotal(0); return; }
+    const load = async () => {
+      setScoreLoading(true);
+      const { data } = await supabase
+        .from('workouts')
+        .select('type, exercise_id, total_weight, total_cardio, calories')
+        .eq('date', scoreDayDate);
+
+      if (data) {
+        const rows = data as any[];
+        setScoreWeightsTotal(
+          rows
+            .filter(r => ['CHEST', 'BACK', 'LEGS'].includes(r.type))
+            .reduce((s, r) => s + Number(r.total_weight || 0), 0)
+        );
+        setScoreTrackerTotal(
+          rows
+            .filter(r => [82, 83, 87].includes(Number(r.exercise_id)))
+            .reduce((s, r) => s + Number(r.total_cardio || 0), 0)
+        );
+        setScoreCaloriesTotal(
+          rows
+            .filter(r => r.type === 'MEASUREMENT')
+            .reduce((s, r) => s + Number(r.calories || 0), 0)
+        );
+      } else {
+        setScoreWeightsTotal(0);
+        setScoreTrackerTotal(0);
+        setScoreCaloriesTotal(0);
+      }
+      setScoreLoading(false);
+    };
+    load();
+  }, [scoreDayDate]);
+
+   // Outside click handler
+  useEffect(() => {
+    if (!cardioDayDate && !weightsDayDate && !scoreDayDate) return;
     const handler = (e: MouseEvent) => {
       const t = e.target as Node;
       if (outerRef.current && !outerRef.current.contains(t)) {
         if (cardioDayDate) setClosing(true);
         if (weightsDayDate) setWeightsClosing(true);
+        if (scoreDayDate) setScoreClosing(true);
       }
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
-  }, [cardioDayDate, weightsDayDate]);
+  }, [cardioDayDate, weightsDayDate, scoreDayDate]);
 
   const handleBarClick = (weekNumber: number, dayIndex: number) => {
     if (activeTab !== 'Cardio') return;
@@ -220,6 +266,25 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
     if (date) setWeightsDayDate(date);
   };
 
+  const handleScoreBarClick = (weekNumber: number, dayIndex: number) => {
+    if (activeTab !== 'Score') return;
+
+    const isSameBar =
+      scoreDayDate !== null &&
+      effectiveWeekNumber === weekNumber &&
+      openScoreDayIndex === dayIndex;
+
+    if (isSameBar) {
+      setScoreClosing(true);
+      return;
+    }
+
+    setScoreClosing(false);
+    setOpenScoreDayIndex(dayIndex);
+    const date = getCardioDayDate(weekNumber, dayIndex);
+    if (date) setScoreDayDate(date);
+  };
+
   const chartConfig: Record<ChartTab, { weeks: WeekData[]; unit: string }> = {
     Cardio:   { weeks: cardioWeeks,  unit: 'km' },
     Weights:  { weeks: weightsWeeks, unit: 'kg' },
@@ -253,6 +318,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
       setWeek(allWeekNumbers[currentGlobalIdx + 1]);
       setOpenDayIndex(null); setCardioDayDate(null); setClosing(false); setCardioReady(false);
       setOpenWeightsDayIndex(null); setWeightsDayDate(null); setWeightsClosing(false); setWeightsReady(false);
+      setOpenScoreDayIndex(null); setScoreDayDate(null); setScoreClosing(false);
     }
   };
   const onNext = () => {
@@ -260,6 +326,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
       setWeek(allWeekNumbers[currentGlobalIdx - 1]);
       setOpenDayIndex(null); setCardioDayDate(null); setClosing(false); setCardioReady(false);
       setOpenWeightsDayIndex(null); setWeightsDayDate(null); setWeightsClosing(false); setWeightsReady(false);
+      setOpenScoreDayIndex(null); setScoreDayDate(null); setScoreClosing(false);
     }
   };
 
@@ -285,7 +352,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
     }
   })();
 
-  const activePillIndex = activeTab === 'Cardio' ? openDayIndex : activeTab === 'Weights' ? openWeightsDayIndex : null;
+  const activePillIndex = activeTab === 'Cardio' ? openDayIndex : activeTab === 'Weights' ? openWeightsDayIndex : activeTab === 'Score' ? openScoreDayIndex : null;
 
   const formatDayLabel = (dateStr: string) => {
     const d = new Date(dateStr + 'T12:00:00Z');
@@ -328,6 +395,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
                   setActiveTab(tab);
                   setCardioDayDate(null); setOpenDayIndex(null); setCardioReady(false); setClosing(false);
                   setWeightsDayDate(null); setOpenWeightsDayIndex(null); setWeightsReady(false); setWeightsClosing(false);
+                  setScoreDayDate(null); setOpenScoreDayIndex(null); setScoreClosing(false);
                 }}
                 style={{
                   fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1.5px',
@@ -386,13 +454,16 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
               <div
                 key={i}
                 className="flex h-full flex-col items-center justify-end"
-                style={{ flex: '1', maxWidth: '28px', cursor: (activeTab === 'Cardio' && effectiveWeekNumber !== null && !isFutureDay(effectiveWeekNumber, i)) || (activeTab === 'Weights' && val > 0) ? 'pointer' : 'default' }}
+                 style={{ flex: '1', maxWidth: '28px', cursor: (activeTab === 'Cardio' && effectiveWeekNumber !== null && !isFutureDay(effectiveWeekNumber, i)) || (activeTab === 'Weights' && val > 0) || (activeTab === 'Score' && val > 0) ? 'pointer' : 'default' }}
                 onClick={() => {
                   if (activeTab === 'Cardio' && effectiveWeekNumber !== null) {
                     handleBarClick(effectiveWeekNumber, i);
                   }
                   if (activeTab === 'Weights' && val > 0 && effectiveWeekNumber !== null) {
                     handleWeightsBarClick(effectiveWeekNumber, i);
+                  }
+                  if (activeTab === 'Score' && val > 0 && effectiveWeekNumber !== null) {
+                    handleScoreBarClick(effectiveWeekNumber, i);
                   }
                 }}
               >
@@ -534,12 +605,67 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
                   <span style={{ fontSize: '12px', fontWeight: 500, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif", letterSpacing: '0.02em' }}>
                     {entry.exercise_name ? entry.exercise_name.charAt(0).toUpperCase() + entry.exercise_name.slice(1).toLowerCase() : ''}
                   </span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
-                          <span style={{ fontSize: '13px', fontWeight: 550, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>{entry.total_weight.toLocaleString()}</span>
-                          <span style={{ fontSize: '8px', fontWeight: 500, color: 'rgba(26,26,26,0.4)', letterSpacing: '0.04em' }}>KG</span>
-                        </span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
+                    <span style={{ fontSize: '13px', fontWeight: 550, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>{entry.total_weight}</span>
+                    <span style={{ fontSize: '8px', fontWeight: 500, color: 'rgba(26,26,26,0.4)', letterSpacing: '0.04em' }}>KG</span>
+                  </span>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── Score Day Breakdown ── */}
+        {scoreDayDate && (
+          <div
+            className={scoreClosing ? 'fade-out-block' : 'fade-in-block'}
+            onAnimationEnd={() => { if (scoreClosing) { setScoreDayDate(null); setOpenScoreDayIndex(null); setScoreClosing(false); } }}
+            onMouseDown={e => { e.stopPropagation(); setScoreClosing(true); }}
+            style={{ borderTop: '1px solid rgba(0,0,0,0.75)', padding: '20px 0 0', willChange: 'opacity, transform', cursor: 'pointer' }}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <div style={{ marginBottom: '12px' }}>
+                <span style={{ fontSize: '13px', fontWeight: 600, color: '#1a1a1a', letterSpacing: '0.04em', fontFamily: "'Archivo', sans-serif" }}>
+                  {formatDayLabel(scoreDayDate)}
+                </span>
+              </div>
+              {(() => {
+                const weightsScore = Math.min(Math.round((scoreWeightsTotal / 20000) * 100), 100);
+                const trackerScore = Math.min(Math.round((scoreTrackerTotal / 20)    * 100), 100);
+                const calorieScore = Math.min(Math.round((scoreCaloriesTotal / 1500) * 100), 100);
+                const rows: { label: string; raw: string; score: number }[] = [
+                  {
+                    label: 'Weights',
+                    raw: `${scoreWeightsTotal.toLocaleString()} kg`,
+                    score: weightsScore,
+                  },
+                  {
+                    label: 'Tracker',
+                    raw: `${scoreTrackerTotal.toLocaleString()} km`,
+                    score: trackerScore,
+                  },
+                  {
+                    label: 'Calories',
+                    raw: `${Math.round(scoreCaloriesTotal).toLocaleString()} kcal`,
+                    score: calorieScore,
+                  },
+                ];
+                return rows.map((row, i) => (
+                  <div key={`score-${row.label}-${i}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '2px 0' }}>
+                    <span style={{ fontSize: '12px', fontWeight: 500, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif", letterSpacing: '0.02em' }}>
+                      {row.label}
+                    </span>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '10px', fontWeight: 300, color: 'rgba(26,26,26,0.4)', fontFamily: "'Archivo', sans-serif", letterSpacing: '0.04em' }}>
+                        {row.raw}
+                      </span>
+                      <span style={{ width: '22px', height: '22px', borderRadius: '50%', backgroundColor: '#f5f5f5', border: '1px solid #1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 700, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif", lineHeight: 1, flex: '0 0 22px' }}>
+                        {row.score}
+                      </span>
+                    </span>
+                  </div>
+                ));
+              })()}
             </div>
           </div>
         )}
