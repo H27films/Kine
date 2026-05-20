@@ -671,7 +671,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
                         <span style={{ fontSize: '11px', fontWeight: 500, color: 'rgba(26,26,26,0.9)', fontFamily: "'Archivo', sans-serif" }}>{row.number}</span>
                         <span style={{ fontSize: '10px', fontWeight: 300, color: 'rgba(26,26,26,0.4)', letterSpacing: '0.04em', fontFamily: "'Archivo', sans-serif" }}>{row.unit}</span>
                       </span>
-                      <span style={{ width: '22px', height: '22px', borderRadius: '50%', backgroundColor: '#f5f5f5', border: '1px solid #1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 700, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif", lineHeight: 1, flex: '0 0 22px' }}>
+                      <span style={{ width: '22px', height: '22px', borderRadius: '50%', backgroundColor: 'rgba(26,26,26,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 700, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif", lineHeight: 1, flex: '0 0 22px' }}>
                         {row.score}
                       </span>
                     </span>
