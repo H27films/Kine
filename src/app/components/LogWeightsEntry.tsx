@@ -678,24 +678,51 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
             /* No exercises yet — show saved template prompt */
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '12px', paddingTop: '40px' }}>
               {savedWorkoutIds.length > 0 ? (
-                <button
-                  onClick={onApplySavedTemplate}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: '8px',
-                    background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-                  }}
-                >
-                  <div style={{
-                    width: 32, height: 32, borderRadius: '50%',
-                    backgroundColor: '#1a1a1a',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                  }}>
-                    <Plus size={16} color="#ffffff" strokeWidth={2.5} />
+                <>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '12px' }}>
+                    <button
+                      onClick={onApplySavedTemplate}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '8px',
+                        background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                      }}
+                    >
+                      <div style={{
+                        width: 32, height: 32, borderRadius: '50%',
+                        backgroundColor: '#1a1a1a',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                      }}>
+                        <Plus size={16} color="#ffffff" strokeWidth={2.5} />
+                      </div>
+                      <span style={{ fontSize: '13px', fontWeight: 500, color: '#1a1a1a', letterSpacing: '0.02em' }}>
+                        ADD SAVED LIST
+                      </span>
+                    </button>
+                    <button
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '8px',
+                        background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                      }}
+                    >
+                      <div style={{
+                        width: 32, height: 32, borderRadius: '50%',
+                        backgroundColor: '#1a1a1a',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                      }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="16 3 21 3 21 8" />
+                          <line x1="4" y1="20" x2="21" y2="3" />
+                          <polyline points="21 16 21 21 16 21" />
+                          <line x1="15" y1="15" x2="21" y2="21" />
+                          <line x1="4" y1="4" x2="9" y2="9" />
+                        </svg>
+                      </div>
+                      <span style={{ fontSize: '13px', fontWeight: 500, color: '#1a1a1a', letterSpacing: '0.02em' }}>
+                        RANDOM LIST
+                      </span>
+                    </button>
                   </div>
-                  <span style={{ fontSize: '13px', fontWeight: 500, color: '#1a1a1a', letterSpacing: '0.02em' }}>
-                    ADD SAVED LIST
-                  </span>
-                </button>
+                </>
               ) : (
                 <span style={{ fontSize: '12px', color: 'rgba(26,26,26,0.35)', letterSpacing: '0.04em' }}>
                   No saved workout — pick exercises above
