@@ -10,6 +10,7 @@ import MonthlyCalendarChart from '../components/MonthlyCalendarChart';
 import { malaysiaDateStr } from '../../lib/supabase';
 import { WeeklyChart } from '../components/WeeklyChart';
 import { WeightsCard } from '../components/WeightsCard';
+import { QuickLog } from '../components/QuickLog';
 import { useDashboardData } from '../hooks/useDashboardData';
 
 const CARDIO_ALWAYS = ['TRACKER', 'RUNNING', 'ROW', 'CROSS TRAINER', 'WALKING', 'CYCLE'];
@@ -105,9 +106,12 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
   return (
     <div className="-mt-2">
       {showWeeklySummary && (
-        <div className="mb-3" style={{ marginBottom: '10px' }}>
-          <WeeklySummaryBar />
-        </div>
+        <>
+          <div className="mb-3" style={{ marginBottom: '10px' }}>
+            <WeeklySummaryBar />
+          </div>
+          <QuickLog />
+        </>
       )}
 
       {!showWeeklySummary && (
