@@ -9,7 +9,6 @@ interface DayWeight {
 interface WeightsCardProps {
   dayWeights: DayWeight[];
   dayWeightsTotal: number;
-  weightsExpanded: boolean;
   onToggle: () => void;
 }
 
@@ -19,7 +18,6 @@ const toTitleCase = (str: string) =>
 export const WeightsCard: React.FC<WeightsCardProps> = ({
   dayWeights,
   dayWeightsTotal,
-  weightsExpanded,
   onToggle,
 }) => {
   return (

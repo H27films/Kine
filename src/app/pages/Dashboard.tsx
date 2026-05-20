@@ -254,12 +254,11 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
       </section>
 
       <section className="mb-6">
-        <WeightsCard
-          dayWeights={dayWeights}
-          dayWeightsTotal={dayWeightsTotal}
-          weightsExpanded={weightsExpanded}
-          onToggle={() => setWeightsExpanded(e => !e)}
-        />
+      <WeightsCard
+  dayWeights={dayWeights}
+  dayWeightsTotal={dayWeightsTotal}
+  onToggle={() => setWeightsExpanded(e => !e)}
+/>
       </section>
 
       {weightsExpanded && (
