@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase, malaysiaDateStr } from '../../lib/supabase';
 import { CARDIO_DISPLAY } from './CardioChartSection';
+import { CaloriesIcon, RunningManIcon } from './NavIcons';
 import { calcMovement, TOTAL_CARDIO_IDS } from '../../lib/cardio';
 
 export type ChartTab = 'Cardio' | 'Weights' | 'Calories' | 'Score';
@@ -633,31 +634,42 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
                 const weightsScore = Math.min(Math.round((scoreWeightsTotal / 20000) * 100), 100);
                 const trackerScore = Math.min(Math.round((scoreTrackerTotal / 20)    * 100), 100);
                 const calorieScore = Math.min(Math.round((scoreCaloriesTotal / 1500) * 100), 100);
-                const rows: { label: string; raw: string; score: number }[] = [
+                const rows: { label: string; raw: string; score: number; icon: React.ReactNode; number: string; unit: string }[] = [
                   {
                     label: 'Weights',
                     raw: `${scoreWeightsTotal.toLocaleString()} kg`,
                     score: weightsScore,
+                    icon: <img src="/icons/dumbbell.svg" style={{ width: 16, height: 16, filter: 'brightness(0)' }} alt="" />,
+                    number: scoreWeightsTotal.toLocaleString(),
+                    unit: 'kg',
                   },
                   {
                     label: 'Tracker',
                     raw: `${scoreTrackerTotal.toLocaleString()} km`,
                     score: trackerScore,
+                    icon: <RunningManIcon size={16} color="#1a1a1a" />,
+                    number: scoreTrackerTotal.toLocaleString(),
+                    unit: 'km',
                   },
                   {
                     label: 'Calories',
                     raw: `${Math.round(scoreCaloriesTotal).toLocaleString()} kcal`,
                     score: calorieScore,
+                    icon: <CaloriesIcon size={16} color="#1a1a1a" />,
+                    number: Math.round(scoreCaloriesTotal).toLocaleString(),
+                    unit: 'kcal',
                   },
                 ];
                 return rows.map((row, i) => (
                   <div key={`score-${row.label}-${i}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '2px 0' }}>
-                    <span style={{ fontSize: '12px', fontWeight: 500, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif", letterSpacing: '0.02em' }}>
-                      {row.label}
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 500, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif", letterSpacing: '0.02em' }}>
+                      <span>{row.label}</span>
+                      {row.icon}
                     </span>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '10px', fontWeight: 300, color: 'rgba(26,26,26,0.4)', fontFamily: "'Archivo', sans-serif", letterSpacing: '0.04em' }}>
-                        {row.raw}
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
+                        <span style={{ fontSize: '11px', fontWeight: 500, color: 'rgba(26,26,26,0.9)', fontFamily: "'Archivo', sans-serif" }}>{row.number}</span>
+                        <span style={{ fontSize: '10px', fontWeight: 300, color: 'rgba(26,26,26,0.4)', letterSpacing: '0.04em', fontFamily: "'Archivo', sans-serif" }}>{row.unit}</span>
                       </span>
                       <span style={{ width: '22px', height: '22px', borderRadius: '50%', backgroundColor: '#f5f5f5', border: '1px solid #1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 700, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif", lineHeight: 1, flex: '0 0 22px' }}>
                         {row.score}
