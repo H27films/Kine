@@ -18,6 +18,7 @@ const SummaryWeights = lazy(() => import('./pages/SummaryWeights').then(m => ({ 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<{page: Page, data?: any}>({page: 'dashboard'});
   const [showWeeklySummary, setShowWeeklySummary] = useState(false);
+  const [showQuickLog, setShowQuickLog] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
 
   const onNavigate = (page: Page, data?: any) => setCurrentPage({page, data});
@@ -25,6 +26,7 @@ const App: React.FC = () => {
   // Reset summary whenever user navigates to a different page
   React.useEffect(() => {
     setShowWeeklySummary(false);
+    setShowQuickLog(false);
   }, [currentPage.page]);
 
   // Scroll to top when navigating to dashboard
@@ -52,7 +54,7 @@ const App: React.FC = () => {
   const renderPage = () => {
     switch (currentPage.page) {
       case 'dashboard':
-        return <Dashboard showWeeklySummary={showWeeklySummary} onNavigate={onNavigate} />;
+        return <Dashboard showWeeklySummary={showWeeklySummary} showQuickLog={showQuickLog} onCloseQuickLog={() => setShowQuickLog(false)} onNavigate={onNavigate} />;
        case 'weights':
          return <LogWeights onNavigate={onNavigate} showWeeklySummary={showWeeklySummary} data={currentPage.data} />;
       case 'cardio':
@@ -91,6 +93,8 @@ const App: React.FC = () => {
         onBack={showBackButton ? () => onNavigate('dashboard') : undefined}
         onNavigate={onNavigate}
         onToggleWeeklySummary={() => setShowWeeklySummary(v => !v)}
+        onToggleQuickLog={() => setShowQuickLog(v => !v)}
+        showQuickLog={showQuickLog}
         showWeeklySummary={showWeeklySummary}
       />
       <main

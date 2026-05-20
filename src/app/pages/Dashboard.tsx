@@ -16,8 +16,10 @@ import { useDashboardData } from '../hooks/useDashboardData';
 const CARDIO_ALWAYS = ['TRACKER', 'RUNNING', 'ROW', 'CROSS TRAINER', 'WALKING', 'CYCLE'];
 const CARDIO_CONDITIONAL: string[] = [];
 
-export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (page: Page, data?: any) => void }> = ({
+export const Dashboard: React.FC<{ showWeeklySummary?: boolean; showQuickLog?: boolean; onCloseQuickLog?: () => void; onNavigate?: (page: Page, data?: any) => void }> = ({
   showWeeklySummary = false,
+  showQuickLog = false,
+  onCloseQuickLog,
   onNavigate,
 }) => {
   const [selectedDate, setSelectedDate] = useState(() => malaysiaDateStr(new Date()));
@@ -106,13 +108,20 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; onNavigate?: (pa
   return (
     <div className="-mt-2">
       {showWeeklySummary && (
-        <>
-          <div className="mb-3" style={{ marginBottom: '10px' }}>
-            <WeeklySummaryBar />
-          </div>
-          <QuickLog />
-        </>
+        <div className="mb-3" style={{ marginBottom: '10px' }}>
+          <WeeklySummaryBar />
+        </div>
       )}
+
+<div style={{
+        overflow: 'hidden',
+        maxHeight: showQuickLog && !showWeeklySummary ? '200px' : '0px',
+        opacity: showQuickLog && !showWeeklySummary ? 1 : 0,
+        marginBottom: showQuickLog && !showWeeklySummary ? '12px' : '0px',
+        transition: 'max-height 0.25s ease, opacity 0.25s ease, margin-bottom 0.25s ease',
+      }}>
+        <QuickLog onClose={onCloseQuickLog} />
+      </div>
 
       {!showWeeklySummary && (
         <div className="flex justify-between items-center py-1 mb-1">

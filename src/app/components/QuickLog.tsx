@@ -8,7 +8,7 @@ const FOOD_ID     = 89;
 const FOOD_OPTIONS = ['BAD', 'OK', 'GOOD'] as const;
 type FoodOption = typeof FOOD_OPTIONS[number];
 
-export const QuickLog: React.FC = () => {
+export const QuickLog: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   const today = todayStr();
   const [trackerKm, setTrackerKm] = useState('');
   const [calories, setCalories] = useState('');
@@ -93,6 +93,7 @@ export const QuickLog: React.FC = () => {
     setSaving(true);
     try {
       await Promise.all([saveTracker(), saveCalories(), saveFood()]);
+      onClose?.();
     } finally {
       setSaving(false);
     }

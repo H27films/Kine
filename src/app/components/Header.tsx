@@ -11,6 +11,8 @@ interface HeaderProps {
   onNavigate?: (page: Page) => void;
   onToggleWeeklySummary?: () => void;
   showWeeklySummary?: boolean;
+  onToggleQuickLog?: () => void;
+  showQuickLog?: boolean;
 }
 
 const headerTextStyle: React.CSSProperties = {
@@ -36,7 +38,7 @@ const DumbbellIcon = ({ size = 16 }: { size?: number }) => (
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type IconComponent = React.ComponentType<any>;
 
-export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNavigate, onToggleWeeklySummary }) => {
+export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNavigate, onToggleWeeklySummary, onToggleQuickLog, showQuickLog }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [score, setScore] = useState<number>(0);
   const [showScoreLabel, setShowScoreLabel] = useState(false);
@@ -147,6 +149,21 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
                 <span className="text-sm font-semibold" style={{ color: '#1a1a1a' }}>{item.label}</span>
               </button>
             ))}
+          <button
+              onClick={() => {
+                onToggleQuickLog?.();
+                setMenuOpen(false);
+              }}
+              className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-black/5 transition-colors"
+              style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}
+            >
+              <span style={{ color: 'rgba(26,26,26,0.45)', display: 'flex', alignItems: 'center' }}>
+                <NewCaloriesIcon size={16} />
+              </span>
+              <span className="text-sm font-semibold" style={{ color: '#1a1a1a' }}>
+                {showQuickLog ? 'Quick Log ✓' : 'Quick Log'}
+              </span>
+            </button>
           </div>
         )}
       </div>
