@@ -425,10 +425,29 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
             style={{ borderTop: '1px solid rgba(0,0,0,0.75)', padding: '20px 0 0', willChange: 'opacity, transform', cursor: 'pointer' }}
           >
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <div style={{ marginBottom: '12px' }}>
+              <div style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span style={{ fontSize: '13px', fontWeight: 600, color: '#1a1a1a', letterSpacing: '0.04em', fontFamily: "'Archivo', sans-serif" }}>
                   {formatDayLabel(cardioDayDate)}
                 </span>
+                {(() => {
+                  const nonTrackerCount = cardioEntries.filter(e => e.exercise_name.toUpperCase() !== 'TRACKER').length;
+                  if (nonTrackerCount === 0) return null;
+                  return (
+                    <div style={{
+                      width: 22,
+                      height: 22,
+                      borderRadius: '50%',
+                      backgroundColor: '#1a1a1a',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}>
+                      <span style={{ fontSize: '9px', fontWeight: 800, color: '#ffffff', fontFamily: "'Archivo', sans-serif" }}>
+                        {nonTrackerCount}
+                      </span>
+                    </div>
+                  );
+                })()}
               </div>
               {(() => {
                 const normal = cardioEntries.filter(e => e.exercise_name.toUpperCase() !== 'TRACKER');
