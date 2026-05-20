@@ -84,6 +84,13 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
     return malaysiaDateStr(monday);
   }
 
+  function isFutureDay(weekNumber: number, dayIndex: number): boolean {
+    const dateStr = getCardioDayDate(weekNumber, dayIndex);
+    if (!dateStr) return true;
+    const today = malaysiaDateStr(new Date());
+    return dateStr > today;
+  }
+
   // Cardio fetch
   useEffect(() => {
     if (!cardioDayDate) { setCardioEntries([]); return; }
@@ -171,6 +178,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
 
   const handleBarClick = (weekNumber: number, dayIndex: number) => {
     if (activeTab !== 'Cardio') return;
+    if (isFutureDay(weekNumber, dayIndex)) return;
 
     const isSameBar =
       cardioDayDate !== null &&
@@ -373,9 +381,9 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
               <div
                 key={i}
                 className="flex h-full flex-col items-center justify-end"
-                style={{ flex: '1', maxWidth: '28px', cursor: (activeTab === 'Cardio' || activeTab === 'Weights') && val > 0 ? 'pointer' : 'default' }}
+                style={{ flex: '1', maxWidth: '28px', cursor: (activeTab === 'Cardio' && effectiveWeekNumber !== null && !isFutureDay(effectiveWeekNumber, i)) || (activeTab === 'Weights' && val > 0) ? 'pointer' : 'default' }}
                 onClick={() => {
-                  if (activeTab === 'Cardio' && val > 0 && effectiveWeekNumber !== null) {
+                  if (activeTab === 'Cardio' && effectiveWeekNumber !== null) {
                     handleBarClick(effectiveWeekNumber, i);
                   }
                   if (activeTab === 'Weights' && val > 0 && effectiveWeekNumber !== null) {
