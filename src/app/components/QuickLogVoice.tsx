@@ -28,12 +28,12 @@ declare global {
 }
 
 interface QuickLogVoiceProps {
-    multiplier: number;
-    onClose: () => void;
-    onSuccess?: () => void;
-  }
+  multiplier: number;
+  onClose: () => void;
+  onSuccess?: () => void;
+}
 
-  export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClose, onSuccess }) => {
+export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClose, onSuccess }) => {
   const today = todayStr();
   const [listening, setListening] = useState(false);
   const [status, setStatus] = useState<'idle' | 'listening' | 'processing' | 'success' | 'error'>('idle');
@@ -45,14 +45,38 @@ interface QuickLogVoiceProps {
   const audioCtxRef = useRef<AudioContext | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const multiplierRef = useRef<number>(multiplier);
+  const closedRef = useRef(false);
 
   useEffect(() => { multiplierRef.current = multiplier; }, [multiplier]);
+
+  const forceCleanup = () => {
+    // Stop recognition
+    if (recognitionRef.current) {
+      try { recognitionRef.current.abort(); } catch {}
+      recognitionRef.current = null;
+    }
+    // Stop animation frame
+    if (animFrameRef.current) {
+      cancelAnimationFrame(animFrameRef.current);
+      animFrameRef.current = null;
+    }
+    // Stop mic stream
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(t => { try { t.stop(); } catch {} });
+      streamRef.current = null;
+    }
+    // Close audio context
+    if (audioCtxRef.current) {
+      try { audioCtxRef.current.close(); } catch {}
+      audioCtxRef.current = null;
+    }
+  };
 
   const stopAudio = () => {
     if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     animFrameRef.current = null;
-    if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop());
-    if (audioCtxRef.current) audioCtxRef.current.close().catch(() => {});
+    if (streamRef.current) streamRef.current.getTracks().forEach(t => { try { t.stop(); } catch {} });
+    if (audioCtxRef.current) { try { audioCtxRef.current.close(); } catch {} }
     audioCtxRef.current = null;
     streamRef.current = null;
     setWaveAmplitudes(Array(32).fill(3));
@@ -155,6 +179,8 @@ interface QuickLogVoiceProps {
   };
 
   const startListening = async () => {
+    if (closedRef.current) return;
+
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
       setStatus('error');
@@ -162,7 +188,7 @@ interface QuickLogVoiceProps {
       return;
     }
 
-    // Fully clean up any previous session first
+    // Clean up any previous session
     if (recognitionRef.current) {
       try { recognitionRef.current.abort(); } catch {}
       recognitionRef.current = null;
@@ -174,7 +200,7 @@ interface QuickLogVoiceProps {
     setListening(true);
 
     const ok = await startAudioVisualiser();
-    if (!ok) { setListening(false); return; }
+    if (!ok || closedRef.current) { setListening(false); return; }
 
     const recognition = new SpeechRecognition();
     recognition.lang = 'en-US';
@@ -186,7 +212,7 @@ interface QuickLogVoiceProps {
     recognitionRef.current = recognition;
 
     recognition.onresult = async (event: any) => {
-      if (handled) return;
+      if (handled || closedRef.current) return;
       handled = true;
       recognitionRef.current = null;
       const transcript = event.results[0][0].transcript;
@@ -196,22 +222,29 @@ interface QuickLogVoiceProps {
       setMessage(`"${transcript}"`);
       try {
         const result = await parseVoiceCommand(transcript);
+        if (closedRef.current) return;
         if (result) {
-            setStatus('success');
-            setMessage(result);
-            setTimeout(() => { onClose(); onSuccess?.(); }, 1800);
+          setStatus('success');
+          setMessage(result);
+          setTimeout(() => {
+            forceCleanup();
+            onSuccess?.();
+            onClose();
+          }, 1800);
         } else {
           setStatus('error');
           setMessage(`Didn't understand — try again`);
         }
       } catch {
-        setStatus('error');
-        setMessage('Failed to save');
+        if (!closedRef.current) {
+          setStatus('error');
+          setMessage('Failed to save');
+        }
       }
     };
 
     recognition.onerror = (event: any) => {
-      if (handled) return;
+      if (handled || closedRef.current) return;
       handled = true;
       recognitionRef.current = null;
       setListening(false);
@@ -221,7 +254,7 @@ interface QuickLogVoiceProps {
     };
 
     recognition.onend = () => {
-      if (handled) return;
+      if (handled || closedRef.current) return;
       recognitionRef.current = null;
       setListening(false);
       stopAudio();
@@ -231,23 +264,29 @@ interface QuickLogVoiceProps {
   };
 
   const stopListening = () => {
-    try { recognitionRef.current?.stop(); } catch {}
-    recognitionRef.current = null;
+    if (recognitionRef.current) {
+      try { recognitionRef.current.abort(); } catch {}
+      recognitionRef.current = null;
+    }
     setListening(false);
     stopAudio();
   };
 
   const handleClose = () => {
-    stopListening();
+    closedRef.current = true;
+    forceCleanup();
+    setListening(false);
     onClose();
   };
 
-  // Auto-start on mount
+  // Auto-start on mount, force full cleanup on unmount
   useEffect(() => {
+    closedRef.current = false;
     const t = setTimeout(() => startListening(), 300);
     return () => {
       clearTimeout(t);
-      stopListening();
+      closedRef.current = true;
+      forceCleanup();
     };
   }, []);
 
