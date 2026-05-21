@@ -10,7 +10,6 @@ export const VoiceVisualiser: React.FC<VoiceVisualiserProps> = ({ amplitudes, li
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animRef = useRef<number | null>(null);
   const timeRef = useRef(0);
-  const historyRef = useRef<number[][]>([]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -19,57 +18,54 @@ export const VoiceVisualiser: React.FC<VoiceVisualiserProps> = ({ amplitudes, li
     if (!ctx) return;
 
     const W = 320;
-    const H = 160;
+    const H = 120;
     canvas.width = W;
     canvas.height = H;
 
-    const NUM_HISTORY = 12;
+    const NUM_DOTS = 32;
+    const DOT_BASE = 4;
     const cy = H / 2;
 
     const draw = () => {
       animRef.current = requestAnimationFrame(draw);
-      timeRef.current += 0.03;
+      timeRef.current += 0.04;
       ctx.clearRect(0, 0, W, H);
 
-      // Build current wave from amplitudes or idle sine
-      const current: number[] = Array.from({ length: W }, (_, x) => {
-        const t = x / W;
+      for (let i = 0; i < NUM_DOTS; i++) {
+        const t = i / (NUM_DOTS - 1);
+        const x = 16 + t * (W - 32);
+
+        let dy = 0;
+        let dotSize = DOT_BASE;
+        let opacity = 0.5;
+
         if (listening) {
           const idx = Math.floor(t * amplitudes.length);
           const amp = (amplitudes[idx] - 3) / 80;
-          return amp * 55 * Math.sin(t * Math.PI);
+          // envelope so edges taper off
+          const envelope = Math.sin(t * Math.PI);
+          dy = amp * 45 * envelope;
+          dotSize = DOT_BASE * (0.6 + amp * 1.4);
+          opacity = 0.5 + amp * 0.5;
         } else if (status === 'success') {
-          return 8 * Math.sin(t * Math.PI * 3 + timeRef.current) * Math.sin(t * Math.PI);
+          const envelope = Math.sin(t * Math.PI);
+          dy = Math.sin(t * Math.PI * 3 + timeRef.current * 2) * 14 * envelope;
+          dotSize = DOT_BASE * 0.9;
+          opacity = 0.75;
         } else {
-          // gentle idle breathe
-          return 6 * Math.sin(t * Math.PI * 2 + timeRef.current) * Math.sin(t * Math.PI);
+          // CSS-style wave: each dot offset by index like --delay
+          const delay = i * 0.18;
+          const envelope = Math.sin(t * Math.PI);
+          dy = Math.sin(timeRef.current + delay) * 28 * envelope;
+          dotSize = DOT_BASE * (0.7 + 0.3 * Math.abs(Math.sin(timeRef.current + delay)));
+          opacity = 0.55 + 0.45 * Math.abs(Math.sin(timeRef.current + delay));
         }
-      });
-
-      // Push to history
-      historyRef.current.unshift(current);
-      if (historyRef.current.length > NUM_HISTORY) historyRef.current.pop();
-
-      // Draw from oldest (faintest) to newest (boldest)
-      historyRef.current.forEach((wave, hi) => {
-        const age = hi / (NUM_HISTORY - 1); // 0 = newest, 1 = oldest
-        const opacity = listening
-          ? (1 - age) * 0.7
-          : (1 - age) * 0.25;
-        const lineWidth = listening
-          ? 1 + (1 - age) * 1.5
-          : 0.8 + (1 - age) * 0.8;
-        const yOffset = age * (listening ? 18 : 6);
 
         ctx.beginPath();
-        ctx.moveTo(0, cy + yOffset);
-        for (let x = 0; x < W; x++) {
-          ctx.lineTo(x, cy + yOffset - wave[x]);
-        }
-        ctx.strokeStyle = `rgba(26,26,26,${opacity})`;
-        ctx.lineWidth = lineWidth;
-        ctx.stroke();
-      });
+        ctx.arc(x, cy - dy, Math.max(2, dotSize), 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(26,26,26,${opacity})`;
+        ctx.fill();
+      }
     };
 
     draw();
@@ -79,7 +75,7 @@ export const VoiceVisualiser: React.FC<VoiceVisualiserProps> = ({ amplitudes, li
   return (
     <canvas
       ref={canvasRef}
-      style={{ width: '320px', height: '160px', marginBottom: '32px' }}
+      style={{ width: '320px', height: '120px', marginBottom: '32px' }}
     />
   );
 };
