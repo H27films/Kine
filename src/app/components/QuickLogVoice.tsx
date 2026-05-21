@@ -28,11 +28,12 @@ declare global {
 }
 
 interface QuickLogVoiceProps {
-  multiplier: number;
-  onClose: () => void;
-}
+    multiplier: number;
+    onClose: () => void;
+    onSuccess?: () => void;
+  }
 
-export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClose }) => {
+  export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClose, onSuccess }) => {
   const today = todayStr();
   const [listening, setListening] = useState(false);
   const [status, setStatus] = useState<'idle' | 'listening' | 'processing' | 'success' | 'error'>('idle');
@@ -161,6 +162,13 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
       return;
     }
 
+    // Fully clean up any previous session first
+    if (recognitionRef.current) {
+      try { recognitionRef.current.abort(); } catch {}
+      recognitionRef.current = null;
+    }
+    stopAudio();
+
     setStatus('listening');
     setMessage('Listening…');
     setListening(true);
@@ -173,13 +181,14 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
     recognition.continuous = false;
-    recognitionRef.current = recognition;
 
     let handled = false;
+    recognitionRef.current = recognition;
 
     recognition.onresult = async (event: any) => {
       if (handled) return;
       handled = true;
+      recognitionRef.current = null;
       const transcript = event.results[0][0].transcript;
       setListening(false);
       stopAudio();
@@ -188,9 +197,9 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
       try {
         const result = await parseVoiceCommand(transcript);
         if (result) {
-          setStatus('success');
-          setMessage(result);
-          setTimeout(() => onClose(), 1800);
+            setStatus('success');
+            setMessage(result);
+            setTimeout(() => { onClose(); onSuccess?.(); }, 1800);
         } else {
           setStatus('error');
           setMessage(`Didn't understand — try again`);
@@ -204,6 +213,7 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
     recognition.onerror = (event: any) => {
       if (handled) return;
       handled = true;
+      recognitionRef.current = null;
       setListening(false);
       stopAudio();
       setStatus('error');
@@ -212,6 +222,7 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
 
     recognition.onend = () => {
       if (handled) return;
+      recognitionRef.current = null;
       setListening(false);
       stopAudio();
     };

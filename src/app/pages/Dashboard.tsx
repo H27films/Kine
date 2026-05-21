@@ -120,7 +120,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; showQuickLog?: b
         marginBottom: showQuickLog && !showWeeklySummary ? '12px' : '0px',
         transition: 'max-height 0.25s ease, opacity 0.25s ease, margin-bottom 0.25s ease',
       }}>
-        <QuickLog onClose={onCloseQuickLog} />
+        <QuickLog onClose={onCloseQuickLog} onSuccess={onCloseQuickLog} />
       </div>
 
       {!showWeeklySummary && (

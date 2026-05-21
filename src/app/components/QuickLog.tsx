@@ -9,7 +9,7 @@ const FOOD_ID          = 89;
 const FOOD_OPTIONS = ['BAD', 'OK', 'GOOD'] as const;
 type FoodOption = typeof FOOD_OPTIONS[number];
 
-export const QuickLog: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
+export const QuickLog: React.FC<{ onClose?: () => void; onSuccess?: () => void }> = ({ onClose, onSuccess }) => {
   const today = todayStr();
   const [trackerKm, setTrackerKm] = useState('');
   const [calories, setCalories] = useState('');
@@ -251,12 +251,13 @@ export const QuickLog: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
 
       </div>
 
-{voiceOpen && (
-  <QuickLogVoice
-    multiplier={trackerMultiplier}
-    onClose={() => setVoiceOpen(false)}
-  />
-)}
+      {voiceOpen && (
+          <QuickLogVoice
+            multiplier={trackerMultiplier}
+            onClose={() => setVoiceOpen(false)}
+            onSuccess={() => { setVoiceOpen(false); onSuccess?.(); }}
+          />
+        )}
 </div>
   );
 };
