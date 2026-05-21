@@ -251,12 +251,12 @@ export const QuickLog: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
 
       </div>
 
-      {voiceOpen && (
-        <QuickLogVoice
-          multiplier={trackerMultiplier}
-          onClose={() => setVoiceOpen(false)}
-        />
-      )}
-    </div>
+{voiceOpen && (
+  <QuickLogVoice
+    multiplier={trackerMultiplier}
+    onClose={() => setVoiceOpen(false)}
+  />
+)}
+</div>
   );
 };
