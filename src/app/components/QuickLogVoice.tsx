@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
+import { CaloriesIcon, RunningManIcon } from './NavIcons';
 import { supabase, todayStr, getISOWeek, getDayName, recalculateDailyTotals } from '../../lib/supabase';
 
 const TRACKER_ID       = 82;
@@ -250,7 +251,7 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
       setListening(false);
       stopAudio();
       setStatus('error');
-      setMessage(event.error === 'no-speech' ? 'No speech detected' : 'Mic error — try again');
+      setMessage(event.error === 'no-speech' ? 'No speech detected' : 'ERROR — TRY AGAIN');
     };
 
     recognition.onend = () => {
@@ -289,9 +290,9 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
   }, []);
 
   const statusColor =
-    status === 'success' ? '#1a1a1a'
-    : status === 'error' ? 'rgba(200,50,50,0.9)'
-    : 'rgba(26,26,26,0.45)';
+  status === 'success' ? '#1a1a1a'
+  : status === 'error' ? '#1a1a1a'
+  : 'rgba(26,26,26,0.45)';
 
   return (
     <div style={{
@@ -319,12 +320,12 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
 
       {/* Title */}
       <div style={{
-        fontSize: '10px', fontWeight: 700, letterSpacing: '2px',
-        textTransform: 'uppercase', color: 'rgba(26,26,26,0.35)',
-        marginBottom: '48px',
-      }}>
-        VOICE LOG
-      </div>
+  fontSize: '24px', fontWeight: 500, letterSpacing: '12px',
+  textTransform: 'uppercase', color: '#1a1a1a',
+  marginBottom: '48px',
+}}>
+  VOICE LOG
+</div>
 
       {/* Waveform */}
       <div style={{
@@ -350,7 +351,7 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
       {/* Status message */}
       <div style={{
         fontSize: status === 'processing' || status === 'success' || status === 'error' ? '14px' : '11px',
-        fontWeight: 600,
+        fontWeight: status === 'error' ? 400 : 600,
         letterSpacing: status === 'processing' || status === 'success' || status === 'error' ? '0.02em' : '0.12em',
         color: statusColor,
         textAlign: 'center',
@@ -382,13 +383,26 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
 
       {/* Hint text */}
       <div style={{
-        position: 'absolute', bottom: 'calc(40px + env(safe-area-inset-bottom))',
-        fontSize: '9px', fontWeight: 500, letterSpacing: '0.1em',
-        color: 'rgba(26,26,26,0.25)', textTransform: 'uppercase', textAlign: 'center',
-        lineHeight: 1.8,
+  position: 'absolute', bottom: 'calc(32px + env(safe-area-inset-bottom))',
+  display: 'flex', gap: '32px', alignItems: 'flex-start', justifyContent: 'center',
+}}>
+  {[
+    { icon: <img src="/icons/dumbbell.svg" style={{ width: 24, height: 24, filter: 'brightness(0)', opacity: 0.9 }} alt="tracker" />, label: 'Log Tracker 10' },
+    { icon: <CaloriesIcon size={24} color="rgba(26,26,26,0.9)" />, label: 'Log Calories 1800' },
+    { icon: <RunningManIcon size={26} color="rgba(26,26,26,0.9)" />, label: 'Log Running\n5' },
+  ].map(({ icon, label }) => (
+    <div key={label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+      {icon}
+      <span style={{
+        fontSize: '8.5px', fontWeight: 500, letterSpacing: '0.08em',
+        color: 'rgba(26,26,26,0.75)', textTransform: 'uppercase', textAlign: 'center',
+        lineHeight: 1.4, maxWidth: '72px', whiteSpace: 'pre-line',
       }}>
-        "Log tracker 10" · "Log calories 1800"
-      </div>
+        {label}
+      </span>
+    </div>
+  ))}
+</div>
 
       <style>{`
         @keyframes vFadeIn {
