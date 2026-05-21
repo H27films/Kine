@@ -75,12 +75,12 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
   }, [isDashboard]);
 
   const menuItems: { label: string; icon: IconComponent; page: Page }[] = [
-    { label: 'Weights',  icon: DumbbellIcon,                                                    page: 'weights'   },
-    { label: 'Cardio',   icon: ({ size }: { size?: number }) => <NewRunningManIcon size={size} />, page: 'cardio'    },
-    { label: 'Calories', icon: ({ size }: { size?: number }) => <NewCaloriesIcon size={size} />,  page: 'calories'  },
-    { label: 'Data+',    icon: BarChart3,                                                       page: 'analytics' },
-    { label: 'Weights+', icon: DumbbellIcon,                                                    page: 'weights-plus' },
-    { label: 'Run+',     icon: ({ size }: { size?: number }) => <NewRunningManIcon size={size} />, page: 'running-plus' },
+    { label: 'Weights',  icon: DumbbellIcon,                                                                   page: 'weights'      },
+    { label: 'Cardio',   icon: ({ size }: { size?: number }) => <NewRunningManIcon size={size} color="#1a1a1a" />, page: 'cardio'    },
+    { label: 'Calories', icon: ({ size }: { size?: number }) => <NewCaloriesIcon size={size} color="#1a1a1a" />,  page: 'calories'  },
+    { label: 'Data+',    icon: ({ size }: { size?: number }) => <BarChart3 size={size} color="#1a1a1a" />,        page: 'analytics' },
+    { label: 'Weights+', icon: DumbbellIcon,                                                                   page: 'weights-plus' },
+    { label: 'Run+',     icon: ({ size }: { size?: number }) => <NewRunningManIcon size={size} color="#1a1a1a" />, page: 'running-plus' },
   ];
 
   const getLogIcon = () => {
@@ -158,8 +158,8 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
               style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}
             >
               <span style={{ color: 'rgba(26,26,26,0.45)', display: 'flex', alignItems: 'center' }}>
-                <NewCaloriesIcon size={16} />
-              </span>
+              <img src="/icons/quicklog.svg" style={{ width: 16, height: 16, opacity: 1 }} alt="quick log" />
+</span>
               <span className="text-sm font-semibold" style={{ color: '#1a1a1a' }}>
                 {showQuickLog ? 'Quick Log ✓' : 'Quick Log'}
               </span>
