@@ -363,7 +363,6 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                       </div>
                     )}
                   </div>
-                  {!showAdvanced && (
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
                       <div
                         onClick={() => onAddSet(activeEx.exercise.id)}
@@ -371,7 +370,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                       >
                         + SET
                       </div>
-                      {showDoubleArrow && (
+                      {!showAdvanced && showDoubleArrow && (
                         <button
                           onClick={() => onNavigate && onNavigate('summary-weights', { addedExercises, todayLoggedTotal, exercisesByGroup })}
                           style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
@@ -381,7 +380,6 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                         </button>
                       )}
                     </div>
-                  )}
                 </div>
               </>
             )}
