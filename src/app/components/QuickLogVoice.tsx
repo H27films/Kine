@@ -40,81 +40,24 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
   const [listening, setListening] = useState(false);
   const [status, setStatus] = useState<'idle' | 'listening' | 'processing' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
-  const [waveAmplitudes, setWaveAmplitudes] = useState<number[]>(Array(32).fill(3));
 
   const recognitionRef = useRef<any>(null);
-  const animFrameRef = useRef<number | null>(null);
-  const audioCtxRef = useRef<AudioContext | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
   const multiplierRef = useRef<number>(multiplier);
   const closedRef = useRef(false);
 
   useEffect(() => { multiplierRef.current = multiplier; }, [multiplier]);
 
+  // ====== CLEANUP ======
+
+  /** Full cleanup: abort recognition. */
   const forceCleanup = () => {
-    // Stop recognition
     if (recognitionRef.current) {
       try { recognitionRef.current.abort(); } catch {}
       recognitionRef.current = null;
     }
-    // Stop animation frame
-    if (animFrameRef.current) {
-      cancelAnimationFrame(animFrameRef.current);
-      animFrameRef.current = null;
-    }
-    // Stop mic stream
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(t => { try { t.stop(); } catch {} });
-      streamRef.current = null;
-    }
-    // Close audio context
-    if (audioCtxRef.current) {
-      try { audioCtxRef.current.close(); } catch {}
-      audioCtxRef.current = null;
-    }
   };
 
-  const stopAudio = () => {
-    if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
-    animFrameRef.current = null;
-    if (streamRef.current) streamRef.current.getTracks().forEach(t => { try { t.stop(); } catch {} });
-    if (audioCtxRef.current) { try { audioCtxRef.current.close(); } catch {} }
-    audioCtxRef.current = null;
-    streamRef.current = null;
-    setWaveAmplitudes(Array(32).fill(3));
-  };
-
-  const startAudioVisualiser = async (): Promise<boolean> => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-      streamRef.current = stream;
-      const audioCtx = new AudioContext();
-      audioCtxRef.current = audioCtx;
-      const source = audioCtx.createMediaStreamSource(stream);
-      const analyser = audioCtx.createAnalyser();
-      analyser.fftSize = 128;
-      analyser.smoothingTimeConstant = 0.75;
-      source.connect(analyser);
-      const dataArray = new Uint8Array(analyser.frequencyBinCount);
-      const NUM_BARS = 32;
-      const draw = () => {
-        animFrameRef.current = requestAnimationFrame(draw);
-        analyser.getByteFrequencyData(dataArray);
-        const step = Math.floor(dataArray.length / NUM_BARS);
-        const amps = Array.from({ length: NUM_BARS }, (_, i) => {
-          const val = dataArray[i * step] || 0;
-          return 3 + (val / 255) * 80;
-        });
-        setWaveAmplitudes(amps);
-      };
-      draw();
-      return true;
-    } catch {
-      setStatus('error');
-      setMessage('Mic access denied');
-      return false;
-    }
-  };
+  // ====== SUPABASE ======
 
   const upsert = async (type: string, exerciseId: number, payload: Record<string, unknown>) => {
     const week = getISOWeek(new Date(today + 'T12:00:00+08:00'));
@@ -144,18 +87,18 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
     await recalculateDailyTotals(today);
   };
 
+  // ====== VOICE PARSING ======
+
   const parseVoiceCommand = async (transcript: string): Promise<string> => {
     const t = transcript.toLowerCase().trim();
 
     // --- FOOD RATING ---
-    // "log food good", "my food was good", "food good", "ate good", "food ok", "food bad"
     const foodMatch = t.match(/(?:log\s+)?(?:my\s+)?food\s+(?:was\s+)?(good|ok|bad)\b/);
     if (foodMatch) {
       const rating = foodMatch[1].toUpperCase();
       await upsert('MEASUREMENT', FOOD_ID, { food_rating: rating, calories: null });
       return `Food rating: ${rating} ✓`;
     }
-    // "food was good" or "food is good" etc
     const foodMatch2 = t.match(/(?:food|meal|ate|eating)\s+(?:was|is)\s+(good|ok|okay|bad)\b/);
     if (foodMatch2) {
       let rating = foodMatch2[1].toUpperCase();
@@ -165,14 +108,12 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
     }
 
     // --- CALORIES ---
-    // "log calories 1800", "i had 1800 calories", "ate 1800 calories", "calories 1800"
     const calMatch = t.match(/(?:log\s+)?(?:(?:i\s+)?(?:had|ate|consumed|took)\s+)?(\d{3,4})\s*cal/);
     if (calMatch) {
       const v = parseInt(calMatch[1], 10);
       await upsert('MEASUREMENT', CALORIES_ID, { calories: v });
       return `Calories: ${v} kcal ✓`;
     }
-    // "log calories 1800" (reverse order)
     const calMatch2 = t.match(/log calories\s+(\d+)/);
     if (calMatch2) {
       const v = parseInt(calMatch2[1], 10);
@@ -180,16 +121,9 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
       return `Calories: ${v} kcal ✓`;
     }
 
-    // --- CARDIO (tracker + specific exercises) ---
-    // Flexible patterns:
-    // "log tracker 10", "i did 10k on the tracker", "tracker 5", "10 tracker"
-    // "log running 5", "i ran 5k", "ran 5 kilometers", "running 3.5"
-    // "log row 2", "rowed 2k", "rowing 2.5"
-    // "log cycle 15", "cycled 15k", "cycling 10"
-
+    // --- CARDIO ---
     const allCardioNames = Object.keys(CARDIO_MAP).join('|');
 
-    // Pattern 1: "log <exercise> <number>" or "<exercise> <number>"
     const cardioMatch1 = t.match(new RegExp(`(?:log\\s+)?(${allCardioNames})\\s+(\\d+(?:\\.\\d+)?)\\s*k?`, 'i'));
     if (cardioMatch1) {
       const exerciseName = cardioMatch1[1].toLowerCase();
@@ -205,7 +139,6 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
       }
     }
 
-    // Pattern 2: "i ran 5k", "i did 5k on the <exercise>", "ran 5 kilometers"
     const actionMap: Record<string, string> = {
       ran: 'running', run: 'running', running: 'running',
       walked: 'walking', walk: 'walking', walking: 'walking',
@@ -230,7 +163,6 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
       }
     }
 
-    // Pattern 3: "i did 5k on the tracker" / "did 10km on the cross trainer"
     const cardioMatch3 = t.match(/(?:i\s+)?did\s+(\d+(?:\.\d+)?)\s*(?:k|km|kilometers|kilometres)?\s+(?:on\s+)?(?:the\s+)?(tracker|row|rowing|running|run|walking|walk|cross trainer|crosstrainer|cycle|cycling)\b/);
     if (cardioMatch3) {
       const km = parseFloat(cardioMatch3[1]);
@@ -249,6 +181,8 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
     return '';
   };
 
+  // ====== SPEECH RECOGNITION ======
+
   const startListening = async () => {
     if (closedRef.current) return;
 
@@ -259,19 +193,14 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
       return;
     }
 
-    // Clean up any previous session
     if (recognitionRef.current) {
       try { recognitionRef.current.abort(); } catch {}
       recognitionRef.current = null;
     }
-    stopAudio();
 
     setStatus('listening');
     setMessage('Listening…');
     setListening(true);
-
-    const ok = await startAudioVisualiser();
-    if (!ok || closedRef.current) { setListening(false); return; }
 
     const recognition = new SpeechRecognition();
     recognition.lang = 'en-US';
@@ -286,11 +215,12 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
       if (handled || closedRef.current) return;
       handled = true;
       recognitionRef.current = null;
+
       const transcript = event.results[0][0].transcript;
       setListening(false);
-      stopAudio();
       setStatus('processing');
       setMessage(`"${transcript}"`);
+
       try {
         const result = await parseVoiceCommand(transcript);
         if (closedRef.current) return;
@@ -304,7 +234,7 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
           }, 1800);
         } else {
           setStatus('error');
-          setMessage(`"${transcript}"\n\u2716 Didn't understand — try again`);
+          setMessage(`"${transcript}"\n\u2716 Didn't understand`);
         }
       } catch {
         if (!closedRef.current) {
@@ -319,19 +249,24 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
       handled = true;
       recognitionRef.current = null;
       setListening(false);
-      stopAudio();
       setStatus('error');
-      setMessage(event.error === 'no-speech' ? 'No speech detected' : 'ERROR   —   TRY AGAIN');
+      const msg = event.error === 'no-speech' ? 'No speech detected'
+        : event.error === 'aborted' ? 'Tap START to try again'
+        : 'ERROR — TRY AGAIN';
+      setMessage(msg);
     };
 
     recognition.onend = () => {
       if (handled || closedRef.current) return;
       recognitionRef.current = null;
       setListening(false);
-      stopAudio();
     };
 
-    recognition.start();
+    try {
+      recognition.start();
+    } catch {
+      setListening(false);
+    }
   };
 
   const stopListening = () => {
@@ -340,7 +275,6 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
       recognitionRef.current = null;
     }
     setListening(false);
-    stopAudio();
   };
 
   const handleClose = () => {
@@ -350,7 +284,6 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
     onClose();
   };
 
-  // Auto-start on mount, force full cleanup on unmount
   useEffect(() => {
     closedRef.current = false;
     return () => {
@@ -376,7 +309,6 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
       animation: 'vFadeIn 0.2s ease',
     }}>
 
-      {/* X close button */}
       <button
         onClick={handleClose}
         style={{
@@ -388,7 +320,6 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
         <X size={22} strokeWidth={1.8} />
       </button>
 
-      {/* Title */}
       <div style={{
   fontSize: '24px', fontWeight: 500, letterSpacing: '12px',
   textTransform: 'uppercase', color: '#1a1a1a',
@@ -397,14 +328,11 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
   VOICE LOG
 </div>
 
-      {/* Waveform */}
       <VoiceVisualiser
-  amplitudes={waveAmplitudes}
   listening={listening}
   status={status}
 />
 
-      {/* Status message */}
       <div style={{
         fontSize: '14px',
         fontWeight: 400,
@@ -420,7 +348,6 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
         {message || 'Say your command'}
       </div>
 
-      {/* DONE button while listening */}
       {(status === 'idle' || status === 'error' || status === 'listening') && (
   <button
     onClick={listening ? stopListening : startListening}
@@ -437,7 +364,6 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
   </button>
 )}
 
-      {/* Hint text */}
       <div style={{
   position: 'absolute', bottom: 'calc(32px + env(safe-area-inset-bottom))',
   display: 'flex', gap: '32px', alignItems: 'flex-start', justifyContent: 'center',

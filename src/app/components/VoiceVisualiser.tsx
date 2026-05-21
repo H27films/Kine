@@ -1,12 +1,19 @@
 import React, { useEffect, useRef } from 'react';
 
 interface VoiceVisualiserProps {
-  amplitudes: number[];
   listening: boolean;
   status: 'idle' | 'listening' | 'processing' | 'success' | 'error';
 }
 
-export const VoiceVisualiser: React.FC<VoiceVisualiserProps> = ({ amplitudes, listening, status }) => {
+const NUM_BARS = 32;
+
+/**
+ * Purely cosmetic waveform visualiser — no AudioContext / AnalyserNode needed.
+ * Uses a timer-based sine wave animation that bounces when listening.
+ * This avoids iOS conflicts where SpeechRecognition and AudioContext
+ * compete for the microphone stream.
+ */
+export const VoiceVisualiser: React.FC<VoiceVisualiserProps> = ({ listening, status }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animRef = useRef<number | null>(null);
   const timeRef = useRef(0);
@@ -22,17 +29,16 @@ export const VoiceVisualiser: React.FC<VoiceVisualiserProps> = ({ amplitudes, li
     canvas.width = W;
     canvas.height = H;
 
-    const NUM_DOTS = 32;
-    const DOT_BASE = 4;
     const cy = H / 2;
+    const DOT_BASE = 4;
 
     const draw = () => {
       animRef.current = requestAnimationFrame(draw);
       timeRef.current += 0.04;
       ctx.clearRect(0, 0, W, H);
 
-      for (let i = 0; i < NUM_DOTS; i++) {
-        const t = i / (NUM_DOTS - 1);
+      for (let i = 0; i < NUM_BARS; i++) {
+        const t = i / (NUM_BARS - 1);
         const x = 16 + t * (W - 32);
 
         let dy = 0;
@@ -40,10 +46,12 @@ export const VoiceVisualiser: React.FC<VoiceVisualiserProps> = ({ amplitudes, li
         let opacity = 0.5;
 
         if (listening) {
-          const idx = Math.floor(t * amplitudes.length);
-          const amp = (amplitudes[idx] - 3) / 80;
-          // envelope so edges taper off
+          // Simulated audio response using sine waves with varying frequencies
+          // Creates a natural-looking bouncing waveform pattern
           const envelope = Math.sin(t * Math.PI);
+          const freq1 = Math.sin(timeRef.current * 4 + t * 6);
+          const freq2 = Math.sin(timeRef.current * 2 + t * 3);
+          const amp = 0.3 + 0.7 * Math.abs(freq1 * 0.6 + freq2 * 0.4);
           dy = amp * 45 * envelope;
           dotSize = DOT_BASE * (0.6 + amp * 1.4);
           opacity = 0.5 + amp * 0.5;
@@ -53,7 +61,7 @@ export const VoiceVisualiser: React.FC<VoiceVisualiserProps> = ({ amplitudes, li
           dotSize = DOT_BASE * 0.9;
           opacity = 0.75;
         } else {
-          // CSS-style wave: each dot offset by index like --delay
+          // Idle wave animation
           const delay = i * 0.18;
           const envelope = Math.sin(t * Math.PI);
           dy = Math.sin(timeRef.current + delay) * 28 * envelope;
@@ -70,7 +78,7 @@ export const VoiceVisualiser: React.FC<VoiceVisualiserProps> = ({ amplitudes, li
 
     draw();
     return () => { if (animRef.current) cancelAnimationFrame(animRef.current); };
-  }, [amplitudes, listening, status]);
+  }, [listening, status]);
 
   return (
     <canvas
