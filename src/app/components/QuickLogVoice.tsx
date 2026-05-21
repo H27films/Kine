@@ -22,6 +22,12 @@ const CARDIO_MAP: Record<string, number> = {
   cycle: CYCLE_ID, cycling: CYCLE_ID,
 };
 
+/** Map from spoken time units to seconds multiplier */
+const TIME_UNITS: Record<string, number> = {
+  minute: 60, minutes: 60, min: 60, mins: 60, m: 60,
+  second: 1, seconds: 1, sec: 1, secs: 1, s: 1,
+};
+
 declare global {
   interface Window {
     SpeechRecognition: any;
@@ -49,7 +55,6 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
 
   // ====== CLEANUP ======
 
-  /** Full cleanup: abort recognition. */
   const forceCleanup = () => {
     if (recognitionRef.current) {
       try { recognitionRef.current.abort(); } catch {}
@@ -76,6 +81,18 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
     await recalculateDailyTotals(today);
   };
 
+  const insertRunning = async (exerciseId: number, km: number, timeStr: string | null) => {
+    const week = getISOWeek(new Date(today + 'T12:00:00+08:00'));
+    const day  = getDayName(new Date(today + 'T12:00:00+08:00'));
+    await supabase.from('workouts').insert({
+      date: today, week, day, type: 'CARDIO', exercise_id: exerciseId,
+      km, total_cardio: +(km * 1).toFixed(2),
+      time: timeStr,
+      total_score_k: null, new_entry: 'New', source: 'app',
+    });
+    await recalculateDailyTotals(today);
+  };
+
   const insertCardio = async (exerciseId: number, km: number) => {
     const week = getISOWeek(new Date(today + 'T12:00:00+08:00'));
     const day  = getDayName(new Date(today + 'T12:00:00+08:00'));
@@ -85,6 +102,57 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
       total_score_k: null, new_entry: 'New', source: 'app',
     });
     await recalculateDailyTotals(today);
+  };
+
+  // ====== TIME PARSING ======
+
+  /**
+   * Parse a time string like "5 minutes 20 seconds" or "5 min 20 sec" or "5:20" or "5.20"
+   * Returns "00:MM:SS" format or null if no time found.
+   */
+  const parseTime = (text: string): string | null => {
+    // Pattern: "X minutes Y seconds" or "X min Y sec" etc
+    const unitPattern = Object.keys(TIME_UNITS).join('|');
+    const timeMatch = text.match(new RegExp(
+      `(\\d+)\\s*(?:${unitPattern})\\s*(?:and\\s+)?(\\d+)?\\s*(?:${unitPattern})?`,
+      'i'
+    ));
+    if (timeMatch) {
+      let totalSeconds = 0;
+      // First number with its unit
+      const val1 = parseInt(timeMatch[1], 10);
+      // We need to check what unit the first number belongs to
+      // Re-parse more carefully
+      const full = text.toLowerCase();
+      const parts = full.match(/(\d+)\s*(minutes|minute|min|mins|m|seconds|second|sec|secs|s)/g);
+      if (parts) {
+        for (const p of parts) {
+          const pMatch = p.match(/(\d+)\s*(minutes|minute|min|mins|m|seconds|second|sec|secs|s)/);
+          if (pMatch) {
+            const num = parseInt(pMatch[1], 10);
+            const unit = pMatch[2];
+            const mult = TIME_UNITS[unit] || 0;
+            totalSeconds += num * mult;
+          }
+        }
+      }
+
+      if (totalSeconds > 0) {
+        const m = Math.floor(totalSeconds / 60);
+        const secs = totalSeconds % 60;
+        return `00:${String(m).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      }
+    }
+
+    // Pattern: "5:20" or "5.20" (minutes:seconds)
+    const colonMatch = text.match(/(\d+)[:.](\d{1,2})\s*(?:min|sec)?/);
+    if (colonMatch) {
+      const m = parseInt(colonMatch[1], 10);
+      const s = parseInt(colonMatch[2], 10);
+      return `00:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    return null;
   };
 
   // ====== VOICE PARSING ======
@@ -121,15 +189,22 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
       return `Calories: ${v} kcal ✓`;
     }
 
-    // --- CARDIO ---
-    const allCardioNames = Object.keys(CARDIO_MAP).join('|');
+    // --- RUNNING (with optional time) ---
+    // Pattern: "log running 5" or "log running 5 time 5 minutes 20 seconds"
+    // Also: "i ran 5" or "i ran 5 time 5 minutes"
+    // The time part can be after a comma or after "time" or "in"
+    const isRunningMatch = (name: string): boolean =>
+      name === 'running' || name === 'run';
 
-    const cardioMatch1 = t.match(new RegExp(`(?:log\\s+)?(${allCardioNames})\\s+(\\d+(?:\\.\\d+)?)\\s*k?`, 'i'));
-    if (cardioMatch1) {
-      const exerciseName = cardioMatch1[1].toLowerCase();
-      const km = parseFloat(cardioMatch1[2]);
-      const exerciseId = CARDIO_MAP[exerciseName];
-      if (exerciseId && !isNaN(km) && km > 0) {
+    // Helper: extract km from a match and determine if it's running
+    const handleRunningWithTime = async (
+      exerciseName: string,
+      km: number,
+      fullTranscript: string,
+      exerciseId: number
+    ): Promise<string> => {
+      if (!isRunningMatch(exerciseName) || exerciseId !== RUNNING_ID) {
+        // Not running — use normal insertCardio
         if (exerciseId === TRACKER_ID) {
           await upsert('CARDIO', TRACKER_ID, { km, total_cardio: +(km * multiplierRef.current).toFixed(2) });
         } else {
@@ -137,8 +212,51 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
         }
         return `${exerciseName.charAt(0).toUpperCase() + exerciseName.slice(1)}: ${km} km ✓`;
       }
+
+      // It's running — try to find time in the full transcript
+      // Look for time after " time ", " in ", or after a comma
+      let timePart = '';
+      const timeAfterKeyword = fullTranscript.match(
+        /(?:time|in|for)\s+(\d+\s*(?:minutes?|min|mins?|m|seconds?|sec|secs?|s)[^,.]*)/i
+      );
+      if (timeAfterKeyword) {
+        timePart = timeAfterKeyword[1];
+      } else {
+        // Try after a comma: "running 5, 5 minutes 20 seconds"
+        const afterComma = fullTranscript.match(/,\s*(\d+\s*(?:minutes?|min|mins?|m|seconds?|sec|secs?|s)[^,.]*)/i);
+        if (afterComma) {
+          timePart = afterComma[1];
+        }
+      }
+
+      let timeStr: string | null = null;
+      if (timePart) {
+        timeStr = parseTime(timePart);
+      }
+
+      await insertRunning(exerciseId, km, timeStr);
+      let msg = `Running: ${km} km ✓`;
+      if (timeStr) {
+        // Strip leading "00:" for display
+        const displayTime = timeStr.replace(/^00:/, '');
+        msg += ` (${displayTime})`;
+      }
+      return msg;
+    };
+
+    // Pattern 1: "log running 5, 5 minutes 20 seconds" or "log running 5 time 5 minutes"
+    const allCardioNames = Object.keys(CARDIO_MAP).join('|');
+    const cardioMatch1 = t.match(new RegExp(`(?:log\\s+)?(${allCardioNames})\\s+(\\d+(?:\\.\\d+)?)\\s*k?`, 'i'));
+    if (cardioMatch1) {
+      const exerciseName = cardioMatch1[1].toLowerCase();
+      const km = parseFloat(cardioMatch1[2]);
+      const exerciseId = CARDIO_MAP[exerciseName];
+      if (exerciseId && !isNaN(km) && km > 0) {
+        return await handleRunningWithTime(exerciseName, km, t, exerciseId);
+      }
     }
 
+    // Pattern 2: "i ran 5k in 5 minutes" / "ran 5"
     const actionMap: Record<string, string> = {
       ran: 'running', run: 'running', running: 'running',
       walked: 'walking', walk: 'walking', walking: 'walking',
@@ -154,27 +272,18 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
       const km = parseFloat(cardioMatch2[2]);
       const exerciseId = CARDIO_MAP[canonical] || CARDIO_MAP[canonical.replace(/ing$/, '') || ''];
       if (exerciseId && !isNaN(km) && km > 0) {
-        if (exerciseId === TRACKER_ID) {
-          await upsert('CARDIO', TRACKER_ID, { km, total_cardio: +(km * multiplierRef.current).toFixed(2) });
-        } else {
-          await insertCardio(exerciseId, km);
-        }
-        return `${canonical.charAt(0).toUpperCase() + canonical.slice(1)}: ${km} km ✓`;
+        return await handleRunningWithTime(canonical, km, t, exerciseId);
       }
     }
 
+    // Pattern 3: "i did 5k on the tracker" / "5k on the running"
     const cardioMatch3 = t.match(/(?:i\s+)?did\s+(\d+(?:\.\d+)?)\s*(?:k|km|kilometers|kilometres)?\s+(?:on\s+)?(?:the\s+)?(tracker|row|rowing|running|run|walking|walk|cross trainer|crosstrainer|cycle|cycling)\b/);
     if (cardioMatch3) {
       const km = parseFloat(cardioMatch3[1]);
       let exerciseName = cardioMatch3[2].toLowerCase();
       const exerciseId = CARDIO_MAP[exerciseName];
       if (exerciseId && !isNaN(km) && km > 0) {
-        if (exerciseId === TRACKER_ID) {
-          await upsert('CARDIO', TRACKER_ID, { km, total_cardio: +(km * multiplierRef.current).toFixed(2) });
-        } else {
-          await insertCardio(exerciseId, km);
-        }
-        return `${exerciseName.charAt(0).toUpperCase() + exerciseName.slice(1)}: ${km} km ✓`;
+        return await handleRunningWithTime(exerciseName, km, t, exerciseId);
       }
     }
 
@@ -371,7 +480,7 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
   {[
     { icon: <Footprints size={24} color="rgba(26,26,26,0.9)" strokeWidth={1.5} />, label: 'LOG TRACKER 15' },
     { icon: <CaloriesIcon size={24} color="rgba(26,26,26,0.9)" />, label: 'LOG CALORIES 1250' },
-    { icon: <RunningManIcon size={26} color="rgba(26,26,26,0.9)" />, label: 'LOG RUNNING 5' },
+    { icon: <RunningManIcon size={26} color="rgba(26,26,26,0.9)" />, label: 'LOG RUNNING 5\nTIME 5 MIN 20 SEC' },
   ].map(({ icon, label }) => (
     <div key={label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
       {icon}
