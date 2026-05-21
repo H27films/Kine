@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { CaloriesIcon, RunningManIcon } from './NavIcons';
 import { supabase, todayStr, getISOWeek, getDayName, recalculateDailyTotals } from '../../lib/supabase';
+import { VoiceVisualiser } from './VoiceVisualiser';
 
 const TRACKER_ID       = 82;
 const ROW_ID           = 83;
@@ -328,25 +329,11 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
 </div>
 
       {/* Waveform */}
-      <div style={{
-        width: '100%', maxWidth: '360px', height: '100px',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px',
-        marginBottom: '40px',
-      }}>
-        {waveAmplitudes.map((amp, i) => (
-          <div key={i} style={{
-            width: '4px',
-            height: `${listening ? Math.max(4, amp) : 4}px`,
-            backgroundColor: listening
-              ? `rgba(26,26,26,${0.2 + (amp / 83) * 0.8})`
-              : status === 'success'
-              ? 'rgba(26,26,26,0.3)'
-              : 'rgba(26,26,26,0.12)',
-            borderRadius: '999px',
-            transition: listening ? 'height 0.08s ease' : 'height 0.4s ease',
-          }} />
-        ))}
-      </div>
+      <VoiceVisualiser
+  amplitudes={waveAmplitudes}
+  listening={listening}
+  status={status}
+/>
 
       {/* Status message */}
       <div style={{
