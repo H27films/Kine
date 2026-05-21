@@ -282,9 +282,7 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
   // Auto-start on mount, force full cleanup on unmount
   useEffect(() => {
     closedRef.current = false;
-    const t = setTimeout(() => startListening(), 300);
     return () => {
-      clearTimeout(t);
       closedRef.current = true;
       forceCleanup();
     };
@@ -366,37 +364,21 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
       </div>
 
       {/* DONE button while listening */}
-      {listening && (
-        <button
-          onClick={stopListening}
-          style={{
-            padding: '10px 40px', borderRadius: '9999px',
-            backgroundColor: '#1a1a1a', color: '#f2f2f2',
-            fontSize: '9px', fontWeight: 700, letterSpacing: '1.5px',
-            textTransform: 'uppercase', border: 'none', cursor: 'pointer',
-          }}
-        >
-          DONE
-        </button>
-      )}
-
-      {/* TRY AGAIN on error */}
-      {status === 'error' && !listening && (
-        <button
-          onClick={startListening}
-          style={{
-            padding: '10px 40px', borderRadius: '9999px',
-            background: 'linear-gradient(135deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.2) 100%)',
-            border: '1px solid rgba(255,255,255,0.7)',
-            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.8), 0 2px 8px rgba(0,0,0,0.08)',
-            backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
-            fontSize: '9px', fontWeight: 700, letterSpacing: '1.5px',
-            textTransform: 'uppercase', color: '#1a1a1a', cursor: 'pointer',
-          }}
-        >
-          TRY AGAIN
-        </button>
-      )}
+      {(status === 'idle' || status === 'error' || status === 'listening') && (
+  <button
+    onClick={listening ? stopListening : startListening}
+    style={{
+      padding: '10px 40px', borderRadius: '9999px',
+      backgroundColor: listening ? '#1a1a1a' : 'transparent',
+      color: listening ? '#f2f2f2' : '#1a1a1a',
+      border: listening ? 'none' : '1px solid rgba(26,26,26,0.2)',
+      fontSize: '9px', fontWeight: 700, letterSpacing: '1.5px',
+      textTransform: 'uppercase', cursor: 'pointer',
+    }}
+  >
+    {listening ? 'DONE' : status === 'error' ? 'TRY AGAIN' : 'START'}
+  </button>
+)}
 
       {/* Hint text */}
       <div style={{
