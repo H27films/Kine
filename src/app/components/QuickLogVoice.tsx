@@ -175,7 +175,11 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
     recognition.continuous = false;
     recognitionRef.current = recognition;
 
+    let handled = false;
+
     recognition.onresult = async (event: any) => {
+      if (handled) return;
+      handled = true;
       const transcript = event.results[0][0].transcript;
       setListening(false);
       stopAudio();
@@ -198,6 +202,8 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
     };
 
     recognition.onerror = (event: any) => {
+      if (handled) return;
+      handled = true;
       setListening(false);
       stopAudio();
       setStatus('error');
@@ -205,6 +211,7 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
     };
 
     recognition.onend = () => {
+      if (handled) return;
       setListening(false);
       stopAudio();
     };
@@ -213,7 +220,8 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
   };
 
   const stopListening = () => {
-    recognitionRef.current?.stop();
+    try { recognitionRef.current?.stop(); } catch {}
+    recognitionRef.current = null;
     setListening(false);
     stopAudio();
   };
@@ -347,7 +355,7 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
         color: 'rgba(26,26,26,0.25)', textTransform: 'uppercase', textAlign: 'center',
         lineHeight: 1.8,
       }}>
-        "Log tracker 10" · "Log calories 1800"{'\n'}"Log food good" · "Log running 5"
+        "Log tracker 10" · "Log calories 1800"
       </div>
 
       <style>{`
