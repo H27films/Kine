@@ -463,31 +463,15 @@ export const QuickLog: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
           </button>
         </div>
 
-        {/* VOICE button */}
-        <div style={{ marginTop: '8px' }}>
-          <button onClick={toggleVoice} style={glassBtn}>
-            {/* Soundwave icon */}
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <line x1="2" y1="12" x2="2" y2="12" />
-              <line x1="6" y1="8" x2="6" y2="16" />
-              <line x1="10" y1="5" x2="10" y2="19" />
-              <line x1="14" y1="8" x2="14" y2="16" />
-              <line x1="18" y1="10" x2="18" y2="14" />
-              <line x1="22" y1="12" x2="22" y2="12" />
-            </svg>
-            {voiceOpen ? 'CLOSE' : 'VOICE'}
-          </button>
-        </div>
-
-        {/* Voice expanded area */}
+        {/* Voice expanded area — sits ABOVE the button */}
         <div style={{
           overflow: 'hidden',
           maxHeight: voiceOpen ? '220px' : '0px',
           opacity: voiceOpen ? 1 : 0,
-          marginTop: voiceOpen ? '8px' : '0px',
-          transition: 'max-height 0.3s ease, opacity 0.3s ease, margin-top 0.3s ease',
+          marginTop: voiceOpen ? '12px' : '0px',
+          transition: 'max-height 0.35s ease, opacity 0.35s ease, margin-top 0.35s ease',
         }}>
-          <div style={{ paddingTop: voiceOpen ? '16px' : '0px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', transition: 'padding 0.3s ease' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', paddingBottom: '4px' }}>
 
             {/* Animated waveform */}
             <div style={{
@@ -520,7 +504,7 @@ export const QuickLog: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
               {voiceMessage || 'SAY YOUR COMMAND'}
             </div>
 
-            {/* Done button — tap when finished speaking */}
+            {/* DONE button */}
             {listening && (
               <button
                 onClick={stopListening}
@@ -536,7 +520,7 @@ export const QuickLog: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
               </button>
             )}
 
-            {/* Retry if error */}
+            {/* TRY AGAIN on error */}
             {voiceStatus === 'error' && !listening && (
               <button
                 onClick={startListening}
@@ -556,6 +540,21 @@ export const QuickLog: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
             )}
 
           </div>
+        </div>
+
+        {/* VOICE button */}
+        <div style={{ marginTop: '8px' }}>
+          <button onClick={toggleVoice} style={glassBtn}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <line x1="2" y1="12" x2="2" y2="12" />
+              <line x1="6" y1="8" x2="6" y2="16" />
+              <line x1="10" y1="5" x2="10" y2="19" />
+              <line x1="14" y1="8" x2="14" y2="16" />
+              <line x1="18" y1="10" x2="18" y2="14" />
+              <line x1="22" y1="12" x2="22" y2="12" />
+            </svg>
+            {voiceOpen ? 'CLOSE' : 'VOICE'}
+          </button>
         </div>
 
       </div>
