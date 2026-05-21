@@ -787,7 +787,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                       textAlign: 'left',
                     }}
                   >
-                    SAVE +
+                    + SAVE
                   </button>
                   {templateSaveFlash && (
                     <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#22c55e', letterSpacing: '0.08em' }}>Saved</span>
@@ -813,7 +813,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                       minWidth: '88px',
                     }}
                   >
-                    CLEAR <span style={{ textTransform: 'none' }}>x</span>
+                    <span style={{ textTransform: 'none' }}>x</span> CLEAR
                   </button>
                   {showClearConfirm !== null && (
                     <>
@@ -854,7 +854,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
               lineHeight: '18px',
             }}
           >
-            CLEAR <span style={{ textTransform: 'none' }}>x</span>
+            <span style={{ textTransform: 'none' }}>x</span> CLEAR
           </button>
           {showClearConfirm !== null && (
             <>
