@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { Page } from '../../types';
 
@@ -29,6 +29,24 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; showQuickLog?: b
   const [monthlyOffset, setMonthlyOffset] = useState(0);
   const [showFoodRatingLabel, setShowFoodRatingLabel] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
+const quickLogRef = useRef<HTMLDivElement>(null);
+
+useEffect(() => {
+  if (!showQuickLog) return;
+  const handleClickOutside = (e: MouseEvent) => {
+    if (quickLogRef.current && !quickLogRef.current.contains(e.target as Node)) {
+      onCloseQuickLog?.();
+    }
+  };
+  // Small delay so the opening tap doesn't immediately re-close
+  const timer = setTimeout(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+  }, 100);
+  return () => {
+    clearTimeout(timer);
+    document.removeEventListener('mousedown', handleClickOutside);
+  };
+}, [showQuickLog]);
 
   useEffect(() => {
     const handler = () => setRefreshKey(k => k + 1);
@@ -113,15 +131,18 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; showQuickLog?: b
         </div>
       )}
 
-<div style={{
-        overflow: 'hidden',
-        maxHeight: showQuickLog && !showWeeklySummary ? '200px' : '0px',
-        opacity: showQuickLog && !showWeeklySummary ? 1 : 0,
-        marginBottom: showQuickLog && !showWeeklySummary ? '12px' : '0px',
-        transition: 'max-height 0.25s ease, opacity 0.25s ease, margin-bottom 0.25s ease',
-      }}>
-        <QuickLog onClose={onCloseQuickLog} onSuccess={onCloseQuickLog} />
-      </div>
+<div
+  ref={quickLogRef}
+  style={{
+    overflow: 'hidden',
+    maxHeight: showQuickLog && !showWeeklySummary ? '190px' : '0px',
+    opacity: showQuickLog && !showWeeklySummary ? 1 : 0,
+    marginBottom: showQuickLog && !showWeeklySummary ? '12px' : '0px',
+    transition: 'max-height 0.25s ease, opacity 0.25s ease, margin-bottom 0.25s ease',
+  }}
+>
+  <QuickLog onClose={onCloseQuickLog} onSuccess={onCloseQuickLog} />
+</div>
 
       {!showWeeklySummary && (
         <div className="flex justify-between items-center py-1 mb-1">

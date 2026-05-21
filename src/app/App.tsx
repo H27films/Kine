@@ -93,7 +93,12 @@ const App: React.FC = () => {
         onBack={showBackButton ? () => onNavigate('dashboard') : undefined}
         onNavigate={onNavigate}
         onToggleWeeklySummary={() => setShowWeeklySummary(v => !v)}
-        onToggleQuickLog={() => setShowQuickLog(v => !v)}
+        onToggleQuickLog={() => {
+          setShowQuickLog(v => {
+            if (!v) setShowWeeklySummary(false);
+            return !v;
+          });
+        }}
         showQuickLog={showQuickLog}
         showWeeklySummary={showWeeklySummary}
       />
