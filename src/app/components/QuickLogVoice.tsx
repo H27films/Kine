@@ -147,24 +147,53 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
   const parseVoiceCommand = async (transcript: string): Promise<string> => {
     const t = transcript.toLowerCase().trim();
 
-    const foodMatch = t.match(/log food (good|ok|bad)/);
+    // --- FOOD RATING ---
+    // "log food good", "my food was good", "food good", "ate good", "food ok", "food bad"
+    const foodMatch = t.match(/(?:log\s+)?(?:my\s+)?food\s+(?:was\s+)?(good|ok|bad)\b/);
     if (foodMatch) {
       const rating = foodMatch[1].toUpperCase();
       await upsert('MEASUREMENT', FOOD_ID, { food_rating: rating, calories: null });
       return `Food rating: ${rating} ✓`;
     }
+    // "food was good" or "food is good" etc
+    const foodMatch2 = t.match(/(?:food|meal|ate|eating)\s+(?:was|is)\s+(good|ok|okay|bad)\b/);
+    if (foodMatch2) {
+      let rating = foodMatch2[1].toUpperCase();
+      if (rating === 'OKAY') rating = 'OK';
+      await upsert('MEASUREMENT', FOOD_ID, { food_rating: rating, calories: null });
+      return `Food rating: ${rating} ✓`;
+    }
 
-    const calMatch = t.match(/log calories (\d+)/);
+    // --- CALORIES ---
+    // "log calories 1800", "i had 1800 calories", "ate 1800 calories", "calories 1800"
+    const calMatch = t.match(/(?:log\s+)?(?:(?:i\s+)?(?:had|ate|consumed|took)\s+)?(\d{3,4})\s*cal/);
     if (calMatch) {
       const v = parseInt(calMatch[1], 10);
       await upsert('MEASUREMENT', CALORIES_ID, { calories: v });
       return `Calories: ${v} kcal ✓`;
     }
+    // "log calories 1800" (reverse order)
+    const calMatch2 = t.match(/log calories\s+(\d+)/);
+    if (calMatch2) {
+      const v = parseInt(calMatch2[1], 10);
+      await upsert('MEASUREMENT', CALORIES_ID, { calories: v });
+      return `Calories: ${v} kcal ✓`;
+    }
 
-    const cardioMatch = t.match(/log (tracker|row|rowing|running|run|walking|walk|cross trainer|crosstrainer|cycle|cycling)\s+([\d.]+)/);
-    if (cardioMatch) {
-      const exerciseName = cardioMatch[1];
-      const km = parseFloat(cardioMatch[2]);
+    // --- CARDIO (tracker + specific exercises) ---
+    // Flexible patterns:
+    // "log tracker 10", "i did 10k on the tracker", "tracker 5", "10 tracker"
+    // "log running 5", "i ran 5k", "ran 5 kilometers", "running 3.5"
+    // "log row 2", "rowed 2k", "rowing 2.5"
+    // "log cycle 15", "cycled 15k", "cycling 10"
+
+    const allCardioNames = Object.keys(CARDIO_MAP).join('|');
+
+    // Pattern 1: "log <exercise> <number>" or "<exercise> <number>"
+    const cardioMatch1 = t.match(new RegExp(`(?:log\\s+)?(${allCardioNames})\\s+(\\d+(?:\\.\\d+)?)\\s*k?`, 'i'));
+    if (cardioMatch1) {
+      const exerciseName = cardioMatch1[1].toLowerCase();
+      const km = parseFloat(cardioMatch1[2]);
       const exerciseId = CARDIO_MAP[exerciseName];
       if (exerciseId && !isNaN(km) && km > 0) {
         if (exerciseId === TRACKER_ID) {
@@ -172,8 +201,48 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
         } else {
           await insertCardio(exerciseId, km);
         }
-        const label = exerciseName.charAt(0).toUpperCase() + exerciseName.slice(1);
-        return `${label}: ${km} km ✓`;
+        return `${exerciseName.charAt(0).toUpperCase() + exerciseName.slice(1)}: ${km} km ✓`;
+      }
+    }
+
+    // Pattern 2: "i ran 5k", "i did 5k on the <exercise>", "ran 5 kilometers"
+    const actionMap: Record<string, string> = {
+      ran: 'running', run: 'running', running: 'running',
+      walked: 'walking', walk: 'walking', walking: 'walking',
+      rowed: 'row', row: 'row', rowing: 'row',
+      cycled: 'cycle', cycle: 'cycle', cycling: 'cycle',
+      tracked: 'tracker',
+    };
+    const actionPattern = Object.keys(actionMap).join('|');
+    const cardioMatch2 = t.match(new RegExp(`(?:i\\s+)?(${actionPattern})\\s+(\\d+(?:\\.\\d+)?)\\s*(?:k|km|kilometers|kilometres|klicks)?`, 'i'));
+    if (cardioMatch2) {
+      const action = cardioMatch2[1].toLowerCase();
+      const canonical = actionMap[action];
+      const km = parseFloat(cardioMatch2[2]);
+      const exerciseId = CARDIO_MAP[canonical] || CARDIO_MAP[canonical.replace(/ing$/, '') || ''];
+      if (exerciseId && !isNaN(km) && km > 0) {
+        if (exerciseId === TRACKER_ID) {
+          await upsert('CARDIO', TRACKER_ID, { km, total_cardio: +(km * multiplierRef.current).toFixed(2) });
+        } else {
+          await insertCardio(exerciseId, km);
+        }
+        return `${canonical.charAt(0).toUpperCase() + canonical.slice(1)}: ${km} km ✓`;
+      }
+    }
+
+    // Pattern 3: "i did 5k on the tracker" / "did 10km on the cross trainer"
+    const cardioMatch3 = t.match(/(?:i\s+)?did\s+(\d+(?:\.\d+)?)\s*(?:k|km|kilometers|kilometres)?\s+(?:on\s+)?(?:the\s+)?(tracker|row|rowing|running|run|walking|walk|cross trainer|crosstrainer|cycle|cycling)\b/);
+    if (cardioMatch3) {
+      const km = parseFloat(cardioMatch3[1]);
+      let exerciseName = cardioMatch3[2].toLowerCase();
+      const exerciseId = CARDIO_MAP[exerciseName];
+      if (exerciseId && !isNaN(km) && km > 0) {
+        if (exerciseId === TRACKER_ID) {
+          await upsert('CARDIO', TRACKER_ID, { km, total_cardio: +(km * multiplierRef.current).toFixed(2) });
+        } else {
+          await insertCardio(exerciseId, km);
+        }
+        return `${exerciseName.charAt(0).toUpperCase() + exerciseName.slice(1)}: ${km} km ✓`;
       }
     }
 
@@ -235,7 +304,7 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
           }, 1800);
         } else {
           setStatus('error');
-          setMessage(`Didn't understand — try again`);
+          setMessage(`"${transcript}"\n\u2716 Didn't understand — try again`);
         }
       } catch {
         if (!closedRef.current) {
@@ -374,14 +443,14 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
   display: 'flex', gap: '32px', alignItems: 'flex-start', justifyContent: 'center',
 }}>
   {[
-    { icon: <img src="/icons/dumbbell.svg" style={{ width: 24, height: 24, filter: 'brightness(0)', opacity: 0.9 }} alt="tracker" />, label: 'Log Tracker 10' },
-    { icon: <CaloriesIcon size={24} color="rgba(26,26,26,0.9)" />, label: 'Log Calories 1800' },
-    { icon: <RunningManIcon size={26} color="rgba(26,26,26,0.9)" />, label: 'Log Running\n5' },
+    { icon: <img src="/icons/dumbbell.svg" style={{ width: 24, height: 24, filter: 'brightness(0)', opacity: 0.9 }} alt="tracker" />, label: 'Say "10 tracker"\nor "I did 5k"' },
+    { icon: <CaloriesIcon size={24} color="rgba(26,26,26,0.9)" />, label: 'Say "1800 calories"\nor "Log calories"' },
+    { icon: <RunningManIcon size={26} color="rgba(26,26,26,0.9)" />, label: 'Say "I ran 5"\nor "Running 5"' },
   ].map(({ icon, label }) => (
     <div key={label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
       {icon}
       <span style={{
-        fontSize: '8.5px', fontWeight: 500, letterSpacing: '0.08em',
+        fontSize: '7.5px', fontWeight: 500, letterSpacing: '0.08em',
         color: 'rgba(26,26,26,0.75)', textTransform: 'uppercase', textAlign: 'center',
         lineHeight: 1.4, maxWidth: '72px', whiteSpace: 'pre-line',
       }}>
