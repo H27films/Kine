@@ -396,7 +396,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                         style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                         aria-label="Summary"
                       >
-                        <DoubleArrowIcon size={18} />
+                        <DoubleArrowIcon size={16} />
                       </button>
                     )}
                   </div>
