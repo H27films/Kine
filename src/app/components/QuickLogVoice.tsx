@@ -251,7 +251,7 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
       setListening(false);
       stopAudio();
       setStatus('error');
-      setMessage(event.error === 'no-speech' ? 'No speech detected' : 'ERROR — TRY AGAIN');
+      setMessage(event.error === 'no-speech' ? 'No speech detected' : 'ERROR   —   TRY AGAIN');
     };
 
     recognition.onend = () => {
@@ -292,7 +292,7 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
   const statusColor =
   status === 'success' ? '#1a1a1a'
   : status === 'error' ? '#1a1a1a'
-  : 'rgba(26,26,26,0.45)';
+  : 'rgba(26,26,26,0.9)';
 
   return (
     <div style={{
@@ -350,9 +350,9 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
 
       {/* Status message */}
       <div style={{
-        fontSize: status === 'processing' || status === 'success' || status === 'error' ? '14px' : '11px',
-        fontWeight: status === 'error' ? 400 : 600,
-        letterSpacing: status === 'processing' || status === 'success' || status === 'error' ? '0.02em' : '0.12em',
+        fontSize: '14px',
+        fontWeight: 400,
+        letterSpacing: '0.08em',
         color: statusColor,
         textAlign: 'center',
         minHeight: '24px',
