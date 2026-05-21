@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X } from 'lucide-react';
+import { X, Footprints } from 'lucide-react';
 import { CaloriesIcon, RunningManIcon } from './NavIcons';
 import { supabase, todayStr, getISOWeek, getDayName, recalculateDailyTotals } from '../../lib/supabase';
 import { VoiceVisualiser } from './VoiceVisualiser';
@@ -443,9 +443,9 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
   display: 'flex', gap: '32px', alignItems: 'flex-start', justifyContent: 'center',
 }}>
   {[
-    { icon: <img src="/icons/dumbbell.svg" style={{ width: 24, height: 24, filter: 'brightness(0)', opacity: 0.9 }} alt="tracker" />, label: 'Say "10 tracker"\nor "I did 5k"' },
-    { icon: <CaloriesIcon size={24} color="rgba(26,26,26,0.9)" />, label: 'Say "1800 calories"\nor "Log calories"' },
-    { icon: <RunningManIcon size={26} color="rgba(26,26,26,0.9)" />, label: 'Say "I ran 5"\nor "Running 5"' },
+    { icon: <Footprints size={24} color="rgba(26,26,26,0.9)" strokeWidth={1.5} />, label: 'LOG TRACKER 15' },
+    { icon: <CaloriesIcon size={24} color="rgba(26,26,26,0.9)" />, label: 'LOG CALORIES 1250' },
+    { icon: <RunningManIcon size={26} color="rgba(26,26,26,0.9)" />, label: 'LOG RUNNING 5' },
   ].map(({ icon, label }) => (
     <div key={label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
       {icon}
