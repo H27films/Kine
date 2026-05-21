@@ -482,26 +482,24 @@ export const QuickLog: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
         {/* Voice expanded area */}
         <div style={{
           overflow: 'hidden',
-          maxHeight: voiceOpen ? '160px' : '0px',
+          maxHeight: voiceOpen ? '220px' : '0px',
           opacity: voiceOpen ? 1 : 0,
-          transition: 'max-height 0.3s ease, opacity 0.3s ease',
+          marginTop: voiceOpen ? '8px' : '0px',
+          transition: 'max-height 0.3s ease, opacity 0.3s ease, margin-top 0.3s ease',
         }}>
-          <div style={{ paddingTop: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+          <div style={{ paddingTop: voiceOpen ? '16px' : '0px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', transition: 'padding 0.3s ease' }}>
 
             {/* Animated waveform */}
-            <div
-              onClick={listening ? stopListening : startListening}
-              style={{
-                width: '100%', height: '48px', cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px',
-              }}
-            >
+            <div style={{
+              width: '100%', height: '56px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px',
+            }}>
               {waveAmplitudes.map((amp, i) => (
                 <div key={i} style={{
                   width: '3px',
                   height: `${listening ? amp : 4}px`,
                   backgroundColor: listening
-                    ? `rgba(26,26,26,${0.3 + (amp / 25) * 0.7})`
+                    ? `rgba(26,26,26,${0.3 + (amp / 43) * 0.7})`
                     : 'rgba(26,26,26,0.15)',
                   borderRadius: '999px',
                   transition: listening ? 'height 0.1s ease' : 'height 0.3s ease',
@@ -509,7 +507,7 @@ export const QuickLog: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
               ))}
             </div>
 
-            {/* Status / hint text */}
+            {/* Status text */}
             <div style={{
               fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em',
               color: voiceStatus === 'success' ? '#1a1a1a'
@@ -517,10 +515,45 @@ export const QuickLog: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
                    : 'rgba(26,26,26,0.45)',
               fontFamily: "'Archivo', sans-serif",
               textAlign: 'center', minHeight: '14px',
-              textTransform: voiceStatus === 'idle' ? 'uppercase' : 'none',
+              textTransform: 'uppercase',
             }}>
-              {voiceMessage || (listening ? '' : 'TAP WAVE TO SPEAK')}
+              {voiceMessage || 'SAY YOUR COMMAND'}
             </div>
+
+            {/* Done button — tap when finished speaking */}
+            {listening && (
+              <button
+                onClick={stopListening}
+                style={{
+                  padding: '6px 24px', borderRadius: '9999px',
+                  backgroundColor: '#1a1a1a', color: '#f2f2f2',
+                  fontFamily: "'Archivo', sans-serif", fontSize: '9px', fontWeight: 700,
+                  letterSpacing: '1.5px', textTransform: 'uppercase', border: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                DONE
+              </button>
+            )}
+
+            {/* Retry if error */}
+            {voiceStatus === 'error' && !listening && (
+              <button
+                onClick={startListening}
+                style={{
+                  padding: '6px 24px', borderRadius: '9999px',
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.10) 100%)',
+                  border: '1px solid rgba(255,255,255,0.55)',
+                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6)',
+                  backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+                  fontFamily: "'Archivo', sans-serif", fontSize: '9px', fontWeight: 700,
+                  letterSpacing: '1.5px', textTransform: 'uppercase', color: '#1a1a1a',
+                  cursor: 'pointer',
+                }}
+              >
+                TRY AGAIN
+              </button>
+            )}
 
           </div>
         </div>
