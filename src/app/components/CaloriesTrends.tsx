@@ -54,7 +54,7 @@ const CaloriesTrends: React.FC = () => {
 
   // Food rating weekly state
   const [weekOff, setWeekOff] = useState(0); // 0 = current week, -1 = last week, etc.
-  const [weeklyFoodData, setWeeklyFoodData] = useState<number[]>(Array(10).fill(0));
+  const [weeklyFoodData, setWeeklyFoodData] = useState<number[]>(Array(12).fill(0));
 
   useEffect(() => {
     const fetchEarliest = async () => {
@@ -82,7 +82,7 @@ const CaloriesTrends: React.FC = () => {
     const loadFoodWeekly = async () => {
       const currentWeek = getISOWeek(todayMalaysiaDate());
       const endWeek = currentWeek + weekOff;
-      const startWeek = endWeek - 9;
+      const startWeek = endWeek - 11;
 
       const { data } = await supabase
         .from('workouts')
@@ -104,7 +104,7 @@ const CaloriesTrends: React.FC = () => {
         }
       }
       const result: number[] = [];
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < 12; i++) {
         const wk = startWeek + i;
         result.push(weekly[wk] || 0);
       }
@@ -223,7 +223,7 @@ const CaloriesTrends: React.FC = () => {
 
   // Week labels for the food rating chart (oldest → newest week number)
   const currentWeekForLabel = getISOWeek(todayMalaysiaDate());
-  const weeklyFoodLabels = Array.from({ length: 10 }, (_, i) => String(currentWeekForLabel + weekOff - 9 + i));
+  const weeklyFoodLabels = Array.from({ length: 12 }, (_, i) => String(currentWeekForLabel + weekOff - 11 + i));
 
   return (
     <section className="mb-8">
