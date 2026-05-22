@@ -174,11 +174,11 @@ export const WeightsBottomBar: React.FC<WeightsBottomBarProps> = ({
         style={{ display: 'flex', alignItems: 'baseline', gap: '4px', cursor: 'pointer' }}
       >
         {showEst && (
-  <span style={{ fontSize: '15px', fontWeight: 350, color: 'rgba(26,26,26,0.65)', letterSpacing: '0.08em', textTransform: 'uppercase', marginRight: '4px' }}>
+  <span style={{ fontSize: '13px', fontWeight: 350, color: 'rgba(26,26,26,0.65)', letterSpacing: '0.08em', textTransform: 'uppercase', marginRight: '4px' }}>
     EST.
   </span>
 )}
-<span style={{ fontSize: '18px', fontWeight: 350, letterSpacing: '-0.02em', color: showEst ? 'rgba(26,26,26,0.65)' : '#1a1a1a', lineHeight: 1 }}>
+<span style={{ fontSize: '16px', fontWeight: 350, letterSpacing: '-0.02em', color: showEst ? 'rgba(26,26,26,0.65)' : '#1a1a1a', lineHeight: 1 }}>
   {showEst
     ? (estTotal ?? 0).toLocaleString()
     : addedExercises.reduce((acc, ex) => acc + calcExerciseTotal(ex.sets, ex.exercise.multiplier ?? 1), 0).toLocaleString()
