@@ -340,8 +340,8 @@ let bgColor = h > 0 ? '#1a1a1a' : 'rgba(26,26,26,0.08)';
             </div>
           </div>
 
-          {/* Bars */}
-          <div className="flex items-end justify-between gap-1" style={{ height: '140px' }}>
+          {/* Bars + line overlay — SVG behind, bars on top */}
+          <div className="flex items-end justify-between gap-1" style={{ height: '140px', position: 'relative' }}>
             {weeklyFoodData.map((h, i) => {
               const MIN_DISPLAY = 5.5;
               const MAX_VAL = 21;
@@ -390,6 +390,8 @@ let bgColor = h > 0 ? '#1a1a1a' : 'rgba(26,26,26,0.08)';
                 </div>
               );
             })}
+
+            
           </div>
 
           {/* Week labels */}
