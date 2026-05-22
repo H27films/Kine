@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Minus } from 'lucide-react';
 import { DoubleArrowIcon } from '../components/DoubleArrowIcon';
 import { AddedExercise } from './LogWeightsEntry';
@@ -23,6 +23,7 @@ interface WeightsBottomBarProps {
   setLogConfirmSynced: (val: boolean) => void;
   setLogging: (val: boolean) => void;
   bottomRef: React.RefObject<HTMLDivElement>;
+  estTotal: number | null;
 }
 
 export const WeightsBottomBar: React.FC<WeightsBottomBarProps> = ({
@@ -44,7 +45,10 @@ export const WeightsBottomBar: React.FC<WeightsBottomBarProps> = ({
   setLogConfirmSynced,
   setLogging,
   bottomRef,
+  estTotal,
 }) => {
+  const [showEst, setShowEst] = useState(false);
+
   if (showAdvanced && activeEx) {
     return (
       <div
@@ -154,20 +158,32 @@ export const WeightsBottomBar: React.FC<WeightsBottomBarProps> = ({
 
   return (
     <div
-      onClick={onShowAdvanced}
       style={{
         padding: '10px 20px',
         paddingBottom: 'calc(10px + env(safe-area-inset-bottom))',
         borderTop: '1px solid rgba(0,0,0,0.06)',
-        cursor: 'pointer',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       }}
     >
-      <span style={{ color: '#1a1a1a', fontSize: '12px', fontWeight: 500, letterSpacing: '0.04em' }}>/ ADVANCED</span>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-        <span style={{ fontSize: '18px', fontWeight: 350, letterSpacing: '-0.02em', color: '#1a1a1a', lineHeight: 1 }}>
-          {addedExercises.reduce((acc, ex) => acc + calcExerciseTotal(ex.sets, ex.exercise.multiplier ?? 1), 0).toLocaleString()}
-        </span>
+      <span
+        onClick={onShowAdvanced}
+        style={{ color: '#1a1a1a', fontSize: '12px', fontWeight: 500, letterSpacing: '0.04em', cursor: 'pointer' }}
+      >/ ADVANCED</span>
+      <div
+        onClick={() => setShowEst(v => !v)}
+        style={{ display: 'flex', alignItems: 'baseline', gap: '4px', cursor: 'pointer' }}
+      >
+        {showEst && (
+  <span style={{ fontSize: '15px', fontWeight: 350, color: 'rgba(26,26,26,0.65)', letterSpacing: '0.08em', textTransform: 'uppercase', marginRight: '4px' }}>
+    EST.
+  </span>
+)}
+<span style={{ fontSize: '18px', fontWeight: 350, letterSpacing: '-0.02em', color: showEst ? 'rgba(26,26,26,0.65)' : '#1a1a1a', lineHeight: 1 }}>
+  {showEst
+    ? (estTotal ?? 0).toLocaleString()
+    : addedExercises.reduce((acc, ex) => acc + calcExerciseTotal(ex.sets, ex.exercise.multiplier ?? 1), 0).toLocaleString()
+  }
+</span>
         <span style={{ fontSize: '10px', fontWeight: 400, color: 'rgba(26,26,26,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>KG</span>
       </div>
     </div>

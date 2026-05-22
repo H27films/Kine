@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, Plus, X } from 'lucide-react';
-import { Exercise } from '../../lib/supabase';
+import { supabase, Exercise } from '../../lib/supabase';
 import { Page } from '../../types';
 import { DoubleArrowIcon } from '../components/DoubleArrowIcon';
 import { ExerciseAdder } from './ExerciseAdder';
@@ -76,6 +76,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
   const [logConfirm, setLogConfirm] = useState(false);
   const logConfirmRef = useRef(false);
   const [logging, setLogging] = useState(false);
+  const [estTotal, setEstTotal] = useState<number | null>(null);
   const adderRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const tabScrollRef = useRef<HTMLDivElement>(null);
@@ -124,6 +125,27 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
       tabScrollRef.current.scrollLeft = 0;
     }
   }, [activeExIndex, adderOpen]);
+
+  useEffect(() => {
+    if (addedExercises.length === 0) { setEstTotal(null); return; }
+    const fetchEst = async () => {
+      const ids = addedExercises.map(ex => ex.exercise.id);
+      let total = 0;
+      await Promise.all(ids.map(async (id) => {
+        const { data } = await supabase
+          .from('workouts')
+          .select('total_weight')
+          .eq('exercise_id', id)
+          .not('total_weight', 'is', null)
+          .order('date', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (data?.total_weight) total += Number(data.total_weight);
+      }));
+      setEstTotal(total);
+    };
+    fetchEst();
+  }, [addedExercises.map(e => e.exercise.id).join(',')]);
 
   const calcExerciseTotal = (sets: SetRow[], multiplier: number = 1): number =>
     sets.reduce((acc, s) => acc + (parseFloat(s.weight) || 0) * s.reps * multiplier, 0);
@@ -343,7 +365,6 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                 <div style={{ height: '0.5px', backgroundColor: 'rgba(0,0,0,0.18)', marginTop: '17px', marginBottom: '9px' }} />
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '6px', paddingBottom: '14px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    {/* + FAIL pill */}
                     <div
                       onClick={() => onToggleFail(activeEx.exercise.id)}
                       style={{
@@ -359,7 +380,6 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                     >
                       {activeEx.fail ? 'FAILED' : '+ FAIL'}
                     </div>
-                    {/* Copy last sets icon */}
                     {!showAdvanced && (
                       <div
                         onClick={() => { if (activeEx.lastSets && activeEx.lastSets.length > 0) onToggleCopyFromLast(activeEx.exercise.id); }}
@@ -373,7 +393,6 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                       </div>
                     )}
                   </div>
-                  {/* + SET pill + double arrow */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div
                       onClick={() => onAddSet(activeEx.exercise.id)}
@@ -405,7 +424,6 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
             )}
           </>
         ) : (
-          /* No exercises yet */
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '12px', paddingTop: '40px' }}>
             {exercisesByGroup && Object.keys(exercisesByGroup).length > 0 ? (
               <div ref={randomListRef} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
@@ -493,6 +511,7 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
           setLogConfirmSynced={setLogConfirmSynced}
           setLogging={setLogging}
           bottomRef={bottomRef}
+          estTotal={estTotal}
         />
       )}
 
