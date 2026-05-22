@@ -163,36 +163,43 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
+  const loadVolume = async () => {
+    const thisMonday = weeksAgoMonday(0);
+    const lastMonday = weeksAgoMonday(1);
+    const today = todayStr();
+    const [{ data: thisData }, { data: lastData }, { data: todayData }] = await Promise.all([
+      supabase
+        .from('workouts')
+        .select('total_weight')
+        .in('type', ['CHEST', 'BACK', 'LEGS'])
+        .gte('date', thisMonday),
+      supabase
+        .from('workouts')
+        .select('total_weight')
+        .in('type', ['CHEST', 'BACK', 'LEGS'])
+        .gte('date', lastMonday)
+        .lt('date', thisMonday),
+      supabase
+        .from('workouts')
+        .select('total_weight')
+        .in('type', ['CHEST', 'BACK', 'LEGS'])
+        .eq('date', today),
+    ]);
+    const sum = (rows: any[] | null) =>
+      (rows || []).reduce((s: number, r: any) => s + Number(r.total_weight || 0), 0);
+    setThisWeekTotal(sum(thisData));
+    setLastWeekTotal(sum(lastData));
+    setTodayTotal(sum(todayData));
+  };
+
   useEffect(() => {
-    const loadVolume = async () => {
-      const thisMonday = weeksAgoMonday(0);
-      const lastMonday = weeksAgoMonday(1);
-      const today = todayStr();
-      const [{ data: thisData }, { data: lastData }, { data: todayData }] = await Promise.all([
-        supabase
-          .from('workouts')
-          .select('total_weight')
-          .in('type', ['CHEST', 'BACK', 'LEGS'])
-          .gte('date', thisMonday),
-        supabase
-          .from('workouts')
-          .select('total_weight')
-          .in('type', ['CHEST', 'BACK', 'LEGS'])
-          .gte('date', lastMonday)
-          .lt('date', thisMonday),
-        supabase
-          .from('workouts')
-          .select('total_weight')
-          .in('type', ['CHEST', 'BACK', 'LEGS'])
-          .eq('date', today),
-      ]);
-      const sum = (rows: any[] | null) =>
-        (rows || []).reduce((s: number, r: any) => s + Number(r.total_weight || 0), 0);
-      setThisWeekTotal(sum(thisData));
-      setLastWeekTotal(sum(lastData));
-      setTodayTotal(sum(todayData));
-    };
     loadVolume();
+  }, []);
+
+  useEffect(() => {
+    const handler = () => loadVolume();
+    window.addEventListener('kine:data-updated', handler);
+    return () => window.removeEventListener('kine:data-updated', handler);
   }, []);
 
   const fmtVol = (v: number) =>
@@ -460,6 +467,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
       setAddedExercises([]);
       setRefreshKey(k => k + 1);
       setSaveSuccess(true);
+      window.dispatchEvent(new CustomEvent('kine:data-updated'));
       setTimeout(() => setSaveSuccess(false), 3000);
     } finally {
       setSaving(false);

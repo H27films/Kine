@@ -48,21 +48,29 @@ const WeeklyVolumeSection: React.FC = () => {
     setWeeklyData(groups);
   };
 
+  const initData = async () => {
+    const { data } = await supabase
+      .from('workouts')
+      .select('week')
+      .in('type', WEIGHT_TYPES)
+      .not('week', 'is', null);
+    if (!data) return;
+    const weeks = [...new Set((data as any[]).map(r => Number(r.week)))]
+      .filter(w => !isNaN(w))
+      .sort((a, b) => b - a);
+    setAvailableWeeks(weeks);
+    setWeekIdx(0);
+    await loadWeeklyData(weeks, 0);
+  };
+
   useEffect(() => {
-    const init = async () => {
-      const { data } = await supabase
-        .from('workouts')
-        .select('week')
-        .in('type', WEIGHT_TYPES)
-        .not('week', 'is', null);
-      if (!data) return;
-      const weeks = [...new Set((data as any[]).map(r => Number(r.week)))]
-        .filter(w => !isNaN(w))
-        .sort((a, b) => b - a);
-      setAvailableWeeks(weeks);
-      await loadWeeklyData(weeks, 0);
-    };
-    init();
+    initData();
+  }, []);
+
+  useEffect(() => {
+    const handler = () => initData();
+    window.addEventListener('kine:data-updated', handler);
+    return () => window.removeEventListener('kine:data-updated', handler);
   }, []);
 
   useEffect(() => {

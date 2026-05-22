@@ -424,6 +424,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
       }
 
       await recalculateDailyTotals(today);
+      window.dispatchEvent(new CustomEvent('kine:data-updated'));
       setSaveSuccess(true);
       setTrackerDistance('');
       setDistance('');

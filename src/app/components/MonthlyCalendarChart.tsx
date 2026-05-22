@@ -20,8 +20,16 @@ const MonthlyCalendarChart: React.FC<MonthlyCalendarChartProps> = ({
   const [selectedTab, setSelectedTab] = useState<'RUNNING' | 'SCORE' | 'WEIGHTS' | 'ROW' | 'CROSS TRAINER'>(defaultTab);
   const [total, setTotal] = useState(0);
   const [count, setCount] = useState(0);
+  const [refreshKey, setRefreshKey] = useState(0);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+
+  // Refresh when data is updated
+  useEffect(() => {
+    const handler = () => setRefreshKey(k => k + 1);
+    window.addEventListener('kine:data-updated', handler);
+    return () => window.removeEventListener('kine:data-updated', handler);
+  }, []);
 
   useEffect(() => {
     const load = async () => {
@@ -109,7 +117,7 @@ const MonthlyCalendarChart: React.FC<MonthlyCalendarChartProps> = ({
       setCount(entryCount);
     };
     load();
-  }, [selectedTab, monthOffset]);
+  }, [selectedTab, monthOffset, refreshKey]);
 
   const targetMonth = new Date();
   targetMonth.setMonth(targetMonth.getMonth() + monthOffset);

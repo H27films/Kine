@@ -60,53 +60,60 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
   const [weeklyBars, setWeeklyBars] = useState<number[]>(Array(7).fill(0));
   const [weeklyRatings, setWeeklyRatings] = useState<(FoodRating)[]>(Array(7).fill(null));
 
-  // Load body measurements
-  useEffect(() => {
-    const loadData = async () => {
-      const { data: bodyData } = await supabase
-        .from('workouts')
-        .select('date, bodyweight, body_fat_percent, muscle_mass')
-        .eq('type', 'MEASUREMENT')
-        .eq('exercise_id', BODY_COMP_EXERCISE_ID)
-        .order('date', { ascending: false })
-        .limit(1);
+  const loadWeeklyBars = async () => {
+    const { data: bodyData } = await supabase
+      .from('workouts')
+      .select('date, bodyweight, body_fat_percent, muscle_mass')
+      .eq('type', 'MEASUREMENT')
+      .eq('exercise_id', BODY_COMP_EXERCISE_ID)
+      .order('date', { ascending: false })
+      .limit(1);
 
-      if (bodyData && bodyData.length > 0) {
-        const latest = bodyData[0];
-        if (latest.bodyweight) setLastBodyWeight(String(latest.bodyweight));
-        if (latest.body_fat_percent) setLastBodyFat(String(latest.body_fat_percent));
-        if (latest.muscle_mass) setLastMuscleMass(String(latest.muscle_mass));
-      }
+    if (bodyData && bodyData.length > 0) {
+      const latest = bodyData[0];
+      if (latest.bodyweight) setLastBodyWeight(String(latest.bodyweight));
+      if (latest.body_fat_percent) setLastBodyFat(String(latest.body_fat_percent));
+      if (latest.muscle_mass) setLastMuscleMass(String(latest.muscle_mass));
+    }
 
-      // Also load this week's calories for the sparkline
-      const monday = getMondayAtOffset(0);
-      const sunday = new Date(monday);
-      sunday.setDate(monday.getDate() + 6);
-      const { data: calData } = await supabase
-        .from('workouts')
-        .select('date, calories')
-        .eq('type', 'MEASUREMENT')
-        .eq('exercise_id', CALORIES_EXERCISE_ID)
-        .gte('date', fmtDate(monday))
-        .lte('date', fmtDate(sunday))
-        .order('date', { ascending: true });
+    // Also load this week's calories for the sparkline
+    const monday = getMondayAtOffset(0);
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    const { data: calData } = await supabase
+      .from('workouts')
+      .select('date, calories')
+      .eq('type', 'MEASUREMENT')
+      .eq('exercise_id', CALORIES_EXERCISE_ID)
+      .gte('date', fmtDate(monday))
+      .lte('date', fmtDate(sunday))
+      .order('date', { ascending: true });
 
-      const weekly = Array(7).fill(0);
-      const todayDateStr = fmtDate(new Date());
-      if (calData) {
-        for (const row of calData as any[]) {
-          if (!row.calories) continue;
-          const d = new Date(row.date + 'T12:00:00');
-          const dayIdx = d.getDay() === 0 ? 6 : d.getDay() - 1;
-          weekly[dayIdx] += Number(row.calories);
-          if (row.date === todayDateStr) {
-            setCalories(String(row.calories));
-          }
+    const weekly = Array(7).fill(0);
+    const todayDateStr = fmtDate(new Date());
+    if (calData) {
+      for (const row of calData as any[]) {
+        if (!row.calories) continue;
+        const d = new Date(row.date + 'T12:00:00');
+        const dayIdx = d.getDay() === 0 ? 6 : d.getDay() - 1;
+        weekly[dayIdx] += Number(row.calories);
+        if (row.date === todayDateStr) {
+          setCalories(String(row.calories));
         }
       }
-      setWeeklyBars(weekly);
-    };
-    loadData();
+    }
+    setWeeklyBars(weekly);
+  };
+
+  // Load initial data & listen for updates
+  useEffect(() => {
+    loadWeeklyBars();
+  }, []);
+
+  useEffect(() => {
+    const handler = () => loadWeeklyBars();
+    window.addEventListener('kine:data-updated', handler);
+    return () => window.removeEventListener('kine:data-updated', handler);
   }, []);
 
   useEffect(() => {
@@ -220,6 +227,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
       if (anySaved) await recalculateDailyTotals(today);
 
       setSaveSuccess(true);
+      window.dispatchEvent(new CustomEvent('kine:data-updated'));
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (e: any) {
       setSaveError(e.message || 'Failed to save');

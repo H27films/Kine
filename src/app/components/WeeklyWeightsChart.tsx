@@ -44,6 +44,16 @@ const WeeklyWeightsChart: React.FC = () => {
     loadWeeks();
   }, []);
 
+  // Refresh when data changes
+  useEffect(() => {
+    const handler = () => {
+      setPageIdx(0);
+      setAllWeeks([]); // Triggers re-fetch via the first useEffect
+    };
+    window.addEventListener('kine:data-updated', handler);
+    return () => window.removeEventListener('kine:data-updated', handler);
+  }, []);
+
   useEffect(() => {
     const loadBars = async () => {
       if (allWeeks.length === 0) return;

@@ -78,6 +78,13 @@ const CaloriesTrends: React.FC = () => {
     fetchEarliest();
   }, []);
 
+  // Refresh when data is updated from other components
+  useEffect(() => {
+    const handler = () => setRefreshKey(k => k + 1);
+    window.addEventListener('kine:data-updated', handler);
+    return () => window.removeEventListener('kine:data-updated', handler);
+  }, []);
+
   useEffect(() => {
     const loadFoodWeekly = async () => {
       const currentWeek = getISOWeek(todayMalaysiaDate());
