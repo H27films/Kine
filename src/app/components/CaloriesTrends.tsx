@@ -319,85 +319,6 @@ let bgColor = h > 0 ? '#1a1a1a' : 'rgba(26,26,26,0.08)';
           </div>
         </div>
 
-        {/* === Monthly Calories Chart === */}
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 42 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <span style={trendLabelStyle}>Monthly:&nbsp;</span>
-              <span style={trendLabelStyle}>
-                {monthlyAvg > 0 ? `${monthlyAvg.toLocaleString()} KCAL` : '\u2014 KCAL'}
-              </span>
-               <button
-                 onClick={() => setMonthOffset(o => Math.max(o - 1, minMonthOffset))}
-                 style={{
-                   background: 'none', border: 'none', padding: '2px 1px', cursor: 'pointer',
-                   color: monthOffset > minMonthOffset ? '#000000' : 'rgba(0,0,0,0.25)',
-                   display: 'flex', alignItems: 'center'
-                 }}
-               >
-                 <ChevronLeft size={14} />
-               </button>
-               <button
-                 onClick={() => setMonthOffset(o => Math.min(o + 1, 0))}
-                 style={{
-                   background: 'none', border: 'none', padding: '2px 1px', cursor: 'pointer',
-                   color: monthOffset < 0 ? '#000000' : 'rgba(0,0,0,0.25)',
-                   display: 'flex', alignItems: 'center'
-                 }}
-               >
-                 <ChevronRight size={14} />
-               </button>
-            </div>
-            <span style={trendLabelStyle}>{monthName}</span>
-          </div>
-
-          {/* Bars */}
-          <div style={{ position: 'relative' }}>
-            <div className="flex items-end justify-between" style={{ height: '120px', gap: '3px' }}>
-              {monthlyBars.map((h, i) => {
-                const pct = monthlyMax > 0 ? (h / monthlyMax) * 100 : 0;
-                const isToday = monthOffset === 0 && i === new Date().getDate() - 1;
-                const isPeakBar = monthlyBars.length > 0 && h > 0 && i === monthlyPeakIdx;
-
-                let bgColor = h > 0 ? (h >= monthlyMax * 0.7 ? '#1a1a1a' : 'rgba(26,26,26,0.65)') : 'rgba(26,26,26,0.08)';
-                if (isToday) bgColor = '#1a1a1a';
-                if (isPeakBar) bgColor = '#ffffff';
-
-                return (
-                  <div
-                    key={i}
-                    className="flex-1 rounded-t-sm"
-                    style={{
-                      height: `${Math.max(pct, h > 0 ? 3 : 0)}%`,
-                      backgroundColor: bgColor,
-                      boxShadow: isPeakBar ? '0 0 6px rgba(26,26,26,0.35), 0 0 16px rgba(26,26,26,0.15)' : 'none',
-                      position: 'relative',
-                    }}
-                  >
-                    {isPeakBar && h > 0 && (
-                      <span style={{
-                        position: 'absolute',
-                        bottom: '100%',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        marginBottom: '12px',
-                        fontSize: '9px',
-                        fontWeight: 700,
-                        color: '#1a1a1a',
-                        whiteSpace: 'nowrap',
-                        letterSpacing: '0.01em',
-                        lineHeight: 1,
-                      }}>
-                        {h}
-                      </span>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
         {/* === Weekly Food Rating Chart === */}
         <div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
@@ -480,6 +401,85 @@ let bgColor = h > 0 ? '#1a1a1a' : 'rgba(26,26,26,0.08)';
                 </span>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* === Monthly Calories Chart === */}
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 42 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span style={trendLabelStyle}>Monthly:&nbsp;</span>
+              <span style={trendLabelStyle}>
+                {monthlyAvg > 0 ? `${monthlyAvg.toLocaleString()} KCAL` : '\u2014 KCAL'}
+              </span>
+               <button
+                  onClick={() => setMonthOffset(o => Math.max(o - 1, minMonthOffset))}
+                  style={{
+                    background: 'none', border: 'none', padding: '2px 1px', cursor: 'pointer',
+                    color: monthOffset > minMonthOffset ? '#000000' : 'rgba(0,0,0,0.25)',
+                    display: 'flex', alignItems: 'center'
+                  }}
+                >
+                  <ChevronLeft size={14} />
+                </button>
+                <button
+                  onClick={() => setMonthOffset(o => Math.min(o + 1, 0))}
+                  style={{
+                    background: 'none', border: 'none', padding: '2px 1px', cursor: 'pointer',
+                    color: monthOffset < 0 ? '#000000' : 'rgba(0,0,0,0.25)',
+                    display: 'flex', alignItems: 'center'
+                  }}
+                >
+                  <ChevronRight size={14} />
+                </button>
+            </div>
+            <span style={trendLabelStyle}>{monthName}</span>
+          </div>
+
+          {/* Bars */}
+          <div style={{ position: 'relative' }}>
+            <div className="flex items-end justify-between" style={{ height: '120px', gap: '3px' }}>
+              {monthlyBars.map((h, i) => {
+                const pct = monthlyMax > 0 ? (h / monthlyMax) * 100 : 0;
+                const isToday = monthOffset === 0 && i === new Date().getDate() - 1;
+                const isPeakBar = monthlyBars.length > 0 && h > 0 && i === monthlyPeakIdx;
+
+                let bgColor = h > 0 ? (h >= monthlyMax * 0.7 ? '#1a1a1a' : 'rgba(26,26,26,0.65)') : 'rgba(26,26,26,0.08)';
+                if (isToday) bgColor = '#1a1a1a';
+                if (isPeakBar) bgColor = '#ffffff';
+
+                return (
+                  <div
+                    key={i}
+                    className="flex-1 rounded-t-sm"
+                    style={{
+                      height: `${Math.max(pct, h > 0 ? 3 : 0)}%`,
+                      backgroundColor: bgColor,
+                      boxShadow: isPeakBar ? '0 0 6px rgba(26,26,26,0.35), 0 0 16px rgba(26,26,26,0.15)' : 'none',
+                      position: 'relative',
+                    }}
+                  >
+                    {isPeakBar && h > 0 && (
+                      <span style={{
+                        position: 'absolute',
+                        bottom: '100%',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        marginBottom: '12px',
+                        fontSize: '9px',
+                        fontWeight: 700,
+                        color: '#1a1a1a',
+                        whiteSpace: 'nowrap',
+                        letterSpacing: '0.01em',
+                        lineHeight: 1,
+                      }}>
+                        {h}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
 
