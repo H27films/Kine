@@ -282,92 +282,93 @@ const DayCard: React.FC<{ day: DayData }> = ({ day }) => {
 export const DailyActivityCards: React.FC = () => {
   const [days, setDays] = useState<DayData[]>([]);
 
-  useEffect(() => {
-    const load = async () => {
-      const dates = getLast7Dates();
-      const oldest = dates[dates.length - 1];
+  const load = useCallback(async () => {
+    const dates = getLast7Dates();
+    const oldest = dates[dates.length - 1];
 
-      const { data: cardioData } = await supabase
-        .from('workouts')
-        .select('date, exercise_id, km, total_cardio')
-        .eq('type', 'CARDIO')
-        .in('exercise_id', ALL_CARDIO_IDS)
-        .gte('date', oldest)
-        .order('date', { ascending: false });
+    const { data: cardioData } = await supabase
+      .from('workouts')
+      .select('date, exercise_id, km, total_cardio')
+      .eq('type', 'CARDIO')
+      .in('exercise_id', ALL_CARDIO_IDS)
+      .gte('date', oldest)
+      .order('date', { ascending: false });
 
-      const { data: calData } = await supabase
-        .from('workouts')
-        .select('date, calories')
-        .eq('type', 'MEASUREMENT')
-        .eq('exercise_id', 90)
-        .not('calories', 'is', null)
-        .gte('date', oldest)
-        .order('date', { ascending: false });
+    const { data: calData } = await supabase
+      .from('workouts')
+      .select('date, calories')
+      .eq('type', 'MEASUREMENT')
+      .eq('exercise_id', 90)
+      .not('calories', 'is', null)
+      .gte('date', oldest)
+      .order('date', { ascending: false });
 
-      const { data: weightsData } = await supabase
-        .from('workouts')
-        .select('date, type, total_weight')
-        .in('type', ['CHEST', 'BACK', 'LEGS'])
-        .gte('date', oldest)
-        .order('date', { ascending: false });
+    const { data: weightsData } = await supabase
+      .from('workouts')
+      .select('date, type, total_weight')
+      .in('type', ['CHEST', 'BACK', 'LEGS'])
+      .gte('date', oldest)
+      .order('date', { ascending: false });
 
-      const { data: scoreData } = await supabase
-        .from('workouts')
-        .select('date, total_score')
-        .not('total_score', 'is', null)
-        .gte('date', oldest)
-        .order('date', { ascending: false });
+    const { data: scoreData } = await supabase
+      .from('workouts')
+      .select('date, total_score')
+      .not('total_score', 'is', null)
+      .gte('date', oldest)
+      .order('date', { ascending: false });
 
-      // Build per-date, per-exercise_id totals
-      const cardioMap: Record<string, Record<number, { tc: number; km: number }>> = {};
-      for (const r of (cardioData || []) as any[]) {
-        if (!cardioMap[r.date]) cardioMap[r.date] = {};
-        if (!cardioMap[r.date][r.exercise_id]) cardioMap[r.date][r.exercise_id] = { tc: 0, km: 0 };
-        cardioMap[r.date][r.exercise_id].tc += Number(r.total_cardio || 0);
-        cardioMap[r.date][r.exercise_id].km += Number(r.km || 0);
+    // Build per-date, per-exercise_id totals
+    const cardioMap: Record<string, Record<number, { tc: number; km: number }>> = {};
+    for (const r of (cardioData || []) as any[]) {
+      if (!cardioMap[r.date]) cardioMap[r.date] = {};
+      if (!cardioMap[r.date][r.exercise_id]) cardioMap[r.date][r.exercise_id] = { tc: 0, km: 0 };
+      cardioMap[r.date][r.exercise_id].tc += Number(r.total_cardio || 0);
+      cardioMap[r.date][r.exercise_id].km += Number(r.km || 0);
+    }
+
+    const calMap: Record<string, number> = {};
+    for (const r of (calData || []) as any[]) {
+      calMap[r.date] = Number(r.calories || 0);
+    }
+
+    const muscleMap: Record<string, Set<string>> = {};
+    const weightTotalMap: Record<string, number> = {};
+    for (const r of (weightsData || []) as any[]) {
+      if (!muscleMap[r.date]) muscleMap[r.date] = new Set();
+      if (!weightTotalMap[r.date]) weightTotalMap[r.date] = 0;
+      const lbl = TYPE_LABEL[r.type];
+      if (lbl) muscleMap[r.date].add(lbl);
+      weightTotalMap[r.date] += Number(r.total_weight || 0);
+    }
+
+    const scoreMap: Record<string, number> = {};
+    for (const r of (scoreData || []) as any[]) {
+      if (!scoreMap[r.date]) {
+        scoreMap[r.date] = Number(r.total_score || 0);
       }
+    }
 
-      const calMap: Record<string, number> = {};
-      for (const r of (calData || []) as any[]) {
-        calMap[r.date] = Number(r.calories || 0);
-      }
+    const result: DayData[] = dates.map(date => ({
+      date,
+      calories: calMap[date] || 0,
+      cardio: cardioMap[date] || {},
+      muscleGroups: muscleMap[date] ? Array.from(muscleMap[date]) : [],
+      totalWeightKg: weightTotalMap[date] || 0,
+      totalScore: scoreMap[date] || 0,
+    }));
 
-      const muscleMap: Record<string, Set<string>> = {};
-      const weightTotalMap: Record<string, number> = {};
-      for (const r of (weightsData || []) as any[]) {
-        if (!muscleMap[r.date]) muscleMap[r.date] = new Set();
-        if (!weightTotalMap[r.date]) weightTotalMap[r.date] = 0;
-        const lbl = TYPE_LABEL[r.type];
-        if (lbl) muscleMap[r.date].add(lbl);
-        weightTotalMap[r.date] += Number(r.total_weight || 0);
-      }
-
-      const scoreMap: Record<string, number> = {};
-      for (const r of (scoreData || []) as any[]) {
-        if (!scoreMap[r.date]) {
-          scoreMap[r.date] = Number(r.total_score || 0);
-        }
-      }
-
-      const result: DayData[] = dates.map(date => ({
-        date,
-        calories: calMap[date] || 0,
-        cardio: cardioMap[date] || {},
-        muscleGroups: muscleMap[date] ? Array.from(muscleMap[date]) : [],
-        totalWeightKg: weightTotalMap[date] || 0,
-        totalScore: scoreMap[date] || 0,
-      }));
-
-      setDays(result);
-    };
-    load();
+    setDays(result);
   }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   useEffect(() => {
     const handler = () => load();
     window.addEventListener('kine:data-updated', handler);
     return () => window.removeEventListener('kine:data-updated', handler);
-  }, []);
+  }, [load]);
 
   if (days.length === 0) return null;
 
