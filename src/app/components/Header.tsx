@@ -3,6 +3,7 @@ import { Menu, ArrowLeft, BarChart3 } from 'lucide-react';
 import { Page } from '../../types';
 import { RunningManIcon as NewRunningManIcon, CaloriesIcon as NewCaloriesIcon, ProfileIcon as NewProfileIcon } from './NavIcons';
 import { supabase } from '../../lib/supabase';
+import { QuickLogVoice } from './QuickLogVoice';
 
 interface HeaderProps {
   title: string;
@@ -13,6 +14,9 @@ interface HeaderProps {
   showWeeklySummary?: boolean;
   onToggleQuickLog?: () => void;
   showQuickLog?: boolean;
+  showQuickLogVoice?: boolean;
+  trackerMultiplier?: number;
+  onToggleQuickLogVoice?: () => void;
 }
 
 const headerTextStyle: React.CSSProperties = {
@@ -38,22 +42,11 @@ const DumbbellIcon = ({ size = 16 }: { size?: number }) => (
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type IconComponent = React.ComponentType<any>;
 
-export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNavigate, onToggleWeeklySummary, onToggleQuickLog, showQuickLog }) => {
+export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNavigate, onToggleWeeklySummary, onToggleQuickLog, showQuickLog, showQuickLogVoice, trackerMultiplier, onToggleQuickLogVoice }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [score, setScore] = useState<number>(0);
-  const [showScoreLabel, setShowScoreLabel] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const isDashboard = !title;
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false);
-      }
-    };
-    if (menuOpen) document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [menuOpen]);
 
   // Fetch today's score on dashboard page
   useEffect(() => {
@@ -73,6 +66,16 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
     };
     load();
   }, [isDashboard]);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    if (menuOpen) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [menuOpen]);
 
   const menuItems: { label: string; icon: IconComponent; page: Page }[] = [
     { label: 'Weights',  icon: DumbbellIcon,                                                                   page: 'weights'      },
@@ -95,146 +98,142 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
   const logIcon = getLogIcon();
 
   return (
-    <header
-      className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-5"
-      style={{
-        backgroundColor: 'rgba(242,242,242,0.85)',
-        backdropFilter: 'blur(24px)',
-        WebkitBackdropFilter: 'blur(24px)',
-        paddingTop: 'env(safe-area-inset-top)',
-        height: 'calc(4rem + env(safe-area-inset-top))',
-        paddingBottom: '0',
-        boxShadow: '0 1px 1px rgba(0,0,0,0.01)',
-        borderBottom: '1px solid rgba(0,0,0,0.01)',
-      }}
-    >
-      <div className="relative flex items-center w-12" ref={menuRef}>
-        {onBack ? (
-          <button onClick={onBack} className="hover:opacity-80 transition-opacity">
-            <ArrowLeft size={22} color="#1a1a1a" />
-          </button>
-        ) : (
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="hover:opacity-80 transition-opacity"
-          >
-            <Menu size={18} color="#1a1a1a" />
-          </button>
-        )}
+    <>
+      <header
+        className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-5"
+        style={{
+          backgroundColor: 'rgba(242,242,242,0.85)',
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
+          paddingTop: 'env(safe-area-inset-top)',
+          height: 'calc(4rem + env(safe-area-inset-top))',
+          paddingBottom: '0',
+          boxShadow: '0 1px 1px rgba(0,0,0,0.01)',
+          borderBottom: '1px solid rgba(0,0,0,0.01)',
+        }}
+      >
+        <div className="relative flex items-center w-12" ref={menuRef}>
+          {onBack ? (
+            <button onClick={onBack} className="hover:opacity-80 transition-opacity">
+              <ArrowLeft size={22} color="#1a1a1a" />
+            </button>
+          ) : (
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="hover:opacity-80 transition-opacity"
+            >
+              <Menu size={18} color="#1a1a1a" />
+            </button>
+          )}
 
-        {menuOpen && (
-          <div
-            className="absolute top-12 left-0 w-48 rounded-xl overflow-hidden shadow-2xl"
-            style={{
-              backgroundColor: '#f2f2f2',
-              border: '1px solid rgba(0,0,0,0.08)',
-              animation: 'fadeIn 0.15s ease-out',
-            }}
-          >
-            {menuItems.map((item, index) => (
+          {menuOpen && (
+            <div
+              className="absolute top-12 left-0 w-48 rounded-xl overflow-hidden shadow-2xl"
+              style={{
+                backgroundColor: '#f2f2f2',
+                border: '1px solid rgba(0,0,0,0.08)',
+                animation: 'fadeIn 0.15s ease-out',
+              }}
+            >
               <button
-                key={item.label}
                 onClick={() => {
-                  onNavigate?.(item.page);
+                  onToggleQuickLog?.();
                   setMenuOpen(false);
                 }}
                 className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-black/5 transition-colors"
-                style={{
-                  borderBottom: index < menuItems.length - 1 ? '1px solid rgba(0,0,0,0.06)' : 'none',
-                }}
+                style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}
               >
                 <span style={{ color: 'rgba(26,26,26,0.45)', display: 'flex', alignItems: 'center' }}>
-                  <item.icon size={16} />
+                  <img src="/icons/quicklog.svg" style={{ width: 16, height: 16, opacity: 1 }} alt="quick log" />
                 </span>
-                <span className="text-sm font-semibold" style={{ color: '#1a1a1a' }}>{item.label}</span>
+                <span className="text-sm font-semibold" style={{ color: '#1a1a1a' }}>
+                  {showQuickLog ? 'Quick Log ✓' : 'Quick Log'}
+                </span>
               </button>
-            ))}
-          <button
-              onClick={() => {
-                onToggleQuickLog?.();
-                setMenuOpen(false);
-              }}
-              className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-black/5 transition-colors"
-              style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}
-            >
-              <span style={{ color: 'rgba(26,26,26,0.45)', display: 'flex', alignItems: 'center' }}>
-              <img src="/icons/quicklog.svg" style={{ width: 16, height: 16, opacity: 1 }} alt="quick log" />
-</span>
-              <span className="text-sm font-semibold" style={{ color: '#1a1a1a' }}>
-                {showQuickLog ? 'Quick Log ✓' : 'Quick Log'}
-              </span>
-            </button>
-          </div>
-        )}
-      </div>
+              {menuItems.map((item, index) => (
+                <button
+                  key={item.label}
+                  onClick={() => {
+                    onNavigate?.(item.page);
+                    setMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-black/5 transition-colors"
+                  style={{
+                    borderBottom: index < menuItems.length - 1 ? '1px solid rgba(0,0,0,0.06)' : 'none',
+                  }}
+                >
+                  <span style={{ color: 'rgba(26,26,26,0.45)', display: 'flex', alignItems: 'center' }}>
+                    <item.icon size={16} />
+                  </span>
+                  <span className="text-sm font-semibold" style={{ color: '#1a1a1a' }}>{item.label}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
-      {isDashboard ? (
-        <>
-          <div className="flex items-center justify-center flex-1">
-            <button
-              onClick={onToggleWeeklySummary}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', WebkitTapHighlightColor: 'transparent' }}
-            >
-              <span style={headerTextStyle}>
-                KINÉ
-              </span>
-            </button>
-          </div>
-          <div className="flex items-center justify-end" style={{ width: 48 }}>
-            <button
-              onClick={() => setShowScoreLabel(v => !v)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, WebkitTapHighlightColor: 'transparent', display: 'flex', alignItems: 'center', gap: '8px' }}
-            >
-              {showScoreLabel && (
-                <span style={{
-                  fontSize: '10px',
-                  fontWeight: 500,
-                  letterSpacing: '0.2em',
-                  color: 'rgba(26,26,26,0.9)',
-                  textTransform: 'uppercase',
-                  fontFamily: "'Archivo', sans-serif",
-                  whiteSpace: 'nowrap',
+        {isDashboard ? (
+          <>
+            <div className="flex items-center justify-center flex-1">
+              <button
+                onClick={onToggleWeeklySummary}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', WebkitTapHighlightColor: 'transparent' }}
+              >
+                <span style={headerTextStyle}>
+                  KINÉ
+                </span>
+              </button>
+            </div>
+            <div className="flex items-center justify-end" style={{ width: 48 }}>
+              <button
+                onClick={onToggleQuickLogVoice}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, WebkitTapHighlightColor: 'transparent', display: 'flex', alignItems: 'center', gap: '8px' }}
+              >
+                <div style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: '50%',
+                  backgroundColor: '#1a1a1a',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}>
-                  SCORE
-                </span>
+                  <span style={{ fontSize: '10px', fontWeight: 700, color: '#f2f2f2', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>
+                    {score > 0 ? score : ''}
+                  </span>
+                </div>
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="flex items-center justify-center flex-1">
+              {isLogPage && logIcon ? (
+                logIcon
+              ) : (
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: '#1a1a1a' }}>{title}</span>
               )}
-              <div style={{
-                width: 28,
-                height: 28,
-                borderRadius: '50%',
-                backgroundColor: '#1a1a1a',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-                <span style={{ fontSize: '10px', fontWeight: 700, color: '#f2f2f2', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>
-                  {score > 0 ? score : '—'}
+            </div>
+            <div className="flex items-center justify-end w-12">
+              <button
+                onClick={onToggleWeeklySummary}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, WebkitTapHighlightColor: 'transparent' }}
+              >
+                <span style={secondaryHeaderTextStyle}>
+                  KINÉ
                 </span>
-              </div>
-            </button>
-          </div>
-        </>
-      ) : (
-        <>
-          <div className="flex items-center justify-center flex-1">
-            {isLogPage && logIcon ? (
-              logIcon
-            ) : (
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: '#1a1a1a' }}>{title}</span>
-            )}
-          </div>
-          <div className="flex items-center justify-end w-12">
-            <button
-              onClick={onToggleWeeklySummary}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, WebkitTapHighlightColor: 'transparent' }}
-            >
-              <span style={secondaryHeaderTextStyle}>
-                KINÉ
-              </span>
-            </button>
-          </div>
-        </>
+              </button>
+            </div>
+          </>
+        )}
+      </header>
+      {showQuickLogVoice && trackerMultiplier && (
+        <QuickLogVoice
+          multiplier={trackerMultiplier}
+          onClose={() => onToggleQuickLogVoice?.()}
+          onSuccess={() => { onToggleQuickLogVoice?.(); }}
+        />
       )}
-    </header>
+    </>
   );
 };

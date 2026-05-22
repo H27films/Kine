@@ -4,6 +4,8 @@ import { Header } from './components/Header';
 import { BottomNav } from './components/BottomNav';
 import { WeeklySummaryBar } from './components/WeeklySummaryBar';
 import SplashScreen from './components/SplashScreen';
+import { QuickLogVoice } from './components/QuickLogVoice';
+import { supabase } from '../lib/supabase';
 
 const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
 const LogWeights = lazy(() => import('./pages/LogWeights').then(m => ({ default: m.LogWeights })));
@@ -19,9 +21,25 @@ const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<{page: Page, data?: any}>({page: 'dashboard'});
   const [showWeeklySummary, setShowWeeklySummary] = useState(false);
   const [showQuickLog, setShowQuickLog] = useState(false);
+  const [showQuickLogVoice, setShowQuickLogVoice] = useState(false);
+  const [trackerMultiplier, setTrackerMultiplier] = useState<number>(1);
   const [showSplash, setShowSplash] = useState(true);
 
   const onNavigate = (page: Page, data?: any) => setCurrentPage({page, data});
+
+  // Fetch tracker multiplier for QuickLogVoice
+  React.useEffect(() => {
+    const fetchMultiplier = async () => {
+      const TRACKER_EXERCISE_ID = 82;
+      const { data } = await supabase
+        .from('exercises')
+        .select('multiplier')
+        .eq('exercise_id', TRACKER_EXERCISE_ID)
+        .maybeSingle();
+      if (data) setTrackerMultiplier(Number(data.multiplier || 1));
+    };
+    fetchMultiplier();
+  }, []);
 
   // Reset summary whenever user navigates to a different page
   React.useEffect(() => {
@@ -49,6 +67,10 @@ const App: React.FC = () => {
       case 'profile': return 'Profile';
       case 'summary-weights': return 'Summary';
     }
+  };
+
+  const onToggleQuickLogVoice = () => {
+    setShowQuickLogVoice(v => !v);
   };
 
   const renderPage = () => {
@@ -101,6 +123,9 @@ const App: React.FC = () => {
         }}
         showQuickLog={showQuickLog}
         showWeeklySummary={showWeeklySummary}
+        showQuickLogVoice={showQuickLogVoice}
+        trackerMultiplier={trackerMultiplier}
+        onToggleQuickLogVoice={onToggleQuickLogVoice}
       />
       <main
         className="pb-32 px-4 max-w-lg mx-auto"
@@ -118,6 +143,16 @@ const App: React.FC = () => {
       <BottomNav currentPage={currentPage.page} onNavigate={onNavigate} />
     </>
     )}
+      {showQuickLogVoice && (
+        <QuickLogVoice
+          multiplier={trackerMultiplier}
+          onClose={() => setShowQuickLogVoice(false)}
+          onSuccess={() => {
+            setShowQuickLogVoice(false);
+            onToggleQuickLogVoice(); // Ensure Dashboard re-renders and refetches
+          }}
+        />
+      )}
     </div>
     </>
   );
