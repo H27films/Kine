@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../../lib/supabase';
 
 // Exercise IDs
@@ -361,6 +361,12 @@ export const DailyActivityCards: React.FC = () => {
       setDays(result);
     };
     load();
+  }, []);
+
+  useEffect(() => {
+    const handler = () => load();
+    window.addEventListener('kine:data-updated', handler);
+    return () => window.removeEventListener('kine:data-updated', handler);
   }, []);
 
   if (days.length === 0) return null;

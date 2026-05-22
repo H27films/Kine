@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase, weeksAgoMonday } from '../../lib/supabase';
 
 const TOTAL_CARDIO_IDS = [82, 83, 87];
@@ -151,57 +151,63 @@ export const WeeklySummaryBar: React.FC = () => {
     avgCalories: null,
   });
 
-  useEffect(() => {
-    const load = async () => {
-      const monday = weeksAgoMonday(0);
+  const load = useCallback(async () => {
+    const monday = weeksAgoMonday(0);
 
-      const [{ data: weightsData }, { data: cardioData }, { data: calData }] =
-        await Promise.all([
-          supabase
-            .from('workouts')
-            .select('type, total_weight')
-            .in('type', ['CHEST', 'BACK', 'LEGS'])
-            .gte('date', monday),
-          supabase
-            .from('workouts')
-            .select('total_cardio')
-            .in('exercise_id', TOTAL_CARDIO_IDS)
-            .gte('date', monday),
-          supabase
-            .from('workouts')
-            .select('calories')
-            .eq('type', 'MEASUREMENT')
-            .eq('exercise_id', 90)
-            .gte('date', monday)
-            .not('calories', 'is', null),
-        ]);
+    const [{ data: weightsData }, { data: cardioData }, { data: calData }] =
+      await Promise.all([
+        supabase
+          .from('workouts')
+          .select('type, total_weight')
+          .in('type', ['CHEST', 'BACK', 'LEGS'])
+          .gte('date', monday),
+        supabase
+          .from('workouts')
+          .select('total_cardio')
+          .in('exercise_id', TOTAL_CARDIO_IDS)
+          .gte('date', monday),
+        supabase
+          .from('workouts')
+          .select('calories')
+          .eq('type', 'MEASUREMENT')
+          .eq('exercise_id', 90)
+          .gte('date', monday)
+          .not('calories', 'is', null),
+      ]);
 
-      const sumByType = (rows: any[] | null, type: string) =>
-        (rows || [])
-          .filter(r => r.type === type)
-          .reduce((s: number, r: any) => s + Number(r.total_weight || 0), 0);
+    const sumByType = (rows: any[] | null, type: string) =>
+      (rows || [])
+        .filter(r => r.type === type)
+        .reduce((s, r) => s + Number(r.total_weight || 0), 0);
 
-      const chest = sumByType(weightsData, 'CHEST');
-      const back = sumByType(weightsData, 'BACK');
-      const legs = sumByType(weightsData, 'LEGS');
-      const cardio = +(
-        (cardioData || [])
-          .reduce((s: number, r: any) => s + Number(r.total_cardio || 0), 0)
-          .toFixed(1)
-      );
+    const chest = sumByType(weightsData, 'CHEST');
+    const back = sumByType(weightsData, 'BACK');
+    const legs = sumByType(weightsData, 'LEGS');
 
-      const calValues = (calData || [])
-        .map((r: any) => Number(r.calories || 0))
-        .filter(v => v > 0);
-      const avgCalories =
-        calValues.length > 0
-          ? Math.round(calValues.reduce((s, v) => s + v, 0) / calValues.length)
-          : null;
+    const cardio = +(cardioData || [])
+      .reduce((s: number, r: any) => s + Number(r.total_cardio || 0), 0)
+      .toFixed(1);
 
-      setStats({ chest, back, legs, cardio, avgCalories });
-    };
-    load();
+    const calValues = (calData || [])
+      .map((r: any) => Number(r.calories || 0))
+      .filter(v => v > 0);
+    const avgCalories =
+      calValues.length > 0
+        ? Math.round(calValues.reduce((s, v) => s + v, 0) / calValues.length)
+        : null;
+
+    setStats({ chest, back, legs, cardio, avgCalories });
   }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  useEffect(() => {
+    const handler = () => load();
+    window.addEventListener('kine:data-updated', handler);
+    return () => window.removeEventListener('kine:data-updated', handler);
+   }, [load]);
 
   const fmtWeight = (v: number) =>
     v >= 1000 ? `${(v / 1000).toFixed(1)}k KG` : `${Math.round(v)} KG`;

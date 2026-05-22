@@ -140,7 +140,7 @@ export function useDashboardData(selectedDate: string, refreshKey: number) {
     loadTodayCalories();
     loadFoodRating();
     loadWeights();
-  }, [selectedDate]);
+  }, [selectedDate, refreshKey]);
 
   useEffect(() => {
     const loadActivityWeekly = async () => {
