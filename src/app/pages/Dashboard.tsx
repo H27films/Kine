@@ -328,7 +328,7 @@ useEffect(() => {
             >
               Monthly
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <button
                 onClick={() => setMonthlyOffset(o => Math.max(o - 1, monthlyMinOffset))}
                 disabled={monthlyOffset <= monthlyMinOffset}
@@ -339,7 +339,7 @@ useEffect(() => {
                   padding: 0, display: 'flex', alignItems: 'center',
                 }}
               >
-                <ChevronLeft size={18} color="#1a1a1a" />
+                <ChevronLeft size={22} color="#1a1a1a" />
               </button>
               <button
                 onClick={() => setMonthlyOffset(o => Math.min(o + 1, monthlyMaxOffset))}
@@ -351,7 +351,7 @@ useEffect(() => {
                   padding: 0, display: 'flex', alignItems: 'center',
                 }}
               >
-                <ChevronRight size={18} color="#1a1a1a" />
+                <ChevronRight size={22} color="#1a1a1a" />
               </button>
             </div>
           </div>

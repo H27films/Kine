@@ -368,16 +368,16 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
     <div ref={outerRef}>
       {/* ── Weekly heading ── */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <span style={{
             fontSize: '1.1rem', fontWeight: 700, letterSpacing: '0.15em',
             textTransform: 'uppercase', color: '#1a1a1a', fontFamily: "'Archivo', sans-serif",
           }}>Weekly</span>
           <button onClick={onPrev} disabled={!canPrev} style={{ opacity: !canPrev ? 0.2 : 0.9, background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}>
-            <ChevronLeft size={18} color="#1a1a1a" />
+            <ChevronLeft size={22} color="#1a1a1a" />
           </button>
           <button onClick={onNext} disabled={!canNext} style={{ opacity: !canNext ? 0.2 : 0.9, background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}>
-            <ChevronRight size={18} color="#1a1a1a" />
+            <ChevronRight size={22} color="#1a1a1a" />
           </button>
         </div>
         <span style={{ fontSize: '0.95rem', fontWeight: 700, letterSpacing: '0.06em', color: '#1a1a1a', marginRight: '6px' }}>{weekLabel}</span>
