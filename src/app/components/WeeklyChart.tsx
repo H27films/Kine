@@ -93,6 +93,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
   const [caloriesDayDate, setCaloriesDayDate] = useState<string | null>(null);
   const [caloriesClosing, setCaloriesClosing] = useState(false);
   const [openCaloriesDayIndex, setOpenCaloriesDayIndex] = useState<number | null>(null);
+  const [caloriesGoal, setCaloriesGoal] = useState<number>(1300);
 
   const outerRef = useRef<HTMLDivElement>(null);
   function getCardioDayDate(weekNumber: number, dayIndex: number): string | null {
@@ -756,14 +757,13 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
           const nonZero      = weekDays.filter(v => v > 0);
           const nonZeroCount = nonZero.length;
 
-          const GOAL = 1300;
-
           // Average = total / number of days with data
           const currentAvg = nonZeroCount > 0 ? totalLogged / nonZeroCount : 0;
 
-          // Days left = days this week after today that have no data yet.
-          // If today already has a value, today is consumed → starts from tomorrow.
+          // Days left = future/present days in this week with no logged value yet.
+          // If today already has a value, today is consumed → start from tomorrow.
           const todayVal = todayIdx !== null ? (weekDays[todayIdx] || 0) : 0;
+
           // Days left = future/present days in this week with no logged value yet.
           // If today already has a value, today is consumed → start from tomorrow.
           const remainingDays = todayIdx !== null
@@ -785,26 +785,53 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
           })();
           const currentAverage = daysPassed > 0 ? totalLogged / daysPassed : 0;
 
-          // Target = ((1300*7) - (currentAverage * daysPassed)) / daysLeft
+          // Target = ((goal * 7) - (currentAverage * daysPassed)) / daysLeft
           const target = remainingDays > 0
-            ? Math.max(0, ((GOAL * 7) - (currentAverage * daysPassed)) / remainingDays)
+            ? Math.max(0, ((caloriesGoal * 7) - (currentAverage * daysPassed)) / remainingDays)
             : 0;
 
           return (
             <div
               className={caloriesClosing ? 'fade-out-block' : 'fade-in-block'}
               onAnimationEnd={() => { if (caloriesClosing) { setCaloriesDayDate(null); setOpenCaloriesDayIndex(null); setCaloriesClosing(false); } }}
-              onMouseDown={e => { e.stopPropagation(); setCaloriesClosing(true); }}
+              onClick={() => { if (!caloriesClosing) setCaloriesClosing(true); }}
+              onPointerDown={() => { if (!caloriesClosing) setCaloriesClosing(true); }}
               style={{ borderTop: '1px solid rgba(0,0,0,0.75)', padding: '20px 0 0', willChange: 'opacity, transform', cursor: 'pointer' }}
             >
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <div style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: '13px', fontWeight: 600, color: '#1a1a1a', letterSpacing: '0.04em', fontFamily: "'Archivo', sans-serif" }}>
-                    WEEKLY TOTAL
-                  </span>
-                  <span style={{ fontSize: '10px', fontWeight: 500, color: 'rgba(26,26,26,0.45)', letterSpacing: '0.04em', fontFamily: "'Archivo', sans-serif", textTransform: 'uppercase' }}>
-                    GOAL: {GOAL.toLocaleString()} kcal
-                  </span>
+                <div style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'nowrap' }}>
+                  <span style={{
+                    fontSize: '13px', fontWeight: 600, color: '#1a1a1a', letterSpacing: '0.04em',
+                    fontFamily: "'Archivo', sans-serif", textTransform: 'uppercase',
+                  }}>GOAL</span>
+                  <span style={{ color: 'rgba(26,26,26,0.4)', fontSize: '11px' }}>:</span>
+                  <span style={{
+                    fontSize: '13px', fontWeight: 600, color: '#1a1a1a', letterSpacing: '0.04em',
+                    fontFamily: "'Archivo', sans-serif",
+                    minWidth: '54px', textAlign: 'right',
+                  }}>{caloriesGoal.toLocaleString()}</span>
+                  <span style={{
+                    fontSize: '13px', fontWeight: 600, color: '#1a1a1a', letterSpacing: '0.04em',
+                    fontFamily: "'Archivo', sans-serif",
+                  }}>kcal</span>
+                  <button
+                    onClick={e => { e.stopPropagation(); setCaloriesGoal(v => Math.max(0, v - 100)); }}
+                    onPointerDown={e => e.stopPropagation()}
+                    style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      background: 'none', border: 'none', cursor: 'pointer',
+                      padding: '0 2px', flexShrink: 0, lineHeight: 1,
+                    }}
+                  ><ChevronLeft size={14} strokeWidth={2.5} color="#1a1a1a" /></button>
+                  <button
+                    onClick={e => { e.stopPropagation(); setCaloriesGoal(v => v + 100); }}
+                    onPointerDown={e => e.stopPropagation()}
+                    style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      background: 'none', border: 'none', cursor: 'pointer',
+                      padding: '0 2px', flexShrink: 0, lineHeight: 1,
+                    }}
+                  ><ChevronRight size={14} strokeWidth={2.5} color="#1a1a1a" /></button>
                 </div>
 
                 {/* Average row */}
