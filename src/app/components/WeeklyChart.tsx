@@ -800,7 +800,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
             >
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 <div style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'nowrap' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'nowrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '2px', flexWrap: 'nowrap' }}>
                     <span style={{
                       fontSize: '13px', fontWeight: 600, color: '#1a1a1a', letterSpacing: '0.04em',
                       fontFamily: "'Archivo', sans-serif", textTransform: 'uppercase',
@@ -812,7 +812,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
                       minWidth: '54px', textAlign: 'right',
                     }}>{caloriesGoal.toLocaleString()}</span>
                     <span style={{
-                      fontSize: '13px', fontWeight: 600, color: '#1a1a1a', letterSpacing: '0.04em',
+                      fontSize: '13px', fontWeight: 500, color: 'rgba(26,26,26,0.4)', letterSpacing: '0.04em',
                       fontFamily: "'Archivo', sans-serif",
                     }}>kcal</span>
                   </div>
@@ -856,7 +856,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
                 {/* Days left row */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '2px 0' }}>
                   <span style={{ fontSize: '12px', fontWeight: 500, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>
-                    Days left
+                    Left
                   </span>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
                     <span style={{ fontSize: '13px', fontWeight: 550, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>
