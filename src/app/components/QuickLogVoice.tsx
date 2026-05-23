@@ -22,6 +22,15 @@ const CARDIO_MAP: Record<string, number> = {
   cycle: CYCLE_ID, cycling: CYCLE_ID,
 };
 
+const CARDIO_MULTIPLIERS: Record<number, number> = {
+  82: 1.00,  // TRACKER
+  83: 0.75,  // ROW
+  84: 1.00,  // RUNNING
+  85: 1.00,  // WALKING
+  86: 0.80,  // CROSS TRAINER
+  87: 1.00,  // CYCLE
+};
+
 /** Map from spoken time units to seconds multiplier */
 const TIME_UNITS: Record<string, number> = {
   minute: 60, minutes: 60, min: 60, mins: 60, m: 60,
@@ -84,9 +93,10 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
   const insertRunning = async (exerciseId: number, km: number, timeStr: string | null) => {
     const week = getISOWeek(new Date(today + 'T12:00:00+08:00'));
     const day  = getDayName(new Date(today + 'T12:00:00+08:00'));
+    const multiplier = CARDIO_MULTIPLIERS[exerciseId] ?? 1;
     await supabase.from('workouts').insert({
       date: today, week, day, type: 'CARDIO', exercise_id: exerciseId,
-      km, total_cardio: +(km * 1).toFixed(2),
+      km, total_cardio: +(km * multiplier).toFixed(2),
       time: timeStr,
       total_score_k: null, new_entry: 'New', source: 'app',
     });
@@ -96,9 +106,11 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
   const insertCardio = async (exerciseId: number, km: number) => {
     const week = getISOWeek(new Date(today + 'T12:00:00+08:00'));
     const day  = getDayName(new Date(today + 'T12:00:00+08:00'));
+    const multiplier = CARDIO_MULTIPLIERS[exerciseId] ?? 1;
     await supabase.from('workouts').insert({
       date: today, week, day, type: 'CARDIO', exercise_id: exerciseId,
-      km, total_cardio: +(km * 1).toFixed(2),
+      km,
+      total_cardio: +(km * multiplier).toFixed(2),
       total_score_k: null, new_entry: 'New', source: 'app',
     });
     await recalculateDailyTotals(today);

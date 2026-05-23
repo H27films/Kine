@@ -328,7 +328,7 @@ useEffect(() => {
             >
               Monthly
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
               <button
                 onClick={() => setMonthlyOffset(o => Math.max(o - 1, monthlyMinOffset))}
                 disabled={monthlyOffset <= monthlyMinOffset}
