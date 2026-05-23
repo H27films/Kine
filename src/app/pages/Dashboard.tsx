@@ -213,7 +213,7 @@ useEffect(() => {
             )}
           </div>
 
-          {!selectedActivity && (
+          {!selectedActivity && foodRating !== null && (
             <div
               className="flex items-center justify-center ml-4"
               style={{ marginTop: '10px', gap: showFoodRatingLabel ? '10px' : '5px', cursor: 'pointer' }}

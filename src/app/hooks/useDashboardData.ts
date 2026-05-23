@@ -28,7 +28,7 @@ export function useDashboardData(selectedDate: string, refreshKey: number) {
   const [dayWeightsTotal, setDayWeightsTotal] = useState<number>(0);
 
   const [todayCalories, setTodayCalories] = useState<number>(0);
-  const [foodRating, setFoodRating] = useState<string>('BAD');
+  const [foodRating, setFoodRating] = useState<string | null>(null);
 
   const [cardioWeeks, setCardioWeeks] = useState<WeekData[]>([]);
   const [weightsWeeks, setWeightsWeeks] = useState<WeekData[]>([]);
@@ -117,7 +117,8 @@ export function useDashboardData(selectedDate: string, refreshKey: number) {
         .eq('date', selectedDate)
         .not('food_rating', 'is', null)
         .limit(1);
-      setFoodRating(data && data.length > 0 ? String(data[0].food_rating) : 'BAD');
+      const rating = data && data.length > 0 ? String(data[0].food_rating) : null;
+      setFoodRating(rating);
     };
 
     const loadWeights = async () => {
