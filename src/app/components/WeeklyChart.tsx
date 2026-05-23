@@ -89,6 +89,11 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
   const [scoreCaloriesTotal, setScoreCaloriesTotal] = useState<number>(0);
   const [scoreLoading, setScoreLoading] = useState(false);
 
+  // Calories expanded state
+  const [caloriesDayDate, setCaloriesDayDate] = useState<string | null>(null);
+  const [caloriesClosing, setCaloriesClosing] = useState(false);
+  const [openCaloriesDayIndex, setOpenCaloriesDayIndex] = useState<number | null>(null);
+
   const outerRef = useRef<HTMLDivElement>(null);
   function getCardioDayDate(weekNumber: number, dayIndex: number): string | null {
     const monday = new Date('2025-01-06T00:00:00Z');
@@ -101,6 +106,12 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
     if (!dateStr) return true;
     const today = malaysiaDateStr(new Date());
     return dateStr > today;
+  }
+
+  // Returns 0=Mon … 6=Sun for today's Malaysia date, or null if not a valid week day
+  function todayMalaysiaDayIndex(): number | null {
+    const dow = new Date(malaysiaDateStr(new Date()) + 'T12:00:00Z').getDay(); // 0=Sun … 6=Sat
+    return dow === 0 ? 6 : dow - 1;
   }
 
   // Cardio fetch
@@ -286,6 +297,24 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
     if (date) setScoreDayDate(date);
   };
 
+  const handleCaloriesBarClick = (weekNumber: number, dayIndex: number) => {
+    // Allow clicking any bar this week — past or future — just show the panel
+    const isSameBar =
+      caloriesDayDate !== null &&
+      effectiveWeekNumber === weekNumber &&
+      openCaloriesDayIndex === dayIndex;
+
+    if (isSameBar) {
+      setCaloriesClosing(true);
+      return;
+    }
+
+    setCaloriesClosing(false);
+    setOpenCaloriesDayIndex(dayIndex);
+    const date = getCardioDayDate(weekNumber, dayIndex);
+    if (date) setCaloriesDayDate(date);
+  };
+
   const chartConfig: Record<ChartTab, { weeks: WeekData[]; unit: string }> = {
     Cardio:   { weeks: cardioWeeks,  unit: 'km' },
     Weights:  { weeks: weightsWeeks, unit: 'kg' },
@@ -320,6 +349,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
       setOpenDayIndex(null); setCardioDayDate(null); setClosing(false); setCardioReady(false);
       setOpenWeightsDayIndex(null); setWeightsDayDate(null); setWeightsClosing(false); setWeightsReady(false);
       setOpenScoreDayIndex(null); setScoreDayDate(null); setScoreClosing(false);
+      setOpenCaloriesDayIndex(null); setCaloriesDayDate(null); setCaloriesClosing(false);
     }
   };
   const onNext = () => {
@@ -328,6 +358,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
       setOpenDayIndex(null); setCardioDayDate(null); setClosing(false); setCardioReady(false);
       setOpenWeightsDayIndex(null); setWeightsDayDate(null); setWeightsClosing(false); setWeightsReady(false);
       setOpenScoreDayIndex(null); setScoreDayDate(null); setScoreClosing(false);
+      setOpenCaloriesDayIndex(null); setCaloriesDayDate(null); setCaloriesClosing(false);
     }
   };
 
@@ -394,7 +425,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
                 key={tab}
                 onClick={async () => {
                   // Clear only the state of the tab we are switching away from
-                  // so an expanded card can be hot-swapped between Cardio/Weights/Score
+                  // so an expanded card can be hot-swapped between Cardio/Weights/Score/Calories
                   if (tab !== 'Cardio') {
                     setCardioDayDate(null); setOpenDayIndex(null); setCardioReady(false); setClosing(false);
                   }
@@ -404,45 +435,40 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
                   if (tab !== 'Score') {
                     setScoreDayDate(null); setOpenScoreDayIndex(null); setScoreClosing(false);
                   }
+                  if (tab !== 'Calories') {
+                    setCaloriesDayDate(null); setOpenCaloriesDayIndex(null); setCaloriesClosing(false);
+                  }
 
                   if (tab === 'Weights' && effectiveWeekNumber !== null) {
-                    if (openDayIndex !== null) {
-                      const idx = openDayIndex;
-                      const date = getCardioDayDate(effectiveWeekNumber, idx);
-                      if (date) setWeightsDayDate(date);
-                      setOpenWeightsDayIndex(idx);
-                      setWeightsReady(false);
-                    } else if (openScoreDayIndex !== null) {
-                      const idx = openScoreDayIndex;
-                      const date = getCardioDayDate(effectiveWeekNumber, idx);
-                      if (date) setWeightsDayDate(date);
-                      setOpenWeightsDayIndex(idx);
-                      setWeightsReady(false);
-                    }
+                    (() => {
+                      if (openDayIndex !== null) {
+                        const idx = openDayIndex, date = getCardioDayDate(effectiveWeekNumber, idx);
+                        if (date) { setWeightsDayDate(date); setOpenWeightsDayIndex(idx); setWeightsReady(false); }
+                      } else if (openScoreDayIndex !== null) {
+                        const idx = openScoreDayIndex, date = getCardioDayDate(effectiveWeekNumber, idx);
+                        if (date) { setWeightsDayDate(date); setOpenWeightsDayIndex(idx); setWeightsReady(false); }
+                      }
+                    })();
                   } else if (tab === 'Score' && effectiveWeekNumber !== null) {
-                    if (openDayIndex !== null) {
-                      const idx = openDayIndex;
-                      const date = getCardioDayDate(effectiveWeekNumber, idx);
-                      if (date) setScoreDayDate(date);
-                      setOpenScoreDayIndex(idx);
-                    } else if (openWeightsDayIndex !== null) {
-                      const idx = openWeightsDayIndex;
-                      const date = getCardioDayDate(effectiveWeekNumber, idx);
-                      if (date) setScoreDayDate(date);
-                      setOpenScoreDayIndex(idx);
-                    }
-                  } else if (tab === 'Cardio') {
-                    if (openWeightsDayIndex !== null) {
-                      const idx = openWeightsDayIndex;
-                      const date = getCardioDayDate(effectiveWeekNumber, idx);
-                      if (date) setCardioDayDate(date);
-                      setOpenDayIndex(idx);
-                    } else if (openScoreDayIndex !== null) {
-                      const idx = openScoreDayIndex;
-                      const date = getCardioDayDate(effectiveWeekNumber, idx);
-                      if (date) setCardioDayDate(date);
-                      setOpenDayIndex(idx);
-                    }
+                    (() => {
+                      if (openDayIndex !== null) {
+                        const idx = openDayIndex, date = getCardioDayDate(effectiveWeekNumber, idx);
+                        if (date) { setScoreDayDate(date); setOpenScoreDayIndex(idx); }
+                      } else if (openWeightsDayIndex !== null) {
+                        const idx = openWeightsDayIndex, date = getCardioDayDate(effectiveWeekNumber, idx);
+                        if (date) { setScoreDayDate(date); setOpenScoreDayIndex(idx); }
+                      }
+                    })();
+                  } else if (tab === 'Cardio' && effectiveWeekNumber !== null) {
+                    (() => {
+                      if (openWeightsDayIndex !== null) {
+                        const idx = openWeightsDayIndex, date = getCardioDayDate(effectiveWeekNumber, idx);
+                        if (date) { setCardioDayDate(date); setOpenDayIndex(idx); }
+                      } else if (openScoreDayIndex !== null) {
+                        const idx = openScoreDayIndex, date = getCardioDayDate(effectiveWeekNumber, idx);
+                        if (date) { setCardioDayDate(date); setOpenDayIndex(idx); }
+                      }
+                    })();
                   }
 
                   setActiveTab(tab);
@@ -504,10 +530,13 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
               <div
                 key={i}
                 className="flex h-full flex-col items-center justify-end"
-                 style={{ flex: '1', maxWidth: '28px', cursor: (activeTab === 'Cardio' && effectiveWeekNumber !== null && !isFutureDay(effectiveWeekNumber, i)) || (activeTab === 'Weights' && val > 0) || (activeTab === 'Score' && val > 0) ? 'pointer' : 'default' }}
+                 style={{ flex: '1', maxWidth: '28px', cursor: ((activeTab === 'Cardio' && effectiveWeekNumber !== null && !isFutureDay(effectiveWeekNumber, i)) || (activeTab === 'Weights' && val > 0) || (activeTab === 'Score' && val > 0) || (activeTab === 'Calories' && effectiveWeekNumber !== null)) ? 'pointer' : 'default' }}
                 onClick={() => {
                   if (activeTab === 'Cardio' && effectiveWeekNumber !== null) {
                     handleBarClick(effectiveWeekNumber, i);
+                  }
+                  if (activeTab === 'Calories' && effectiveWeekNumber !== null) {
+                    handleCaloriesBarClick(effectiveWeekNumber, i);
                   }
                   if (activeTab === 'Weights' && val > 0 && effectiveWeekNumber !== null) {
                     handleWeightsBarClick(effectiveWeekNumber, i);
@@ -716,6 +745,100 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
             </div>
           </div>
         )}
+
+        {/* ── Calories Goal Breakdown ── */}
+        {caloriesDayDate && effectiveWeekNumber !== null && (() => {
+          const todayIdx = todayMalaysiaDayIndex();
+
+          // day values per index from the current week bar data
+          const weekDays = data;           // 7-element array from current week
+          const totalLogged  = weekDays.reduce((s, v) => s + Math.max(v, 0), 0);
+          const nonZero      = weekDays.filter(v => v > 0);
+          const nonZeroCount = nonZero.length;
+
+          const GOAL = 1300;
+
+          // Average = total / number of days with data
+          const currentAvg = nonZeroCount > 0 ? totalLogged / nonZeroCount : 0;
+
+          // Days left = days this week after today that have no data yet.
+          // If today already has a value, today is consumed → starts from tomorrow.
+          const todayVal = todayIdx !== null ? (weekDays[todayIdx] || 0) : 0;
+          // Days left = future/present days in this week with no logged value yet.
+          // If today already has a value, today is consumed → start from tomorrow.
+          const remainingDays = todayIdx !== null
+            ? (() => {
+                let count = 0;
+                for (let i = todayIdx + (todayVal > 0 ? 1 : 0); i <= 6; i++) {
+                  if ((weekDays[i] || 0) <= 0) count++;
+                }
+                return count;
+              })()
+            : 0;
+
+          // Target = what they need to average per remaining day to meet the goal
+          const target = remainingDays > 0 ? Math.max(0, (GOAL - totalLogged) / remainingDays) : 0;
+
+          return (
+            <div
+              className={caloriesClosing ? 'fade-out-block' : 'fade-in-block'}
+              onAnimationEnd={() => { if (caloriesClosing) { setCaloriesDayDate(null); setOpenCaloriesDayIndex(null); setCaloriesClosing(false); } }}
+              onMouseDown={e => { e.stopPropagation(); setCaloriesClosing(true); }}
+              style={{ borderTop: '1px solid rgba(0,0,0,0.75)', padding: '20px 0 0', willChange: 'opacity, transform', cursor: 'pointer' }}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <div style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 600, color: '#1a1a1a', letterSpacing: '0.04em', fontFamily: "'Archivo', sans-serif" }}>
+                    WEEKLY TOTAL
+                  </span>
+                  <span style={{ fontSize: '10px', fontWeight: 500, color: 'rgba(26,26,26,0.45)', letterSpacing: '0.04em', fontFamily: "'Archivo', sans-serif", textTransform: 'uppercase' }}>
+                    GOAL: {GOAL.toLocaleString()} kcal
+                  </span>
+                </div>
+
+                {/* Average row */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '2px 0' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 500, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>
+                    Average
+                  </span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
+                    <span style={{ fontSize: '13px', fontWeight: 550, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>
+                      {currentAvg.toFixed(0)}
+                    </span>
+                    <span style={{ fontSize: '8px', fontWeight: 500, color: 'rgba(26,26,26,0.4)', letterSpacing: '0.04em', fontFamily: "'Archivo', sans-serif" }}>
+                      kcal
+                    </span>
+                  </span>
+                </div>
+
+                {/* Days left row */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '2px 0' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 500, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>
+                    Days left
+                  </span>
+                  <span style={{ fontSize: '13px', fontWeight: 550, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>
+                    {remainingDays}
+                  </span>
+                </div>
+
+                {/* Target row */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '2px 0' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 500, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>
+                    Target
+                  </span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
+                    <span style={{ fontSize: '13px', fontWeight: 550, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>
+                      {target.toFixed(0)}
+                    </span>
+                    <span style={{ fontSize: '8px', fontWeight: 500, color: 'rgba(26,26,26,0.4)', letterSpacing: '0.04em', fontFamily: "'Archivo', sans-serif" }}>
+                      kcal
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
       </div>
     </div>
