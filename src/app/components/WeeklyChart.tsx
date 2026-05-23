@@ -776,8 +776,19 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
               })()
             : 0;
 
-          // Target = what they need to average per remaining day to meet the goal
-          const target = remainingDays > 0 ? Math.max(0, (GOAL - totalLogged) / remainingDays) : 0;
+          const daysPassed = (() => {
+            let count = 0;
+            for (let i = 0; i <= 6; i++) {
+              if ((weekDays[i] || 0) > 0) count++;
+            }
+            return count;
+          })();
+          const currentAverage = daysPassed > 0 ? totalLogged / daysPassed : 0;
+
+          // Target = ((1300*7) - (currentAverage * daysPassed)) / daysLeft
+          const target = remainingDays > 0
+            ? Math.max(0, ((GOAL * 7) - (currentAverage * daysPassed)) / remainingDays)
+            : 0;
 
           return (
             <div
