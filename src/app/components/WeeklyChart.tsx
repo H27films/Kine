@@ -392,11 +392,60 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
             {(['Cardio', 'Weights', 'Calories', 'Score'] as ChartTab[]).map(tab => (
               <button
                 key={tab}
-                onClick={() => {
+                onClick={async () => {
+                  // Clear only the state of the tab we are switching away from
+                  // so an expanded card can be hot-swapped between Cardio/Weights/Score
+                  if (tab !== 'Cardio') {
+                    setCardioDayDate(null); setOpenDayIndex(null); setCardioReady(false); setClosing(false);
+                  }
+                  if (tab !== 'Weights') {
+                    setWeightsDayDate(null); setOpenWeightsDayIndex(null); setWeightsReady(false); setWeightsClosing(false);
+                  }
+                  if (tab !== 'Score') {
+                    setScoreDayDate(null); setOpenScoreDayIndex(null); setScoreClosing(false);
+                  }
+
+                  if (tab === 'Weights' && effectiveWeekNumber !== null) {
+                    if (openDayIndex !== null) {
+                      const idx = openDayIndex;
+                      const date = getCardioDayDate(effectiveWeekNumber, idx);
+                      if (date) setWeightsDayDate(date);
+                      setOpenWeightsDayIndex(idx);
+                      setWeightsReady(false);
+                    } else if (openScoreDayIndex !== null) {
+                      const idx = openScoreDayIndex;
+                      const date = getCardioDayDate(effectiveWeekNumber, idx);
+                      if (date) setWeightsDayDate(date);
+                      setOpenWeightsDayIndex(idx);
+                      setWeightsReady(false);
+                    }
+                  } else if (tab === 'Score' && effectiveWeekNumber !== null) {
+                    if (openDayIndex !== null) {
+                      const idx = openDayIndex;
+                      const date = getCardioDayDate(effectiveWeekNumber, idx);
+                      if (date) setScoreDayDate(date);
+                      setOpenScoreDayIndex(idx);
+                    } else if (openWeightsDayIndex !== null) {
+                      const idx = openWeightsDayIndex;
+                      const date = getCardioDayDate(effectiveWeekNumber, idx);
+                      if (date) setScoreDayDate(date);
+                      setOpenScoreDayIndex(idx);
+                    }
+                  } else if (tab === 'Cardio') {
+                    if (openWeightsDayIndex !== null) {
+                      const idx = openWeightsDayIndex;
+                      const date = getCardioDayDate(effectiveWeekNumber, idx);
+                      if (date) setCardioDayDate(date);
+                      setOpenDayIndex(idx);
+                    } else if (openScoreDayIndex !== null) {
+                      const idx = openScoreDayIndex;
+                      const date = getCardioDayDate(effectiveWeekNumber, idx);
+                      if (date) setCardioDayDate(date);
+                      setOpenDayIndex(idx);
+                    }
+                  }
+
                   setActiveTab(tab);
-                  setCardioDayDate(null); setOpenDayIndex(null); setCardioReady(false); setClosing(false);
-                  setWeightsDayDate(null); setOpenWeightsDayIndex(null); setWeightsReady(false); setWeightsClosing(false);
-                  setScoreDayDate(null); setOpenScoreDayIndex(null); setScoreClosing(false);
                 }}
                 style={{
                   fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1.5px',
