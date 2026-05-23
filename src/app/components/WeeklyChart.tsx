@@ -799,39 +799,43 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
               style={{ borderTop: '1px solid rgba(0,0,0,0.75)', padding: '20px 0 0', willChange: 'opacity, transform', cursor: 'pointer' }}
             >
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <div style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'nowrap' }}>
-                  <span style={{
-                    fontSize: '13px', fontWeight: 600, color: '#1a1a1a', letterSpacing: '0.04em',
-                    fontFamily: "'Archivo', sans-serif", textTransform: 'uppercase',
-                  }}>GOAL</span>
-                  <span style={{ color: 'rgba(26,26,26,0.4)', fontSize: '11px' }}>:</span>
-                  <span style={{
-                    fontSize: '13px', fontWeight: 600, color: '#1a1a1a', letterSpacing: '0.04em',
-                    fontFamily: "'Archivo', sans-serif",
-                    minWidth: '54px', textAlign: 'right',
-                  }}>{caloriesGoal.toLocaleString()}</span>
-                  <span style={{
-                    fontSize: '13px', fontWeight: 600, color: '#1a1a1a', letterSpacing: '0.04em',
-                    fontFamily: "'Archivo', sans-serif",
-                  }}>kcal</span>
-                  <button
-                    onClick={e => { e.stopPropagation(); setCaloriesGoal(v => Math.max(0, v - 100)); }}
-                    onPointerDown={e => e.stopPropagation()}
-                    style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      background: 'none', border: 'none', cursor: 'pointer',
-                      padding: '0 2px', flexShrink: 0, lineHeight: 1,
-                    }}
-                  ><ChevronLeft size={14} strokeWidth={2.5} color="#1a1a1a" /></button>
-                  <button
-                    onClick={e => { e.stopPropagation(); setCaloriesGoal(v => v + 100); }}
-                    onPointerDown={e => e.stopPropagation()}
-                    style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      background: 'none', border: 'none', cursor: 'pointer',
-                      padding: '0 2px', flexShrink: 0, lineHeight: 1,
-                    }}
-                  ><ChevronRight size={14} strokeWidth={2.5} color="#1a1a1a" /></button>
+                <div style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'nowrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'nowrap' }}>
+                    <span style={{
+                      fontSize: '13px', fontWeight: 600, color: '#1a1a1a', letterSpacing: '0.04em',
+                      fontFamily: "'Archivo', sans-serif", textTransform: 'uppercase',
+                    }}>GOAL</span>
+                    <span style={{ color: 'rgba(26,26,26,0.4)', fontSize: '11px' }}>:</span>
+                    <span style={{
+                      fontSize: '13px', fontWeight: 600, color: '#1a1a1a', letterSpacing: '0.04em',
+                      fontFamily: "'Archivo', sans-serif",
+                      minWidth: '54px', textAlign: 'right',
+                    }}>{caloriesGoal.toLocaleString()}</span>
+                    <span style={{
+                      fontSize: '13px', fontWeight: 600, color: '#1a1a1a', letterSpacing: '0.04em',
+                      fontFamily: "'Archivo', sans-serif",
+                    }}>kcal</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+                    <button
+                      onClick={e => { e.stopPropagation(); setCaloriesGoal(v => Math.max(0, v - 50)); }}
+                      onPointerDown={e => e.stopPropagation()}
+                      style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        background: 'none', border: 'none', cursor: 'pointer',
+                        padding: 0, flexShrink: 0, lineHeight: 1, marginLeft: '16px',
+                      }}
+                    ><ChevronLeft size={18} strokeWidth={2.5} color="#1a1a1a" /></button>
+                    <button
+                      onClick={e => { e.stopPropagation(); setCaloriesGoal(v => v + 50); }}
+                      onPointerDown={e => e.stopPropagation()}
+                      style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        background: 'none', border: 'none', cursor: 'pointer',
+                        padding: 0, flexShrink: 0, lineHeight: 1,
+                      }}
+                    ><ChevronRight size={18} strokeWidth={2.5} color="#1a1a1a" /></button>
+                  </div>
                 </div>
 
                 {/* Average row */}
