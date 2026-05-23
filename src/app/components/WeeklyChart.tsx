@@ -816,16 +816,16 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
                       fontFamily: "'Archivo', sans-serif",
                     }}>kcal</span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
                     <button
                       onClick={e => { e.stopPropagation(); setCaloriesGoal(v => Math.max(0, v - 50)); }}
                       onPointerDown={e => e.stopPropagation()}
                       style={{
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         background: 'none', border: 'none', cursor: 'pointer',
-                        padding: 0, flexShrink: 0, lineHeight: 1, marginLeft: '16px',
+                        padding: 0, flexShrink: 0, lineHeight: 1,
                       }}
-                    ><ChevronLeft size={18} strokeWidth={2.5} color="#1a1a1a" /></button>
+                    ><ChevronLeft size={18} strokeWidth={2} color="#1a1a1a" /></button>
                     <button
                       onClick={e => { e.stopPropagation(); setCaloriesGoal(v => v + 50); }}
                       onPointerDown={e => e.stopPropagation()}
@@ -834,7 +834,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
                         background: 'none', border: 'none', cursor: 'pointer',
                         padding: 0, flexShrink: 0, lineHeight: 1,
                       }}
-                    ><ChevronRight size={18} strokeWidth={2.5} color="#1a1a1a" /></button>
+                    ><ChevronRight size={18} strokeWidth={2} color="#1a1a1a" /></button>
                   </div>
                 </div>
 
@@ -858,8 +858,13 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
                   <span style={{ fontSize: '12px', fontWeight: 500, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>
                     Days left
                   </span>
-                  <span style={{ fontSize: '13px', fontWeight: 550, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>
-                    {remainingDays}
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
+                    <span style={{ fontSize: '13px', fontWeight: 550, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>
+                      {remainingDays}
+                    </span>
+                    <span style={{ fontSize: '8px', fontWeight: 500, color: 'rgba(26,26,26,0.4)', letterSpacing: '0.04em', fontFamily: "'Archivo', sans-serif" }}>
+                      Days
+                    </span>
                   </span>
                 </div>
 
