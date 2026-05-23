@@ -710,9 +710,9 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
                 </span>
               </div>
               {(() => {
-                const weightsScore = Math.min(Math.round((scoreWeightsTotal / 20000) * 100), 100);
-                const trackerScore = Math.min(Math.round((scoreTrackerTotal / 20)    * 100), 100);
-                const calorieScore = Math.min(Math.round((scoreCaloriesTotal / 1500) * 100), 100);
+                const weightsScore = Math.round((scoreWeightsTotal / 20000) * 100);
+                const trackerScore = Math.round((scoreTrackerTotal / 20)    * 100);
+                const calorieScore = Math.round((scoreCaloriesTotal / 1500) * 100);
 
                 const mkRow = (label: string, rawNumber: string, rawUnit: string, score: number, icon: React.ReactNode) => {
                   const isZero = score === 0;
