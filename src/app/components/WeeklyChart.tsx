@@ -425,51 +425,34 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
               <button
                 key={tab}
                 onClick={async () => {
-                  // Clear only the state of the tab we are switching away from
-                  // so an expanded card can be hot-swapped between Cardio/Weights/Score/Calories
-                  if (tab !== 'Cardio') {
-                    setCardioDayDate(null); setOpenDayIndex(null); setCardioReady(false); setClosing(false);
-                  }
-                  if (tab !== 'Weights') {
-                    setWeightsDayDate(null); setOpenWeightsDayIndex(null); setWeightsReady(false); setWeightsClosing(false);
-                  }
-                  if (tab !== 'Score') {
-                    setScoreDayDate(null); setOpenScoreDayIndex(null); setScoreClosing(false);
-                  }
-                  if (tab !== 'Calories') {
-                    setCaloriesDayDate(null); setOpenCaloriesDayIndex(null); setCaloriesClosing(false);
-                  }
+                  // Determine which open index to carry from each other tab
+                  const carryIdx =
+                    tab === 'Cardio' ? (openWeightsDayIndex ?? openScoreDayIndex ?? openCaloriesDayIndex) :
+                    tab === 'Weights' ? (openDayIndex ?? openScoreDayIndex ?? openCaloriesDayIndex) :
+                    tab === 'Score' ? (openDayIndex ?? openWeightsDayIndex ?? openCaloriesDayIndex) :
+                    tab === 'Calories' ? (openDayIndex ?? openWeightsDayIndex ?? openScoreDayIndex) : null;
 
-                  if (tab === 'Weights' && effectiveWeekNumber !== null) {
-                    (() => {
-                      if (openDayIndex !== null) {
-                        const idx = openDayIndex, date = getCardioDayDate(effectiveWeekNumber, idx);
-                        if (date) { setWeightsDayDate(date); setOpenWeightsDayIndex(idx); setWeightsReady(false); }
-                      } else if (openScoreDayIndex !== null) {
-                        const idx = openScoreDayIndex, date = getCardioDayDate(effectiveWeekNumber, idx);
-                        if (date) { setWeightsDayDate(date); setOpenWeightsDayIndex(idx); setWeightsReady(false); }
+                  // Immediately clear all old expanded state (no animation on tab switch)
+                  setCardioDayDate(null); setOpenDayIndex(null); setCardioReady(false); setClosing(false); setCardioEntries([]);
+                  setWeightsDayDate(null); setOpenWeightsDayIndex(null); setWeightsReady(false); setWeightsClosing(false); setWeightsEntries([]);
+                  setScoreDayDate(null); setOpenScoreDayIndex(null); setScoreClosing(false);
+                  setScoreWeightsTotal(0); setScoreTrackerTotal(0); setScoreCaloriesTotal(0);
+                  setCaloriesDayDate(null); setOpenCaloriesDayIndex(null); setCaloriesClosing(false);
+
+                  // Reopen the carried index on the target tab
+                  if (carryIdx !== null && effectiveWeekNumber !== null) {
+                    const date = getCardioDayDate(effectiveWeekNumber, carryIdx);
+                    if (date) {
+                      if (tab === 'Cardio') {
+                        setCardioDayDate(date); setOpenDayIndex(carryIdx); setCardioReady(false);
+                      } else if (tab === 'Weights') {
+                        setWeightsDayDate(date); setOpenWeightsDayIndex(carryIdx); setWeightsReady(false);
+                      } else if (tab === 'Score') {
+                        setScoreDayDate(date); setOpenScoreDayIndex(carryIdx);
+                      } else if (tab === 'Calories') {
+                        setCaloriesDayDate(date); setOpenCaloriesDayIndex(carryIdx);
                       }
-                    })();
-                  } else if (tab === 'Score' && effectiveWeekNumber !== null) {
-                    (() => {
-                      if (openDayIndex !== null) {
-                        const idx = openDayIndex, date = getCardioDayDate(effectiveWeekNumber, idx);
-                        if (date) { setScoreDayDate(date); setOpenScoreDayIndex(idx); }
-                      } else if (openWeightsDayIndex !== null) {
-                        const idx = openWeightsDayIndex, date = getCardioDayDate(effectiveWeekNumber, idx);
-                        if (date) { setScoreDayDate(date); setOpenScoreDayIndex(idx); }
-                      }
-                    })();
-                  } else if (tab === 'Cardio' && effectiveWeekNumber !== null) {
-                    (() => {
-                      if (openWeightsDayIndex !== null) {
-                        const idx = openWeightsDayIndex, date = getCardioDayDate(effectiveWeekNumber, idx);
-                        if (date) { setCardioDayDate(date); setOpenDayIndex(idx); }
-                      } else if (openScoreDayIndex !== null) {
-                        const idx = openScoreDayIndex, date = getCardioDayDate(effectiveWeekNumber, idx);
-                        if (date) { setCardioDayDate(date); setOpenDayIndex(idx); }
-                      }
-                    })();
+                    }
                   }
 
                   setActiveTab(tab);
@@ -573,7 +556,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
         </div>
 
         {/* ── Cardio Day Breakdown ── */}
-        {cardioDayDate && cardioReady && (
+        {activeTab === 'Cardio' && cardioDayDate && cardioReady && (
           <div
             className={closing ? 'fade-out-block' : 'fade-in-block'}
             onAnimationEnd={() => { if (closing) { setCardioDayDate(null); setOpenDayIndex(null); setCardioReady(false); setClosing(false); } }}
@@ -667,7 +650,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
         )}
 
         {/* ── Weights Day Breakdown ── */}
-        {weightsDayDate && weightsReady && (
+        {activeTab === 'Weights' && weightsDayDate && weightsReady && (
           <div
             className={weightsClosing ? 'fade-out-block' : 'fade-in-block'}
             onAnimationEnd={() => { if (weightsClosing) { setWeightsDayDate(null); setOpenWeightsDayIndex(null); setWeightsReady(false); setWeightsClosing(false); } }}
@@ -696,7 +679,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
         )}
 
         {/* ── Score Day Breakdown ── */}
-        {scoreDayDate && (
+        {activeTab === 'Score' && scoreDayDate && (
           <div
             className={scoreClosing ? 'fade-out-block' : 'fade-in-block'}
             onAnimationEnd={() => { if (scoreClosing) { setScoreDayDate(null); setOpenScoreDayIndex(null); setScoreClosing(false); } }}
@@ -748,7 +731,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
         )}
 
         {/* ── Calories Goal Breakdown ── */}
-        {caloriesDayDate && effectiveWeekNumber !== null && (() => {
+        {activeTab === 'Calories' && caloriesDayDate && effectiveWeekNumber !== null && (() => {
           const todayIdx = todayMalaysiaDayIndex();
 
           // day values per index from the current week bar data
