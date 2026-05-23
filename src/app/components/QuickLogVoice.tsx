@@ -299,6 +299,27 @@ export const QuickLogVoice: React.FC<QuickLogVoiceProps> = ({ multiplier, onClos
       }
     }
 
+    // --- Pattern 4: "Log 7.17 Time 48 mins 0 seconds" (running default) ---
+    // Handles "Log [km] Time [time]" without specifying exercise type — defaults to running
+    const logKmTimePattern = t.match(/(?:log\s+)?(\d+(?:\.\d+)?)\s*(?:km\s+)?time\s+(.*)/i);
+    if (logKmTimePattern) {
+      const km = parseFloat(logKmTimePattern[1]);
+      const timePart = logKmTimePattern[2];
+      if (!isNaN(km) && km > 0) {
+        let timeStr: string | null = null;
+        if (timePart) {
+          timeStr = parseTime(timePart);
+        }
+        await insertRunning(RUNNING_ID, km, timeStr);
+        let msg = `Running: ${km} km ✓`;
+        if (timeStr) {
+          const displayTime = timeStr.replace(/^00:/, '');
+          msg += ` (${displayTime})`;
+        }
+        return msg;
+      }
+    }
+
     return '';
   };
 
