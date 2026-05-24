@@ -151,7 +151,7 @@ const [syncMessage, setSyncMessage] = useState('');
         return;
       }
       console.log('First activity sample:', activities[0]);
-      const allowed = ['Run', 'Walk', 'Ride', 'VirtualRide', 'Hike', 'Rowing', 'Elliptical'];
+      const allowed = ['Run', 'Walk', 'Ride', 'VirtualRide', 'Hike', 'Rowing', 'Elliptical', 'WeightTraining'];
       const filtered = activities.filter((a: any) => allowed.includes(a.type));
       let inserted = 0;
       for (const a of filtered) {
@@ -160,20 +160,26 @@ const [syncMessage, setSyncMessage] = useState('');
           .select('id')
           .eq('activity_id', a.id)
           .maybeSingle();
-          if (!existing) {
-            const { error } = await supabase.from('strava').insert({
-              activity_id: a.id,
-              date: a.start_date.split('T')[0],
-              type: a.type,
-              distance_km: +(a.distance / 1000).toFixed(2),
-              name: a.name,
-              duration_seconds: a.moving_time,
-              time_formatted: new Date(a.moving_time * 1000).toISOString().substr(11, 8),
-              workout_calories: a.calories || null,
-            });
-            if (error) console.error('Insert error:', error);
-            else inserted++;
-          }
+        if (!existing) {
+          // Fetch full activity for calories
+          const detailRes = await fetch(
+            `https://www.strava.com/api/v3/activities/${a.id}`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          const detail = await detailRes.json();
+          const { error } = await supabase.from('strava').insert({
+            activity_id: a.id,
+            date: a.start_date.split('T')[0],
+            type: a.type,
+            distance_km: +(a.distance / 1000).toFixed(2),
+            name: a.name,
+            duration_seconds: a.moving_time,
+            time_formatted: new Date(a.moving_time * 1000).toISOString().substr(11, 8),
+            workout_calories: detail.calories || null,
+          });
+          if (error) console.error('Insert error:', error);
+          else inserted++;
+        }
       }
       setSyncMessage(`✓ ${inserted} new activities synced`);
     } catch (e: any) {
