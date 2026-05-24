@@ -367,7 +367,7 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
       </div>
 
       {/* Scrollable content */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '0 20px' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '0 20px', overflowY: 'auto' }}>
         {/* Name section */}
         <div style={{ paddingTop: '12px', paddingBottom: '8px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
@@ -623,7 +623,7 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
         {/* Data+ Analytics */}
         <button
           onClick={() => onNavigate('analytics')}
-          className="w-full rounded-xl p-4 mb-4 flex items-center justify-between active:scale-[0.98] transition-all"
+          className="w-full rounded-xl p-4 mb-3 flex items-center justify-between active:scale-[0.98] transition-all"
           style={{ backgroundColor: 'rgba(0,0,0,0.05)' }}
         >
           <div className="flex items-center gap-4">
@@ -636,6 +636,35 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
               textTransform: 'uppercase',
             }}>
               Data+
+            </span>
+          </div>
+          <div style={{ color: '#999' }}>›</div>
+        </button>
+
+        {/* Strava Connect */}
+        <button
+          onClick={() => {
+            const clientId = '250203';
+            const redirectUri = 'https://kine-v2.vercel.app/strava/callback';
+            const scope = 'read,activity:read';
+            window.location.href = `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
+          }}
+          className="w-full rounded-xl p-4 mb-4 flex items-center justify-between active:scale-[0.98] transition-all"
+          style={{ backgroundColor: 'rgba(0,0,0,0.05)' }}
+        >
+          <div className="flex items-center gap-4">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FC4C02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+</svg>
+            <span style={{
+              fontSize: '0.8rem',
+              fontWeight: 500,
+              letterSpacing: '0.1em',
+              color: '#FC4C02',
+              textTransform: 'uppercase',
+            }}>
+              Strava Connect
             </span>
           </div>
           <div style={{ color: '#999' }}>›</div>
