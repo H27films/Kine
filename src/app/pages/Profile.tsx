@@ -50,6 +50,8 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
   const [lastExportDisplay, setLastExportDisplay] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const [syncing, setSyncing] = useState(false);
+const [syncMessage, setSyncMessage] = useState('');
   /** Min/max workout dates for WaveTimeline when nothing is pending export (all rows are Exported). */
   const [allWorkoutDateSpan, setAllWorkoutDateSpan] = useState<{ first: string; last: string } | null>(null);
 
@@ -128,6 +130,55 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
   };
 
   useEffect(() => { loadData(); }, []);
+
+  const handleStravaSync = async () => {
+    const token = localStorage.getItem('strava_access_token');
+    if (!token) {
+      setSyncMessage('Not connected to Strava');
+      return;
+    }
+    setSyncing(true);
+    setSyncMessage('');
+    try {
+      const response = await fetch(
+        'https://www.strava.com/api/v3/athlete/activities?per_page=90',
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const activities = await response.json();
+      if (!Array.isArray(activities)) {
+        setSyncMessage('Token expired — reconnect Strava');
+        setSyncing(false);
+        return;
+      }
+      const allowed = ['Run', 'Walk', 'Ride', 'VirtualRide', 'Hike'];
+      const filtered = activities.filter((a: any) => allowed.includes(a.type));
+      let inserted = 0;
+      for (const a of filtered) {
+        const { data: existing } = await supabase
+          .from('strava')
+          .select('id')
+          .eq('activity_id', a.id)
+          .maybeSingle();
+        if (!existing) {
+          await supabase.from('strava').insert({
+            activity_id: a.id,
+            date: a.start_date.split('T')[0],
+            type: a.type,
+            distance_km: +(a.distance / 1000).toFixed(2),
+            name: a.name,
+            duration_seconds: a.moving_time,
+          });
+          inserted++;
+        }
+      }
+      setSyncMessage(`✓ ${inserted} new activities synced`);
+    } catch (e) {
+      setSyncMessage('Sync failed');
+    } finally {
+      setSyncing(false);
+    }
+  };
+
 
   const handleExport = async () => {
     setExporting(true);
@@ -669,6 +720,30 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
           </div>
           <div style={{ color: '#999' }}>›</div>
         </button>
+
+        {localStorage.getItem('strava_access_token') && (
+          <button
+            onClick={handleStravaSync}
+            disabled={syncing}
+            className="w-full rounded-xl p-4 mb-4 flex items-center justify-between active:scale-[0.98] transition-all"
+            style={{ backgroundColor: 'rgba(0,0,0,0.05)' }}
+          >
+            <div className="flex items-center gap-4">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FC4C02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="23 4 23 10 17 10" />
+                <polyline points="1 20 1 14 7 14" />
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+              </svg>
+              <span style={{ fontSize: '0.8rem', fontWeight: 500, letterSpacing: '0.1em', color: '#FC4C02', textTransform: 'uppercase' }}>
+                {syncing ? 'Syncing...' : 'Strava Sync'}
+              </span>
+            </div>
+            {syncMessage 
+              ? <span style={{ fontSize: '0.7rem', color: '#999' }}>{syncMessage}</span> 
+              : <div style={{ color: '#999' }}>›</div>
+            }
+          </button>
+        )}
       </div>
 
       {/* Exercises+ Sheet */}
