@@ -209,29 +209,29 @@ const ExerciseLogDots: React.FC<Props> = ({ exercises, saveSuccess }) => {
                 {/* Spacer to push cross to the right */}
                 <div style={{ flex: 1 }} />
 
-                {/* Cross button — always visible */}
-                <button
-                  onClick={e => {
-                    e.stopPropagation();
-                    setConfirmDeleteId(prev => prev === session.id ? null : session.id);
-                  }}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    padding: '4px 8px',
-                    cursor: 'pointer',
-                    color: '#1a1a1a',
-                    fontSize: '16px',
-                    fontWeight: 500,
-                    lineHeight: 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                  }}
-                >
-                  ✕
-                </button>
+                 {/* Cross button — always visible */}
+                 <button
+                   onClick={e => {
+                     e.stopPropagation();
+                     setConfirmDeleteId(prev => prev === session.id ? null : session.id);
+                   }}
+                   style={{
+                     background: 'none',
+                     border: 'none',
+                     padding: '2px 4px',
+                     cursor: 'pointer',
+                     color: '#1a1a1a',
+                     fontSize: '18px',
+                     fontWeight: 500,
+                     lineHeight: 1,
+                     display: 'flex',
+                     alignItems: 'center',
+                     justifyContent: 'center',
+                     flexShrink: 0,
+                   }}
+                 >
+                   ✕
+                 </button>
 
                 {/* Delete confirmation pill */}
                 {confirmDeleteId === session.id && (
