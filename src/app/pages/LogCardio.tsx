@@ -25,7 +25,7 @@ const tabs: { label: string; page: Page }[] = [
 const TOTAL_CARDIO_IDS = [82, 83, 87];
 const NO_TRACKER_CARDIO_IDS = [83, 84, 85, 86, 87]; // Row + Running + Walking + Cross Trainer + Cycle
 
-export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity }) => {
+export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, initialSelectedActivity }) => {
   const exerciseSectionRef = useRef<HTMLDivElement>(null);
   const [trackerDistance, setTrackerDistance] = useState('');
   const [trackerInputVisible, setTrackerInputVisible] = useState(true);
@@ -662,7 +662,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ initialSelectedActivity })
       `}</style>
 
       {/* Per-type cardio chart */}
-      <CardioTypeChart />
+      <CardioTypeChart onNavigate={onNavigate} />
 
       {/* Monthly Calendar Chart */}
       <section className="mb-10">

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { Page } from '../../types';
+import { DoubleArrowIcon } from './DoubleArrowIcon';
 
 type ViewMode = 'weekly' | 'monthly';
 
@@ -32,7 +34,11 @@ function getMonthBounds(offset: number) {
   };
 }
 
-export const CardioTypeChart: React.FC = () => {
+interface CardioTypeChartProps {
+  onNavigate?: (page: Page, data?: any) => void;
+}
+
+export const CardioTypeChart: React.FC<CardioTypeChartProps> = ({ onNavigate }) => {
   const [selectedType, setSelectedType] = useState('RUNNING');
   const [typePickerOpen, setTypePickerOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('weekly');
@@ -338,12 +344,23 @@ export const CardioTypeChart: React.FC = () => {
           )}
         </div>
 
-        {/* Total only */}
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '20px' }}>
-          <span style={{ fontSize: '1.6rem', fontWeight: 900, letterSpacing: '-0.02em', color: '#1a1a1a', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>
-            {total}
-          </span>
-          <span style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(26,26,26,0.45)', letterSpacing: '0.12em', fontFamily: "'Archivo', sans-serif" }}>KM</span>
+        {/* Total only + double arrow to Running+ (only for Running in week view) */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+            <span style={{ fontSize: '1.6rem', fontWeight: 900, letterSpacing: '-0.02em', color: '#1a1a1a', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>
+              {total}
+            </span>
+            <span style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(26,26,26,0.45)', letterSpacing: '0.12em', fontFamily: "'Archivo', sans-serif" }}>KM</span>
+          </div>
+          {selectedType === 'RUNNING' && viewMode === 'weekly' && onNavigate && (
+            <button
+              onClick={() => onNavigate('running-plus')}
+              style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+              aria-label="Running+"
+            >
+              <DoubleArrowIcon size={16} />
+            </button>
+          )}
         </div>
 
         {/* Bar chart */}
