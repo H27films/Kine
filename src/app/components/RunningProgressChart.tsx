@@ -101,7 +101,7 @@ export const RunningProgressChart: React.FC<RunningProgressChartProps> = ({
           y2={baselineY}
           stroke="#666"
           strokeWidth="2.0"
-          strokeOpacity={0.6}
+          strokeOpacity={completedKm === 0 ? 0.01 : 0.6}
         />
         
         {/* Completed portion — starts at y=0, fills down to baselineY */}
