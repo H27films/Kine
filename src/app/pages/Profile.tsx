@@ -159,21 +159,23 @@ const [syncMessage, setSyncMessage] = useState('');
           .select('id')
           .eq('activity_id', a.id)
           .maybeSingle();
-        if (!existing) {
-          await supabase.from('strava').insert({
-            activity_id: a.id,
-            date: a.start_date.split('T')[0],
-            type: a.type,
-            distance_km: +(a.distance / 1000).toFixed(2),
-            name: a.name,
-            duration_seconds: a.moving_time,
-          });
-          inserted++;
-        }
+          if (!existing) {
+            const { error } = await supabase.from('strava').insert({
+              activity_id: a.id,
+              date: a.start_date.split('T')[0],
+              type: a.type,
+              distance_km: +(a.distance / 1000).toFixed(2),
+              name: a.name,
+              duration_seconds: a.moving_time,
+            });
+            if (error) console.error('Insert error:', error);
+            else inserted++;
+          }
       }
       setSyncMessage(`✓ ${inserted} new activities synced`);
-    } catch (e) {
-      setSyncMessage('Sync failed');
+    } catch (e: any) {
+      setSyncMessage('Sync failed: ' + e.message);
+      console.error('Sync error:', e);
     } finally {
       setSyncing(false);
     }
