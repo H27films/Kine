@@ -645,7 +645,7 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
         <button
           onClick={() => {
             const clientId = '250203';
-            const redirectUri = 'https://kine-v2.vercel.app/strava/callback';
+            const redirectUri = 'https://kine-v2.vercel.app/api/strava-callback';
             const scope = 'read,activity:read';
             window.location.href = `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
           }}

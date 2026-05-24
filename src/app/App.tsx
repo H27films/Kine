@@ -54,6 +54,27 @@ const App: React.FC = () => {
     }
   }, [currentPage.page]);
 
+  // Handle Strava OAuth callback
+React.useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('strava_token');
+  const refresh = params.get('strava_refresh');
+  const expires = params.get('strava_expires');
+  const error = params.get('strava_error');
+
+  if (token && refresh && expires) {
+    localStorage.setItem('strava_access_token', token);
+    localStorage.setItem('strava_refresh_token', refresh);
+    localStorage.setItem('strava_expires_at', expires);
+    window.history.replaceState({}, '', '/');
+    setCurrentPage({ page: 'profile' });
+  }
+  if (error) {
+    window.history.replaceState({}, '', '/');
+    console.error('Strava auth error:', error);
+  }
+}, []);
+
    const getHeaderTitle = (): string => {
     switch (currentPage.page) {
       case 'dashboard': return '';
