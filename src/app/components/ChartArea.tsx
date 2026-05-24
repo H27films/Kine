@@ -140,6 +140,7 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                 height="100%"
                 viewBox={`0 0 ${chartWidth} ${chartHeight}`}
                 preserveAspectRatio="xMidYMid meet"
+                style={{ overflow: 'visible' }}
               >
                 {/* Background bars for exercise - always show for maxBars positions */}
                 {Array.from({ length: maxBars }).map((_, i) => {
@@ -185,6 +186,7 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                 height="100%"
                 viewBox={`0 0 ${chartWidth} ${chartHeight}`}
                 preserveAspectRatio="xMidYMid meet"
+                style={{ overflow: 'visible' }}
               >
                 {/* Bars */}
                 {data.map((d, i) => {
