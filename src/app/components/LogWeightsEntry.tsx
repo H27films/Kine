@@ -424,67 +424,83 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
             )}
           </>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '12px', paddingTop: '40px' }}>
-            {exercisesByGroup && Object.keys(exercisesByGroup).length > 0 ? (
-              <div ref={randomListRef} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
-                {!randomListExpanded && (
+          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', paddingTop: '40px' }}>
+            {/* Centered empty state content */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, gap: '12px' }}>
+              {exercisesByGroup && Object.keys(exercisesByGroup).length > 0 ? (
+                <div ref={randomListRef} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+                  {!randomListExpanded && (
+                    <button
+                      onClick={onApplySavedTemplate}
+                      style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                    >
+                      <div style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <Plus size={16} color="#ffffff" strokeWidth={2.5} />
+                      </div>
+                      <span style={{ fontSize: '13px', fontWeight: 500, color: '#1a1a1a', letterSpacing: '0.02em' }}>ADD SAVED LIST</span>
+                    </button>
+                  )}
                   <button
-                    onClick={onApplySavedTemplate}
-                    style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                    onClick={() => {
+                      if (randomListExpanded) { onRandomList(); setRandomListExpanded(false); }
+                      else setRandomListExpanded(true);
+                    }}
+                    style={{
+                      display: 'flex', flexDirection: randomListExpanded ? 'column' : 'row',
+                      alignItems: 'center', gap: randomListExpanded ? '6px' : '8px',
+                      background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                    }}
                   >
-                    <div style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <Plus size={16} color="#ffffff" strokeWidth={2.5} />
+                    <div style={{ width: randomListExpanded ? 40 : 32, height: randomListExpanded ? 40 : 32, borderRadius: '50%', backgroundColor: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <svg width={randomListExpanded ? 18 : 16} height={randomListExpanded ? 18 : 16} viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="16 3 21 3 21 8" />
+                        <line x1="4" y1="20" x2="21" y2="3" />
+                        <polyline points="21 16 21 21 16 21" />
+                        <line x1="15" y1="15" x2="21" y2="21" />
+                        <line x1="4" y1="4" x2="9" y2="9" />
+                      </svg>
                     </div>
-                    <span style={{ fontSize: '13px', fontWeight: 500, color: '#1a1a1a', letterSpacing: '0.02em' }}>ADD SAVED LIST</span>
+                    <span style={{ fontSize: '13px', fontWeight: 500, color: '#1a1a1a', letterSpacing: '0.02em' }}>RANDOM LIST</span>
                   </button>
-                )}
+                  {randomListExpanded && (
+                    <div style={{ display: 'flex', gap: '28px', marginTop: '8px', justifyContent: 'center' }}>
+                      {['Chest', 'Back'].map(group => (
+                        <button
+                          key={group}
+                          onClick={() => { onRandomList(group); setRandomListExpanded(false); }}
+                          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '7px', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                        >
+                          <div style={{
+                            width: 48, height: 48, borderRadius: '50%', backgroundColor: 'transparent',
+                            border: '1px solid rgba(0,0,0,0.12)',
+                            background: 'radial-gradient(circle at 30% 30%, rgba(26,26,26,0.12) 0%, rgba(26,26,26,0.05) 30%, transparent 70%)',
+                            boxShadow: '0 0 8px rgba(0,0,0,0.06), 0 0 16px rgba(0,0,0,0.04), 0 0 26px rgba(0,0,0,0.02), 4px 6px 20px rgba(0,0,0,0.10), inset 2px 2px 12px rgba(255,255,255,0.25), inset -2px -2px 10px rgba(255,255,255,0.03)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
+                          }}>
+                            <img src={`/icons/${group}.svg`} alt={group} style={{ width: '34px', height: '34px', objectFit: 'contain' }} />
+                          </div>
+                          <span style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#1a1a1a' }}>{group}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <span style={{ fontSize: '12px', color: 'rgba(26,26,26,0.35)', letterSpacing: '0.04em' }}>No exercises available</span>
+              )}
+            </div>
+
+            {/* Double arrow button — only when no exercises added */}
+            {!adderOpen && showDoubleArrow && addedExercises.length === 0 && (
+              <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0 0 20px 20px' }}>
                 <button
-                  onClick={() => {
-                    if (randomListExpanded) { onRandomList(); setRandomListExpanded(false); }
-                    else setRandomListExpanded(true);
-                  }}
-                  style={{
-                    display: 'flex', flexDirection: randomListExpanded ? 'column' : 'row',
-                    alignItems: 'center', gap: randomListExpanded ? '6px' : '8px',
-                    background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-                  }}
+                  onClick={() => onNavigate && onNavigate('summary-weights', { addedExercises, todayLoggedTotal, exercisesByGroup })}
+                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', marginRight: '4px' }}
+                  aria-label="Summary"
                 >
-                  <div style={{ width: randomListExpanded ? 40 : 32, height: randomListExpanded ? 40 : 32, borderRadius: '50%', backgroundColor: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <svg width={randomListExpanded ? 18 : 16} height={randomListExpanded ? 18 : 16} viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="16 3 21 3 21 8" />
-                      <line x1="4" y1="20" x2="21" y2="3" />
-                      <polyline points="21 16 21 21 16 21" />
-                      <line x1="15" y1="15" x2="21" y2="21" />
-                      <line x1="4" y1="4" x2="9" y2="9" />
-                    </svg>
-                  </div>
-                  <span style={{ fontSize: '13px', fontWeight: 500, color: '#1a1a1a', letterSpacing: '0.02em' }}>RANDOM LIST</span>
+                  <DoubleArrowIcon size={16} />
                 </button>
-                {randomListExpanded && (
-                  <div style={{ display: 'flex', gap: '28px', marginTop: '8px', justifyContent: 'center' }}>
-                    {['Chest', 'Back'].map(group => (
-                      <button
-                        key={group}
-                        onClick={() => { onRandomList(group); setRandomListExpanded(false); }}
-                        style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '7px', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-                      >
-                        <div style={{
-                          width: 48, height: 48, borderRadius: '50%', backgroundColor: 'transparent',
-                          border: '1px solid rgba(0,0,0,0.12)',
-                          background: 'radial-gradient(circle at 30% 30%, rgba(26,26,26,0.12) 0%, rgba(26,26,26,0.05) 30%, transparent 70%)',
-                          boxShadow: '0 0 8px rgba(0,0,0,0.06), 0 0 16px rgba(0,0,0,0.04), 0 0 26px rgba(0,0,0,0.02), 4px 6px 20px rgba(0,0,0,0.10), inset 2px 2px 12px rgba(255,255,255,0.25), inset -2px -2px 10px rgba(255,255,255,0.03)',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
-                        }}>
-                          <img src={`/icons/${group}.svg`} alt={group} style={{ width: '34px', height: '34px', objectFit: 'contain' }} />
-                        </div>
-                        <span style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#1a1a1a' }}>{group}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
               </div>
-            ) : (
-              <span style={{ fontSize: '12px', color: 'rgba(26,26,26,0.35)', letterSpacing: '0.04em' }}>No exercises available</span>
             )}
           </div>
         )}
