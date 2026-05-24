@@ -129,215 +129,215 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
         </div>
       </div>
 
-      {/* Chart */}
-      <div style={{ height: '220px', position: 'relative', marginBottom: '2px' }}>
-        {data.length > 0 ? (
-          mode === 'exercise' ? (
-            // Bar chart for exercise
-            <svg
-              width="100%"
-              height="100%"
-              viewBox={`0 0 ${chartWidth} ${chartHeight}`}
-              preserveAspectRatio="none"
-              style={{ overflow: 'visible' }}
-            >
-              {/* Background bars for exercise - always show for maxBars positions */}
-              {Array.from({ length: maxBars }).map((_, i) => {
-                const x = paddingX + i * (barWidth + barSpacing);
-                const bgY = paddingY + plotHeight - maxBarHeight;
-                return <rect key={`bg-${i}`} x={x} y={bgY} width={barWidth} height={maxBarHeight} fill="rgba(0,0,0,0.02)" rx="4" />;
-              })}
-              {/* Foreground bars for exercise */}
-              {data.map((d, i) => {
-                const x = paddingX + i * (barWidth + barSpacing);
-                const barHeight = Math.max(4, ((d.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
-                const y = paddingY + plotHeight - barHeight;
-                const radius = barWidth / 2;
-                const color = getBarColor(d.value);
-                const isHovered = hoveredIdx === i;
+      {/* Chart & x-axis labels — wrapped in shared width container */}
+      <div style={{ maxWidth: chartWidth, margin: '0 auto' }}>
+        <div style={{ height: '220px', position: 'relative', marginBottom: '2px' }}>
+          {data.length > 0 ? (
+            mode === 'exercise' ? (
+              // Bar chart for exercise
+              <svg
+                width="100%"
+                height="100%"
+                viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+                preserveAspectRatio="xMidYMid meet"
+              >
+                {/* Background bars for exercise - always show for maxBars positions */}
+                {Array.from({ length: maxBars }).map((_, i) => {
+                  const x = paddingX + i * (barWidth + barSpacing);
+                  const bgY = paddingY + plotHeight - maxBarHeight;
+                  return <rect key={`bg-${i}`} x={x} y={bgY} width={barWidth} height={maxBarHeight} fill="rgba(0,0,0,0.02)" rx="4" />;
+                })}
+                {/* Foreground bars for exercise */}
+                {data.map((d, i) => {
+                  const x = paddingX + i * (barWidth + barSpacing);
+                  const barHeight = Math.max(4, ((d.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
+                  const y = paddingY + plotHeight - barHeight;
+                  const radius = barWidth / 2;
+                  const color = getBarColor(d.value);
+                  const isHovered = hoveredIdx === i;
 
-                const tooltipX = x + barWidth / 2;
-                const tooltipY = -10;
+                  const tooltipX = x + barWidth / 2;
+                  const tooltipY = -10;
 
-                return (
-                  <g key={d.workoutId}>
-                    <path
-                      d={`M ${x},${y + barHeight} L ${x},${y + radius} A ${radius} ${radius} 0 0 1 ${x + barWidth},${y + radius} L ${x + barWidth},${y + barHeight} Z`}
-                      fill={color}
-                      style={{ cursor: 'pointer', transition: 'opacity 0.15s ease' }}
-                      onMouseEnter={() => setHoveredIdx(i)}
-                      onMouseLeave={() => setHoveredIdx(null)}
-                    />
-                    {isHovered && (
-                      <g>
-                        <rect x={tooltipX - 28} y={tooltipY} width="56" height="28" rx="4" fill="rgba(0,0,0,0.06)" />
-                        <text x={tooltipX} y={tooltipY + 18} textAnchor="middle" style={{ fontSize: '12px', fontWeight: 900, color: '#1a1a1a', fontFamily: "'JetBrains Mono', monospace" }}>{d.value.toLocaleString()}</text>
-                      </g>
-                    )}
-                  </g>
-                );
-              })}
-            </svg>
-          ) : (
-            // Aggregate chart (bar chart)
-            <svg
-              width="100%"
-              height="100%"
-              viewBox={`0 0 ${chartWidth} ${chartHeight}`}
-              preserveAspectRatio="none"
-              style={{ overflow: 'visible' }}
-            >
-              {/* Bars */}
-              {data.map((d, i) => {
-                const x = paddingX + i * (barWidth + barSpacing);
-                const barHeight = Math.max(4, ((d.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
-                const y = paddingY + plotHeight - barHeight;
-                const isHovered = hoveredIdx === i;
+                  return (
+                    <g key={d.workoutId}>
+                      <path
+                        d={`M ${x},${y + barHeight} L ${x},${y + radius} A ${radius} ${radius} 0 0 1 ${x + barWidth},${y + radius} L ${x + barWidth},${y + barHeight} Z`}
+                        fill={color}
+                        style={{ cursor: 'pointer', transition: 'opacity 0.15s ease' }}
+                        onMouseEnter={() => setHoveredIdx(i)}
+                        onMouseLeave={() => setHoveredIdx(null)}
+                      />
+                      {isHovered && (
+                        <g>
+                          <rect x={tooltipX - 28} y={tooltipY} width="56" height="28" rx="4" fill="rgba(0,0,0,0.06)" />
+                          <text x={tooltipX} y={tooltipY + 18} textAnchor="middle" style={{ fontSize: '12px', fontWeight: 900, color: '#1a1a1a', fontFamily: "'JetBrains Mono', monospace" }}>{d.value.toLocaleString()}</text>
+                        </g>
+                      )}
+                    </g>
+                  );
+                })}
+              </svg>
+            ) : (
+              // Aggregate chart (bar chart)
+              <svg
+                width="100%"
+                height="100%"
+                viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+                preserveAspectRatio="xMidYMid meet"
+              >
+                {/* Bars */}
+                {data.map((d, i) => {
+                  const x = paddingX + i * (barWidth + barSpacing);
+                  const barHeight = Math.max(4, ((d.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
+                  const y = paddingY + plotHeight - barHeight;
+                  const isHovered = hoveredIdx === i;
 
-                const bgY = paddingY;
-                const bgHeight = plotHeight;
-                const minVal = Math.min(...data.map(dd => dd.value), 0);
-                const maxVal = Math.max(...data.map(dd => dd.value), minVal + 1);
-                const pct = (d.value - minVal) / (maxVal - minVal);
-                const opacity = isHovered ? 1 : (0.15 + (Math.max(pct, 0) * 0.85));
+                  const bgY = paddingY;
+                  const bgHeight = plotHeight;
+                  const minVal = Math.min(...data.map(dd => dd.value), 0);
+                  const maxVal = Math.max(...data.map(dd => dd.value), minVal + 1);
+                  const pct = (d.value - minVal) / (maxVal - minVal);
+                  const opacity = isHovered ? 1 : (0.15 + (Math.max(pct, 0) * 0.85));
 
-                const tooltipX = x + barWidth / 2;
-                const tooltipY = -10;
+                  const tooltipX = x + barWidth / 2;
+                  const tooltipY = -10;
 
-                return (
-                  <g key={d.workoutId}>
-                    {/* Background bar */}
-                    <path
-                      d={`M ${x},${bgY + maxBarHeight} L ${x},${bgY + 2} A 2 2 0 0 1 ${x + barWidth},${bgY + 2} L ${x + barWidth},${bgY + maxBarHeight} Z`}
-                      fill="rgba(0,0,0,0.02)"
-                    />
-                    {/* Foreground bar */}
-                    <path
-                      d={`M ${x},${y + barHeight} L ${x},${y + 2} A 2 2 0 0 1 ${x + barWidth},${y + 2} L ${x + barWidth},${y + barHeight} Z`}
-                      fill="#1a1a1a"
-                      fillOpacity={opacity}
-                      style={{ cursor: 'pointer', transition: 'fill-opacity 0.15s ease' }}
-                      onMouseEnter={() => setHoveredIdx(i)}
-                      onMouseLeave={() => setHoveredIdx(null)}
-                    />
-                    {isHovered && (
-                      <g>
-                        <rect x={tooltipX - 28} y={tooltipY} width="56" height="28" rx="4" fill="rgba(0,0,0,0.06)" />
-                        <text x={tooltipX} y={tooltipY + 18} textAnchor="middle" style={{ fontSize: '12px', fontWeight: 900, color: '#1a1a1a', fontFamily: "'JetBrains Mono', monospace" }}>{Math.round(d.value).toLocaleString()}</text>
-                      </g>
-                    )}
-                  </g>
-                );
-              })}
-              {/* Moving average line chart */}
-              {(() => {
-                let linePath = '';
-                if (data.length > 1) {
-                  // Calculate moving average (3-point)
-                  const maValues = data.map((_, i) => {
-                    const start = Math.max(0, i - 1);
-                    const end = Math.min(data.length - 1, i + 1);
-                    const sum = data.slice(start, end + 1).reduce((s, dd) => s + dd.value, 0);
-                    const count = end - start + 1;
-                    return sum / count;
-                  });
-                  // Calculate points based on MA
-                  const points = maValues.map((ma, i) => {
-                    const barHeight = Math.max(4, ((ma - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
-                    const y = paddingY + plotHeight - barHeight;
-                    const y_line = y + barHeight * 0.05;
-                    let x;
-                    if (i === 0) {
-                      x = paddingX; // left edge of first bar
-                    } else if (i === maValues.length - 1) {
-                      x = paddingX + i * (barWidth + barSpacing) + barWidth; // right edge of last bar
-                    } else {
-                      x = paddingX + i * (barWidth + barSpacing) + barWidth / 2; // center for middle
+                  return (
+                    <g key={d.workoutId}>
+                      {/* Background bar */}
+                      <path
+                        d={`M ${x},${bgY + maxBarHeight} L ${x},${bgY + 2} A 2 2 0 0 1 ${x + barWidth},${bgY + 2} L ${x + barWidth},${bgY + maxBarHeight} Z`}
+                        fill="rgba(0,0,0,0.02)"
+                      />
+                      {/* Foreground bar */}
+                      <path
+                        d={`M ${x},${y + barHeight} L ${x},${y + 2} A 2 2 0 0 1 ${x + barWidth},${y + 2} L ${x + barWidth},${y + barHeight} Z`}
+                        fill="#1a1a1a"
+                        fillOpacity={opacity}
+                        style={{ cursor: 'pointer', transition: 'fill-opacity 0.15s ease' }}
+                        onMouseEnter={() => setHoveredIdx(i)}
+                        onMouseLeave={() => setHoveredIdx(null)}
+                      />
+                      {isHovered && (
+                        <g>
+                          <rect x={tooltipX - 28} y={tooltipY} width="56" height="28" rx="4" fill="rgba(0,0,0,0.06)" />
+                          <text x={tooltipX} y={tooltipY + 18} textAnchor="middle" style={{ fontSize: '12px', fontWeight: 900, color: '#1a1a1a', fontFamily: "'JetBrains Mono', monospace" }}>{Math.round(d.value).toLocaleString()}</text>
+                        </g>
+                      )}
+                    </g>
+                  );
+                })}
+                {/* Moving average line chart */}
+                {(() => {
+                  let linePath = '';
+                  if (data.length > 1) {
+                    // Calculate moving average (3-point)
+                    const maValues = data.map((_, i) => {
+                      const start = Math.max(0, i - 1);
+                      const end = Math.min(data.length - 1, i + 1);
+                      const sum = data.slice(start, end + 1).reduce((s, dd) => s + dd.value, 0);
+                      const count = end - start + 1;
+                      return sum / count;
+                    });
+                    // Calculate points based on MA
+                    const points = maValues.map((ma, i) => {
+                      const barHeight = Math.max(4, ((ma - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
+                      const y = paddingY + plotHeight - barHeight;
+                      const y_line = y + barHeight * 0.05;
+                      let x;
+                      if (i === 0) {
+                        x = paddingX; // left edge of first bar
+                      } else if (i === maValues.length - 1) {
+                        x = paddingX + i * (barWidth + barSpacing) + barWidth; // right edge of last bar
+                      } else {
+                        x = paddingX + i * (barWidth + barSpacing) + barWidth / 2; // center for middle
+                      }
+                      return { x, y: y_line };
+                    });
+                    // Build smooth path using cubic Bezier
+                    for (let i = 0; i < points.length - 1; i++) {
+                      const p0 = i > 0 ? points[i - 1] : points[i];
+                      const p1 = points[i];
+                      const p2 = points[i + 1];
+                      const p3 = i < points.length - 2 ? points[i + 2] : points[i + 1];
+                      const cp1x = p1.x + (p2.x - p0.x) / 6;
+                      const cp1y = p1.y + (p2.y - p0.y) / 6;
+                      const cp2x = p2.x - (p3.x - p1.x) / 6;
+                      const cp2y = p2.y - (p3.y - p1.y) / 6;
+                      if (i === 0) {
+                        linePath = `M ${p1.x} ${p1.y}`;
+                      }
+                      linePath += ` C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${p2.x} ${p2.y}`;
                     }
-                    return { x, y: y_line };
-                  });
-                  // Build smooth path using cubic Bezier
-                  for (let i = 0; i < points.length - 1; i++) {
-                    const p0 = i > 0 ? points[i - 1] : points[i];
-                    const p1 = points[i];
-                    const p2 = points[i + 1];
-                    const p3 = i < points.length - 2 ? points[i + 2] : points[i + 1];
-                    const cp1x = p1.x + (p2.x - p0.x) / 6;
-                    const cp1y = p1.y + (p2.y - p0.y) / 6;
-                    const cp2x = p2.x - (p3.x - p1.x) / 6;
-                    const cp2y = p2.y - (p3.y - p1.y) / 6;
-                    if (i === 0) {
-                      linePath = `M ${p1.x} ${p1.y}`;
-                    }
-                    linePath += ` C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${p2.x} ${p2.y}`;
                   }
-                }
-                return data.length > 1 ? <path d={linePath} stroke="rgba(220,220,220,0.4)" strokeWidth="3" fill="none" /> : null;
-              })()}
-            </svg>
-          )
-        ) : (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#999', fontSize: '12px' }}>
-            No data for this selection
-          </div>
-        )}
-      </div>
+                  return data.length > 1 ? <path d={linePath} stroke="rgba(220,220,220,0.4)" strokeWidth="3" fill="none" /> : null;
+                })()}
+              </svg>
+            )
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#999', fontSize: '12px' }}>
+              No data for this selection
+            </div>
+          )}
+        </div>
 
-      {/* X-axis labels */}
-      {mode === 'exercise' && data.length > 0 ? (
-        // Bar chart: show occurrence numbers for all data positions
-        <div style={{ position: 'relative', height: '12px' }}>
-          {Array.from({ length: data.length > maxBars ? data.length : maxBars }).map((_, i) => {
-            const barLeft = paddingX + i * (barWidth + barSpacing);
-            const barCenter = barLeft + barWidth / 2;
-            const leftPercent = (barCenter / chartWidth) * 100;
-            return (
-              <span
-                key={i}
-                style={{
-                  position: 'absolute',
-                  left: `${leftPercent}%`,
-                  bottom: 0,
-                  transform: 'translateX(-50%)',
-                  fontSize: '9px',
-                  fontWeight: 500,
-                  color: '#1a1a1a',
-                  letterSpacing: '0.02em',
-                }}
-              >
-                {i + 1}
-              </span>
-            );
-          })}
-        </div>
-      ) : mode === 'aggregate' && data.length > 0 ? (
-        <div style={{ position: 'relative', height: '10px' }}>
-          {data.map((point, i) => {
-            const week = point?.occurrence || i + 1;
-            const showLabel = i % 2 === 0; // Show every 2nd bar, starting from first
-            const barLeft = paddingX + i * (barWidth + barSpacing);
-            const barCenter = barLeft + barWidth / 2;
-            const leftPercent = (barCenter / chartWidth) * 100;
-            return showLabel ? (
-              <span
-                key={i}
-                style={{
-                  position: 'absolute',
-                  left: `${leftPercent}%`,
-                  bottom: 0,
-                  transform: 'translateX(-50%)',
-                  fontSize: '9px',
-                  fontWeight: 500,
-                  color: '#1a1a1a',
-                  letterSpacing: '0.02em',
-                }}
-              >
-                {week}
-              </span>
-            ) : null;
-          })}
-        </div>
-      ) : null}
+        {/* X-axis labels */}
+        {mode === 'exercise' && data.length > 0 ? (
+          // Bar chart: show occurrence numbers for all data positions
+          <div style={{ position: 'relative', height: '12px' }}>
+            {Array.from({ length: data.length > maxBars ? data.length : maxBars }).map((_, i) => {
+              const barLeft = paddingX + i * (barWidth + barSpacing);
+              const barCenter = barLeft + barWidth / 2;
+              const leftPercent = (barCenter / chartWidth) * 100;
+              return (
+                <span
+                  key={i}
+                  style={{
+                    position: 'absolute',
+                    left: `${leftPercent}%`,
+                    bottom: 0,
+                    transform: 'translateX(-50%)',
+                    fontSize: '9px',
+                    fontWeight: 500,
+                    color: '#1a1a1a',
+                    letterSpacing: '0.02em',
+                  }}
+                >
+                  {i + 1}
+                </span>
+              );
+            })}
+          </div>
+        ) : mode === 'aggregate' && data.length > 0 ? (
+          <div style={{ position: 'relative', height: '10px' }}>
+            {data.map((point, i) => {
+              const week = point?.occurrence || i + 1;
+              const showLabel = i % 2 === 0; // Show every 2nd bar, starting from first
+              const barLeft = paddingX + i * (barWidth + barSpacing);
+              const barCenter = barLeft + barWidth / 2;
+              const leftPercent = (barCenter / chartWidth) * 100;
+              return showLabel ? (
+                <span
+                  key={i}
+                  style={{
+                    position: 'absolute',
+                    left: `${leftPercent}%`,
+                    bottom: 0,
+                    transform: 'translateX(-50%)',
+                    fontSize: '9px',
+                    fontWeight: 500,
+                    color: '#1a1a1a',
+                    letterSpacing: '0.02em',
+                  }}
+                >
+                  {week}
+                </span>
+              ) : null;
+            })}
+          </div>
+        ) : null}
+      </div>
 
       {/* MAX/AVG stats for aggregate mode */}
       {mode === 'aggregate' && data.length > 0 && (
