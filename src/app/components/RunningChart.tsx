@@ -522,171 +522,173 @@ export const RunningChart: React.FC<RunningChartProps> = () => {
           </div>
         </div>
 
-        {/* Chart */}
-        <div style={{ height: '220px', position: 'relative', marginBottom: '2px' }}>
-          {points.length > 0 ? (
-             <svg
-               width="100%"
-               height="100%"
-               viewBox={`0 0 ${chartWidth} ${chartHeight}`}
-               preserveAspectRatio="xMidYMid meet"
-               style={{ overflow: 'visible', maxWidth: chartWidth, margin: '0 auto' }}
-              >
-               <defs>
-                 <pattern id="squarePattern" patternUnits="userSpaceOnUse" width="5" height="5">
-                   <rect width="2.5" height="2.5" fill="#1a1a1a"/>
-                 </pattern>
-               </defs>
-                    {points.map((d, i) => {
-                  const x = paddingX + i * (barWidth + dynamicBarSpacing);
-                  const barHeight = d.value === 0 ? 1.5 : Math.max(4, ((d.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
-                  const y = baselineY - barHeight;
-                  const pct = (d.value - minValue) / (maxValue - minValue);
-                  const opacity = 0.15 + (Math.max(pct, 0) * 0.85);
-                  const label = d.value === 0 ? '0.0' : d.value.toFixed(1);
-                  const isAllView = view.type === 'all';
-                  const isSelected = selectedBarIdx === i;
+        {/* Chart & x-axis labels — wrapped in shared width container */}
+        <div style={{ maxWidth: chartWidth, margin: '0 auto' }}>
+          <div style={{ height: '220px', position: 'relative', marginBottom: '2px' }}>
+            {points.length > 0 ? (
+               <svg
+                 width="100%"
+                 height="100%"
+                 viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+                 preserveAspectRatio="xMidYMid meet"
+                 style={{ overflow: 'visible' }}
+                >
+                 <defs>
+                   <pattern id="squarePattern" patternUnits="userSpaceOnUse" width="5" height="5">
+                     <rect width="2.5" height="2.5" fill="#1a1a1a"/>
+                   </pattern>
+                 </defs>
+                      {points.map((d, i) => {
+                    const x = paddingX + i * (barWidth + dynamicBarSpacing);
+                    const barHeight = d.value === 0 ? 1.5 : Math.max(4, ((d.value - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
+                    const y = baselineY - barHeight;
+                    const pct = (d.value - minValue) / (maxValue - minValue);
+                    const opacity = 0.15 + (Math.max(pct, 0) * 0.85);
+                    const label = d.value === 0 ? '0.0' : d.value.toFixed(1);
+                    const isAllView = view.type === 'all';
+                    const isSelected = selectedBarIdx === i;
 
-                  // Background bar for week/month: slightly narrower (2px less wide)
-                  const bgBarWidth = barWidth - 2;
-                  const bgBarX = x + 1;
-                  const bgBarFullHeight = (view.type === 'week' || view.type === 'month') ? maxBarHeight : 0;
-                  const bgBarY = baselineY - bgBarFullHeight;
+                    // Background bar for week/month: slightly narrower (2px less wide)
+                    const bgBarWidth = barWidth - 2;
+                    const bgBarX = x + 1;
+                    const bgBarFullHeight = (view.type === 'week' || view.type === 'month') ? maxBarHeight : 0;
+                    const bgBarY = baselineY - bgBarFullHeight;
 
-                   // For ALL DATA: overlay pattern bar on top (20% of bar height, extends upward)
-                   const overlayBarHeight = isAllView && d.value > 0 ? barHeight * 0.20 : 0;
+                     // For ALL DATA: overlay pattern bar on top (20% of bar height, extends upward)
+                     const overlayBarHeight = isAllView && d.value > 0 ? barHeight * 0.20 : 0;
 
-                   // Paths for WEEK view bars with rounded top corners only (bottom corners flat)
-                   const weekBarRadius = 1;
-                   const bgBarPath = view.type === 'week' ? `M ${bgBarX},${bgBarY + bgBarFullHeight} L ${bgBarX},${bgBarY + weekBarRadius} L ${bgBarX + weekBarRadius},${bgBarY} L ${bgBarX + bgBarWidth - weekBarRadius},${bgBarY} L ${bgBarX + bgBarWidth},${bgBarY + weekBarRadius} L ${bgBarX + bgBarWidth},${bgBarY + bgBarFullHeight} Z` : '';
-                   const fgBarPath = view.type === 'week' ? `M ${x},${y + barHeight} L ${x},${y + weekBarRadius} L ${x + weekBarRadius},${y} L ${x + barWidth - weekBarRadius},${y} L ${x + barWidth},${y + weekBarRadius} L ${x + barWidth},${y + barHeight} Z` : '';
+                     // Paths for WEEK view bars with rounded top corners only (bottom corners flat)
+                     const weekBarRadius = 1;
+                     const bgBarPath = view.type === 'week' ? `M ${bgBarX},${bgBarY + bgBarFullHeight} L ${bgBarX},${bgBarY + weekBarRadius} L ${bgBarX + weekBarRadius},${bgBarY} L ${bgBarX + bgBarWidth - weekBarRadius},${bgBarY} L ${bgBarX + bgBarWidth},${bgBarY + weekBarRadius} L ${bgBarX + bgBarWidth},${bgBarY + bgBarFullHeight} Z` : '';
+                     const fgBarPath = view.type === 'week' ? `M ${x},${y + barHeight} L ${x},${y + weekBarRadius} L ${x + weekBarRadius},${y} L ${x + barWidth - weekBarRadius},${y} L ${x + barWidth},${y + weekBarRadius} L ${x + barWidth},${y + barHeight} Z` : '';
 
-                 return (
-                  <g key={d.workoutId}>
-                     {view.type === 'month' ? (
-                       <>
-                         <line
-                           className="month-animate"
-                           x1={x + barWidth / 2}
-                           y1={paddingY + plotHeight}
-                           x2={x + barWidth / 2}
-                           y2={y}
-                           stroke={d.originalValue === 0 ? "#ccc" : "#1a1a1a"}
-                           strokeWidth="1"
-                         />
-                         {d.originalValue > 0 && (
-                           <circle
+                   return (
+                    <g key={d.workoutId}>
+                       {view.type === 'month' ? (
+                         <>
+                           <line
                              className="month-animate"
-                             cx={x + barWidth / 2}
-                             cy={y}
-                             r={Math.max(2, Math.min(8, 2 + (d.originalValue / originalMax) * 6))}
-                             fill="#1a1a1a"
+                             x1={x + barWidth / 2}
+                             y1={paddingY + plotHeight}
+                             x2={x + barWidth / 2}
+                             y2={y}
+                             stroke={d.originalValue === 0 ? "#ccc" : "#1a1a1a"}
+                             strokeWidth="1"
                            />
-                         )}
-                        </>
-                      ) : (
-                        <>
-                          {/* Background light grey bars (week only) */}
-                          {view.type === 'week' && (
-                            <path d={bgBarPath} fill="#000000" fillOpacity={0.02} />
-                          )}
-                           {/* Foreground solid bars */}
-                           {view.type === 'week' ? (
-                             <path className="bar-animate" d={fgBarPath} fill="#1a1a1a" fillOpacity={opacity} onClick={() => isAllView && setSelectedBarIdx(isSelected ? null : i)} style={{ cursor: isAllView ? 'pointer' : 'default' }} />
-                           ) : (
-                             <rect className="bar-animate" x={x} y={y} width={barWidth} height={barHeight} fill="#1a1a1a" fillOpacity={opacity} onClick={() => isAllView && setSelectedBarIdx(isSelected ? null : i)} style={{ cursor: isAllView ? 'pointer' : 'default' }} />
+                           {d.originalValue > 0 && (
+                             <circle
+                               className="month-animate"
+                               cx={x + barWidth / 2}
+                               cy={y}
+                               r={Math.max(2, Math.min(8, 2 + (d.originalValue / originalMax) * 6))}
+                               fill="#1a1a1a"
+                             />
                            )}
-                          {/* Overlay pattern bars (ALL DATA only) */}
-                          {isAllView && overlayBarHeight > 0 && (
-                            <rect
-                              x={x}
-                              y={y - overlayBarHeight}
-                              width={barWidth}
-                              height={overlayBarHeight}
-                              fill="url(#squarePattern)"
-                              fillOpacity={opacity * 0.7}
-                              style={{ pointerEvents: 'none' }}
-                            />
-                          )}
-                         {d.value > 0 && view.type === 'week' && (
-                          <text
-                            x={x + barWidth / 2}
-                            y={y + barHeight / 2}
-                            textAnchor="middle"
-                            dominantBaseline="middle"
-                            fill="#f2f2f2"
-                            fontSize="10px"
-                            fontWeight="600"
-                            fontFamily="'JetBrains Mono', monospace"
-                          >
-                            {d.value.toFixed(1)}
-                          </text>
-                        )}
-                        {isSelected && isAllView && (
-                          <g>
-                            <rect
-                              x={x + barWidth / 2 - 25}
-                              y={4}
-                              width="50"
-                              height="22"
-                              rx="4"
-                              fill="rgba(0,0,0,0.06)"
-                            />
+                          </>
+                        ) : (
+                          <>
+                            {/* Background light grey bars (week only) */}
+                            {view.type === 'week' && (
+                              <path d={bgBarPath} fill="#000000" fillOpacity={0.02} />
+                            )}
+                             {/* Foreground solid bars */}
+                             {view.type === 'week' ? (
+                               <path className="bar-animate" d={fgBarPath} fill="#1a1a1a" fillOpacity={opacity} onClick={() => isAllView && setSelectedBarIdx(isSelected ? null : i)} style={{ cursor: isAllView ? 'pointer' : 'default' }} />
+                             ) : (
+                               <rect className="bar-animate" x={x} y={y} width={barWidth} height={barHeight} fill="#1a1a1a" fillOpacity={opacity} onClick={() => isAllView && setSelectedBarIdx(isSelected ? null : i)} style={{ cursor: isAllView ? 'pointer' : 'default' }} />
+                             )}
+                            {/* Overlay pattern bars (ALL DATA only) */}
+                            {isAllView && overlayBarHeight > 0 && (
+                              <rect
+                                x={x}
+                                y={y - overlayBarHeight}
+                                width={barWidth}
+                                height={overlayBarHeight}
+                                fill="url(#squarePattern)"
+                                fillOpacity={opacity * 0.7}
+                                style={{ pointerEvents: 'none' }}
+                              />
+                            )}
+                           {d.value > 0 && view.type === 'week' && (
                             <text
                               x={x + barWidth / 2}
-                              y={15}
+                              y={y + barHeight / 2}
                               textAnchor="middle"
                               dominantBaseline="middle"
+                              fill="#f2f2f2"
+                              fontSize="10px"
+                              fontWeight="600"
                               fontFamily="'JetBrains Mono', monospace"
-                              fontSize="12px"
-                              fontWeight="900"
-                              fill="#1a1a1a"
                             >
-                              {d.originalValue.toFixed(1)}
+                              {d.value.toFixed(1)}
                             </text>
-                          </g>
-                        )}
-                      </>
-                    )}
-                  </g>
-                 );
-                      })}
-                   </svg>
-          ) : (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#999', fontSize: '12px' }}>
-              No data
-            </div>
-          )}
-        </div>
+                          )}
+                          {isSelected && isAllView && (
+                            <g>
+                              <rect
+                                x={x + barWidth / 2 - 25}
+                                y={4}
+                                width="50"
+                                height="22"
+                                rx="4"
+                                fill="rgba(0,0,0,0.06)"
+                              />
+                              <text
+                                x={x + barWidth / 2}
+                                y={15}
+                                textAnchor="middle"
+                                dominantBaseline="middle"
+                                fontFamily="'JetBrains Mono', monospace"
+                                fontSize="12px"
+                                fontWeight="900"
+                                fill="#1a1a1a"
+                              >
+                                {d.originalValue.toFixed(1)}
+                              </text>
+                            </g>
+                          )}
+                        </>
+                      )}
+                    </g>
+                   );
+                        })}
+                     </svg>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#999', fontSize: '12px' }}>
+                No data
+              </div>
+            )}
+          </div>
 
-         {/* X-axis labels */}
-         {view.type !== 'month' && (
-           <div style={{ position: 'relative', height: '10px' }}>
-              {points.map((point, i) => {
-                const showLabel = view.type === 'all' ? i % 2 === 0 : true;
-                const barLeft = paddingX + i * (barWidth + dynamicBarSpacing);
-                const barCenter = barLeft + barWidth / 2;
-                const leftPercent = (barCenter / chartWidth) * 100;
-                return showLabel ? (
-                  <span
-                    key={i}
-                    style={{
-                      position: 'absolute',
-                      left: `${leftPercent}%`,
-                      bottom: 0,
-                      transform: 'translateX(-50%)',
-                      fontSize: '9px',
-                      fontWeight: 500,
-                      color: '#1a1a1a',
-                      letterSpacing: '0.02em',
-                    }}
-                  >
-                    {point.date}
-                  </span>
-                ) : null;
-              })}
-            </div>
-          )}
+           {/* X-axis labels */}
+           {view.type !== 'month' && (
+             <div style={{ position: 'relative', height: '10px' }}>
+                {points.map((point, i) => {
+                  const showLabel = view.type === 'all' ? i % 2 === 0 : true;
+                  const barLeft = paddingX + i * (barWidth + dynamicBarSpacing);
+                  const barCenter = barLeft + barWidth / 2;
+                  const leftPercent = (barCenter / chartWidth) * 100;
+                  return showLabel ? (
+                    <span
+                      key={i}
+                      style={{
+                        position: 'absolute',
+                        left: `${leftPercent}%`,
+                        bottom: 0,
+                        transform: 'translateX(-50%)',
+                        fontSize: '9px',
+                        fontWeight: 500,
+                        color: '#1a1a1a',
+                        letterSpacing: '0.02em',
+                      }}
+                    >
+                      {point.date}
+                    </span>
+                  ) : null;
+                })}
+              </div>
+            )}
+          </div>
 
            {/* Navigation dots */}
            <div style={{
