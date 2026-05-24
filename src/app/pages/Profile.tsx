@@ -167,6 +167,8 @@ const [syncMessage, setSyncMessage] = useState('');
               distance_km: +(a.distance / 1000).toFixed(2),
               name: a.name,
               duration_seconds: a.moving_time,
+              time_formatted: new Date(a.moving_time * 1000).toISOString().substr(11, 8),
+              workout_calories: a.calories || null,
             });
             if (error) console.error('Insert error:', error);
             else inserted++;
@@ -699,7 +701,7 @@ const [syncMessage, setSyncMessage] = useState('');
           onClick={() => {
             const clientId = '250203';
             const redirectUri = 'https://kine-v2.vercel.app/api/strava-callback';
-            const scope = 'read,activity:read';
+            const scope = 'read,activity:read_all';
             window.location.href = `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
           }}
           className="w-full rounded-xl p-4 mb-4 flex items-center justify-between active:scale-[0.98] transition-all"
