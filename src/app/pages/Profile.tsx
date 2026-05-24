@@ -150,7 +150,8 @@ const [syncMessage, setSyncMessage] = useState('');
         setSyncing(false);
         return;
       }
-      const allowed = ['Run', 'Walk', 'Ride', 'VirtualRide', 'Hike'];
+      console.log('First activity sample:', activities[0]);
+      const allowed = ['Run', 'Walk', 'Ride', 'VirtualRide', 'Hike', 'Rowing', 'Elliptical'];
       const filtered = activities.filter((a: any) => allowed.includes(a.type));
       let inserted = 0;
       for (const a of filtered) {
