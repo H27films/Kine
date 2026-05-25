@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import StravaViewer from './StravaViewer';
 
@@ -6,6 +6,15 @@ const Strava: React.FC = () => {
   const [syncing, setSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState('');
   const [viewerOpen, setViewerOpen] = useState(false);
+  const [justConnected, setJustConnected] = useState(false);
+
+  useEffect(() => {
+    if (localStorage.getItem('strava_access_token')) {
+      setJustConnected(true);
+      const timer = setTimeout(() => setJustConnected(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   const handleStravaConnect = () => {
     const clientId = '250203';
@@ -85,7 +94,7 @@ const Strava: React.FC = () => {
             <circle cx="12" cy="12" r="3" />
           </svg>
           <span style={{ fontSize: '0.8rem', fontWeight: 500, letterSpacing: '0.1em', color: '#FC4C02', textTransform: 'uppercase' }}>
-          Strava Data
+            Strava Data
           </span>
         </div>
         <div style={{ color: '#999' }}>›</div>
@@ -103,7 +112,7 @@ const Strava: React.FC = () => {
             <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
           </svg>
           <span style={{ fontSize: '0.75rem', fontWeight: 500, letterSpacing: '0.08em', color: '#FC4C02', textTransform: 'uppercase' }}>
-            Connect
+            {justConnected ? 'Connected ✓' : 'Connect'}
           </span>
         </button>
 
