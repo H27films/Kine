@@ -48,6 +48,17 @@ const formatDate = (dateStr: string): string => {
   return `${MONTH_NAMES[d.getMonth()]} ${d.getDate()}`;
 };
 
+const formatTime = (timeStr: string): string => {
+  if (!timeStr) return '';
+  const parts = timeStr.split(':');
+  if (parts.length !== 3) return timeStr;
+  const hours = parseInt(parts[0], 10);
+  const mins = parseInt(parts[1], 10);
+  const secs = parts[2];
+  const totalMins = hours * 60 + mins;
+  return `${totalMins}:${secs}`;
+};
+
 const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
   const [activities, setActivities] = useState<StravaActivity[]>([]);
   const [loading, setLoading] = useState(true);
@@ -198,6 +209,7 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
                       textTransform: 'uppercase',
                       cursor: a.type === 'Walk' ? 'pointer' : 'default',
                       textDecoration: a.type === 'Walk' ? 'underline dotted' : 'none',
+textUnderlineOffset: '4px',
                       display: 'inline-block',
                     }}
                   >
@@ -237,32 +249,35 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
               </div>
 
               {/* Right: stats */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexShrink: 0 }}>
-                {a.distance_km > 0 && (
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '14px', fontWeight: 700, color: '#1a1a1a', letterSpacing: '-0.02em' }}>
-                      {a.distance_km}
-                    </div>
-                    <div style={{ fontSize: '8px', color: 'rgba(26,26,26,0.4)', letterSpacing: '0.1em' }}>KM</div>
-                  </div>
-                )}
-                {a.time_formatted && (
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '11px', fontWeight: 500, color: '#1a1a1a', letterSpacing: '0.02em' }}>
-                      {a.time_formatted}
-                    </div>
-                    <div style={{ fontSize: '8px', color: 'rgba(26,26,26,0.4)', letterSpacing: '0.1em' }}>TIME</div>
-                  </div>
-                )}
-                {a.workout_calories && (
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '11px', fontWeight: 500, color: '#1a1a1a', letterSpacing: '0.02em' }}>
-                      {a.workout_calories}
-                    </div>
-                    <div style={{ fontSize: '8px', color: 'rgba(26,26,26,0.4)', letterSpacing: '0.1em' }}>KCAL</div>
-                  </div>
-                )}
-              </div>
+<div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexShrink: 0 }}>
+  {/* TIME — always leftmost of the stats */}
+  {a.time_formatted && (
+    <div style={{ textAlign: 'right' }}>
+      <div style={{ fontSize: '11px', fontWeight: 500, color: '#1a1a1a', letterSpacing: '0.02em' }}>
+      {formatTime(a.time_formatted)}
+      </div>
+      <div style={{ fontSize: '8px', color: 'rgba(26,26,26,0.4)', letterSpacing: '0.1em' }}>TIME</div>
+    </div>
+  )}
+  {/* KCAL — middle for cardio, far right for weights */}
+  {a.workout_calories && (
+    <div style={{ textAlign: 'right' }}>
+      <div style={{ fontSize: '14px', fontWeight: 700, color: '#1a1a1a', letterSpacing: '-0.02em' }}>
+        {a.workout_calories}
+      </div>
+      <div style={{ fontSize: '8px', color: 'rgba(26,26,26,0.4)', letterSpacing: '0.1em' }}>KCAL</div>
+    </div>
+  )}
+  {/* KM — far right for cardio only */}
+  {a.distance_km > 0 && (
+    <div style={{ textAlign: 'right' }}>
+      <div style={{ fontSize: '14px', fontWeight: 700, color: '#1a1a1a', letterSpacing: '-0.02em' }}>
+        {a.distance_km}
+      </div>
+      <div style={{ fontSize: '8px', color: 'rgba(26,26,26,0.4)', letterSpacing: '0.1em' }}>KM</div>
+    </div>
+  )}
+</div>
             </div>
           ))
         )}
