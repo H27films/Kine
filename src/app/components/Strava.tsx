@@ -116,10 +116,9 @@ const Strava: React.FC = () => {
         </button>
       )}
 
-      {/* View Data — only shown when connected */}
-      {localStorage.getItem('strava_access_token') && (
-        <button
-          onClick={() => setViewerOpen(true)}
+      {/* View Data */}
+<button
+  onClick={() => setViewerOpen(true)}
           className="w-full rounded-xl p-4 mb-4 flex items-center justify-between active:scale-[0.98] transition-all"
           style={{ backgroundColor: 'rgba(0,0,0,0.05)' }}
         >
@@ -134,7 +133,7 @@ const Strava: React.FC = () => {
           </div>
           <div style={{ color: '#999' }}>›</div>
         </button>
-      )}
+    
 
       {viewerOpen && <StravaViewer onClose={() => setViewerOpen(false)} />}
     </>
