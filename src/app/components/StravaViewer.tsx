@@ -111,7 +111,6 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
       }}
       onClick={() => setEditingId(null)}
     >
-
       {/* Header */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -174,112 +173,162 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
             No activities
           </div>
         ) : (
-          filtered.map((a) => (
-            <div
-              key={a.id}
-              style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '12px 0',
-                borderBottom: '1px solid rgba(0,0,0,0.06)',
-              }}
-            >
-              {/* Left: name + date + type */}
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+          (() => {
+            const grouped: { date: string; activities: StravaActivity[] }[] = [];
+            filtered.forEach(a => {
+              const last = grouped[grouped.length - 1];
+              if (last && last.date === a.date) {
+                last.activities.push(a);
+              } else {
+                grouped.push({ date: a.date, activities: [a] });
+              }
+            });
+            return grouped.map((group, groupIdx) => {
+              const isLastGroup = groupIdx === grouped.length - 1;
+              const nextGroup = grouped[groupIdx + 1];
+              const getWeek = (dateStr: string) => {
+                const d = new Date(dateStr + 'T00:00:00');
+                const day = d.getDay();
+                const mondayBased = (day === 0 ? 6 : day - 1);
+                const monday = new Date(d);
+                monday.setDate(d.getDate() - mondayBased);
+                return monday.toISOString().split('T')[0];
+              };
+              const isWeekBoundary = !isLastGroup && nextGroup &&
+                getWeek(group.date) !== getWeek(nextGroup.date);
+            
+              return (
+              <div key={group.date} style={{ marginBottom: '8px' }}>
+                {/* Date header */}
+                <div style={{ paddingTop: '16px', paddingBottom: '6px' }}>
                   <span style={{
-                    fontSize: '9px', fontWeight: 500, color: '#1a1a1a',
-                    letterSpacing: '0.02em', whiteSpace: 'nowrap',
-                    overflow: 'hidden', textOverflow: 'ellipsis',
-                    maxWidth: '160px',
+                    fontSize: '16px', fontWeight: 700, letterSpacing: '0.08em',
+                    color: '#1a1a1a', textTransform: 'uppercase',
+                    fontFamily: "'JetBrains Mono', monospace",
                   }}>
-                    {a.name}
-                  </span>
-                  <span style={{ fontSize: '9px', color: 'rgba(26,26,26,0.35)', letterSpacing: '0.05em' }}>
-                    {formatDate(a.date)}
+                    {(() => {
+                      const d = new Date(group.date + 'T00:00:00');
+                      const day = d.toLocaleDateString('en-GB', { weekday: 'short' }).toUpperCase();
+                      const date = d.getDate();
+                      const month = MONTH_NAMES[d.getMonth()];
+                      return `${day} ${date} ${month}`;
+                    })()}
                   </span>
                 </div>
 
-                {/* Type label — tappable if Walk */}
-                <div style={{ position: 'relative' }} onClick={e => e.stopPropagation()}>
-                  <div
-                    onClick={() => a.type === 'Walk' ? setEditingId(editingId === a.id ? null : a.id) : undefined}
-                    style={{
-                      fontSize: '13px', fontWeight: 700, letterSpacing: '0.1em',
-                      color: TYPE_COLORS[a.type] || '#1a1a1a',
-                      textTransform: 'uppercase',
-                      cursor: a.type === 'Walk' ? 'pointer' : 'default',
-                      textDecoration: a.type === 'Walk' ? 'underline dotted' : 'none',
-textUnderlineOffset: '4px',
-                      display: 'inline-block',
-                    }}
-                  >
-                    {TYPE_LABELS[a.type] || a.type}
-                  </div>
+                {/* Activities for this date */}
+                {group.activities.map((a, actIdx) => {
+  const isLastInGroup = actIdx === group.activities.length - 1;
+  return (
+  <div
+    key={a.id}
+    style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      padding: '12px 0',
+      borderBottom: isLastInGroup && isWeekBoundary
+        ? '1.5px solid #1a1a1a'
+        : '1px solid rgba(0,0,0,0.06)',
+    }}
+  >
+                    {/* Left: name + type */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ marginBottom: '4px' }}>
+                        <span style={{
+                          fontSize: '9px', fontWeight: 500, color: '#1a1a1a',
+                          letterSpacing: '0.02em', whiteSpace: 'nowrap',
+                          overflow: 'hidden', textOverflow: 'ellipsis',
+                          display: 'block', maxWidth: '160px',
+                        }}>
+                          {a.name}
+                        </span>
+                      </div>
 
-                  {/* Dropdown */}
-                  {editingId === a.id && (
-                    <div style={{
-                      position: 'absolute', top: '100%', left: 0, zIndex: 50,
-                      backgroundColor: '#f2f2f2', borderRadius: '10px',
-                      boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
-                      border: '1px solid rgba(0,0,0,0.08)',
-                      overflow: 'hidden', minWidth: '140px',
-                      marginTop: '4px',
-                    }}>
-                      {['Walk', 'CrossTrainer'].map((opt, i) => (
+                      {/* Type label — tappable if Walk */}
+                      <div style={{ position: 'relative' }} onClick={e => e.stopPropagation()}>
                         <div
-                          key={opt}
-                          onClick={() => handleTypeChange(a, opt)}
+                          onClick={() => a.type === 'Walk' ? setEditingId(editingId === a.id ? null : a.id) : undefined}
                           style={{
-                            padding: '10px 14px', cursor: 'pointer',
-                            fontSize: '11px', fontWeight: 700,
-                            letterSpacing: '0.08em', textTransform: 'uppercase',
-                            color: a.type === opt ? '#FC4C02' : '#1a1a1a',
-                            backgroundColor: a.type === opt ? 'rgba(0,0,0,0.04)' : 'transparent',
-                            borderBottom: i === 0 ? '1px solid rgba(0,0,0,0.06)' : 'none',
-                            fontFamily: "'JetBrains Mono', monospace",
+                            fontSize: '13px', fontWeight: 700, letterSpacing: '0.1em',
+                            color: TYPE_COLORS[a.type] || '#1a1a1a',
+                            textTransform: 'uppercase',
+                            cursor: a.type === 'Walk' ? 'pointer' : 'default',
+                            textDecoration: a.type === 'Walk' ? 'underline dotted' : 'none',
+                            textUnderlineOffset: '4px',
+                            display: 'inline-block',
                           }}
                         >
-                          {TYPE_LABELS[opt]}
+                          {TYPE_LABELS[a.type] || a.type}
                         </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
 
-              {/* Right: stats */}
-<div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexShrink: 0 }}>
-  {/* TIME — always leftmost of the stats */}
-  {a.time_formatted && (
-    <div style={{ textAlign: 'right' }}>
-      <div style={{ fontSize: '11px', fontWeight: 500, color: '#1a1a1a', letterSpacing: '0.02em' }}>
-      {formatTime(a.time_formatted)}
-      </div>
-      <div style={{ fontSize: '8px', color: 'rgba(26,26,26,0.4)', letterSpacing: '0.1em' }}>TIME</div>
-    </div>
-  )}
-  {/* KCAL — middle for cardio, far right for weights */}
-  {a.workout_calories && (
-    <div style={{ textAlign: 'right' }}>
-      <div style={{ fontSize: '14px', fontWeight: 700, color: '#1a1a1a', letterSpacing: '-0.02em' }}>
-        {a.workout_calories}
-      </div>
-      <div style={{ fontSize: '8px', color: 'rgba(26,26,26,0.4)', letterSpacing: '0.1em' }}>KCAL</div>
-    </div>
-  )}
-  {/* KM — far right for cardio only */}
-  {a.distance_km > 0 && (
-    <div style={{ textAlign: 'right' }}>
-      <div style={{ fontSize: '14px', fontWeight: 700, color: '#1a1a1a', letterSpacing: '-0.02em' }}>
-        {a.distance_km}
-      </div>
-      <div style={{ fontSize: '8px', color: 'rgba(26,26,26,0.4)', letterSpacing: '0.1em' }}>KM</div>
-    </div>
-  )}
-</div>
+                        {/* Dropdown */}
+                        {editingId === a.id && (
+                          <div style={{
+                            position: 'absolute', top: '100%', left: 0, zIndex: 50,
+                            backgroundColor: '#f2f2f2', borderRadius: '10px',
+                            boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                            border: '1px solid rgba(0,0,0,0.08)',
+                            overflow: 'hidden', minWidth: '140px',
+                            marginTop: '4px',
+                          }}>
+                            {['Walk', 'CrossTrainer'].map((opt, i) => (
+                              <div
+                                key={opt}
+                                onClick={() => handleTypeChange(a, opt)}
+                                style={{
+                                  padding: '10px 14px', cursor: 'pointer',
+                                  fontSize: '11px', fontWeight: 700,
+                                  letterSpacing: '0.08em', textTransform: 'uppercase',
+                                  color: a.type === opt ? '#FC4C02' : '#1a1a1a',
+                                  backgroundColor: a.type === opt ? 'rgba(0,0,0,0.04)' : 'transparent',
+                                  borderBottom: i === 0 ? '1px solid rgba(0,0,0,0.06)' : 'none',
+                                  fontFamily: "'JetBrains Mono', monospace",
+                                }}
+                              >
+                                {TYPE_LABELS[opt]}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Right: stats */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexShrink: 0 }}>
+                      {/* TIME */}
+                      {a.time_formatted && (
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontSize: '11px', fontWeight: 500, color: '#1a1a1a', letterSpacing: '0.02em' }}>
+                            {formatTime(a.time_formatted)}
+                          </div>
+                          <div style={{ fontSize: '8px', color: 'rgba(26,26,26,0.4)', letterSpacing: '0.1em' }}>TIME</div>
+                        </div>
+                      )}
+                      {/* KCAL */}
+                      {a.workout_calories && (
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontSize: '14px', fontWeight: 700, color: '#1a1a1a', letterSpacing: '-0.02em' }}>
+                            {a.workout_calories}
+                          </div>
+                          <div style={{ fontSize: '8px', color: 'rgba(26,26,26,0.4)', letterSpacing: '0.1em' }}>KCAL</div>
+                        </div>
+                      )}
+                      {/* KM */}
+                      {a.distance_km > 0 && (
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontSize: '14px', fontWeight: 700, color: '#1a1a1a', letterSpacing: '-0.02em' }}>
+                            {a.distance_km}
+                          </div>
+                          <div style={{ fontSize: '8px', color: 'rgba(26,26,26,0.4)', letterSpacing: '0.1em' }}>KM</div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-          ))
+        );
+        });
+          })()
         )}
       </div>
 
