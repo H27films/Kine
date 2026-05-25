@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import StravaViewer from './StravaViewer.tsx';
+import StravaViewer from './StravaViewer';
 
 const Strava: React.FC = () => {
   const [syncing, setSyncing] = useState(false);
@@ -73,67 +73,62 @@ const Strava: React.FC = () => {
 
   return (
     <>
-      {/* Strava Connect */}
+      {/* View Data */}
       <button
-        onClick={handleStravaConnect}
-        className="w-full rounded-xl p-4 mb-4 flex items-center justify-between active:scale-[0.98] transition-all"
+        onClick={() => setViewerOpen(true)}
+        className="w-full rounded-xl p-4 mb-3 flex items-center justify-between active:scale-[0.98] transition-all"
         style={{ backgroundColor: 'rgba(0,0,0,0.05)' }}
       >
         <div className="flex items-center gap-4">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FC4C02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+            <circle cx="12" cy="12" r="3" />
           </svg>
           <span style={{ fontSize: '0.8rem', fontWeight: 500, letterSpacing: '0.1em', color: '#FC4C02', textTransform: 'uppercase' }}>
-            Strava Connect
+          Strava Data
           </span>
         </div>
         <div style={{ color: '#999' }}>›</div>
       </button>
 
-      {/* Strava Sync — only shown when connected */}
-      {localStorage.getItem('strava_access_token') && (
+      {/* Connect + Sync on same row */}
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+        <button
+          onClick={handleStravaConnect}
+          className="rounded-xl p-4 flex items-center justify-start gap-3 active:scale-[0.98] transition-all"
+          style={{ backgroundColor: 'rgba(0,0,0,0.05)', flex: 1 }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FC4C02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+          </svg>
+          <span style={{ fontSize: '0.75rem', fontWeight: 500, letterSpacing: '0.08em', color: '#FC4C02', textTransform: 'uppercase' }}>
+            Connect
+          </span>
+        </button>
+
         <button
           onClick={handleStravaSync}
           disabled={syncing}
-          className="w-full rounded-xl p-4 mb-4 flex items-center justify-between active:scale-[0.98] transition-all"
-          style={{ backgroundColor: 'rgba(0,0,0,0.05)' }}
+          className="rounded-xl p-4 flex items-center justify-start gap-3 active:scale-[0.98] transition-all"
+          style={{ backgroundColor: 'rgba(0,0,0,0.05)', flex: 1 }}
         >
-          <div className="flex items-center gap-4">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FC4C02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="23 4 23 10 17 10" />
-              <polyline points="1 20 1 14 7 14" />
-              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
-            </svg>
-            <span style={{ fontSize: '0.8rem', fontWeight: 500, letterSpacing: '0.1em', color: '#FC4C02', textTransform: 'uppercase' }}>
-              {syncing ? 'Syncing...' : 'Strava Sync'}
-            </span>
-          </div>
-          {syncMessage
-            ? <span style={{ fontSize: '0.7rem', color: '#999' }}>{syncMessage}</span>
-            : <div style={{ color: '#999' }}>›</div>
-          }
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FC4C02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="23 4 23 10 17 10" />
+            <polyline points="1 20 1 14 7 14" />
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+          </svg>
+          <span style={{ fontSize: '0.75rem', fontWeight: 500, letterSpacing: '0.08em', color: '#FC4C02', textTransform: 'uppercase' }}>
+            {syncing ? 'Syncing...' : 'Sync'}
+          </span>
         </button>
-      )}
+      </div>
 
-      {/* View Data */}
-<button
-  onClick={() => setViewerOpen(true)}
-          className="w-full rounded-xl p-4 mb-4 flex items-center justify-between active:scale-[0.98] transition-all"
-          style={{ backgroundColor: 'rgba(0,0,0,0.05)' }}
-        >
-          <div className="flex items-center gap-4">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FC4C02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
-            <span style={{ fontSize: '0.8rem', fontWeight: 500, letterSpacing: '0.1em', color: '#FC4C02', textTransform: 'uppercase' }}>
-              View Data
-            </span>
-          </div>
-          <div style={{ color: '#999' }}>›</div>
-        </button>
-    
+      {syncMessage && (
+        <div style={{ fontSize: '0.7rem', color: '#999', textAlign: 'center', marginBottom: '8px' }}>
+          {syncMessage}
+        </div>
+      )}
 
       {viewerOpen && <StravaViewer onClose={() => setViewerOpen(false)} />}
     </>

@@ -152,26 +152,26 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
             >
               {/* Left: date + name */}
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
-                  <span style={{
-                    fontSize: '9px', fontWeight: 700, letterSpacing: '0.1em',
-                    color: TYPE_COLORS[a.type] || '#1a1a1a',
-                    textTransform: 'uppercase',
-                  }}>
-                    {TYPE_LABELS[a.type] || a.type}
-                  </span>
-                  <span style={{ fontSize: '9px', color: 'rgba(26,26,26,0.35)', letterSpacing: '0.05em' }}>
-                    {formatDate(a.date)}
-                  </span>
-                </div>
-                <div style={{
-                  fontSize: '12px', fontWeight: 500, color: '#1a1a1a',
-                  letterSpacing: '0.02em', whiteSpace: 'nowrap',
-                  overflow: 'hidden', textOverflow: 'ellipsis',
-                  maxWidth: '200px',
-                }}>
-                  {a.name}
-                </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
+  <span style={{
+    fontSize: '12px', fontWeight: 500, color: '#1a1a1a',
+    letterSpacing: '0.02em', whiteSpace: 'nowrap',
+    overflow: 'hidden', textOverflow: 'ellipsis',
+    maxWidth: '160px',
+  }}>
+    {a.name}
+  </span>
+  <span style={{ fontSize: '9px', color: 'rgba(26,26,26,0.35)', letterSpacing: '0.05em' }}>
+    {formatDate(a.date)}
+  </span>
+</div>
+<div style={{
+  fontSize: '9px', fontWeight: 700, letterSpacing: '0.1em',
+  color: TYPE_COLORS[a.type] || '#1a1a1a',
+  textTransform: 'uppercase',
+}}>
+  {TYPE_LABELS[a.type] || a.type}
+</div>
               </div>
 
               {/* Right: stats */}
