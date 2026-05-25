@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { supabase } from '../../lib/supabase';
+import StravaViewer from './StravaViewer.tsx';
 
 const Strava: React.FC = () => {
   const [syncing, setSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState('');
+  const [viewerOpen, setViewerOpen] = useState(false);
 
   const handleStravaConnect = () => {
     const clientId = '250203';
@@ -31,7 +33,6 @@ const Strava: React.FC = () => {
         setSyncing(false);
         return;
       }
-      console.log('First activity sample:', activities[0]);
       const allowed = ['Run', 'Walk', 'Ride', 'VirtualRide', 'Hike', 'Rowing', 'Elliptical', 'WeightTraining'];
       const filtered = activities.filter((a: any) => allowed.includes(a.type));
       let inserted = 0;
@@ -83,13 +84,7 @@ const Strava: React.FC = () => {
             <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
             <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
           </svg>
-          <span style={{
-            fontSize: '0.8rem',
-            fontWeight: 500,
-            letterSpacing: '0.1em',
-            color: '#FC4C02',
-            textTransform: 'uppercase',
-          }}>
+          <span style={{ fontSize: '0.8rem', fontWeight: 500, letterSpacing: '0.1em', color: '#FC4C02', textTransform: 'uppercase' }}>
             Strava Connect
           </span>
         </div>
@@ -114,12 +109,34 @@ const Strava: React.FC = () => {
               {syncing ? 'Syncing...' : 'Strava Sync'}
             </span>
           </div>
-          {syncMessage 
-            ? <span style={{ fontSize: '0.7rem', color: '#999' }}>{syncMessage}</span> 
+          {syncMessage
+            ? <span style={{ fontSize: '0.7rem', color: '#999' }}>{syncMessage}</span>
             : <div style={{ color: '#999' }}>›</div>
           }
         </button>
       )}
+
+      {/* View Data — only shown when connected */}
+      {localStorage.getItem('strava_access_token') && (
+        <button
+          onClick={() => setViewerOpen(true)}
+          className="w-full rounded-xl p-4 mb-4 flex items-center justify-between active:scale-[0.98] transition-all"
+          style={{ backgroundColor: 'rgba(0,0,0,0.05)' }}
+        >
+          <div className="flex items-center gap-4">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FC4C02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+            <span style={{ fontSize: '0.8rem', fontWeight: 500, letterSpacing: '0.1em', color: '#FC4C02', textTransform: 'uppercase' }}>
+              View Data
+            </span>
+          </div>
+          <div style={{ color: '#999' }}>›</div>
+        </button>
+      )}
+
+      {viewerOpen && <StravaViewer onClose={() => setViewerOpen(false)} />}
     </>
   );
 };
