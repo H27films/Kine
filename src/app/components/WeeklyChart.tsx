@@ -79,6 +79,7 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
   const [weightsEntries, setWeightsEntries] = useState<WeightsEntry[]>([]);
   const [weightsLoadingDay, setWeightsLoadingDay] = useState(false);
   const [weightsReady, setWeightsReady] = useState(false);
+  const [weightsStravaCalories, setWeightsStravaCalories] = useState<number | null>(null);
 
   // Score state
   const [scoreDayDate, setScoreDayDate] = useState<string | null>(null);
@@ -158,23 +159,28 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
 
   // Weights fetch
   useEffect(() => {
-    if (!weightsDayDate) { setWeightsEntries([]); return; }
+    if (!weightsDayDate) { setWeightsEntries([]); setWeightsStravaCalories(null); return; }
     const load = async () => {
       setWeightsLoadingDay(true);
-      const { data } = await supabase
-        .from('workouts')
-        .select('total_weight, exercises:exercise_id(exercise_name)')
-        .in('type', ['CHEST', 'BACK', 'LEGS'])
-        .eq('date', weightsDayDate)
-        .not('total_weight', 'is', null)
-        .gt('total_weight', 0)
-        .order('exercise_id');
 
-      if (data) {
+      // Fetch weights data
+      const { data: weightsData, error: weightsError } = await supabase
+        .from("workouts")
+        .select("total_weight, exercises:exercise_id(exercise_name)")
+        .in("type", ["CHEST", "BACK", "LEGS"])
+        .eq("date", weightsDayDate)
+        .not("total_weight", "is", null)
+        .gt("total_weight", 0)
+        .order("exercise_id");
+
+      if (weightsError) {
+        console.error("Error fetching weights data:", weightsError);
+        setWeightsEntries([]);
+      } else if (weightsData) {
         setWeightsEntries(
-          data
+          weightsData
             .map((r: any) => ({
-              exercise_name: r.exercises?.exercise_name || 'Unknown',
+              exercise_name: r.exercises?.exercise_name || "Unknown",
               total_weight: Math.round(Number(r.total_weight)),
             }))
             .sort((a, b) => b.total_weight - a.total_weight)
@@ -182,6 +188,24 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
       } else {
         setWeightsEntries([]);
       }
+
+      // Fetch Strava workout calories
+      const { data: stravaData, error: stravaError } = await supabase
+        .from("strava")
+        .select("workout_calories")
+        .eq("type", "WeightTraining")
+        .eq("date", weightsDayDate);
+
+      if (stravaError) {
+        console.error("Error fetching Strava data:", stravaError);
+        setWeightsStravaCalories(null);
+      } else if (stravaData) {
+        const totalStravaCalories = stravaData.reduce((sum, entry) => sum + (entry.workout_calories || 0), 0);
+        setWeightsStravaCalories(Math.round(totalStravaCalories));
+      } else {
+        setWeightsStravaCalories(null);
+      }
+
       setWeightsLoadingDay(false);
       setWeightsReady(true);
     };
@@ -433,11 +457,11 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
                     tab === 'Calories' ? (openDayIndex ?? openWeightsDayIndex ?? openScoreDayIndex) : null;
 
                   // Immediately clear all old expanded state (no animation on tab switch)
-                  setCardioDayDate(null); setOpenDayIndex(null); setCardioReady(false); setClosing(false); setCardioEntries([]);
-                  setWeightsDayDate(null); setOpenWeightsDayIndex(null); setWeightsReady(false); setWeightsClosing(false); setWeightsEntries([]);
-                  setScoreDayDate(null); setOpenScoreDayIndex(null); setScoreClosing(false);
-                  setScoreWeightsTotal(0); setScoreTrackerTotal(0); setScoreCaloriesTotal(0);
-                  setCaloriesDayDate(null); setOpenCaloriesDayIndex(null); setCaloriesClosing(false);
+        setCardioDayDate(null); setOpenDayIndex(null); setCardioReady(false); setClosing(false); setCardioEntries([]);
+        setWeightsDayDate(null); setOpenWeightsDayIndex(null); setWeightsReady(false); setWeightsClosing(false); setWeightsEntries([]); setWeightsStravaCalories(null);
+        setScoreDayDate(null); setOpenScoreDayIndex(null); setScoreClosing(false);
+        setScoreWeightsTotal(0); setScoreTrackerTotal(0); setScoreCaloriesTotal(0);
+        setCaloriesDayDate(null); setOpenCaloriesDayIndex(null); setCaloriesClosing(false);
 
                   // Reopen the carried index on the target tab
                   if (carryIdx !== null && effectiveWeekNumber !== null) {
@@ -658,10 +682,20 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
             style={{ borderTop: '1px solid rgba(0,0,0,0.75)', padding: '20px 0 0', willChange: 'opacity, transform', cursor: 'pointer' }}
           >
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <div style={{ marginBottom: '12px' }}>
+              <div style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span style={{ fontSize: '13px', fontWeight: 600, color: '#1a1a1a', letterSpacing: '0.04em', fontFamily: "'Archivo', sans-serif" }}>
                   {formatDayLabel(weightsDayDate)}
                 </span>
+                {weightsStravaCalories !== null && weightsStravaCalories > 0 && (
+                  <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: '2px' }}>
+                    <span style={{ fontSize: '13px', fontWeight: 550, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>
+                      {weightsStravaCalories.toLocaleString()}
+                    </span>
+                    <span style={{ fontSize: '8px', fontWeight: 500, color: 'rgba(26,26,26,0.4)', letterSpacing: '0.04em' }}>
+                      Kcal
+                    </span>
+                  </span>
+                )}
               </div>
               {weightsEntries.map((entry, i) => (
                 <div key={`weights-${entry.exercise_name}-${i}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '2px 0' }}>
