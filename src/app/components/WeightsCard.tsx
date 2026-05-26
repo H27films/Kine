@@ -9,6 +9,7 @@ interface DayWeight {
 interface WeightsCardProps {
   dayWeights: DayWeight[];
   dayWeightsTotal: number;
+  weightTrainingCalories: number;
   onToggle: () => void;
 }
 
@@ -18,6 +19,7 @@ const toTitleCase = (str: string) =>
 export const WeightsCard: React.FC<WeightsCardProps> = ({
   dayWeights,
   dayWeightsTotal,
+  weightTrainingCalories,
   onToggle,
 }) => {
   return (
@@ -74,38 +76,46 @@ export const WeightsCard: React.FC<WeightsCardProps> = ({
         )}
       </div>
 
-      {dayWeights.length > 0 ? (
-        <>
-          <div className="text-4xl font-black tracking-tight" style={{ color: '#1a1a1a' }}>
-            {Math.round(dayWeightsTotal).toLocaleString()}{' '}
-            <span style={{ fontSize: '15px', fontWeight: 500, letterSpacing: '0.08em', color: 'rgba(26,26,26,0.7)' }}>
-              KG
-            </span>
-          </div>
-          <div className="mt-4 space-y-2">
-            {dayWeights.map((ex, i) => (
-              <div key={i} className="flex items-center justify-between">
-                <span
-                  className="text-[11px] font-medium"
-                  style={{ color: 'rgba(26,26,26,0.9)', fontFamily: "'Archivo', sans-serif" }}
-                >
-                  {toTitleCase(ex.name)}
-                </span>
-                <span className="text-[12px] font-bold" style={{ color: '#1a1a1a' }}>
-                  {Math.round(ex.weight).toLocaleString()} kg
-                </span>
-              </div>
-            ))}
-          </div>
-        </>
-      ) : (
-        <div
-          className="text-[13px] font-medium py-1"
-          style={{ color: 'rgba(26,26,26,0.3)', fontFamily: "'Archivo', sans-serif" }}
-        >
-          No weights logged
-        </div>
-      )}
+       {dayWeights.length > 0 ? (
+         <>
+           <div className="flex justify-between items-baseline">
+             <div className="text-4xl font-black tracking-tight" style={{ color: '#1a1a1a' }}>
+               {Math.round(dayWeightsTotal).toLocaleString()}{' '}
+               <span style={{ fontSize: '15px', fontWeight: 500, letterSpacing: '0.08em', color: 'rgba(26,26,26,0.7)' }}>
+                 KG
+               </span>
+             </div>
+             <div className="text-2xl font-bold" style={{ color: '#1a1a1a' }}>
+               {Math.round(weightTrainingCalories).toLocaleString()}{' '}
+               <span style={{ fontSize: '15px', fontWeight: 500, letterSpacing: '0.08em', color: 'rgba(26,26,26,0.7)' }}>
+                 Kcal
+               </span>
+             </div>
+           </div>
+           <div className="mt-4 space-y-2">
+             {dayWeights.map((ex, i) => (
+               <div key={i} className="flex items-center justify-between">
+                 <span
+                   className="text-[11px] font-medium"
+                   style={{ color: 'rgba(26,26,26,0.9)', fontFamily: "'Archivo', sans-serif" }}
+                 >
+                   {toTitleCase(ex.name)}
+                 </span>
+                 <span className="text-[12px] font-bold" style={{ color: '#1a1a1a' }}>
+                   {Math.round(ex.weight).toLocaleString()} kg
+                 </span>
+               </div>
+             ))}
+           </div>
+         </>
+       ) : (
+         <div
+           className="text-[13px] font-medium py-1"
+           style={{ color: 'rgba(26,26,26,0.3)', fontFamily: "'Archivo', sans-serif" }}
+         >
+           No weights logged
+         </div>
+       )}
     </div>
   );
 };

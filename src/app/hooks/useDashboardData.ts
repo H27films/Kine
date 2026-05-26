@@ -28,6 +28,7 @@ export function useDashboardData(selectedDate: string, refreshKey: number) {
   const [dayWeightsTotal, setDayWeightsTotal] = useState<number>(0);
 
   const [todayCalories, setTodayCalories] = useState<number>(0);
+  const [weightTrainingCalories, setWeightTrainingCalories] = useState<number>(0);
   const [foodRating, setFoodRating] = useState<string | null>(null);
 
   const [cardioWeeks, setCardioWeeks] = useState<WeekData[]>([]);
@@ -109,6 +110,24 @@ export function useDashboardData(selectedDate: string, refreshKey: number) {
       setTodayCalories(data && data.length > 0 ? Number(data[0].calories) : 0);
     };
 
+    const loadWeightTrainingCalories = async () => {
+      const { data } = await supabase
+        .from('workouts')
+        .select('workout_calories')
+        .eq('type', 'WeightTraining')
+        .eq('date', selectedDate);
+      
+      if (!data) {
+        setWeightTrainingCalories(0);
+        return;
+      }
+      
+      const totalCalories = data.reduce((sum: number, row: any) => {
+        return sum + (Number(row.workout_calories) || 0);
+      }, 0);
+      setWeightTrainingCalories(totalCalories);
+    };
+
     const loadFoodRating = async () => {
       const { data } = await supabase
         .from('workouts')
@@ -139,6 +158,7 @@ export function useDashboardData(selectedDate: string, refreshKey: number) {
     loadCardio();
     loadTodayScore();
     loadTodayCalories();
+    loadWeightTrainingCalories();
     loadFoodRating();
     loadWeights();
   }, [selectedDate, refreshKey]);
@@ -271,6 +291,7 @@ export function useDashboardData(selectedDate: string, refreshKey: number) {
     dayWeights,
     dayWeightsTotal,
     todayCalories,
+    weightTrainingCalories,
     foodRating,
     cardioWeeks,
     weightsWeeks,

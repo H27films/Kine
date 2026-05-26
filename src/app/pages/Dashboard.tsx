@@ -54,23 +54,24 @@ useEffect(() => {
     return () => window.removeEventListener('kine:data-updated', handler);
   }, []);
 
-  const {
-    todayActivities,
-    totalMovement,
-    yesterdayMovement,
-    dayWeights,
-    dayWeightsTotal,
-    todayCalories,
-    foodRating,
-    cardioWeeks,
-    weightsWeeks,
-    weightsExerciseCounts,
-    calorieWeeks,
-    scoreWeeks,
-    activityWeeklyData,
-    monthlyMinOffset,
-    monthlyMaxOffset,
-  } = useDashboardData(selectedDate, refreshKey);
+   const {
+     todayActivities,
+     totalMovement,
+     yesterdayMovement,
+     dayWeights,
+     dayWeightsTotal,
+     todayCalories,
+     weightTrainingCalories,
+     foodRating,
+     cardioWeeks,
+     weightsWeeks,
+     weightsExerciseCounts,
+     calorieWeeks,
+     scoreWeeks,
+     activityWeeklyData,
+     monthlyMinOffset,
+     monthlyMaxOffset,
+   } = useDashboardData(selectedDate, refreshKey);
 
   const visibleCardioKeys = [
     ...CARDIO_ALWAYS,
@@ -287,13 +288,14 @@ useEffect(() => {
         />
       </section>
 
-      <section className="mb-6">
-      <WeightsCard
-  dayWeights={dayWeights}
-  dayWeightsTotal={dayWeightsTotal}
-  onToggle={() => setWeightsExpanded(e => !e)}
-/>
-      </section>
+       <section className="mb-6">
+       <WeightsCard
+   dayWeights={dayWeights}
+   dayWeightsTotal={dayWeightsTotal}
+   weightTrainingCalories={weightTrainingCalories}
+   onToggle={() => setWeightsExpanded(e => !e)}
+ />
+       </section>
 
       {weightsExpanded && (
         <section className="mb-4 mt-1.5">
