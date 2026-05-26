@@ -686,16 +686,16 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
                 <span style={{ fontSize: '13px', fontWeight: 600, color: '#1a1a1a', letterSpacing: '0.04em', fontFamily: "'Archivo', sans-serif" }}>
                   {formatDayLabel(weightsDayDate)}
                 </span>
-                {weightsStravaCalories !== null && weightsStravaCalories > 0 && (
-                  <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: '2px' }}>
-                    <span style={{ fontSize: '13px', fontWeight: 550, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>
-                      {weightsStravaCalories.toLocaleString()}
-                    </span>
-                    <span style={{ fontSize: '8px', fontWeight: 500, color: 'rgba(26,26,26,0.4)', letterSpacing: '0.04em' }}>
-                      Kcal
-                    </span>
-                  </span>
-                )}
+{weightsStravaCalories !== null && weightsStravaCalories > 0 && (
+  <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: '2px' }}>
+    <span style={{ fontSize: '14px', fontWeight: 550, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>
+      {weightsStravaCalories.toLocaleString()}
+    </span>
+    <span style={{ fontSize: '9px', fontWeight: 500, color: 'rgba(26,26,26,0.4)', letterSpacing: '0.04em' }}>
+      Kcal
+    </span>
+  </span>
+)}
               </div>
               {weightsEntries.map((entry, i) => (
                 <div key={`weights-${entry.exercise_name}-${i}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '2px 0' }}>
