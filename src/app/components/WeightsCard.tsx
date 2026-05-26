@@ -78,20 +78,20 @@ export const WeightsCard: React.FC<WeightsCardProps> = ({
 
        {dayWeights.length > 0 ? (
          <>
-           <div className="flex justify-between items-baseline">
-             <div className="text-4xl font-black tracking-tight" style={{ color: '#1a1a1a' }}>
-               {Math.round(dayWeightsTotal).toLocaleString()}{' '}
-               <span style={{ fontSize: '15px', fontWeight: 500, letterSpacing: '0.08em', color: 'rgba(26,26,26,0.7)' }}>
-                 KG
-               </span>
-             </div>
-             <div className="text-2xl font-bold" style={{ color: '#1a1a1a' }}>
-               {Math.round(weightTrainingCalories).toLocaleString()}{' '}
-               <span style={{ fontSize: '15px', fontWeight: 500, letterSpacing: '0.08em', color: 'rgba(26,26,26,0.7)' }}>
-                 Kcal
-               </span>
-             </div>
-           </div>
+<div className="flex justify-between items-baseline">
+              <div className="text-4xl font-black tracking-tight" style={{ color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>
+                {Math.round(dayWeightsTotal).toLocaleString()}{' '}
+                <span style={{ fontSize: '15px', fontWeight: 500, letterSpacing: '0.08em', color: 'rgba(26,26,26,0.7)', fontFamily: "'Archivo', sans-serif" }}>
+                  KG
+                </span>
+              </div>
+              <div style={{ fontSize: '18px', fontWeight: 700, color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>
+                {Math.round(weightTrainingCalories).toLocaleString()}{' '}
+                <span style={{ fontSize: '13px', fontWeight: 500, letterSpacing: '0.08em', color: 'rgba(26,26,26,0.7)', fontFamily: "'Archivo', sans-serif" }}>
+                  Kcal
+                </span>
+              </div>
+            </div>
            <div className="mt-4 space-y-2">
              {dayWeights.map((ex, i) => (
                <div key={i} className="flex items-center justify-between">
