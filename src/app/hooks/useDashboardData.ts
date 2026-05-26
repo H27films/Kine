@@ -112,7 +112,7 @@ export function useDashboardData(selectedDate: string, refreshKey: number) {
 
     const loadWeightTrainingCalories = async () => {
       const { data } = await supabase
-        .from('workouts')
+        .from('strava')
         .select('workout_calories')
         .eq('type', 'WeightTraining')
         .eq('date', selectedDate);
@@ -125,7 +125,7 @@ export function useDashboardData(selectedDate: string, refreshKey: number) {
       const totalCalories = data.reduce((sum: number, row: any) => {
         return sum + (Number(row.workout_calories) || 0);
       }, 0);
-      setWeightTrainingCalories(totalCalories);
+      setWeightTrainingCalories(Math.round(totalCalories));
     };
 
     const loadFoodRating = async () => {
