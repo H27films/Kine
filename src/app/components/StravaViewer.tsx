@@ -64,8 +64,9 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('All');
   const [editingId, setEditingId] = useState<number | null>(null);
+const [filterOpen, setFilterOpen] = useState(false);
 
-  const filters = ['All', 'Run', 'Walk', 'Ride', 'Rowing', 'WeightTraining', 'CrossTrainer'];
+  
 
   useEffect(() => {
     const load = async () => {
@@ -137,29 +138,75 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
         </div>
       </div>
 
-      {/* Filter pills */}
-      <div style={{
+     {/* Filter pills */}
+     <div style={{
         display: 'flex', gap: '8px', padding: '12px 20px',
-        overflowX: 'auto', scrollbarWidth: 'none',
         borderBottom: '1px solid rgba(0,0,0,0.06)',
-      }}>
-        {filters.map(f => (
+      }} onClick={() => setFilterOpen(false)}>
+
+        {/* ALL pill */}
+        <button
+          onClick={() => { setFilter('All'); setFilterOpen(false); }}
+          style={{
+            padding: '6px 14px', borderRadius: '999px',
+            backgroundColor: filter === 'All' ? '#1a1a1a' : 'rgba(0,0,0,0.06)',
+            color: filter === 'All' ? '#f2f2f2' : '#1a1a1a',
+            border: 'none', cursor: 'pointer',
+            fontSize: '9px', fontWeight: 700, letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+            fontFamily: "'JetBrains Mono', monospace",
+          }}
+        >
+          ALL
+        </button>
+
+        {/* FILTER pill + dropdown */}
+        <div style={{ position: 'relative' }} onClick={e => e.stopPropagation()}>
           <button
-            key={f}
-            onClick={() => setFilter(f)}
+            onClick={() => setFilterOpen(o => !o)}
             style={{
-              padding: '6px 14px', borderRadius: '999px', flexShrink: 0,
-              backgroundColor: filter === f ? '#1a1a1a' : 'rgba(0,0,0,0.06)',
-              color: filter === f ? '#f2f2f2' : '#1a1a1a',
+              padding: '6px 14px', borderRadius: '999px',
+              backgroundColor: filter !== 'All' ? '#1a1a1a' : 'rgba(0,0,0,0.06)',
+              color: filter !== 'All' ? '#f2f2f2' : '#1a1a1a',
               border: 'none', cursor: 'pointer',
               fontSize: '9px', fontWeight: 700, letterSpacing: '0.1em',
               textTransform: 'uppercase',
               fontFamily: "'JetBrains Mono', monospace",
+              display: 'flex', alignItems: 'center', gap: '5px',
             }}
           >
-            {TYPE_LABELS[f] || f}
+            {filter !== 'All' ? (TYPE_LABELS[filter] || filter) : 'FILTER'}
+            <span style={{ fontSize: '8px', opacity: 0.7 }}>{filterOpen ? '▲' : '▼'}</span>
           </button>
-        ))}
+
+          {filterOpen && (
+            <div style={{
+              position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 100,
+              backgroundColor: '#f2f2f2', borderRadius: '12px',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+              border: '1px solid rgba(0,0,0,0.08)',
+              overflow: 'hidden', minWidth: '150px',
+            }}>
+              {['Run', 'Walk', 'Ride', 'Rowing', 'WeightTraining', 'CrossTrainer'].map((opt, i, arr) => (
+                <div
+                  key={opt}
+                  onClick={() => { setFilter(opt); setFilterOpen(false); }}
+                  style={{
+                    padding: '10px 14px', cursor: 'pointer',
+                    fontSize: '11px', fontWeight: 700,
+                    letterSpacing: '0.08em', textTransform: 'uppercase',
+                    color: filter === opt ? '#FC4C02' : '#1a1a1a',
+                    backgroundColor: filter === opt ? 'rgba(0,0,0,0.04)' : 'transparent',
+                    borderBottom: i < arr.length - 1 ? '1px solid rgba(0,0,0,0.06)' : 'none',
+                    fontFamily: "'JetBrains Mono', monospace",
+                  }}
+                >
+                  {TYPE_LABELS[opt]}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Activity list */}
