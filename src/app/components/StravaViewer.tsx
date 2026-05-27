@@ -43,12 +43,21 @@ const TYPE_LABELS: Record<string, string> = {
   CrossTrainer: 'CROSS TRAINER',
 };
 
+const EXERCISE_IDS: Record<string, number> = {
+  Run: 84,
+  Rowing: 83,
+  Walk: 85,
+  Ride: 87,
+  VirtualRide: 87,
+  CrossTrainer: 86,
+};
+
+const CALORIE_DERIVED_KM = new Set(['Rowing', 'Ride', 'VirtualRide']);
+
 const MONTH_NAMES = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
 
-const formatDate = (dateStr: string): string => {
-  const d = new Date(dateStr + 'T00:00:00');
-  return `${MONTH_NAMES[d.getMonth()]} ${d.getDate()}`;
-};
+const makeLogKey = (date: string, exerciseId: number, km: number | null): string =>
+  `${date}-${exerciseId}-${km ?? 'null'}`;
 
 const formatTime = (timeStr: string): string => {
   if (!timeStr) return '';
@@ -69,6 +78,7 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
   const [filterOpen, setFilterOpen] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [loggedKeys, setLoggedKeys] = useState<Set<string>>(new Set());
 
   const selectedActivities = activities.filter(a => selectedIds.includes(a.id));
 
@@ -89,20 +99,48 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
     clearSelection();
   };
 
-  
+  const handleWorkoutsSuccess = (newKeys: Set<string>) => {
+    setLoggedKeys(prev => new Set([...prev, ...newKeys]));
+  };
 
+  // Fetch activities + existing workouts logs in parallel
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      const { data } = await supabase
-        .from('strava')
-        .select('*')
-        .order('date', { ascending: false });
-      setActivities((data as StravaActivity[]) || []);
+
+      const [{ data: stravaData }, { data: workoutsData }] = await Promise.all([
+        supabase.from('strava').select('*').order('date', { ascending: false }),
+        supabase.from('workouts').select('date, exercise_id, km').eq('source', 'strava'),
+      ]);
+
+      setActivities((stravaData as StravaActivity[]) || []);
+
+      // Build logged keys from existing workouts rows
+      const keys = new Set<string>();
+      (workoutsData || []).forEach((w: { date: string; exercise_id: number; km: number | null }) => {
+        keys.add(makeLogKey(w.date, w.exercise_id, w.km));
+      });
+      setLoggedKeys(keys);
+
       setLoading(false);
     };
     load();
   }, []);
+
+  // Compute logged key for a given activity
+  const getActivityLogKey = (a: StravaActivity): string | null => {
+    const exercise_id = EXERCISE_IDS[a.type];
+    if (!exercise_id) return null;
+    const km = CALORIE_DERIVED_KM.has(a.type)
+      ? (a.workout_calories ?? 0) / 50
+      : (a.distance_km > 0 ? a.distance_km : null);
+    return makeLogKey(a.date, exercise_id, km);
+  };
+
+  const isLogged = (a: StravaActivity): boolean => {
+    const key = getActivityLogKey(a);
+    return key ? loggedKeys.has(key) : false;
+  };
 
   const handleTypeChange = async (activity: StravaActivity, newType: string) => {
     const newName = newType === 'CrossTrainer'
@@ -152,7 +190,6 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
           <span style={{ fontSize: '10px', color: 'rgba(26,26,26,0.45)', letterSpacing: '0.1em' }}>
             {filtered.length} ACTIVITIES
           </span>
-          
           <button
             onClick={onClose}
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#1a1a1a' }}
@@ -162,13 +199,12 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
         </div>
       </div>
 
-     {/* Filter pills */}
-     <div style={{
+      {/* Filter pills */}
+      <div style={{
         display: 'flex', gap: '8px', padding: '12px 20px',
         borderBottom: '1px solid rgba(0,0,0,0.06)',
       }} onClick={() => setFilterOpen(false)}>
 
-        {/* ALL pill */}
         <button
           onClick={() => { setFilter('All'); setFilterOpen(false); }}
           style={{
@@ -184,7 +220,6 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
           ALL
         </button>
 
-        {/* FILTER pill + dropdown */}
         <div style={{ position: 'relative' }} onClick={e => e.stopPropagation()}>
           <button
             onClick={() => setFilterOpen(o => !o)}
@@ -231,8 +266,8 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
             </div>
           )}
         </div>
-     {/* Select button — far right */}
-     <button
+
+        <button
           onClick={() => {
             if (selectMode && selectedIds.length > 0) {
               setSelectedIds([]);
@@ -289,156 +324,166 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
               };
               const isWeekBoundary = !isLastGroup && nextGroup &&
                 getWeek(group.date) !== getWeek(nextGroup.date);
-            
+
               return (
-              <div key={group.date} style={{ marginBottom: '8px' }}>
-                {/* Date header */}
-                <div style={{ paddingTop: '16px', paddingBottom: '6px' }}>
-                  <span style={{
-                    fontSize: '16px', fontWeight: 700, letterSpacing: '0.08em',
-                    color: '#1a1a1a', textTransform: 'uppercase',
-                    fontFamily: "'JetBrains Mono', monospace",
-                  }}>
-                    {(() => {
-                      const d = new Date(group.date + 'T00:00:00');
-                      const day = d.toLocaleDateString('en-GB', { weekday: 'short' }).toUpperCase();
-                      const date = d.getDate();
-                      const month = MONTH_NAMES[d.getMonth()];
-                      return `${day} ${date} ${month}`;
-                    })()}
-                  </span>
-                </div>
+                <div key={group.date} style={{ marginBottom: '8px' }}>
+                  {/* Date header */}
+                  <div style={{ paddingTop: '16px', paddingBottom: '6px' }}>
+                    <span style={{
+                      fontSize: '16px', fontWeight: 700, letterSpacing: '0.08em',
+                      color: '#1a1a1a', textTransform: 'uppercase',
+                      fontFamily: "'JetBrains Mono', monospace",
+                    }}>
+                      {(() => {
+                        const d = new Date(group.date + 'T00:00:00');
+                        const day = d.toLocaleDateString('en-GB', { weekday: 'short' }).toUpperCase();
+                        const date = d.getDate();
+                        const month = MONTH_NAMES[d.getMonth()];
+                        return `${day} ${date} ${month}`;
+                      })()}
+                    </span>
+                  </div>
 
-                {/* Activities for this date */}
-                {group.activities.map((a, actIdx) => {
-  const isLastInGroup = actIdx === group.activities.length - 1;
-  return (
-    <div
-    key={a.id}
-    onClick={() => selectMode && toggleSelect(a.id)}
-    style={{
-      display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
-      padding: '12px 0',
-      borderBottom: isLastInGroup && isWeekBoundary
-        ? '1.5px solid #1a1a1a'
-        : '1px solid rgba(0,0,0,0.06)',
-      cursor: selectMode ? 'pointer' : 'default',
-    }}
-  >
-    {/* Selection circle */}
-    {selectMode && (
-      <div style={{
-        width: '18px', height: '18px', borderRadius: '50%', flexShrink: 0,
-        marginRight: '12px', marginTop: '22px',
-        border: selectedIds.includes(a.id) ? 'none' : '1.5px solid rgba(26,26,26,0.25)',
-        backgroundColor: selectedIds.includes(a.id) ? '#FC4C02' : 'transparent',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-      }}>
-        {selectedIds.includes(a.id) && (
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-            <path d="M2 5l2.5 2.5L8 3" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        )}
-      </div>
-    )}
-                    {/* Left: name + type */}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ marginBottom: '4px' }}>
-                        <span style={{
-                          fontSize: '9px', fontWeight: 500, color: '#1a1a1a',
-                          letterSpacing: '0.02em', whiteSpace: 'nowrap',
-                          overflow: 'hidden', textOverflow: 'ellipsis',
-                          display: 'block', maxWidth: '160px',
-                        }}>
-                          {a.name}
-                        </span>
-                      </div>
+                  {group.activities.map((a, actIdx) => {
+                    const isLastInGroup = actIdx === group.activities.length - 1;
+                    const logged = isLogged(a);
 
-                      {/* Type label — tappable if Walk */}
-                      <div style={{ position: 'relative' }} onClick={e => e.stopPropagation()}>
-                        <div
-                          onClick={() => a.type === 'Walk' ? setEditingId(editingId === a.id ? null : a.id) : undefined}
-                          style={{
-                            fontSize: '13px', fontWeight: 700, letterSpacing: '0.1em',
-                            color: TYPE_COLORS[a.type] || '#1a1a1a',
-                            textTransform: 'uppercase',
-                            cursor: a.type === 'Walk' ? 'pointer' : 'default',
-                            textDecoration: a.type === 'Walk' ? 'underline dotted' : 'none',
-                            textUnderlineOffset: '4px',
-                            display: 'inline-block',
-                          }}
-                        >
-                          {TYPE_LABELS[a.type] || a.type}
-                        </div>
-
-                        {/* Dropdown */}
-                        {editingId === a.id && (
+                    return (
+                      <div
+                        key={a.id}
+                        onClick={() => selectMode && toggleSelect(a.id)}
+                        style={{
+                          display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
+                          padding: '12px 0',
+                          borderBottom: isLastInGroup && isWeekBoundary
+                            ? '1.5px solid #1a1a1a'
+                            : '1px solid rgba(0,0,0,0.06)',
+                          cursor: selectMode ? 'pointer' : 'default',
+                        }}
+                      >
+                        {/* Selection circle */}
+                        {selectMode && (
                           <div style={{
-                            position: 'absolute', top: '100%', left: 0, zIndex: 50,
-                            backgroundColor: '#f2f2f2', borderRadius: '10px',
-                            boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
-                            border: '1px solid rgba(0,0,0,0.08)',
-                            overflow: 'hidden', minWidth: '140px',
-                            marginTop: '4px',
+                            width: '18px', height: '18px', borderRadius: '50%', flexShrink: 0,
+                            marginRight: '12px', marginTop: '22px',
+                            border: selectedIds.includes(a.id) ? 'none' : '1.5px solid rgba(26,26,26,0.25)',
+                            backgroundColor: selectedIds.includes(a.id) ? '#FC4C02' : 'transparent',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
                           }}>
-                            {['Walk', 'CrossTrainer'].map((opt, i) => (
-                              <div
-                                key={opt}
-                                onClick={() => handleTypeChange(a, opt)}
-                                style={{
-                                  padding: '10px 14px', cursor: 'pointer',
-                                  fontSize: '11px', fontWeight: 700,
-                                  letterSpacing: '0.08em', textTransform: 'uppercase',
-                                  color: a.type === opt ? '#FC4C02' : '#1a1a1a',
-                                  backgroundColor: a.type === opt ? 'rgba(0,0,0,0.04)' : 'transparent',
-                                  borderBottom: i === 0 ? '1px solid rgba(0,0,0,0.06)' : 'none',
-                                  fontFamily: "'JetBrains Mono', monospace",
-                                }}
-                              >
-                                {TYPE_LABELS[opt]}
-                              </div>
-                            ))}
+                            {selectedIds.includes(a.id) && (
+                              <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                                <path d="M2 5l2.5 2.5L8 3" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            )}
                           </div>
                         )}
-                      </div>
-                    </div>
 
-                    {/* Right: stats */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexShrink: 0 }}>
-                      {/* TIME */}
-                      {a.time_formatted && (
-                        <div style={{ textAlign: 'right' }}>
-                          <div style={{ fontSize: '11px', fontWeight: 500, color: '#1a1a1a', letterSpacing: '0.02em' }}>
-                            {formatTime(a.time_formatted)}
+                        {/* Left: name + type */}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          {/* Name row with Logged pill */}
+                          <div style={{ marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{
+                              fontSize: '9px', fontWeight: 500, color: '#1a1a1a',
+                              letterSpacing: '0.02em', whiteSpace: 'nowrap',
+                              overflow: 'hidden', textOverflow: 'ellipsis',
+                              maxWidth: '160px',
+                            }}>
+                              {a.name}
+                            </span>
+                            {logged && (
+                              <span style={{
+                                fontSize: '8px', fontWeight: 700, letterSpacing: '0.1em',
+                                color: '#f2f2f2', backgroundColor: '#1a1a1a',
+                                padding: '2px 6px', borderRadius: '999px',
+                                textTransform: 'uppercase', flexShrink: 0,
+                                fontFamily: "'JetBrains Mono', monospace",
+                              }}>
+                                LOGGED
+                              </span>
+                            )}
                           </div>
-                          <div style={{ fontSize: '8px', color: 'rgba(26,26,26,0.4)', letterSpacing: '0.1em' }}>TIME</div>
-                        </div>
-                      )}
-                      {/* KCAL */}
-                      {a.workout_calories && (
-                        <div style={{ textAlign: 'right' }}>
-                          <div style={{ fontSize: '14px', fontWeight: 700, color: '#1a1a1a', letterSpacing: '-0.02em' }}>
-                            {a.workout_calories}
+
+                          {/* Type label */}
+                          <div style={{ position: 'relative' }} onClick={e => e.stopPropagation()}>
+                            <div
+                              onClick={() => a.type === 'Walk' ? setEditingId(editingId === a.id ? null : a.id) : undefined}
+                              style={{
+                                fontSize: '13px', fontWeight: 700, letterSpacing: '0.1em',
+                                color: TYPE_COLORS[a.type] || '#1a1a1a',
+                                textTransform: 'uppercase',
+                                cursor: a.type === 'Walk' ? 'pointer' : 'default',
+                                textDecoration: a.type === 'Walk' ? 'underline dotted' : 'none',
+                                textUnderlineOffset: '4px',
+                                display: 'inline-block',
+                              }}
+                            >
+                              {TYPE_LABELS[a.type] || a.type}
+                            </div>
+
+                            {editingId === a.id && (
+                              <div style={{
+                                position: 'absolute', top: '100%', left: 0, zIndex: 50,
+                                backgroundColor: '#f2f2f2', borderRadius: '10px',
+                                boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                                border: '1px solid rgba(0,0,0,0.08)',
+                                overflow: 'hidden', minWidth: '140px',
+                                marginTop: '4px',
+                              }}>
+                                {['Walk', 'CrossTrainer'].map((opt, i) => (
+                                  <div
+                                    key={opt}
+                                    onClick={() => handleTypeChange(a, opt)}
+                                    style={{
+                                      padding: '10px 14px', cursor: 'pointer',
+                                      fontSize: '11px', fontWeight: 700,
+                                      letterSpacing: '0.08em', textTransform: 'uppercase',
+                                      color: a.type === opt ? '#FC4C02' : '#1a1a1a',
+                                      backgroundColor: a.type === opt ? 'rgba(0,0,0,0.04)' : 'transparent',
+                                      borderBottom: i === 0 ? '1px solid rgba(0,0,0,0.06)' : 'none',
+                                      fontFamily: "'JetBrains Mono', monospace",
+                                    }}
+                                  >
+                                    {TYPE_LABELS[opt]}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
-                          <div style={{ fontSize: '8px', color: 'rgba(26,26,26,0.4)', letterSpacing: '0.1em' }}>KCAL</div>
                         </div>
-                      )}
-                      {/* KM */}
-                      {a.distance_km > 0 && (
-                        <div style={{ textAlign: 'right' }}>
-                          <div style={{ fontSize: '14px', fontWeight: 700, color: '#1a1a1a', letterSpacing: '-0.02em' }}>
-                            {a.distance_km}
-                          </div>
-                          <div style={{ fontSize: '8px', color: 'rgba(26,26,26,0.4)', letterSpacing: '0.1em' }}>KM</div>
+
+                        {/* Right: stats */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexShrink: 0 }}>
+                          {a.time_formatted && (
+                            <div style={{ textAlign: 'right' }}>
+                              <div style={{ fontSize: '11px', fontWeight: 500, color: '#1a1a1a', letterSpacing: '0.02em' }}>
+                                {formatTime(a.time_formatted)}
+                              </div>
+                              <div style={{ fontSize: '8px', color: 'rgba(26,26,26,0.4)', letterSpacing: '0.1em' }}>TIME</div>
+                            </div>
+                          )}
+                          {a.workout_calories && (
+                            <div style={{ textAlign: 'right' }}>
+                              <div style={{ fontSize: '14px', fontWeight: 700, color: '#1a1a1a', letterSpacing: '-0.02em' }}>
+                                {a.workout_calories}
+                              </div>
+                              <div style={{ fontSize: '8px', color: 'rgba(26,26,26,0.4)', letterSpacing: '0.1em' }}>KCAL</div>
+                            </div>
+                          )}
+                          {a.distance_km > 0 && (
+                            <div style={{ textAlign: 'right' }}>
+                              <div style={{ fontSize: '14px', fontWeight: 700, color: '#1a1a1a', letterSpacing: '-0.02em' }}>
+                                {a.distance_km}
+                              </div>
+                              <div style={{ fontSize: '8px', color: 'rgba(26,26,26,0.4)', letterSpacing: '0.1em' }}>KM</div>
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-        );
-        });
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            });
           })()
         )}
       </div>
@@ -447,6 +492,8 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
         selected={selectedActivities}
         onClear={clearSelection}
         onJoinSuccess={handleJoinSuccess}
+        onWorkoutsSuccess={handleWorkoutsSuccess}
+        loggedKeys={loggedKeys}
       />
 
       <style>{`
