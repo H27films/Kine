@@ -155,18 +155,20 @@ const SelectionBar: React.FC<SelectionBarProps> = ({
           ? (a.workout_calories ?? 0) / 50
           : (a.distance_km > 0 ? a.distance_km : null);
         const total_cardio = km != null ? +(km * multiplier).toFixed(2) : null;
-
-        newLogKeys.add(makeLogKey(a.date, exercise_id, km));
-
+        const total_score_k = total_cardio != null ? +(total_cardio * 1000).toFixed(1) : null;
+      
         return {
           date: a.date,
           type: 'CARDIO',
           exercise_id,
           km,
+          multiplier: multiplier ? +multiplier.toFixed(1) : null,
           total_cardio,
+          total_score_k,
           workout_calories: a.workout_calories ?? null,
           time: a.time_formatted || null,
-          source: 'strava',
+          source: 'app',
+          new_entry: 'New',
         };
       });
 

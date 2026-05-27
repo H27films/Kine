@@ -110,7 +110,7 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
 
       const [{ data: stravaData }, { data: workoutsData }] = await Promise.all([
         supabase.from('strava').select('*').order('date', { ascending: false }),
-        supabase.from('workouts').select('date, exercise_id, km').eq('source', 'strava'),
+        supabase.from('workouts').select('date, exercise_id, km').eq('source', 'app'),
       ]);
 
       setActivities((stravaData as StravaActivity[]) || []);
