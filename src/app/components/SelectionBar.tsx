@@ -18,7 +18,20 @@ interface SelectionBarProps {
   selected: StravaActivity[];
   onClear: () => void;
   onJoinSuccess: (keptId: number, removedIds: number[], merged: StravaActivity) => void;
+  onWorkoutsSuccess?: (insertedCount: number) => void;
 }
+
+const EXERCISE_IDS: Record<string, number> = {
+  Run: 84,
+  Rowing: 83,
+  Walk: 85,
+  Ride: 87,
+  VirtualRide: 87,
+  CrossTrainer: 86,
+};
+
+// Types that derive km from calories (workout_calories / 50)
+const CALORIE_DERIVED_KM = new Set(['Rowing', 'Ride', 'VirtualRide']);
 
 const canJoin = (selected: StravaActivity[]): boolean => {
   if (selected.length < 2) return false;
@@ -31,13 +44,25 @@ const canJoin = (selected: StravaActivity[]): boolean => {
   return true;
 };
 
+// + WORKOUTS is only hidden if ALL selected are WeightTraining
+const canAddWorkouts = (selected: StravaActivity[]): boolean =>
+  selected.some(a => a.type !== 'WeightTraining');
+
 type ConfirmState = 'none' | 'join' | 'workouts';
 
-const SelectionBar: React.FC<SelectionBarProps> = ({ selected, onClear, onJoinSuccess }) => {
+const SelectionBar: React.FC<SelectionBarProps> = ({
+  selected,
+  onClear,
+  onJoinSuccess,
+  onWorkoutsSuccess,
+}) => {
   const [joining, setJoining] = React.useState(false);
+  const [addingWorkouts, setAddingWorkouts] = React.useState(false);
   const [error, setError] = React.useState('');
   const [confirming, setConfirming] = React.useState<ConfirmState>('none');
+
   const joinable = canJoin(selected);
+  const workoutsAllowed = canAddWorkouts(selected);
 
   const handleJoin = async () => {
     setJoining(true);
@@ -93,6 +118,64 @@ const SelectionBar: React.FC<SelectionBarProps> = ({ selected, onClear, onJoinSu
     }
   };
 
+  const handleAddWorkouts = async () => {
+    setAddingWorkouts(true);
+    setError('');
+    setConfirming('none');
+    try {
+      // Filter out WeightTraining — never inserted
+      const insertable = selected.filter(a => a.type !== 'WeightTraining');
+
+      // Fetch multipliers for all unique exercise_ids in one query
+      const uniqueExerciseIds = [...new Set(insertable.map(a => EXERCISE_IDS[a.type]).filter(Boolean))];
+      const { data: exercises, error: exErr } = await supabase
+        .from('exercises')
+        .select('id, multiplier')
+        .in('id', uniqueExerciseIds);
+
+      if (exErr) throw exErr;
+
+      const multiplierMap: Record<number, number> = {};
+      (exercises || []).forEach(ex => { multiplierMap[ex.id] = ex.multiplier; });
+
+      const rows = insertable.map(a => {
+        const exercise_id = EXERCISE_IDS[a.type];
+        const multiplier = multiplierMap[exercise_id] ?? 1;
+
+        // Derive km: calorie-based types use calories/50, others use distance_km directly
+        const km = CALORIE_DERIVED_KM.has(a.type)
+          ? (a.workout_calories ?? 0) / 50
+          : (a.distance_km > 0 ? a.distance_km : null);
+
+        const total_cardio = km != null ? +(km * multiplier).toFixed(2) : null;
+
+        return {
+          date: a.date,
+          type: 'CARDIO',
+          exercise_id,
+          km,
+          total_cardio,
+          workout_calories: a.workout_calories ?? null,
+          time: a.time_formatted || null,
+          source: 'strava',
+        };
+      });
+
+      const { error: insertErr } = await supabase
+        .from('workouts')
+        .insert(rows);
+
+      if (insertErr) throw insertErr;
+
+      onWorkoutsSuccess?.(rows.length);
+      onClear();
+    } catch (e: any) {
+      setError('Add workouts failed: ' + e.message);
+    } finally {
+      setAddingWorkouts(false);
+    }
+  };
+
   if (selected.length === 0) return null;
 
   const btnBase: React.CSSProperties = {
@@ -134,6 +217,9 @@ const SelectionBar: React.FC<SelectionBarProps> = ({ selected, onClear, onJoinSu
     border: 'none',
   };
 
+  // Count that will actually be inserted (excluding WeightTraining)
+  const insertableCount = selected.filter(a => a.type !== 'WeightTraining').length;
+
   return (
     <div style={{
       position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 10000,
@@ -149,62 +235,65 @@ const SelectionBar: React.FC<SelectionBarProps> = ({ selected, onClear, onJoinSu
 
       {/* Left side */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
-      {/* Count */}
-      <span style={{
-        fontSize: '10px', fontWeight: 700, letterSpacing: '0.12em',
-        color: 'rgba(0,0,0,0.4)', textTransform: 'uppercase',
-        fontFamily: "'JetBrains Mono', monospace",
-        marginRight: '4px', flexShrink: 0, whiteSpace: 'nowrap',
-      }}>
-        {selected.length} SELECTED
-      </span>
-      {confirming === 'join' ? (
-        <>
-          <button onClick={handleJoin} disabled={joining} style={confirmBtn}>
-            {joining ? 'JOINING...' : 'CONFIRM JOIN'}
-          </button>
-          <button onClick={() => setConfirming('none')} style={cancelBtn}>
-            CANCEL
-          </button>
-        </>
-      ) : confirming === 'workouts' ? (
-        <>
-          <button onClick={() => { setConfirming('none'); }} style={confirmBtn}>
-            CONFIRM
-          </button>
-          <button onClick={() => setConfirming('none')} style={cancelBtn}>
-            CANCEL
-          </button>
-        </>
-      ) : (
-        <>
-          <button
-            onClick={() => joinable && setConfirming('join')}
-            style={joinable ? blackBtn : disabledBtn}
-          >
-            JOIN
-          </button>
-          <button
-            onClick={() => setConfirming('workouts')}
-            style={blackBtn}
-          >
-            + WORKOUTS
-          </button>
-        </>
-      )}
+        <span style={{
+          fontSize: '10px', fontWeight: 700, letterSpacing: '0.12em',
+          color: 'rgba(0,0,0,0.4)', textTransform: 'uppercase',
+          fontFamily: "'JetBrains Mono', monospace",
+          marginRight: '4px', flexShrink: 0, whiteSpace: 'nowrap',
+        }}>
+          {selected.length} SELECTED
+        </span>
 
-</div>
+        {confirming === 'join' ? (
+          <>
+            <button onClick={handleJoin} disabled={joining} style={confirmBtn}>
+              {joining ? 'JOINING...' : 'CONFIRM JOIN'}
+            </button>
+            <button onClick={() => setConfirming('none')} style={cancelBtn}>
+              CANCEL
+            </button>
+          </>
+        ) : confirming === 'workouts' ? (
+          <>
+            <button
+              onClick={handleAddWorkouts}
+              disabled={addingWorkouts}
+              style={confirmBtn}
+            >
+              {addingWorkouts ? 'ADDING...' : `CONFIRM ADD ${insertableCount}`}
+            </button>
+            <button onClick={() => setConfirming('none')} style={cancelBtn}>
+              CANCEL
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              onClick={() => joinable && setConfirming('join')}
+              style={joinable ? blackBtn : disabledBtn}
+            >
+              JOIN
+            </button>
+            <button
+              onClick={() => workoutsAllowed ? setConfirming('workouts') : undefined}
+              style={workoutsAllowed ? blackBtn : disabledBtn}
+            >
+              + WORKOUTS
+            </button>
+          </>
+        )}
+      </div>
 
-{/* Close */}
-<button
-  onClick={onClear}
-  style={{
-    background: 'none', border: 'none', cursor: 'pointer',
-    padding: '4px', color: '#1a1a1a', flexShrink: 0,
-  }}
->
-  <X size={18} strokeWidth={1.8} />
-</button>
+      {/* Close */}
+      <button
+        onClick={onClear}
+        style={{
+          background: 'none', border: 'none', cursor: 'pointer',
+          padding: '4px', color: '#1a1a1a', flexShrink: 0,
+        }}
+      >
+        <X size={18} strokeWidth={1.8} />
+      </button>
 
       {error && (
         <div style={{
