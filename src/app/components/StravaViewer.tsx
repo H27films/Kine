@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import SelectionBar from './SelectionBar';
 
 interface StravaActivity {
   id: number;
@@ -11,6 +12,7 @@ interface StravaActivity {
   name: string;
   time_formatted: string;
   workout_calories: number | null;
+  duration_seconds: number | null;
 }
 
 interface StravaViewerProps {
@@ -64,7 +66,28 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('All');
   const [editingId, setEditingId] = useState<number | null>(null);
-const [filterOpen, setFilterOpen] = useState(false);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+
+  const selectedActivities = activities.filter(a => selectedIds.includes(a.id));
+
+  const toggleSelect = (id: number) => {
+    setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  };
+
+  const clearSelection = () => {
+    setSelectedIds([]);
+    setSelectMode(false);
+  };
+
+  const handleJoinSuccess = (keptId: number, removedIds: number[], merged: StravaActivity) => {
+    setActivities(prev => {
+      const without = prev.filter(a => !removedIds.includes(a.id));
+      return without.map(a => a.id === keptId ? { ...a, ...merged } : a);
+    });
+    clearSelection();
+  };
 
   
 
@@ -129,6 +152,7 @@ const [filterOpen, setFilterOpen] = useState(false);
           <span style={{ fontSize: '10px', color: 'rgba(26,26,26,0.45)', letterSpacing: '0.1em' }}>
             {filtered.length} ACTIVITIES
           </span>
+          
           <button
             onClick={onClose}
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#1a1a1a' }}
@@ -207,6 +231,28 @@ const [filterOpen, setFilterOpen] = useState(false);
             </div>
           )}
         </div>
+     {/* Select button — far right */}
+     <button
+          onClick={() => {
+            if (selectMode && selectedIds.length > 0) {
+              setSelectedIds([]);
+            } else {
+              setSelectMode(s => !s);
+              setSelectedIds([]);
+            }
+          }}
+          style={{
+            marginLeft: 'auto', padding: '6px 14px', borderRadius: '999px',
+            backgroundColor: selectMode ? '#1a1a1a' : 'rgba(0,0,0,0.06)',
+            color: selectMode ? '#f2f2f2' : '#1a1a1a',
+            border: 'none', cursor: 'pointer',
+            fontSize: '9px', fontWeight: 700, letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+            fontFamily: "'JetBrains Mono', monospace",
+          }}
+        >
+          {selectMode && selectedIds.length > 0 ? 'DESELECT ALL' : 'SELECT'}
+        </button>
       </div>
 
       {/* Activity list */}
@@ -267,16 +313,34 @@ const [filterOpen, setFilterOpen] = useState(false);
                 {group.activities.map((a, actIdx) => {
   const isLastInGroup = actIdx === group.activities.length - 1;
   return (
-  <div
+    <div
     key={a.id}
+    onClick={() => selectMode && toggleSelect(a.id)}
     style={{
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
       padding: '12px 0',
       borderBottom: isLastInGroup && isWeekBoundary
         ? '1.5px solid #1a1a1a'
         : '1px solid rgba(0,0,0,0.06)',
+      cursor: selectMode ? 'pointer' : 'default',
     }}
   >
+    {/* Selection circle */}
+    {selectMode && (
+      <div style={{
+        width: '18px', height: '18px', borderRadius: '50%', flexShrink: 0,
+        marginRight: '12px', marginTop: '22px',
+        border: selectedIds.includes(a.id) ? 'none' : '1.5px solid rgba(26,26,26,0.25)',
+        backgroundColor: selectedIds.includes(a.id) ? '#FC4C02' : 'transparent',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        {selectedIds.includes(a.id) && (
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+            <path d="M2 5l2.5 2.5L8 3" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        )}
+      </div>
+    )}
                     {/* Left: name + type */}
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ marginBottom: '4px' }}>
@@ -378,6 +442,12 @@ const [filterOpen, setFilterOpen] = useState(false);
           })()
         )}
       </div>
+
+      <SelectionBar
+        selected={selectedActivities}
+        onClear={clearSelection}
+        onJoinSuccess={handleJoinSuccess}
+      />
 
       <style>{`
         @keyframes slideUp {
