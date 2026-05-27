@@ -19,6 +19,7 @@ interface SelectionBarProps {
   onClear: () => void;
   onJoinSuccess: (keptId: number, removedIds: number[], merged: StravaActivity) => void;
   onWorkoutsSuccess?: (insertedKeys: Set<string>) => void;
+  onMarkLogged?: (loggedKeys: Set<string>) => void;
   loggedKeys: Set<string>;
 }
 
@@ -47,13 +48,14 @@ const canJoin = (selected: StravaActivity[]): boolean => {
   return true;
 };
 
-type ConfirmState = 'none' | 'join' | 'workouts';
+type ConfirmState = 'none' | 'join' | 'workouts' | 'logged';
 
 const SelectionBar: React.FC<SelectionBarProps> = ({
   selected,
   onClear,
   onJoinSuccess,
   onWorkoutsSuccess,
+  onMarkLogged,
   loggedKeys,
 }) => {
   const [joining, setJoining] = React.useState(false);
@@ -75,6 +77,7 @@ const SelectionBar: React.FC<SelectionBarProps> = ({
   });
 
   const workoutsAllowed = selected.some(a => a.type !== 'WeightTraining');
+  const loggable = insertable.length > 0;
 
   const handleJoin = async () => {
     setJoining(true);
@@ -128,6 +131,20 @@ const SelectionBar: React.FC<SelectionBarProps> = ({
     } finally {
       setJoining(false);
     }
+  };
+
+  const handleMarkLogged = () => {
+    const keys = new Set(loggedKeys);
+    insertable.forEach(a => {
+      const exercise_id = EXERCISE_IDS[a.type];
+      if (!exercise_id) return;
+      const km = CALORIE_DERIVED_KM.has(a.type)
+        ? (a.workout_calories ?? 0) / 50
+        : (a.distance_km > 0 ? a.distance_km : null);
+      keys.add(makeLogKey(a.date, exercise_id, km));
+    });
+    onMarkLogged?.(keys);
+    onClear();
   };
 
   const handleAddWorkouts = async () => {
@@ -274,6 +291,13 @@ WebkitBackdropFilter: 'blur(10px)',
             </button>
             <button onClick={() => setConfirming('none')} style={cancelBtn}>CANCEL</button>
           </>
+        ) : confirming === 'logged' ? (
+          <>
+            <button onClick={handleMarkLogged} style={confirmBtn}>
+              {`CONFIRM LOG ${insertable.length}`}
+            </button>
+            <button onClick={() => setConfirming('none')} style={cancelBtn}>CANCEL</button>
+          </>
         ) : (
           <>
             <button
@@ -287,6 +311,12 @@ WebkitBackdropFilter: 'blur(10px)',
               style={workoutsAllowed ? blackBtn : disabledBtn}
             >
               + WORKOUTS
+            </button>
+            <button
+              onClick={() => loggable && setConfirming('logged')}
+              style={loggable ? blackBtn : disabledBtn}
+            >
+              LOGGED
             </button>
           </>
         )}

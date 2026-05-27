@@ -493,6 +493,7 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
         onClear={clearSelection}
         onJoinSuccess={handleJoinSuccess}
         onWorkoutsSuccess={handleWorkoutsSuccess}
+        onMarkLogged={(keys) => setLoggedKeys(keys)}
         loggedKeys={loggedKeys}
       />
 
