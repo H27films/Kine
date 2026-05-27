@@ -1,6 +1,6 @@
 import React from 'react';
 import { X } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { supabase, getISOWeek, getDayName } from '../../lib/supabase';
 
 interface StravaActivity {
   id: number;
@@ -156,9 +156,16 @@ const SelectionBar: React.FC<SelectionBarProps> = ({
           : (a.distance_km > 0 ? a.distance_km : null);
         const total_cardio = km != null ? +(km * multiplier).toFixed(2) : null;
         const total_score_k = total_cardio != null ? +(total_cardio * 1000).toFixed(1) : null;
-      
+        
+        // Compute week and day in Malaysia timezone, matching LogCardio.tsx's approach
+        const activityDate = new Date(a.date + 'T12:00:00+08:00');
+        const week = getISOWeek(activityDate);
+        const day = getDayName(activityDate);
+       
         return {
           date: a.date,
+          week,
+          day,
           type: 'CARDIO',
           exercise_id,
           km,
