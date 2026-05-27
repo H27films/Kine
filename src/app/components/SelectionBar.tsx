@@ -206,10 +206,12 @@ const SelectionBar: React.FC<SelectionBarProps> = ({
 
   const disabledBtn: React.CSSProperties = {
     ...btnBase,
-    backgroundColor: 'rgba(0,0,0,0.2)',
-    color: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(255,255,255,0.35)',
+    color: 'rgba(0,0,0,0.25)',
     cursor: 'not-allowed',
-    border: '1px solid rgba(255,255,255,0.05)',
+    border: '1px solid rgba(255,255,255,0.5)',
+    backdropFilter: 'blur(10px)',
+    WebkitBackdropFilter: 'blur(10px)',
   };
 
   const confirmBtn: React.CSSProperties = {
@@ -230,8 +232,8 @@ const SelectionBar: React.FC<SelectionBarProps> = ({
     <div style={{
       position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 10000,
       background: 'rgba(240,240,240,0.75)',
-      backdropFilter: 'blur(24px)',
-      WebkitBackdropFilter: 'blur(24px)',
+backdropFilter: 'blur(20px)',
+WebkitBackdropFilter: 'blur(10px)',
       borderTop: '1px solid rgba(255,255,255,0.1)',
       padding: '14px 20px',
       paddingBottom: 'calc(14px + env(safe-area-inset-bottom))',
@@ -242,7 +244,7 @@ const SelectionBar: React.FC<SelectionBarProps> = ({
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
         <span style={{
           fontSize: '10px', fontWeight: 700, letterSpacing: '0.12em',
-          color: 'rgba(0,0,0,0.4)', textTransform: 'uppercase',
+          color: '#000000', textTransform: 'uppercase',
           fontFamily: "'JetBrains Mono', monospace",
           marginRight: '4px', flexShrink: 0, whiteSpace: 'nowrap',
         }}>
