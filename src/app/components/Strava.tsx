@@ -11,7 +11,7 @@ const Strava: React.FC = () => {
   useEffect(() => {
     if (localStorage.getItem('strava_access_token')) {
       setJustConnected(true);
-      const timer = setTimeout(() => setJustConnected(false), 3000);
+      const timer = setTimeout(() => setJustConnected(false), 9000);
       return () => clearTimeout(timer);
     }
   }, []);
@@ -26,7 +26,7 @@ const Strava: React.FC = () => {
   const handleStravaSync = async () => {
     const token = localStorage.getItem('strava_access_token');
     if (!token) {
-      setSyncMessage('Not connected to Strava');
+      setSyncMessage('Not connected');
       return;
     }
     setSyncing(true);
@@ -38,7 +38,7 @@ const Strava: React.FC = () => {
       );
       const activities = await response.json();
       if (!Array.isArray(activities)) {
-        setSyncMessage('Token expired — reconnect Strava');
+        setSyncMessage('Token Expired');
         setSyncing(false);
         return;
       }
@@ -119,7 +119,7 @@ const Strava: React.FC = () => {
         <button
           onClick={handleStravaSync}
           disabled={syncing}
-          className="rounded-xl p-4 flex items-center justify-start gap-3 active:scale-[0.98] transition-all"
+          className="rounded-xl p-4 flex items-center justify-center gap-3 active:scale-[0.98] transition-all"
           style={{ backgroundColor: 'rgba(0,0,0,0.05)', flex: 1 }}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FC4C02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -128,16 +128,11 @@ const Strava: React.FC = () => {
             <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
           </svg>
           <span style={{ fontSize: '0.75rem', fontWeight: 500, letterSpacing: '0.08em', color: '#FC4C02', textTransform: 'uppercase' }}>
-            {syncing ? 'Syncing...' : 'Sync'}
+            {syncing ? 'Syncing...' : syncMessage || 'Sync'}
           </span>
         </button>
       </div>
 
-      {syncMessage && (
-        <div style={{ fontSize: '0.7rem', color: '#999', textAlign: 'center', marginBottom: '8px' }}>
-          {syncMessage}
-        </div>
-      )}
 
       {viewerOpen && <StravaViewer onClose={() => setViewerOpen(false)} />}
     </>
