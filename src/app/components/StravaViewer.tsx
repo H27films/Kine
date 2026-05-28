@@ -164,9 +164,13 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
           .update({ date, distance_km })
           .eq('id', id);
         if (error) throw error;
-        setActivities(prev => prev.map(a =>
-          a.id === id ? { ...a, date, distance_km } : a
-        ));
+        setActivities(prev => {
+          const updated = prev.map(a =>
+            a.id === id ? { ...a, date, distance_km } : a
+          );
+          // Re-sort by date descending so edits reorder correctly
+          return updated.sort((a, b) => b.date.localeCompare(a.date));
+        });
       }
       cancelEditMode();
     } catch (e: any) {
