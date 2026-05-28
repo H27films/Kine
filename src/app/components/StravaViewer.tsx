@@ -620,10 +620,10 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
                               <div style={{ fontSize: '8px', color: 'rgba(26,26,26,0.4)', letterSpacing: '0.1em' }}>KCAL</div>
                             </div>
                           )}
-                          {a.distance_km > 0 && (
+                          {(a.distance_km > 0 || a.type === 'Rowing') && (
                             <div style={{ textAlign: 'right' }}>
                               <div style={{ fontSize: '14px', fontWeight: 700, color: '#1a1a1a', letterSpacing: '-0.02em' }}>
-                                {a.distance_km}
+                                {a.distance_km > 0 ? a.distance_km : ((a.workout_calories ?? 0) / 50).toFixed(2)}
                               </div>
                               <div style={{ fontSize: '8px', color: 'rgba(26,26,26,0.4)', letterSpacing: '0.1em' }}>KM</div>
                             </div>
