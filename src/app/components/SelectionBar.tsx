@@ -143,18 +143,74 @@ const SelectionBar: React.FC<SelectionBarProps> = (props) => {
     }
   };
 
-  const handleMarkLogged = () => {
-    const keys = new Set(loggedKeys);
-    insertable.forEach(a => {
-      const exercise_id = EXERCISE_IDS[a.type];
-      if (!exercise_id) return;
-      const km = CALORIE_DERIVED_KM.has(a.type)
-        ? (a.workout_calories ?? 0) / 50
-        : (a.distance_km > 0 ? a.distance_km : null);
-      keys.add(makeLogKey(a.date, exercise_id, km));
-    });
-    onMarkLogged?.(keys);
-    onClear();
+  const handleMarkLogged = async () => {
+    setAddingWorkouts(true);
+    setError('');
+    setConfirming('none');
+    try {
+      const uniqueExerciseIds = [...new Set(insertable.map(a => EXERCISE_IDS[a.type]).filter(Boolean))];
+      const { data: exercises, error: exErr } = await supabase
+        .from('exercises')
+        .select('id, multiplier')
+        .in('id', uniqueExerciseIds);
+
+      if (exErr) throw exErr;
+
+      const multiplierMap: Record<number, number> = {};
+      (exercises || []).forEach(ex => { multiplierMap[ex.id] = ex.multiplier; });
+
+      const newLogKeys = new Set<string>();
+
+      const rows = insertable.map(a => {
+        const exercise_id = EXERCISE_IDS[a.type];
+        const multiplier = multiplierMap[exercise_id] ?? 1;
+        const km = CALORIE_DERIVED_KM.has(a.type)
+          ? (a.workout_calories ?? 0) / 50
+          : (a.distance_km > 0 ? a.distance_km : null);
+
+        const key = makeLogKey(a.date, exercise_id, km);
+        newLogKeys.add(key);
+
+        const total_cardio = km != null ? +(km * multiplier).toFixed(2) : null;
+        const total_score_k = total_cardio != null ? +(total_cardio * 1000).toFixed(1) : null;
+
+        const activityDate = new Date(a.date + 'T12:00:00+08:00');
+        const week = getISOWeek(activityDate);
+        const day = getDayName(activityDate);
+
+        return {
+          date: a.date,
+          week,
+          day,
+          type: 'CARDIO',
+          exercise_id,
+          km,
+          multiplier: multiplier ? +multiplier.toFixed(1) : null,
+          total_cardio,
+          total_score_k,
+          workout_calories: a.workout_calories ?? null,
+          time: a.time_formatted || null,
+          source: 'app',
+          new_entry: 'New',
+        };
+      });
+
+      const { error: insertErr } = await supabase
+        .from('workouts')
+        .insert(rows);
+
+      if (insertErr) throw insertErr;
+
+      // Merge the new keys into existing loggedKeys
+      const mergedKeys = new Set(loggedKeys);
+      newLogKeys.forEach(k => mergedKeys.add(k));
+      onMarkLogged?.(mergedKeys);
+      onClear();
+    } catch (e: any) {
+      setError('Mark logged failed: ' + e.message);
+    } finally {
+      setAddingWorkouts(false);
+    }
   };
 
   const handleAddWorkouts = async () => {
