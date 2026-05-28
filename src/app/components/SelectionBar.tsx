@@ -21,6 +21,10 @@ interface SelectionBarProps {
   onWorkoutsSuccess?: (insertedKeys: Set<string>) => void;
   onMarkLogged?: (loggedKeys: Set<string>) => void;
   loggedKeys: Set<string>;
+  editing?: boolean;
+  onEdit?: () => void;
+  onSaveAll?: () => void;
+  onCancelEdit?: () => void;
 }
 
 const EXERCISE_IDS: Record<string, number> = {
@@ -50,14 +54,20 @@ const canJoin = (selected: StravaActivity[]): boolean => {
 
 type ConfirmState = 'none' | 'join' | 'workouts' | 'logged';
 
-const SelectionBar: React.FC<SelectionBarProps> = ({
-  selected,
-  onClear,
-  onJoinSuccess,
-  onWorkoutsSuccess,
-  onMarkLogged,
-  loggedKeys,
-}) => {
+const SelectionBar: React.FC<SelectionBarProps> = (props) => {
+  const {
+    selected,
+    onClear,
+    onJoinSuccess,
+    onWorkoutsSuccess,
+    onMarkLogged,
+    loggedKeys,
+    editing = false,
+    onEdit,
+    onSaveAll,
+    onCancelEdit,
+  } = props;
+
   const [joining, setJoining] = React.useState(false);
   const [addingWorkouts, setAddingWorkouts] = React.useState(false);
   const [error, setError] = React.useState('');
@@ -298,28 +308,41 @@ WebkitBackdropFilter: 'blur(10px)',
             </button>
             <button onClick={() => setConfirming('none')} style={cancelBtn}>CANCEL</button>
           </>
-        ) : (
-          <>
-            <button
-              onClick={() => joinable && setConfirming('join')}
-              style={joinable ? blackBtn : disabledBtn}
-            >
-              JOIN
-            </button>
-            <button
-              onClick={() => workoutsAllowed ? setConfirming('workouts') : undefined}
-              style={workoutsAllowed ? blackBtn : disabledBtn}
-            >
-              + WORKOUTS
-            </button>
-            <button
-              onClick={() => loggable && setConfirming('logged')}
-              style={loggable ? blackBtn : disabledBtn}
-            >
-              LOGGED
-            </button>
-          </>
-        )}
+         ) : editing ? (
+           <>
+             <button onClick={onSaveAll} style={confirmBtn}>
+               SAVE ALL
+             </button>
+             <button onClick={onCancelEdit} style={cancelBtn}>CANCEL</button>
+           </>
+         ) : (
+           <>
+             <button
+               onClick={() => joinable && setConfirming('join')}
+               style={joinable ? blackBtn : disabledBtn}
+             >
+               JOIN
+             </button>
+             <button
+               onClick={() => workoutsAllowed ? setConfirming('workouts') : undefined}
+               style={workoutsAllowed ? blackBtn : disabledBtn}
+             >
+               + WORKOUTS
+             </button>
+             <button
+               onClick={() => loggable && setConfirming('logged')}
+               style={loggable ? blackBtn : disabledBtn}
+             >
+               LOGGED
+             </button>
+             <button
+               onClick={() => onEdit?.()}
+               style={blackBtn}
+             >
+               EDIT
+             </button>
+           </>
+         )}
       </div>
 
       <button

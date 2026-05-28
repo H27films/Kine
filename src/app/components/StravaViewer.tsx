@@ -79,6 +79,11 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [loggedKeys, setLoggedKeys] = useState<Set<string>>(new Set());
+  const [editing, setEditing] = useState(false);
+  const [editValues, setEditValues] = useState<Record<number, { date: string; distance_km: number }>>({});
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [savingIds, setSavingIds] = useState<Set<number>>(new Set());
+  const [deletingConfirmId, setDeletingConfirmId] = useState<number | null>(null);
 
   const selectedActivities = activities.filter(a => selectedIds.includes(a.id));
 
@@ -89,6 +94,86 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
   const clearSelection = () => {
     setSelectedIds([]);
     setSelectMode(false);
+    setEditing(false);
+    setEditValues({});
+    setDeletingConfirmId(null);
+    setDeletingId(null);
+  };
+
+  const enterEditMode = () => {
+    const edits: Record<number, { date: string; distance_km: number }> = {};
+    selectedActivities.forEach(a => {
+      edits[a.id] = { date: a.date, distance_km: a.distance_km };
+    });
+    setEditValues(edits);
+    setEditing(true);
+    setDeletingConfirmId(null);
+    setDeletingId(null);
+  };
+
+  const cancelEditMode = () => {
+    setEditing(false);
+    setEditValues({});
+    setDeletingConfirmId(null);
+    setDeletingId(null);
+  };
+
+  const handleEditChange = (id: number, field: 'date' | 'distance_km', value: string) => {
+    setEditValues(prev => {
+      const current = prev[id];
+      if (!current) return prev;
+      if (field === 'date') {
+        return { ...prev, [id]: { ...current, date: value } };
+      }
+      const parsed = parseFloat(value);
+      return { ...prev, [id]: { ...current, distance_km: isNaN(parsed) ? 0 : parsed } };
+    });
+  };
+
+  const handleDeleteActivity = async (id: number) => {
+    setDeletingId(id);
+    try {
+      const { error } = await supabase.from('strava').delete().eq('id', id);
+      if (error) throw error;
+      setActivities(prev => prev.filter(a => a.id !== id));
+      setSelectedIds(prev => prev.filter(x => x !== id));
+      setDeletingConfirmId(null);
+      // Remove from editValues too if editing
+      setEditValues(prev => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+    } catch (e: any) {
+      console.error('Delete failed:', e.message);
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const handleSaveAllEdits = async () => {
+    const ids = Object.keys(editValues).map(Number);
+    if (ids.length === 0) return;
+
+    setSavingIds(new Set(ids));
+    try {
+      for (const id of ids) {
+        const { date, distance_km } = editValues[id];
+        const { error } = await supabase
+          .from('strava')
+          .update({ date, distance_km })
+          .eq('id', id);
+        if (error) throw error;
+        setActivities(prev => prev.map(a =>
+          a.id === id ? { ...a, date, distance_km } : a
+        ));
+      }
+      cancelEditMode();
+    } catch (e: any) {
+      console.error('Save failed:', e.message);
+    } finally {
+      setSavingIds(new Set());
+    }
   };
 
   const handleJoinSuccess = (keptId: number, removedIds: number[], merged: StravaActivity) => {
@@ -347,17 +432,24 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
                   {group.activities.map((a, actIdx) => {
                     const isLastInGroup = actIdx === group.activities.length - 1;
                     const logged = isLogged(a);
+                    const isEditing = editing && selectedIds.includes(a.id);
+                    const editVal = editValues[a.id];
+                    const isSaving = savingIds.has(a.id);
+                    const isDeleting = deletingId === a.id;
+                    const showDeleteConfirm = deletingConfirmId === a.id;
 
                     return (
+                      <React.Fragment key={a.id}>
                       <div
-                        key={a.id}
                         onClick={() => selectMode && toggleSelect(a.id)}
                         style={{
                           display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
                           padding: '12px 0',
-                          borderBottom: isLastInGroup && isWeekBoundary
-                            ? '1.5px solid #1a1a1a'
-                            : '1px solid rgba(0,0,0,0.06)',
+                          borderBottom: isEditing
+                            ? 'none'
+                            : isLastInGroup && isWeekBoundary
+                              ? '1.5px solid #1a1a1a'
+                              : '1px solid rgba(0,0,0,0.06)',
                           cursor: selectMode ? 'pointer' : 'default',
                         }}
                       >
@@ -479,6 +571,121 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
                           )}
                         </div>
                       </div>
+
+                      {/* Expanded edit row (3rd line) */}
+                      {isEditing && editVal && (
+                        <div style={{
+                          padding: '10px 0 14px 0',
+                          display: 'flex', alignItems: 'center', gap: '12px',
+                          borderBottom: isLastInGroup && isWeekBoundary
+                            ? '1.5px solid #1a1a1a'
+                            : '1px solid rgba(0,0,0,0.06)',
+                        }}>
+                          {/* Date input */}
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(26,26,26,0.75)', letterSpacing: '0.1em', marginBottom: '6px' }}>DATE</div>
+                            <div style={{
+                              padding: '8px 10px', borderRadius: '10px',
+                              background: 'rgba(255,255,255,0.55)',
+                              backdropFilter: 'blur(12px)',
+                              WebkitBackdropFilter: 'blur(12px)',
+                              border: '1px solid rgba(255,255,255,0.3)',
+                              boxShadow: '0 4px 16px rgba(0,0,0,0.04)',
+                            }}>
+                              <input
+                                type="text"
+                                value={editVal.date}
+                                onChange={e => handleEditChange(a.id, 'date', e.target.value)}
+                                onClick={e => e.stopPropagation()}
+                                style={{
+                                  width: '100%', border: 'none', outline: 'none',
+                                  backgroundColor: 'transparent',
+                                  fontSize: '12px', fontWeight: 500,
+                                  fontFamily: "'JetBrains Mono', monospace",
+                                  color: '#1a1a1a',
+                                }}
+                                placeholder="YYYY-MM-DD"
+                              />
+                            </div>
+                          </div>
+                          {/* Distance input */}
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(26,26,26,0.75)', letterSpacing: '0.1em', marginBottom: '6px' }}>KM</div>
+                            <div style={{
+                              padding: '8px 10px', borderRadius: '10px',
+                              background: 'rgba(255,255,255,0.55)',
+                              backdropFilter: 'blur(12px)',
+                              WebkitBackdropFilter: 'blur(12px)',
+                              border: '1px solid rgba(255,255,255,0.3)',
+                              boxShadow: '0 4px 16px rgba(0,0,0,0.04)',
+                            }}>
+                              <input
+                                type="number"
+                                value={editVal.distance_km}
+                                onChange={e => handleEditChange(a.id, 'distance_km', e.target.value)}
+                                onClick={e => e.stopPropagation()}
+                                step="0.01"
+                                min="0"
+                                style={{
+                                  width: '100%', border: 'none', outline: 'none',
+                                  backgroundColor: 'transparent',
+                                  fontSize: '12px', fontWeight: 500,
+                                  fontFamily: "'JetBrains Mono', monospace",
+                                  color: '#1a1a1a',
+                                }}
+                              />
+                            </div>
+                          </div>
+                          {/* Delete button with confirmation */}
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            <div style={{ height: '16px' }} /> {/* spacer to align with label above inputs */}
+                            {showDeleteConfirm ? (
+                              <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                                <button
+                                  onClick={e => { e.stopPropagation(); handleDeleteActivity(a.id); }}
+                                  disabled={isDeleting}
+                                  style={{
+                                    padding: '6px 12px', borderRadius: '8px',
+                                    border: 'none', cursor: 'pointer',
+                                    backgroundColor: '#FC4C02', color: '#fff',
+                                    fontSize: '9px', fontWeight: 700, letterSpacing: '0.08em',
+                                    fontFamily: "'JetBrains Mono', monospace",
+                                  }}
+                                >
+                                  {isDeleting ? '...' : 'DELETE'}
+                                </button>
+                                <button
+                                  onClick={e => { e.stopPropagation(); setDeletingConfirmId(null); }}
+                                  style={{
+                                    padding: '6px 8px', borderRadius: '8px',
+                                    border: 'none', cursor: 'pointer',
+                                    backgroundColor: 'rgba(0,0,0,0.06)', color: '#1a1a1a',
+                                    fontSize: '9px', fontWeight: 700, letterSpacing: '0.08em',
+                                    fontFamily: "'JetBrains Mono', monospace",
+                                  }}
+                                >
+                                  X
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={e => { e.stopPropagation(); setDeletingConfirmId(a.id); }}
+                                style={{
+                                  padding: '6px 12px', borderRadius: '8px',
+                                  border: '1px solid rgba(252,76,2,0.3)', cursor: 'pointer',
+                                  backgroundColor: 'rgba(252,76,2,0.06)', color: '#FC4C02',
+                                  fontSize: '9px', fontWeight: 700, letterSpacing: '0.08em',
+                                  textTransform: 'uppercase',
+                                  fontFamily: "'JetBrains Mono', monospace",
+                                }}
+                              >
+                                DELETE
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      </React.Fragment>
                     );
                   })}
                 </div>
@@ -495,6 +702,10 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
         onWorkoutsSuccess={handleWorkoutsSuccess}
         onMarkLogged={(keys) => setLoggedKeys(keys)}
         loggedKeys={loggedKeys}
+        editing={editing}
+        onEdit={enterEditMode}
+        onSaveAll={handleSaveAllEdits}
+        onCancelEdit={cancelEditMode}
       />
 
       <style>{`
