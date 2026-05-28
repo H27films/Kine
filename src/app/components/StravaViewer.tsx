@@ -251,6 +251,8 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
     ? activities
     : activities.filter(a => a.type === filter);
 
+  const totalKm = filtered.reduce((sum, a) => sum + (a.distance_km > 0 ? a.distance_km : 0), 0);
+
   return (
     <div
       style={{
@@ -354,6 +356,30 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
               ))}
             </div>
           )}
+        </div>
+
+        {/* Filter-sensitive KM total */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: '4px',
+          padding: '6px 14px', borderRadius: '999px',
+          background: 'rgba(255,255,255,0.55)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          border: '1px solid rgba(255,255,255,0.3)',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.04)',
+        }}>
+          <span style={{
+            fontSize: '10px', fontWeight: 700, color: '#1a1a1a',
+            letterSpacing: '0.02em', fontFamily: "'JetBrains Mono', monospace",
+          }}>
+            {totalKm.toFixed(2)}
+          </span>
+          <span style={{
+            fontSize: '8px', color: 'rgba(26,26,26,0.4)', letterSpacing: '0.1em',
+            fontWeight: 700,
+          }}>
+            KM
+          </span>
         </div>
 
         <button
