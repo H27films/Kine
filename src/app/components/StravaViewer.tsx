@@ -471,7 +471,10 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
                     return (
                       <React.Fragment key={a.id}>
                       <div
-                        onClick={() => selectMode && toggleSelect(a.id)}
+                        onClick={() => {
+                          if (!selectMode) setSelectMode(true);
+                          toggleSelect(a.id);
+                        }}
                         style={{
                           display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
                           padding: '12px 0',
@@ -526,7 +529,7 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
                           </div>
 
                           {/* Type label */}
-                          <div style={{ position: 'relative' }} onClick={e => e.stopPropagation()}>
+                          <div style={{ position: 'relative' }}>
                             <div
                               onClick={() => a.type === 'Walk' ? setEditingId(editingId === a.id ? null : a.id) : undefined}
                               style={{
