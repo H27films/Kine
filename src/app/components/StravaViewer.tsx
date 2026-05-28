@@ -251,7 +251,13 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
     ? activities
     : activities.filter(a => a.type === filter);
 
-  const totalKm = filtered.reduce((sum, a) => sum + (a.distance_km > 0 ? a.distance_km : 0), 0);
+  const totalKm = filter === 'WeightTraining'
+    ? 0
+    : filtered.reduce((sum, a) => sum + (a.distance_km > 0 ? a.distance_km : 0), 0);
+
+  const avgCalories = filter === 'WeightTraining' && filtered.length > 0
+    ? Math.round(filtered.reduce((sum, a) => sum + (a.workout_calories ?? 0), 0) / filtered.length)
+    : 0;
 
   const totalDays = (() => {
     if (activities.length === 0) return 0;
@@ -366,7 +372,7 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
           )}
         </div>
 
-        {/* Filter-sensitive KM total */}
+        {/* Filter-sensitive sum pill: KM for most types, avg calories for WeightTraining */}
         <div style={{
           display: 'flex', alignItems: 'center', gap: '4px',
           padding: '6px 14px', borderRadius: '999px',
@@ -380,13 +386,13 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
             fontSize: '10px', fontWeight: 700, color: '#1a1a1a',
             letterSpacing: '0.02em', fontFamily: "'JetBrains Mono', monospace",
           }}>
-            {totalKm.toFixed(2)}
+            {filter === 'WeightTraining' ? avgCalories : totalKm.toFixed(2)}
           </span>
           <span style={{
             fontSize: '8px', color: 'rgba(26,26,26,0.4)', letterSpacing: '0.1em',
             fontWeight: 700,
           }}>
-            KM
+            {filter === 'WeightTraining' ? 'KCAL (AVG)' : 'KM'}
           </span>
         </div>
 
