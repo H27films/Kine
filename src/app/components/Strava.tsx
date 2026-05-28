@@ -57,15 +57,22 @@ const Strava: React.FC = () => {
             { headers: { Authorization: `Bearer ${token}` } }
           );
           const detail = await detailRes.json();
+          const rawDistance = +(a.distance / 1000).toFixed(2);
+          const rawCalories = detail.calories || null;
+          // For Rowing, Strava doesn't return distance — derive it from calories (50 kcal = 1 km)
+          const distanceKm = a.type === 'Rowing' && rawDistance === 0 && rawCalories
+            ? +(rawCalories / 50).toFixed(2)
+            : rawDistance;
+
           const { error } = await supabase.from('strava').insert({
             activity_id: a.id,
             date: a.start_date.split('T')[0],
             type: a.type,
-            distance_km: +(a.distance / 1000).toFixed(2),
+            distance_km: distanceKm,
             name: a.name,
             duration_seconds: a.moving_time,
             time_formatted: new Date(a.moving_time * 1000).toISOString().substr(11, 8),
-            workout_calories: detail.calories || null,
+            workout_calories: rawCalories,
           });
           if (error) console.error('Insert error:', error);
           else inserted++;
