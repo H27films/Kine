@@ -253,6 +253,14 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
 
   const totalKm = filtered.reduce((sum, a) => sum + (a.distance_km > 0 ? a.distance_km : 0), 0);
 
+  const totalDays = (() => {
+    if (activities.length === 0) return 0;
+    const dates = activities.map(a => new Date(a.date + 'T00:00:00').getTime());
+    const min = Math.min(...dates);
+    const max = Math.max(...dates);
+    return Math.round((max - min) / (1000 * 60 * 60 * 24)) + 1;
+  })();
+
   return (
     <div
       style={{
@@ -279,7 +287,7 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
         </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <span style={{ fontSize: '10px', color: 'rgba(26,26,26,0.45)', letterSpacing: '0.1em' }}>
-            {filtered.length} ACTIVITIES
+            {totalDays} DAYS / {filtered.length} ACTIVITIES
           </span>
           <button
             onClick={onClose}
@@ -382,27 +390,45 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
           </span>
         </div>
 
-        <button
-          onClick={() => {
-            if (selectMode && selectedIds.length > 0) {
-              setSelectedIds([]);
-            } else {
-              setSelectMode(s => !s);
-              setSelectedIds([]);
-            }
-          }}
-          style={{
-            marginLeft: 'auto', padding: '6px 14px', borderRadius: '999px',
-            backgroundColor: selectMode ? '#1a1a1a' : 'rgba(0,0,0,0.06)',
-            color: selectMode ? '#f2f2f2' : '#1a1a1a',
-            border: 'none', cursor: 'pointer',
-            fontSize: '9px', fontWeight: 700, letterSpacing: '0.1em',
-            textTransform: 'uppercase',
-            fontFamily: "'JetBrains Mono', monospace",
-          }}
-        >
-          {selectMode && selectedIds.length > 0 ? 'DESELECT ALL' : 'SELECT'}
-        </button>
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button
+            onClick={() => {
+              if (selectMode && selectedIds.length > 0) {
+                setSelectedIds([]);
+              } else {
+                setSelectMode(s => !s);
+                setSelectedIds([]);
+              }
+            }}
+            style={{
+              padding: '6px 14px', borderRadius: '999px',
+              backgroundColor: selectMode ? '#1a1a1a' : 'rgba(0,0,0,0.06)',
+              color: selectMode ? '#f2f2f2' : '#1a1a1a',
+              border: 'none', cursor: 'pointer',
+              fontSize: '9px', fontWeight: 700, letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              fontFamily: "'JetBrains Mono', monospace",
+            }}
+          >
+            {selectMode && selectedIds.length > 0 ? 'DESELECT ALL' : 'SELECT'}
+          </button>
+          {selectMode && (
+            <button
+              onClick={() => setSelectedIds(filtered.map(a => a.id))}
+              style={{
+                padding: '6px 14px', borderRadius: '999px',
+                backgroundColor: selectedIds.length === filtered.length ? '#1a1a1a' : 'rgba(0,0,0,0.06)',
+                color: selectedIds.length === filtered.length ? '#f2f2f2' : '#1a1a1a',
+                border: 'none', cursor: 'pointer',
+                fontSize: '9px', fontWeight: 700, letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                fontFamily: "'JetBrains Mono', monospace",
+              }}
+            >
+              ALL
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Activity list */}
