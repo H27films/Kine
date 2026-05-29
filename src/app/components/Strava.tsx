@@ -32,8 +32,26 @@ const Strava: React.FC = () => {
     setSyncing(true);
     setSyncMessage('');
     try {
+      // Use Malaysia timezone (UTC+8) — only fetch activities from yesterday 00:00 MYT onwards
+      const now = new Date();
+      // Compute yesterday 00:00 in Malaysia time, as UTC epoch seconds
+      // Malaysia offset is UTC+8 (480 minutes)
+      const msPerHour = 3600000;
+      const utcMs = now.getTime() + now.getTimezoneOffset() * 60000; // convert local to UTC
+      const mytMs = utcMs + 8 * msPerHour; // UTC to Malaysia time
+      const mytDate = new Date(mytMs);
+      // Yesterday start in MYT
+      const yesterdayMYT = new Date(mytDate);
+      yesterdayMYT.setDate(yesterdayMYT.getDate() - 1);
+      yesterdayMYT.setHours(0, 0, 0, 0);
+      const after = Math.floor((yesterdayMYT.getTime() - 8 * msPerHour) / 1000); // MYT back to UTC epoch
+      // Today end in MYT
+      const todayEndMYT = new Date(mytDate);
+      todayEndMYT.setHours(23, 59, 59, 999);
+      const before = Math.floor((todayEndMYT.getTime() - 8 * msPerHour) / 1000);
+
       const response = await fetch(
-        'https://www.strava.com/api/v3/athlete/activities?per_page=90',
+        `https://www.strava.com/api/v3/athlete/activities?after=${after}&before=${before}&per_page=90`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const activities = await response.json();
