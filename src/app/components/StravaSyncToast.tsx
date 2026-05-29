@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
+import { getValidStravaToken } from '../lib/stravaToken';
 
 interface StravaSyncToastProps {}
 
@@ -16,6 +17,17 @@ const StravaSyncToast: React.FC<StravaSyncToastProps> = () => {
     const runAutoSync = async () => {
       if (cancelled) return;
       try {
+        const accessToken = await getValidStravaToken();
+        if (!accessToken) {
+          setMessage('Strava token expired — reconnect');
+          setVisible(true);
+          setTimeout(() => {
+            setVisible(false);
+            setTimeout(() => setMessage(null), 300);
+          }, 4000);
+          return;
+        }
+
         // Use local date (the user is in UTC+8 Malaysia).
         // .getTime() returns UTC epoch ms regardless of timezone, so local midnight
         // boundaries convert to the correct UTC epoch seconds for the Strava API.
@@ -34,7 +46,7 @@ const StravaSyncToast: React.FC<StravaSyncToastProps> = () => {
 
         const response = await fetch(
           `https://www.strava.com/api/v3/athlete/activities?after=${after}&before=${before}&per_page=90`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${accessToken}` } }
         );
         const activities = await response.json();
         if (!Array.isArray(activities)) {
@@ -58,7 +70,7 @@ const StravaSyncToast: React.FC<StravaSyncToastProps> = () => {
           if (!existing) {
             const detailRes = await fetch(
               `https://www.strava.com/api/v3/activities/${a.id}`,
-              { headers: { Authorization: `Bearer ${token}` } }
+              { headers: { Authorization: `Bearer ${accessToken}` } }
             );
             const detail = await detailRes.json();
             const rawDistance = +(a.distance / 1000).toFixed(2);

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
+import { getValidStravaToken } from '../lib/stravaToken';
 import StravaViewer from './StravaViewer';
 
 const Strava: React.FC = () => {
@@ -39,9 +40,9 @@ const Strava: React.FC = () => {
   };
 
   const handleStravaSync = async () => {
-    const token = localStorage.getItem('strava_access_token');
+    const token = await getValidStravaToken();
     if (!token) {
-      setSyncMessage('Not connected');
+      showToast('Strava token expired — reconnect');
       return;
     }
     setSyncing(true);
