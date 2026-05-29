@@ -16,18 +16,21 @@ const StravaSyncToast: React.FC<StravaSyncToastProps> = () => {
     const runAutoSync = async () => {
       if (cancelled) return;
       try {
+        // Use local date (the user is in UTC+8 Malaysia).
+        // .getTime() returns UTC epoch ms regardless of timezone, so local midnight
+        // boundaries convert to the correct UTC epoch seconds for the Strava API.
         const now = new Date();
-        const msPerHour = 3600000;
-        const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
-        const mytMs = utcMs + 8 * msPerHour;
-        const mytDate = new Date(mytMs);
-        const yesterdayMYT = new Date(mytDate);
-        yesterdayMYT.setDate(yesterdayMYT.getDate() - 1);
-        yesterdayMYT.setHours(0, 0, 0, 0);
-        const after = Math.floor((yesterdayMYT.getTime() - 8 * msPerHour) / 1000);
-        const todayEndMYT = new Date(mytDate);
-        todayEndMYT.setHours(23, 59, 59, 999);
-        const before = Math.floor((todayEndMYT.getTime() - 8 * msPerHour) / 1000);
+
+        // Yesterday 00:00:00 local time
+        const yesterdayStart = new Date(now);
+        yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+        yesterdayStart.setHours(0, 0, 0, 0);
+        const after = Math.floor(yesterdayStart.getTime() / 1000);
+
+        // Today 23:59:59 local time
+        const todayEnd = new Date(now);
+        todayEnd.setHours(23, 59, 59, 999);
+        const before = Math.floor(todayEnd.getTime() / 1000);
 
         const response = await fetch(
           `https://www.strava.com/api/v3/athlete/activities?after=${after}&before=${before}&per_page=90`,
