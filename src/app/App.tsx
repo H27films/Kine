@@ -5,6 +5,7 @@ import { BottomNav } from './components/BottomNav';
 import { WeeklySummaryBar } from './components/WeeklySummaryBar';
 import SplashScreen from './components/SplashScreen';
 import { QuickLogVoice } from './components/QuickLogVoice';
+import StravaSyncToast from './components/StravaSyncToast';
 import { supabase } from '../lib/supabase';
 
 const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
@@ -174,6 +175,7 @@ React.useEffect(() => {
           }}
         />
       )}
+      <StravaSyncToast />
     </div>
     </>
   );
