@@ -11,7 +11,10 @@ const StravaSyncToast: React.FC<StravaSyncToastProps> = () => {
     const token = localStorage.getItem('strava_access_token');
     if (!token) return;
 
+    let cancelled = false;
+
     const runAutoSync = async () => {
+      if (cancelled) return;
       try {
         const now = new Date();
         const msPerHour = 3600000;
@@ -92,7 +95,19 @@ const StravaSyncToast: React.FC<StravaSyncToastProps> = () => {
 
     // Delay slightly so the app renders first
     const timer = setTimeout(() => runAutoSync(), 800);
-    return () => clearTimeout(timer);
+
+    // Also listen for connect-triggered sync (e.g. after Strava OAuth callback)
+    const handleJustConnected = () => {
+      clearTimeout(timer);
+      setTimeout(() => runAutoSync(), 1500);
+    };
+    window.addEventListener('strava:just-connected', handleJustConnected);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+      window.removeEventListener('strava:just-connected', handleJustConnected);
+    };
   }, []);
 
   if (!message) return null;

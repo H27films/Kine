@@ -69,6 +69,10 @@ React.useEffect(() => {
     localStorage.setItem('strava_expires_at', expires);
     window.history.replaceState({}, '', '/');
     setCurrentPage({ page: 'profile' });
+    // Trigger auto-sync after connect, with a delay to let the page render
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('strava:just-connected'));
+    }, 1200);
   }
   if (error) {
     window.history.replaceState({}, '', '/');
