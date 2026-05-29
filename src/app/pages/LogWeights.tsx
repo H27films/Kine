@@ -767,7 +767,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
               </div>
             </div>
             {exerciseOpen && (
-              <div style={{ ...dropdownStyle, top: 'calc(100% + 16px)', left: '-16px', right: '-16px', maxHeight: '65vh', overflowY: 'auto', paddingBottom: '120px' }}>
+              <div style={{ ...dropdownStyle, top: 'calc(100% + 16px)', left: '-16px', right: '-16px', maxHeight: '65vh', overflowY: 'auto', paddingBottom: '130px' }}>
                 {renderExerciseDropdown()}
               </div>
             )}
