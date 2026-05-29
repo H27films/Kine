@@ -199,7 +199,7 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
                   justifyContent: 'center',
                 }}>
                   <span style={{ fontSize: '10px', fontWeight: 700, color: '#f2f2f2', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>
-                    {score > 0 ? score : ''}
+                    {score > 0 ? score : '-'}
                   </span>
                 </div>
               </button>
