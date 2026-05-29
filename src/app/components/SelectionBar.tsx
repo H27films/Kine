@@ -193,7 +193,7 @@ const SelectionBar: React.FC<SelectionBarProps> = (props) => {
           total_score_k,
           workout_calories: a.workout_calories ?? null,
           time: a.time_formatted || null,
-          source: 'app',
+          source: 'Strava',
           new_entry: 'New',
         };
       });
