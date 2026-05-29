@@ -12,15 +12,14 @@ interface StravaActivity {
   time_formatted: string;
   workout_calories: number | null;
   duration_seconds: number | null;
+  logged: boolean;
 }
 
 interface SelectionBarProps {
   selected: StravaActivity[];
   onClear: () => void;
   onJoinSuccess: (keptId: number, removedIds: number[], merged: StravaActivity) => void;
-  onWorkoutsSuccess?: (insertedKeys: Set<string>) => void;
-  onMarkLogged?: (loggedKeys: Set<string>) => void;
-  loggedKeys: Set<string>;
+  onLoggedChange: (activityIds: number[]) => void;
   editing?: boolean;
   onEdit?: () => void;
   onSaveAll?: () => void;
@@ -35,11 +34,6 @@ const EXERCISE_IDS: Record<string, number> = {
   VirtualRide: 87,
   CrossTrainer: 86,
 };
-
-const CALORIE_DERIVED_KM = new Set(['Rowing', 'Ride', 'VirtualRide']);
-
-const makeLogKey = (date: string, exerciseId: number, km: number | null): string =>
-  `${date}-${exerciseId}-${km ?? 'null'}`;
 
 const canJoin = (selected: StravaActivity[]): boolean => {
   if (selected.length < 2) return false;
@@ -59,9 +53,7 @@ const SelectionBar: React.FC<SelectionBarProps> = (props) => {
     selected,
     onClear,
     onJoinSuccess,
-    onWorkoutsSuccess,
-    onMarkLogged,
-    loggedKeys,
+    onLoggedChange,
     editing = false,
     onEdit,
     onSaveAll,
@@ -75,15 +67,12 @@ const SelectionBar: React.FC<SelectionBarProps> = (props) => {
 
   const joinable = canJoin(selected);
 
-  // Activities that will actually be inserted: not WeightTraining, not already logged
+  // Activities that can be inserted into workouts: not WeightTraining, and not already logged
   const insertable = selected.filter(a => {
     if (a.type === 'WeightTraining') return false;
     const exercise_id = EXERCISE_IDS[a.type];
     if (!exercise_id) return false;
-    const km = CALORIE_DERIVED_KM.has(a.type)
-      ? (a.workout_calories ?? 0) / 50
-      : (a.distance_km > 0 ? a.distance_km : null);
-    return !loggedKeys.has(makeLogKey(a.date, exercise_id, km));
+    return !a.logged;
   });
 
   const workoutsAllowed = selected.some(a => a.type !== 'WeightTraining');
@@ -148,63 +137,15 @@ const SelectionBar: React.FC<SelectionBarProps> = (props) => {
     setError('');
     setConfirming('none');
     try {
-      const uniqueExerciseIds = [...new Set(insertable.map(a => EXERCISE_IDS[a.type]).filter(Boolean))];
-      const { data: exercises, error: exErr } = await supabase
-        .from('exercises')
-        .select('id, multiplier')
-        .in('id', uniqueExerciseIds);
+      const activityIds = selected.map(a => a.id);
+      const { error: updateErr } = await supabase
+        .from('strava')
+        .update({ logged: true })
+        .in('id', activityIds);
 
-      if (exErr) throw exErr;
+      if (updateErr) throw updateErr;
 
-      const multiplierMap: Record<number, number> = {};
-      (exercises || []).forEach(ex => { multiplierMap[ex.id] = ex.multiplier; });
-
-      const newLogKeys = new Set<string>();
-
-      const rows = insertable.map(a => {
-        const exercise_id = EXERCISE_IDS[a.type];
-        const multiplier = multiplierMap[exercise_id] ?? 1;
-        const km = CALORIE_DERIVED_KM.has(a.type)
-          ? (a.workout_calories ?? 0) / 50
-          : (a.distance_km > 0 ? a.distance_km : null);
-
-        const key = makeLogKey(a.date, exercise_id, km);
-        newLogKeys.add(key);
-
-        const total_cardio = km != null ? +(km * multiplier).toFixed(2) : null;
-        const total_score_k = total_cardio != null ? +(total_cardio * 1000).toFixed(1) : null;
-
-        const activityDate = new Date(a.date + 'T12:00:00+08:00');
-        const week = getISOWeek(activityDate);
-        const day = getDayName(activityDate);
-
-        return {
-          date: a.date,
-          week,
-          day,
-          type: 'CARDIO',
-          exercise_id,
-          km,
-          multiplier: multiplier ? +multiplier.toFixed(1) : null,
-          total_cardio,
-          total_score_k,
-          workout_calories: a.workout_calories ?? null,
-          time: a.time_formatted || null,
-          source: 'app',
-          new_entry: 'New',
-        };
-      });
-
-      const { error: insertErr } = await supabase
-        .from('workouts')
-        .insert(rows);
-
-      if (insertErr) throw insertErr;
-
-      // Merge the new keys into existing loggedKeys
-      const mergedKeys = new Set(loggedKeys);
-      newLogKeys.forEach(k => mergedKeys.add(k));
-      onMarkLogged?.(mergedKeys);
+      onLoggedChange(activityIds);
       onClear();
     } catch (e: any) {
       setError('Mark logged failed: ' + e.message);
@@ -229,22 +170,17 @@ const SelectionBar: React.FC<SelectionBarProps> = (props) => {
       const multiplierMap: Record<number, number> = {};
       (exercises || []).forEach(ex => { multiplierMap[ex.id] = ex.multiplier; });
 
-      const newLogKeys = new Set<string>();
-
       const rows = insertable.map(a => {
         const exercise_id = EXERCISE_IDS[a.type];
         const multiplier = multiplierMap[exercise_id] ?? 1;
-        const km = CALORIE_DERIVED_KM.has(a.type)
-          ? (a.workout_calories ?? 0) / 50
-          : (a.distance_km > 0 ? a.distance_km : null);
+        const km = a.distance_km > 0 ? a.distance_km : null;
         const total_cardio = km != null ? +(km * multiplier).toFixed(2) : null;
         const total_score_k = total_cardio != null ? +(total_cardio * 1000).toFixed(1) : null;
-        
-        // Compute week and day in Malaysia timezone, matching LogCardio.tsx's approach
+
         const activityDate = new Date(a.date + 'T12:00:00+08:00');
         const week = getISOWeek(activityDate);
         const day = getDayName(activityDate);
-       
+
         return {
           date: a.date,
           week,
@@ -268,7 +204,16 @@ const SelectionBar: React.FC<SelectionBarProps> = (props) => {
 
       if (insertErr) throw insertErr;
 
-      onWorkoutsSuccess?.(newLogKeys);
+      // Also set logged = true on these activity IDs in the strava table
+      const activityIds = selected.map(a => a.id);
+      const { error: updateErr } = await supabase
+        .from('strava')
+        .update({ logged: true })
+        .in('id', activityIds);
+
+      if (updateErr) throw updateErr;
+
+      onLoggedChange(activityIds);
       onClear();
     } catch (e: any) {
       setError('Add workouts failed: ' + e.message);
@@ -324,8 +269,8 @@ const SelectionBar: React.FC<SelectionBarProps> = (props) => {
     <div style={{
       position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 10000,
       background: 'rgba(240,240,240,0.75)',
-backdropFilter: 'blur(20px)',
-WebkitBackdropFilter: 'blur(10px)',
+      backdropFilter: 'blur(20px)',
+      WebkitBackdropFilter: 'blur(10px)',
       borderTop: '1px solid rgba(255,255,255,0.1)',
       padding: '14px 20px',
       paddingBottom: 'calc(14px + env(safe-area-inset-bottom))',
@@ -360,7 +305,7 @@ WebkitBackdropFilter: 'blur(10px)',
         ) : confirming === 'logged' ? (
           <>
             <button onClick={handleMarkLogged} style={confirmBtn}>
-              {`CONFIRM LOG ${insertable.length}`}
+              {`CONFIRM LOG ${selected.length}`}
             </button>
             <button onClick={() => setConfirming('none')} style={cancelBtn}>CANCEL</button>
           </>

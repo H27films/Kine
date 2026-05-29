@@ -13,6 +13,7 @@ interface StravaActivity {
   time_formatted: string;
   workout_calories: number | null;
   duration_seconds: number | null;
+  logged: boolean;
 }
 
 interface StravaViewerProps {
@@ -43,21 +44,7 @@ const TYPE_LABELS: Record<string, string> = {
   CrossTrainer: 'CROSS TRAINER',
 };
 
-const EXERCISE_IDS: Record<string, number> = {
-  Run: 84,
-  Rowing: 83,
-  Walk: 85,
-  Ride: 87,
-  VirtualRide: 87,
-  CrossTrainer: 86,
-};
-
-const CALORIE_DERIVED_KM = new Set(['Rowing', 'Ride', 'VirtualRide']);
-
 const MONTH_NAMES = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-
-const makeLogKey = (date: string, exerciseId: number, km: number | null): string =>
-  `${date}-${exerciseId}-${km ?? 'null'}`;
 
 const formatTime = (timeStr: string): string => {
   if (!timeStr) return '';
@@ -78,7 +65,6 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
   const [filterOpen, setFilterOpen] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
-  const [loggedKeys, setLoggedKeys] = useState<Set<string>>(new Set());
   const [editing, setEditing] = useState(false);
   const [editValues, setEditValues] = useState<Record<number, { date: string; distance_km: number }>>({});
   const [deletingId, setDeletingId] = useState<number | null>(null);
@@ -138,7 +124,6 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
       setActivities(prev => prev.filter(a => a.id !== id));
       setSelectedIds(prev => prev.filter(x => x !== id));
       setDeletingConfirmId(null);
-      // Remove from editValues too if editing
       setEditValues(prev => {
         const next = { ...prev };
         delete next[id];
@@ -168,7 +153,6 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
           const updated = prev.map(a =>
             a.id === id ? { ...a, date, distance_km } : a
           );
-          // Re-sort by date descending so edits reorder correctly
           return updated.sort((a, b) => b.date.localeCompare(a.date));
         });
       }
@@ -188,48 +172,28 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
     clearSelection();
   };
 
-  const handleWorkoutsSuccess = (newKeys: Set<string>) => {
-    setLoggedKeys(prev => new Set([...prev, ...newKeys]));
+  const handleLoggedChange = (activityIds: number[]) => {
+    setActivities(prev => prev.map(a =>
+      activityIds.includes(a.id) ? { ...a, logged: true } : a
+    ));
   };
 
-  // Fetch activities + existing workouts logs in parallel
+  // Fetch activities
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-
-      const [{ data: stravaData }, { data: workoutsData }] = await Promise.all([
-        supabase.from('strava').select('*').order('date', { ascending: false }),
-        supabase.from('workouts').select('date, exercise_id, km').eq('source', 'app'),
-      ]);
+      const { data: stravaData } = await supabase
+        .from('strava')
+        .select('*')
+        .order('date', { ascending: false });
 
       setActivities((stravaData as StravaActivity[]) || []);
-
-      // Build logged keys from existing workouts rows
-      const keys = new Set<string>();
-      (workoutsData || []).forEach((w: { date: string; exercise_id: number; km: number | null }) => {
-        keys.add(makeLogKey(w.date, w.exercise_id, w.km));
-      });
-      setLoggedKeys(keys);
-
       setLoading(false);
     };
     load();
   }, []);
 
-  // Compute logged key for a given activity
-  const getActivityLogKey = (a: StravaActivity): string | null => {
-    const exercise_id = EXERCISE_IDS[a.type];
-    if (!exercise_id) return null;
-    const km = CALORIE_DERIVED_KM.has(a.type)
-      ? (a.workout_calories ?? 0) / 50
-      : (a.distance_km > 0 ? a.distance_km : null);
-    return makeLogKey(a.date, exercise_id, km);
-  };
-
-  const isLogged = (a: StravaActivity): boolean => {
-    const key = getActivityLogKey(a);
-    return key ? loggedKeys.has(key) : false;
-  };
+  const isLogged = (a: StravaActivity): boolean => a.logged === true;
 
   const handleTypeChange = async (activity: StravaActivity, newType: string) => {
     const newName = newType === 'CrossTrainer'
@@ -764,9 +728,7 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
         selected={selectedActivities}
         onClear={clearSelection}
         onJoinSuccess={handleJoinSuccess}
-        onWorkoutsSuccess={handleWorkoutsSuccess}
-        onMarkLogged={(keys) => setLoggedKeys(keys)}
-        loggedKeys={loggedKeys}
+        onLoggedChange={handleLoggedChange}
         editing={editing}
         onEdit={enterEditMode}
         onSaveAll={handleSaveAllEdits}
