@@ -350,8 +350,11 @@ let bgColor = h > 0 ? '#1a1a1a' : 'rgba(26,26,26,0.08)';
           {/* Bars + line overlay — SVG behind, bars on top */}
           <div className="flex items-end justify-between gap-1" style={{ height: '140px', position: 'relative' }}>
             {weeklyFoodData.map((h, i) => {
+              const isCurrentWeek = weekOff === 0 && i === 11;
+              const todayIdx = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
+              const daysThisWeek = todayIdx + 1; // Mon=1, Tue=2, ..., Sun=7
+              const MAX_VAL = isCurrentWeek ? daysThisWeek * 3 : 21;
               const MIN_DISPLAY = 5.5;
-              const MAX_VAL = 21;
               const effectiveH = h > 0 ? Math.max(h, MIN_DISPLAY) : 0;
               const displayVal = h > 0 && h < MIN_DISPLAY ? MIN_DISPLAY : h;
               const barPct = h > 0 ? (effectiveH / MAX_VAL) * 100 : 0;
@@ -391,7 +394,7 @@ let bgColor = h > 0 ? '#1a1a1a' : 'rgba(26,26,26,0.08)';
     lineHeight: 1,
     whiteSpace: 'nowrap',
   }}>
-    {Math.round((h / 21) * 100)}%
+    {Math.round((h / MAX_VAL) * 100)}%
   </span>
 )}
                 </div>
