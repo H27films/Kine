@@ -96,7 +96,27 @@ const Strava: React.FC = () => {
           else inserted++;
         }
       }
-      setSyncMessage(`✓ ${inserted} new activities synced`);
+      if (inserted === 0) {
+        // Check if auto-sync already ran recently
+        const autoResult = localStorage.getItem('strava_auto_sync_result');
+        if (autoResult) {
+          try {
+            const { count, timestamp } = JSON.parse(autoResult);
+            const fiveMinutes = 5 * 60 * 1000;
+            if (count > 0 && Date.now() - timestamp < fiveMinutes) {
+              setSyncMessage(`✓ ${count} new activities synced`);
+            } else {
+              setSyncMessage('✓ Up to date');
+            }
+          } catch {
+            setSyncMessage('✓ Up to date');
+          }
+        } else {
+          setSyncMessage('✓ Up to date');
+        }
+      } else {
+        setSyncMessage(`✓ ${inserted} new activities synced`);
+      }
     } catch (e: any) {
       setSyncMessage('Sync failed: ' + e.message);
       console.error('Sync error:', e);

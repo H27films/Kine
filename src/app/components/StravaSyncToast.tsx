@@ -69,6 +69,12 @@ const StravaSyncToast: React.FC<StravaSyncToastProps> = () => {
           }
         }
 
+        // Store auto-sync result so manual Sync button can show matching count
+        localStorage.setItem('strava_auto_sync_result', JSON.stringify({
+          count: inserted,
+          timestamp: Date.now(),
+        }));
+
         if (inserted > 0) {
           setMessage(`Sync — ${inserted} new entr${inserted === 1 ? 'y' : 'ies'}`);
         } else {
