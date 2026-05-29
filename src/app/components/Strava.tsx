@@ -7,6 +7,8 @@ const Strava: React.FC = () => {
   const [syncMessage, setSyncMessage] = useState('');
   const [viewerOpen, setViewerOpen] = useState(false);
   const [justConnected, setJustConnected] = useState(false);
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [toastVisible, setToastVisible] = useState(false);
 
   useEffect(() => {
     if (localStorage.getItem('strava_access_token')) {
@@ -16,7 +18,20 @@ const Strava: React.FC = () => {
     }
   }, []);
 
+  const showToast = (msg: string) => {
+    setToastMsg(msg);
+    setToastVisible(true);
+    setTimeout(() => {
+      setToastVisible(false);
+      setTimeout(() => setToastMsg(null), 300);
+    }, 4000);
+  };
+
   const handleStravaConnect = () => {
+    if (localStorage.getItem('strava_access_token')) {
+      showToast('Already connected');
+      return;
+    }
     const clientId = '250203';
     const redirectUri = 'https://kine-v2.vercel.app/api/strava-callback';
     const scope = 'read,activity:read_all';
@@ -179,6 +194,40 @@ const Strava: React.FC = () => {
 
 
       {viewerOpen && <StravaViewer onClose={() => setViewerOpen(false)} />}
+
+      {/* Toast notification */}
+      {toastMsg && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: 'calc(80px + env(safe-area-inset-bottom))',
+            left: '50%',
+            transform: toastVisible ? 'translateX(-50%) translateY(0)' : 'translateX(-50%) translateY(20px)',
+            zIndex: 9999,
+            padding: '12px 24px',
+            borderRadius: '999px',
+            backgroundColor: 'rgba(255,255,255,0.65)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.10)',
+            border: '1px solid rgba(255,255,255,0.4)',
+            transition: 'transform 0.35s ease, opacity 0.35s ease',
+            opacity: toastVisible ? 1 : 0,
+            pointerEvents: toastVisible ? 'auto' : 'none',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          <span style={{
+            fontSize: '0.8rem',
+            fontWeight: 600,
+            color: '#1a1a1a',
+            letterSpacing: '0.04em',
+            fontFamily: "'Inter', system-ui, sans-serif",
+          }}>
+            {toastMsg}
+          </span>
+        </div>
+      )}
     </>
   );
 };
