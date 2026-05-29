@@ -49,18 +49,77 @@ const WeeklyVolumeCompact: React.FC<WeeklyVolumeCompactProps> = ({ selectedWeekN
     loadWeeklyData();
   }, [effectiveWeek, allWeekNumbers.length]);
 
+  const grandTotal = weeklyData.reduce((sum, d) => sum + d.total, 0);
+  const hasData = weeklyData.length > 0 && weeklyData.some(d => d.total > 0);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-      {weeklyData.map(({ group, total, count }) => {
-        const maxVal = WEEKLY_MAX[group] ?? 30000;
-        const pct = maxVal > 0 ? Math.min((total / maxVal) * 100, 100) : 0;
-        return (
-          <div key={group}>
+      {hasData && (
+        <>
+          {/* BREAKDOWN header matching WEEKLY style */}
+          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
+            <span style={{
+              fontSize: '1.1rem', fontWeight: 700, letterSpacing: '0.15em',
+              textTransform: 'uppercase', color: '#1a1a1a', fontFamily: "'Archivo', sans-serif",
+            }}>Breakdown</span>
+          </div>
+          {weeklyData.map(({ group, total, count }) => {
+            const maxVal = WEEKLY_MAX[group] ?? 30000;
+            const pct = maxVal > 0 ? Math.min((total / maxVal) * 100, 100) : 0;
+            return (
+              <div key={group}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <span style={{ color: '#1a1a1a', fontWeight: 650, fontSize: '12px', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: "'Archivo', sans-serif" }}>{group}</span>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
+                    <span style={{ color: '#1a1a1a', fontWeight: 900, fontSize: '14px', letterSpacing: '-0.02em', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>
+                      {Math.round(total).toLocaleString()}
+                    </span>
+                    <span style={{ color: 'rgba(26,26,26,0.45)', fontWeight: 700, fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: "'Archivo', sans-serif" }}>kg</span>
+                  </div>
+                </div>
+                <div style={{ height: '30px', width: '100%', backgroundColor: 'rgba(26,26,26,0.1)', borderRadius: '999px', overflow: 'hidden', padding: '4px', position: 'relative' }}>
+                  <div
+                    style={{
+                      height: '100%',
+                      width: `${pct}%`,
+                      background: '#1a1a1a',
+                      borderRadius: '999px',
+                      boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                      transition: 'width 0.5s cubic-bezier(0.4,0,0.2,1)',
+                    }}
+                  />
+                  {count > 0 && (
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '6px',
+                      left: '6px',
+                      width: '18px',
+                      height: '18px',
+                      borderRadius: '50%',
+                      backgroundColor: '#1a1a1a',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      color: '#ffffff',
+                      lineHeight: 1,
+                      fontFamily: "'Archivo', sans-serif",
+                    }}>
+                      {count}
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+          {/* TOTAL bar */}
+          <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-              <span style={{ color: '#1a1a1a', fontWeight: 650, fontSize: '12px', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: "'Archivo', sans-serif" }}>{group}</span>
+              <span style={{ color: '#1a1a1a', fontWeight: 650, fontSize: '12px', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: "'Archivo', sans-serif" }}>Total</span>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
                 <span style={{ color: '#1a1a1a', fontWeight: 900, fontSize: '14px', letterSpacing: '-0.02em', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>
-                  {Math.round(total).toLocaleString()}
+                  {Math.round(grandTotal).toLocaleString()}
                 </span>
                 <span style={{ color: 'rgba(26,26,26,0.45)', fontWeight: 700, fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: "'Archivo', sans-serif" }}>kg</span>
               </div>
@@ -69,14 +128,14 @@ const WeeklyVolumeCompact: React.FC<WeeklyVolumeCompactProps> = ({ selectedWeekN
               <div
                 style={{
                   height: '100%',
-                  width: `${pct}%`,
+                  width: `${Math.min((grandTotal / 80000) * 100, 100)}%`,
                   background: '#1a1a1a',
                   borderRadius: '999px',
                   boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
                   transition: 'width 0.5s cubic-bezier(0.4,0,0.2,1)',
                 }}
               />
-              {count > 0 && (
+              {weeklyData.reduce((sum, d) => sum + d.count, 0) > 0 && (
                 <div style={{
                   position: 'absolute',
                   bottom: '6px',
@@ -94,13 +153,13 @@ const WeeklyVolumeCompact: React.FC<WeeklyVolumeCompactProps> = ({ selectedWeekN
                   lineHeight: 1,
                   fontFamily: "'Archivo', sans-serif",
                 }}>
-                  {count}
+                  {weeklyData.reduce((sum, d) => sum + d.count, 0)}
                 </div>
               )}
             </div>
           </div>
-        );
-      })}
+        </>
+      )}
     </div>
   );
 };
