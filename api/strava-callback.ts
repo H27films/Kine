@@ -12,7 +12,7 @@ export default async function handler(req: any, res: any) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           client_id: '250203',
-          client_secret: process.env.VITE_STRAVA_CLIENT_SECRET,
+          client_secret: process.env.STRAVA_CLIENT_SECRET,
           code,
           grant_type: 'authorization_code',
         }),

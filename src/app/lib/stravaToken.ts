@@ -1,5 +1,3 @@
-const STRAVA_CLIENT_ID = '250203';
-
 /**
  * Get a valid Strava access token, silently refreshing if expired.
  * Returns the access token string, or null if refresh fails.
@@ -20,17 +18,12 @@ export async function getValidStravaToken(): Promise<string | null> {
     return token;
   }
 
-  // Token expired or about to expire — refresh it
+  // Token expired or about to expire — refresh via serverless API
   try {
-    const response = await fetch('https://www.strava.com/oauth/token', {
+    const response = await fetch('/api/strava-refresh', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        client_id: STRAVA_CLIENT_ID,
-        client_secret: import.meta.env.VITE_STRAVA_CLIENT_SECRET,
-        grant_type: 'refresh_token',
-        refresh_token: refreshToken,
-      }),
+      body: JSON.stringify({ refresh_token: refreshToken }),
     });
 
     if (!response.ok) return null;
