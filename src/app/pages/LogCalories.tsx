@@ -60,6 +60,12 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
   const [weeklyBars, setWeeklyBars] = useState<number[]>(Array(7).fill(0));
   const [weeklyRatings, setWeeklyRatings] = useState<(FoodRating)[]>(Array(7).fill(null));
 
+  // Selected day for editing food rating
+  const [selectedDayIdx, setSelectedDayIdx] = useState<number | null>(null);
+  const [selectedDayDate, setSelectedDayDate] = useState<string | null>(null);
+  const [selectedDayRating, setSelectedDayRating] = useState<FoodRating>(null);
+  const [confirmingRating, setConfirmingRating] = useState(false);
+
   const loadWeeklyBars = async () => {
     const { data: bodyData } = await supabase
       .from('workouts')
@@ -162,6 +168,79 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
     { label: 'Good', value: 'GOOD' },
   ];
 
+
+  const getDateFromDayIdx = (dayIdx: number): string => {
+    const monday = getMondayAtOffset(weekOffset);
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + dayIdx);
+    return fmtDate(d);
+  };
+
+  const handleDayCircleClick = (dayIdx: number) => {
+    const dateStr = getDateFromDayIdx(dayIdx);
+    const existingRating = weeklyRatings[dayIdx];
+    if (selectedDayIdx === dayIdx) {
+      // Deselect
+      setSelectedDayIdx(null);
+      setSelectedDayDate(null);
+      setSelectedDayRating(null);
+      return;
+    }
+    setSelectedDayIdx(dayIdx);
+    setSelectedDayDate(dateStr);
+    setSelectedDayRating(existingRating);
+  };
+
+  const handleConfirmDayRating = async () => {
+    if (!selectedDayDate || selectedDayRating === null) return;
+    setConfirmingRating(true);
+    try {
+      const dateStr = selectedDayDate;
+      const d = new Date(dateStr + 'T12:00:00+08:00');
+      const week = getISOWeek(d);
+      const day = getDayName(d);
+
+      const { data: existing } = await supabase
+        .from('workouts')
+        .select('id')
+        .eq('date', dateStr)
+        .eq('type', 'MEASUREMENT')
+        .eq('exercise_id', FOOD_EXERCISE_ID)
+        .maybeSingle();
+
+      if (existing) {
+        await supabase.from('workouts').update({ food_rating: selectedDayRating }).eq('id', existing.id);
+      } else {
+        await supabase.from('workouts').insert({
+          date: dateStr,
+          week,
+          day,
+          type: 'MEASUREMENT',
+          exercise_id: FOOD_EXERCISE_ID,
+          food_rating: selectedDayRating,
+          total_score_k: null,
+          new_entry: 'New',
+          source: 'app',
+        });
+      }
+
+      // Update local state
+      const newRatings = [...weeklyRatings];
+      newRatings[selectedDayIdx!] = selectedDayRating;
+      setWeeklyRatings(newRatings);
+
+      window.dispatchEvent(new CustomEvent('kine:data-updated'));
+
+      // Deselect
+      setSelectedDayIdx(null);
+      setSelectedDayDate(null);
+      setSelectedDayRating(null);
+    } catch (e: any) {
+      console.error('Failed to save food rating:', e.message);
+    } finally {
+      setConfirmingRating(false);
+    }
+  };
 
   const upsertMeasurementRow = async (
     exerciseId: number,
@@ -328,6 +407,7 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
               const today = new Date();
               const todayIdx = today.getDay() === 0 ? 6 : today.getDay() - 1;
               const isFuture = weekOffset === 0 && i > todayIdx;
+              const isSelected = selectedDayIdx === i;
               let border = '1.5px solid rgba(26,26,26,0.18)';
               let textColor = 'rgba(26,26,26,0.45)';
               let glowShadow = 'none';
@@ -341,31 +421,69 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
                   {i > 0 && (
                     <div style={{ flex: 1, height: 1, backgroundColor: showLine ? 'rgba(26,26,26,0.75)' : 'transparent' }} />
                   )}
-                  <div style={{
-                    width: 28, height: 28, borderRadius: '50%',
-                    backgroundColor: 'transparent', border,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    opacity: isFuture && !rating ? 0.50 : 1,
-                    flexShrink: 0,
-                    boxShadow: rating ? glowShadow : 'none',
-                  }}>
-                    <span style={{ fontSize: '8px', fontWeight: 800, color: textColor, letterSpacing: '0.05em' }}>{day}</span>
+                  <div
+                    onClick={() => handleDayCircleClick(i)}
+                    style={{
+                      width: 28, height: 28, borderRadius: '50%',
+                      backgroundColor: isSelected ? '#1a1a1a' : 'transparent',
+                      border: isSelected ? '1px solid #1a1a1a' : border,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      opacity: isFuture && !rating ? 0.50 : 1,
+                      flexShrink: 0,
+                      boxShadow: isSelected ? '0 0 0 3px rgba(26,26,26,0.15)' : (rating ? glowShadow : 'none'),
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    <span style={{ fontSize: '8px', fontWeight: 800, color: isSelected ? '#f2f2f2' : textColor, letterSpacing: '0.05em' }}>{day}</span>
                   </div>
                 </React.Fragment>
               );
             })}
           </div>
-          <div style={{ marginTop: 16 }}>
-            <div className="flex gap-2">
-              {ratingButtons.map(btn => (
-                <button key={btn.value} onClick={() => setFoodRating(btn.value)}
-                  className="flex-1 py-4 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95"
-                   style={{ backgroundColor: foodRating === btn.value ? '#1a1a1a' : 'rgba(0,0,0,0.07)', border: foodRating === btn.value ? '1px solid #1a1a1a' : 'none', color: foodRating === btn.value ? '#ffffff' : 'rgba(26,26,26,0.8)' }}>
-                  {btn.label}
-                </button>
-              ))}
+
+          {/* Selected day rating editor */}
+          {selectedDayIdx !== null && selectedDayDate && (
+            <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em', color: 'rgba(26,26,26,0.6)' }}>
+                {(() => {
+                  const d = new Date(selectedDayDate + 'T12:00:00');
+                  const dayName = d.toLocaleDateString('en-GB', { weekday: 'short' }).toUpperCase();
+                  const dateNum = d.getDate();
+                  const month = d.toLocaleDateString('en-GB', { month: 'short' }).toUpperCase();
+                  return `${dayName} ${dateNum} ${month}`;
+                })()}
+              </div>
+              <div className="flex gap-2">
+                {ratingButtons.map(btn => (
+                  <button key={btn.value} onClick={() => setSelectedDayRating(btn.value)}
+                    className="flex-1 py-4 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95"
+                     style={{ backgroundColor: selectedDayRating === btn.value ? '#1a1a1a' : 'rgba(0,0,0,0.07)', border: selectedDayRating === btn.value ? '1px solid #1a1a1a' : 'none', color: selectedDayRating === btn.value ? '#ffffff' : 'rgba(26,26,26,0.8)' }}>
+                    {btn.label}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={handleConfirmDayRating}
+                disabled={selectedDayRating === null || confirmingRating}
+                style={{
+                  padding: '12px 0',
+                  borderRadius: '999px',
+                  backgroundColor: selectedDayRating !== null ? '#1a1a1a' : 'rgba(0,0,0,0.07)',
+                  color: selectedDayRating !== null ? '#ffffff' : 'rgba(26,26,26,0.4)',
+                  border: 'none',
+                  cursor: selectedDayRating !== null ? 'pointer' : 'default',
+                  fontSize: '10px',
+                  fontWeight: 700,
+                  letterSpacing: '0.15em',
+                  textTransform: 'uppercase',
+                  fontFamily: "'JetBrains Mono', monospace",
+                }}
+              >
+                {confirmingRating ? 'Saving...' : 'Confirm'}
+              </button>
             </div>
-          </div>
+          )}
         </div>
       </section>
 
