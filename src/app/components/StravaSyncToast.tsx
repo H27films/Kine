@@ -38,6 +38,12 @@ const StravaSyncToast: React.FC<StravaSyncToastProps> = () => {
         );
         const activities = await response.json();
         if (!Array.isArray(activities)) {
+          setMessage('Strava token expired — reconnect');
+          setVisible(true);
+          setTimeout(() => {
+            setVisible(false);
+            setTimeout(() => setMessage(null), 300);
+          }, 4000);
           return;
         }
         const allowed = ['Run', 'Walk', 'Ride', 'VirtualRide', 'Hike', 'Rowing', 'Elliptical', 'WeightTraining'];
