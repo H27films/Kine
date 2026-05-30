@@ -157,6 +157,13 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
       if (weekOffset === 0) {
         const todayIdx = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
         if (ratings[todayIdx]) setFoodRating(ratings[todayIdx]);
+        // Auto-select today so the Bad/Ok/Good editor is visible by default
+        const m = getMondayAtOffset(0);
+        const todayDate = new Date(m);
+        todayDate.setDate(m.getDate() + todayIdx);
+        setSelectedDayIdx(todayIdx);
+        setSelectedDayDate(fmtDate(todayDate));
+        setSelectedDayRating(ratings[todayIdx]);
       }
     };
     loadRatings();
@@ -443,7 +450,9 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
           </div>
 
           {/* Selected day rating editor */}
-          {selectedDayIdx !== null && selectedDayDate && (
+          {selectedDayIdx !== null && selectedDayDate && (() => {
+            const isToday = selectedDayDate === todayStr();
+            return (
             <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em', color: 'rgba(26,26,26,0.6)' }}>
                 {(() => {
@@ -456,34 +465,35 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
               </div>
               <div className="flex gap-2">
                 {ratingButtons.map(btn => (
-                  <button key={btn.value} onClick={() => setSelectedDayRating(btn.value)}
+                  <button key={btn.value} onClick={() => {
+                    setSelectedDayRating(btn.value);
+                    if (isToday) setFoodRating(btn.value);
+                  }}
                     className="flex-1 py-4 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95"
                      style={{ backgroundColor: selectedDayRating === btn.value ? '#1a1a1a' : 'rgba(0,0,0,0.07)', border: selectedDayRating === btn.value ? '1px solid #1a1a1a' : 'none', color: selectedDayRating === btn.value ? '#ffffff' : 'rgba(26,26,26,0.8)' }}>
                     {btn.label}
                   </button>
                 ))}
               </div>
-              <button
-                onClick={handleConfirmDayRating}
-                disabled={selectedDayRating === null || confirmingRating}
-                style={{
-                  padding: '12px 0',
-                  borderRadius: '999px',
-                  backgroundColor: selectedDayRating !== null ? '#1a1a1a' : 'rgba(0,0,0,0.07)',
-                  color: selectedDayRating !== null ? '#ffffff' : 'rgba(26,26,26,0.4)',
-                  border: 'none',
-                  cursor: selectedDayRating !== null ? 'pointer' : 'default',
-                  fontSize: '10px',
-                  fontWeight: 700,
-                  letterSpacing: '0.15em',
-                  textTransform: 'uppercase',
-                  fontFamily: "'JetBrains Mono', monospace",
-                }}
-              >
-                {confirmingRating ? 'Saving...' : 'Confirm'}
-              </button>
+              {/* Confirm button only for past days — today uses Update Metrics button */}
+              {!isToday && (
+                <button
+                  onClick={handleConfirmDayRating}
+                  disabled={selectedDayRating === null || confirmingRating}
+                  className="w-full font-black uppercase tracking-widest text-[10px] py-3 rounded-full active:scale-[0.98] transition-all"
+                  style={{
+                    backgroundColor: selectedDayRating !== null ? '#1a1a1a' : 'rgba(0,0,0,0.07)',
+                    color: selectedDayRating !== null ? '#ffffff' : 'rgba(26,26,26,0.4)',
+                    border: 'none',
+                    cursor: selectedDayRating !== null ? 'pointer' : 'default',
+                  }}
+                >
+                  {confirmingRating ? 'Saving...' : 'Confirm'}
+                </button>
+              )}
             </div>
-          )}
+            );
+          })()}
         </div>
       </section>
 
