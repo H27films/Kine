@@ -28,7 +28,7 @@ const MONTH_NAMES = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SE
 const FOOD_EXERCISE_ID = 89;
 const CALORIES_EXERCISE_ID = 90;
 
-const EXCLUDE_TYPES = ['CHEST', 'BACK', 'LEGS'];
+const EXCLUDE_EXERCISE_ID = 82;
 
 const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
   const [rows, setRows] = useState<WorkoutRow[]>([]);
@@ -62,14 +62,15 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
           total_cardio, total_weight, new_entry,
           exercises:exercise_id(exercise_name)
         `)
-        .not('type', 'in', `(${EXCLUDE_TYPES.join(',')})`)
+        .in('type', ['CARDIO', 'MEASUREMENT'])
+        .not('exercise_id', 'eq', EXCLUDE_EXERCISE_ID)
         .gte('date', minDate)
         .order('date', { ascending: false })
         .order('id', { ascending: false })
         .limit(500);
 
       if (data) {
-        setRows((data as any[]).map(r => ({
+        const mapped = (data as any[]).map(r => ({
           id: r.id,
           date: r.date,
           type: r.type,
@@ -85,7 +86,15 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
           total_cardio: r.total_cardio,
           total_weight: r.total_weight,
           new_entry: r.new_entry,
-        })));
+        }));
+        // Within same date, CARDIO before MEASUREMENT
+        mapped.sort((a, b) => {
+          if (a.date !== b.date) return b.date.localeCompare(a.date);
+          if (a.type === 'CARDIO' && b.type !== 'CARDIO') return -1;
+          if (a.type !== 'CARDIO' && b.type === 'CARDIO') return 1;
+          return b.id - a.id;
+        });
+        setRows(mapped);
       }
       setLoading(false);
     };
@@ -188,14 +197,15 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
           total_cardio, total_weight, new_entry,
           exercises:exercise_id(exercise_name)
         `)
-        .not('type', 'in', `(${EXCLUDE_TYPES.join(',')})`)
+        .in('type', ['CARDIO', 'MEASUREMENT'])
+        .not('exercise_id', 'eq', EXCLUDE_EXERCISE_ID)
         .gte('date', minDate)
         .order('date', { ascending: false })
         .order('id', { ascending: false })
         .limit(500);
 
       if (data) {
-        setRows((data as any[]).map(r => ({
+        const mapped = (data as any[]).map(r => ({
           id: r.id,
           date: r.date,
           type: r.type,
@@ -211,7 +221,14 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
           total_cardio: r.total_cardio,
           total_weight: r.total_weight,
           new_entry: r.new_entry,
-        })));
+        }));
+        mapped.sort((a, b) => {
+          if (a.date !== b.date) return b.date.localeCompare(a.date);
+          if (a.type === 'CARDIO' && b.type !== 'CARDIO') return -1;
+          if (a.type !== 'CARDIO' && b.type === 'CARDIO') return 1;
+          return b.id - a.id;
+        });
+        setRows(mapped);
       }
       cancelEditMode();
     } catch (e: any) {
@@ -261,7 +278,10 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
         </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <span style={{ fontSize: '10px', color: 'rgba(26,26,26,0.45)', letterSpacing: '0.1em' }}>
-            {rows.length} ROWS
+            {(() => {
+              const dates = new Set(rows.map(r => r.date));
+              return dates.size;
+            })()} DAYS
           </span>
           <button
             onClick={onClose}
@@ -476,13 +496,15 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
                           }}
                           style={{
                             display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
-                            padding: '12px 0',
-                            borderBottom: isEditing
-                              ? 'none'
-                              : isLastInGroup && isWeekBoundary
-                                ? '1.5px solid #1a1a1a'
-                                : '1px solid rgba(0,0,0,0.06)',
-                            cursor: selectMode ? 'pointer' : 'default',
+                          padding: '12px 20px',
+                          margin: '0 -20px',
+                          backgroundColor: isMeasurement ? 'rgba(0,0,0,0.03)' : 'transparent',
+                          borderBottom: isEditing
+                            ? 'none'
+                            : isLastInGroup && isWeekBoundary
+                              ? '1.5px solid #1a1a1a'
+                              : '1px solid rgba(0,0,0,0.06)',
+                          cursor: selectMode ? 'pointer' : 'default',
                           }}
                         >
                           {/* Selection circle */}
