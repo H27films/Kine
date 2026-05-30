@@ -35,7 +35,7 @@ const DumbbellIconSmall = ({ size = 20 }: { size?: number }) => (
 
 
 export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
-  const [category, setCategory] = useState('CHEST');
+  const [category, setCategory] = useState('ALL WEIGHTS');
   const [data, setData] = useState<DataPoint[]>([]);
   const [total, setTotal] = useState(0);
   const [sessionCount, setSessionCount] = useState(0);
@@ -75,7 +75,7 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
        const { data } = await supabase
          .from('exercises')
          .select('id, exercise_name')
-         .eq('type', category)
+         .in('type', category === 'ALL WEIGHTS' ? ['CHEST', 'BACK', 'LEGS'] : [category])
          .eq('favourite', 'yes')
          .order('exercise_name');
 
@@ -97,7 +97,11 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
        .order('date', { ascending: true });
 
      // Filter by category type from workouts table
-     query = query.eq('type', category);
+     if (category === 'ALL WEIGHTS') {
+       query = query.in('type', ['CHEST', 'BACK', 'LEGS']);
+     } else {
+       query = query.eq('type', category);
+     }
 
      // Filter by selected exercise_id if any
      if (selectedExerciseId) {
@@ -111,12 +115,15 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
       let exerciseCountsData: Record<number, number> = {};
       if (!selectedExerciseId) {
         // PB counts
-        const { data: pbRows } = await supabase
+        const pbQuery = supabase
           .from('workouts')
           .select('week')
-          .eq('type', category)
           .eq('pb', 'PB')
           .not('week', 'is', null);
+
+        const { data: pbRows } = category === 'ALL WEIGHTS'
+          ? await pbQuery.in('type', ['CHEST', 'BACK', 'LEGS'])
+          : await pbQuery.eq('type', category);
 
         if (pbRows) {
           pbRows.forEach((row: any) => {
@@ -126,11 +133,14 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
         }
 
         // Total exercise counts
-        const { data: exerciseRows } = await supabase
+        const exerciseQuery = supabase
           .from('workouts')
           .select('week')
-          .eq('type', category)
           .not('week', 'is', null);
+
+        const { data: exerciseRows } = category === 'ALL WEIGHTS'
+          ? await exerciseQuery.in('type', ['CHEST', 'BACK', 'LEGS'])
+          : await exerciseQuery.eq('type', category);
 
         if (exerciseRows) {
           exerciseRows.forEach((row: any) => {
@@ -365,7 +375,7 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
                 maxHeight: '300px',
                 overflowY: 'auto',
               }}>
-                {['CHEST', 'BACK', 'LEGS'].map(cat => (
+                {[ 'ALL WEIGHTS', 'CHEST', 'BACK', 'LEGS' ].map(cat => (
                   <div
                     key={cat}
                     onClick={() => { setCategory(cat); setCategoryOpen(false); setSelectedExercise(null); setSelectedExerciseId(null); }}
@@ -388,7 +398,9 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
           {/* Exercise selector */}
           <div style={{ flex: 1, position: 'relative', display: 'flex', flexDirection: 'column' }} ref={exerciseRef}>
             <button
-              onClick={() => { setExerciseOpen(!exerciseOpen); setCategoryOpen(false); }}
+              onClick={() => { setExerciseOpen(!exerciseOpen);
+                setCategoryOpen(false);
+              }}
               disabled={exerciseOpen}
               style={{ ...pillStyle(), flex: 1 }}
             >
