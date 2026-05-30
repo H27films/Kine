@@ -240,7 +240,7 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
         fontFamily: "'JetBrains Mono', monospace",
         animation: 'slideUp 0.25s ease',
       }}
-      onClick={() => setEditingId(null)}
+      onClick={() => { setEditingId(null); if (editing) cancelEditMode(); }}
     >
       {/* Header */}
       <div style={{
@@ -256,9 +256,24 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
           Strava Data
         </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <span style={{ fontSize: '10px', color: 'rgba(26,26,26,0.45)', letterSpacing: '0.1em' }}>
-            {totalDays} DAYS / {filtered.length} ACTIVITIES
-          </span>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '4px',
+            padding: '5px 12px', borderRadius: '999px',
+            background: 'rgba(0,0,0,0.06)',
+          }}>
+            <span style={{
+              fontSize: '10px', fontWeight: 700, color: '#1a1a1a',
+              letterSpacing: '0.02em', fontFamily: "'JetBrains Mono', monospace",
+            }}>
+              {filter === 'WeightTraining' ? avgCalories : totalKm.toFixed(2)}
+            </span>
+            <span style={{
+              fontSize: '8px', color: 'rgba(26,26,26,0.4)', letterSpacing: '0.1em',
+              fontWeight: 700,
+            }}>
+              {filter === 'WeightTraining' ? 'KCAL (AVG)' : 'KM'}
+            </span>
+          </div>
           <button
             onClick={onClose}
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#1a1a1a' }}
@@ -336,30 +351,6 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
           )}
         </div>
 
-        {/* Filter-sensitive sum pill: KM for most types, avg calories for WeightTraining */}
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: '4px',
-          padding: '6px 14px', borderRadius: '999px',
-          background: 'rgba(255,255,255,0.55)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
-          border: '1px solid rgba(255,255,255,0.3)',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.04)',
-        }}>
-          <span style={{
-            fontSize: '10px', fontWeight: 700, color: '#1a1a1a',
-            letterSpacing: '0.02em', fontFamily: "'JetBrains Mono', monospace",
-          }}>
-            {filter === 'WeightTraining' ? avgCalories : totalKm.toFixed(2)}
-          </span>
-          <span style={{
-            fontSize: '8px', color: 'rgba(26,26,26,0.4)', letterSpacing: '0.1em',
-            fontWeight: 700,
-          }}>
-            {filter === 'WeightTraining' ? 'KCAL (AVG)' : 'KM'}
-          </span>
-        </div>
-
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <button
             onClick={() => {
@@ -380,7 +371,7 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
               fontFamily: "'JetBrains Mono', monospace",
             }}
           >
-            {selectMode && selectedIds.length > 0 ? 'DESELECT ALL' : 'SELECT'}
+            {selectMode ? 'DESELECT' : 'SELECT'}
           </button>
           {selectMode && (
             <button
@@ -401,8 +392,17 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
         </div>
       </div>
 
+      {/* Days / Activities count */}
+      <div style={{
+        padding: '4px 20px 0',
+      }}>
+        <span style={{ fontSize: '10px', color: 'rgba(26,26,26,0.45)', letterSpacing: '0.1em' }}>
+          {totalDays} DAYS / {filtered.length} ACTIVITIES
+        </span>
+      </div>
+
       {/* Activity list */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '8px 20px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '0 20px 8px 20px' }}>
         {loading ? (
           <div style={{ textAlign: 'center', padding: '40px', color: 'rgba(26,26,26,0.35)', fontSize: '12px' }}>
             Loading...
@@ -439,7 +439,7 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
               return (
                 <div key={group.date} style={{ marginBottom: '8px' }}>
                   {/* Date header */}
-                  <div style={{ paddingTop: '16px', paddingBottom: '6px' }}>
+                  <div style={{ paddingTop: '8px', paddingBottom: '6px' }}>
                     <span style={{
                       fontSize: '16px', fontWeight: 700, letterSpacing: '0.08em',
                       color: '#1a1a1a', textTransform: 'uppercase',
@@ -519,7 +519,7 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
                                 textTransform: 'uppercase', flexShrink: 0,
                                 fontFamily: "'JetBrains Mono', monospace",
                               }}>
-                                LOGGED
+                                LOG
                               </span>
                             )}
                           </div>

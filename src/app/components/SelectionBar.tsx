@@ -279,14 +279,6 @@ const SelectionBar: React.FC<SelectionBarProps> = (props) => {
     }}>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
-        <span style={{
-          fontSize: '10px', fontWeight: 700, letterSpacing: '0.12em',
-          color: '#000000', textTransform: 'uppercase',
-          fontFamily: "'JetBrains Mono', monospace",
-          marginRight: '4px', flexShrink: 0, whiteSpace: 'nowrap',
-        }}>
-          {selected.length} SELECTED
-        </span>
 
         {confirming === 'join' ? (
           <>
@@ -334,7 +326,7 @@ const SelectionBar: React.FC<SelectionBarProps> = (props) => {
                onClick={() => loggable && setConfirming('logged')}
                style={loggable ? blackBtn : disabledBtn}
              >
-               LOGGED
+                LOG
              </button>
              <button
                onClick={() => onEdit?.()}
