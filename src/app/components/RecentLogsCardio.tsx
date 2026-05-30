@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Clock, X } from 'lucide-react';
+import { ChevronDown, X } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 const MATCH_KEYWORDS: Record<string, string> = {
@@ -88,6 +88,7 @@ interface CardioLog {
   id: number;
   name: string;
   km: number;
+  kmPerHour: number | null;
   date: string;
   time: string | null;
 }
@@ -112,6 +113,7 @@ const RecentLogsCardio: React.FC<Props> = ({ refreshKey }) => {
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
   const [editKm, setEditKm] = useState<Record<number, string>>({});
   const [savingLogId, setSavingLogId] = useState<number | null>(null);
+  const [collapsed, setCollapsed] = useState(false);
 
   const loadRecent = useCallback(async () => {
     const { data } = await supabase
@@ -121,6 +123,7 @@ const RecentLogsCardio: React.FC<Props> = ({ refreshKey }) => {
         exercises:exercise_id(exercise_name)
       `)
       .eq('type', 'CARDIO')
+      .neq('exercise_id', 82)
       .not('exercise_id', 'is', null)
       .order('date', { ascending: false })
       .limit(50);
@@ -147,13 +150,25 @@ const RecentLogsCardio: React.FC<Props> = ({ refreshKey }) => {
         if (selectedLogs.length >= 5) break;
       }
 
-      setRecentLogs(selectedLogs.map(r => ({
-        id: r.id,
-        name: r.exercises?.exercise_name || 'Unknown',
-        km: Number(r.km || 0),
-        date: r.date,
-        time: r.time || null,
-      })));
+      setRecentLogs(selectedLogs.map(r => {
+        const km = Number(r.km || 0);
+        let kmPerHour: number | null = null;
+        if (km > 0 && r.time) {
+          const parts = String(r.time).split(':');
+          if (parts.length === 3) {
+            const hours = Number(parts[0]) + Number(parts[1]) / 60 + Number(parts[2]) / 3600;
+            if (hours > 0) kmPerHour = +(km / hours).toFixed(1);
+          }
+        }
+        return {
+          id: r.id,
+          name: r.exercises?.exercise_name || 'Unknown',
+          km,
+          kmPerHour,
+          date: r.date,
+          time: r.time || null,
+        };
+      }));
     }
   }, []);
 
@@ -180,10 +195,22 @@ const RecentLogsCardio: React.FC<Props> = ({ refreshKey }) => {
 
   return (
     <section style={{ marginBottom: 40 }}>
-      <div className="flex justify-between items-center mb-3">
+      <div
+        className="flex justify-between items-center mb-3 cursor-pointer select-none"
+        onClick={() => setCollapsed(c => !c)}
+      >
         <p style={sectionLabelStyle}>Recent Cardio</p>
-        <Clock size={15} style={{ color: 'rgba(26,26,26,0.8)', marginBottom: '1.25rem' }} />
+        <ChevronDown
+          size={16}
+          style={{
+            color: 'rgba(26,26,26,0.8)',
+            marginBottom: '1.25rem',
+            transition: 'transform 0.2s ease',
+            transform: collapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
+          }}
+        />
       </div>
+      {!collapsed && (
       <div className="space-y-3">
         {recentLogs.map((log, index) => {
           const previousLog = index > 0 ? recentLogs[index - 1] : null;
@@ -213,21 +240,65 @@ const RecentLogsCardio: React.FC<Props> = ({ refreshKey }) => {
                   <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'rgba(0,0,0,0.04)' }}>
                     <CardioIcon name={log.name} color="#1a1a1a" />
                   </div>
-                  <p style={{
-                    flex: 1,
-                    fontFamily: "'Archivo', sans-serif",
-                    fontWeight: 600,
-                    fontSize: '13px',
-                    color: '#1a1a1a',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}>
-                    {log.name}
-                  </p>
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px', flexShrink: 0 }}>
+                  <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+                    <p style={{
+                      fontFamily: "'Archivo', sans-serif",
+                      fontWeight: 600,
+                      fontSize: '13px',
+                      color: '#1a1a1a',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}>
+                      {log.name}
+                    </p>
+                    <span style={{
+                      fontFamily: "'Archivo', sans-serif",
+                      fontWeight: 500,
+                      fontSize: '10px',
+                      color: 'rgba(26,26,26,0.45)',
+                      letterSpacing: '0.04em',
+                      textTransform: 'uppercase',
+                      whiteSpace: 'nowrap',
+                      flexShrink: 0,
+                    }}>
+                      {(() => {
+                        const d = new Date(log.date + 'T12:00:00');
+                        const dayName = d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
+                        const dayNum = String(d.getDate()).padStart(2, '0');
+                        const month = d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+                        return `${dayName} - ${dayNum}-${month}`;
+                      })()}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', flexShrink: 0 }}>
+                    {/run/i.test(log.name) && log.kmPerHour !== null && (
+                      <>
+                        <span style={{
+                          color: 'rgba(26,26,26,0.75)',
+                          fontWeight: 600,
+                          fontSize: '11px',
+                          letterSpacing: '-0.01em',
+                          lineHeight: 1,
+                          fontFamily: "'Archivo', sans-serif"
+                        }}>
+                          {log.kmPerHour}
+                        </span>
+                        <span style={{
+                          color: 'rgba(26,26,26,0.5)',
+                          fontWeight: 500,
+                          fontSize: '0.55rem',
+                          lineHeight: 1,
+                          letterSpacing: '0.06em',
+                          textTransform: 'uppercase',
+                          fontFamily: "'Archivo', sans-serif"
+                        }}>
+                          KM/H
+                        </span>
+                      </>
+                    )}
                     <span style={{
                       color: '#1a1a1a',
                       fontWeight: 700,
@@ -342,6 +413,7 @@ const RecentLogsCardio: React.FC<Props> = ({ refreshKey }) => {
           );
         })}
       </div>
+      )}
     </section>
   );
 };
