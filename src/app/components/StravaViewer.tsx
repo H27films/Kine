@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { supabase, getISOWeek } from '../../lib/supabase';
 import SelectionBar from './SelectionBar';
 
 interface StravaActivity {
@@ -439,7 +439,7 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
               return (
                 <div key={group.date} style={{ marginBottom: '8px' }}>
                   {/* Date header */}
-                  <div style={{ paddingTop: '8px', paddingBottom: '6px' }}>
+                  <div style={{ paddingTop: '8px', paddingBottom: '6px', display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
                     <span style={{
                       fontSize: '16px', fontWeight: 700, letterSpacing: '0.08em',
                       color: '#1a1a1a', textTransform: 'uppercase',
@@ -452,6 +452,13 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
                         const month = MONTH_NAMES[d.getMonth()];
                         return `${day} ${date} ${month}`;
                       })()}
+                    </span>
+                    <span style={{
+                      fontSize: '14px', fontWeight: 500, letterSpacing: '0.08em',
+                      color: '#1a1a1a', opacity: 0.75, textTransform: 'uppercase',
+                      fontFamily: "'JetBrains Mono', monospace",
+                    }}>
+                      W{getISOWeek(new Date(group.date + 'T00:00:00'))}
                     </span>
                   </div>
 
