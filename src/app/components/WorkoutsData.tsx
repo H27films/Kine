@@ -63,6 +63,7 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
         .not('type', 'in', `(${EXCLUDE_TYPES.join(',')})`)
         .gte('date', minDate)
         .order('date', { ascending: false })
+        .order('id', { ascending: false })
         .limit(500);
 
       if (data) {
@@ -188,6 +189,7 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
         .not('type', 'in', `(${EXCLUDE_TYPES.join(',')})`)
         .gte('date', minDate)
         .order('date', { ascending: false })
+        .order('id', { ascending: false })
         .limit(500);
 
       if (data) {
@@ -415,16 +417,14 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
 
                           {/* Left: type + name (swapped: type on top, name larger below) */}
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            {/* Type label — top row, smaller */}
+                            {/* Type label — top row, smaller, grey */}
                             <div style={{
                               fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em',
-                              color: isMeasurement ? 'rgba(26,26,26,0.5)' : '#1a1a1a',
+                              color: 'rgba(26,26,26,0.5)',
                               textTransform: 'uppercase',
                               marginBottom: '3px',
                             }}>
                               {row.type}
-                              {isCaloriesRow && ' · CALORIES'}
-                              {isFoodRow && ' · FOOD'}
                             </div>
 
                             {/* Exercise name — bottom row, larger */}
@@ -662,81 +662,78 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
         )}
       </div>
 
-      {/* Bottom action bar */}
-      {selectMode && (
-        <div style={{
-          padding: '12px 20px',
-          paddingBottom: 'calc(12px + env(safe-area-inset-bottom))',
-          borderTop: '1px solid rgba(0,0,0,0.06)',
-          display: 'flex', gap: '8px', alignItems: 'center',
-          backgroundColor: '#f2f2f2',
-        }}>
-          <button
-            onClick={clearSelection}
-            style={{
-              padding: '8px 16px', borderRadius: '999px', border: 'none', cursor: 'pointer',
-              backgroundColor: 'rgba(0,0,0,0.06)', color: '#1a1a1a',
-              fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em',
-              textTransform: 'uppercase',
-              fontFamily: "'JetBrains Mono', monospace",
-            }}
-          >
-            CLEAR
-          </button>
-          {editing ? (
-            <>
-              <button
-                onClick={handleSaveAllEdits}
-                disabled={savingIds.size > 0}
-                style={{
-                  padding: '8px 20px', borderRadius: '999px', border: 'none', cursor: 'pointer',
-                  backgroundColor: savingIds.size > 0 ? 'rgba(0,0,0,0.3)' : '#1a1a1a',
-                  color: '#f2f2f2',
-                  fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em',
-                  textTransform: 'uppercase',
-                  fontFamily: "'JetBrains Mono', monospace",
-                  marginLeft: 'auto',
-                }}
-              >
-                {savingIds.size > 0 ? `SAVING ${savingIds.size}...` : 'SAVE ALL'}
-              </button>
-              <button
-                onClick={cancelEditMode}
-                style={{
-                  padding: '8px 16px', borderRadius: '999px', border: 'none', cursor: 'pointer',
-                  backgroundColor: 'rgba(0,0,0,0.06)', color: '#1a1a1a',
-                  fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em',
-                  textTransform: 'uppercase',
-                  fontFamily: "'JetBrains Mono', monospace",
-                }}
-              >
-                CANCEL
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                onClick={enterEditMode}
-                disabled={selectedIds.length === 0}
-                style={{
-                  padding: '8px 20px', borderRadius: '999px', border: 'none', cursor: 'pointer',
-                  backgroundColor: selectedIds.length > 0 ? '#1a1a1a' : 'rgba(0,0,0,0.08)',
-                  color: selectedIds.length > 0 ? '#f2f2f2' : 'rgba(26,26,26,0.4)',
-                  fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em',
-                  textTransform: 'uppercase',
-                  fontFamily: "'JetBrains Mono', monospace",
-                  marginLeft: 'auto',
-                }}
-              >
-                EDIT SELECTED
-              </button>
-              <span style={{ fontSize: '9px', color: 'rgba(26,26,26,0.4)', letterSpacing: '0.08em' }}>
-                {selectedIds.length} SELECTED
-              </span>
-            </>
-          )}
-        </div>
-      )}
+       {/* Bottom action bar */}
+       {selectMode && (
+         <div style={{
+           padding: '12px 20px',
+           paddingBottom: 'calc(12px + env(safe-area-inset-bottom))',
+           borderTop: '1px solid rgba(0,0,0,0.06)',
+           display: 'flex', gap: '8px', alignItems: 'center',
+           backgroundColor: '#f2f2f2',
+         }}>
+           {editing ? (
+             <>
+               <button
+                 onClick={handleSaveAllEdits}
+                 disabled={savingIds.size > 0}
+                 style={{
+                   padding: '8px 20px', borderRadius: '999px', border: 'none', cursor: 'pointer',
+                   backgroundColor: savingIds.size > 0 ? 'rgba(0,0,0,0.3)' : '#1a1a1a',
+                   color: '#f2f2f2',
+                   fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em',
+                   textTransform: 'uppercase',
+                   fontFamily: "'JetBrains Mono', monospace",
+                 }}
+               >
+                 {savingIds.size > 0 ? `SAVING ${savingIds.size}...` : 'SAVE ALL'}
+               </button>
+               <button
+                 onClick={cancelEditMode}
+                 style={{
+                   padding: '8px 16px', borderRadius: '999px', border: 'none', cursor: 'pointer',
+                   backgroundColor: 'rgba(0,0,0,0.06)', color: '#1a1a1a',
+                   fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em',
+                   textTransform: 'uppercase',
+                   fontFamily: "'JetBrains Mono', monospace",
+                   marginLeft: 'auto',
+                 }}
+               >
+                 CANCEL
+               </button>
+             </>
+           ) : (
+             <>
+               <button
+                 onClick={enterEditMode}
+                 disabled={selectedIds.length === 0}
+                 style={{
+                   padding: '8px 20px', borderRadius: '999px', border: 'none', cursor: 'pointer',
+                   backgroundColor: selectedIds.length > 0 ? '#1a1a1a' : 'rgba(0,0,0,0.08)',
+                   color: selectedIds.length > 0 ? '#f2f2f2' : 'rgba(26,26,26,0.4)',
+                   fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em',
+                   textTransform: 'uppercase',
+                   fontFamily: "'JetBrains Mono', monospace",
+                 }}
+               >
+                 EDIT SELECTED
+               </button>
+               <button
+                 onClick={clearSelection}
+                 style={{
+                   padding: '8px 16px', borderRadius: '999px', border: 'none', cursor: 'pointer',
+                   backgroundColor: 'rgba(0,0,0,0.06)', color: '#1a1a1a',
+                   fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em',
+                   textTransform: 'uppercase',
+                   fontFamily: "'JetBrains Mono', monospace",
+                   marginLeft: 'auto',
+                 }}
+               >
+                 CLEAR
+               </button>
+             </>
+           )}
+         </div>
+       )}
 
       <style>{`
         @keyframes wsSlideUp {
