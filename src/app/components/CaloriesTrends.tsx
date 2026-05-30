@@ -51,6 +51,7 @@ const CaloriesTrends: React.FC = () => {
   const [minMonthOffset, setMinMonthOffset] = useState(-24);
 
   const [showEditSheet, setShowEditSheet] = useState(false);
+  const [editDates, setEditDates] = useState<Date[] | undefined>(undefined);
 
   // Food rating weekly state
   const [weekOff, setWeekOff] = useState(0); // 0 = current week, -1 = last week, etc.
@@ -198,17 +199,17 @@ const CaloriesTrends: React.FC = () => {
     return d;
   };
 
-  const isBarEditable = (barIndex: number): boolean => {
-    const todayD = new Date();
-    todayD.setHours(0, 0, 0, 0);
-    const sixAgo = new Date(todayD);
-    sixAgo.setDate(todayD.getDate() - 6);
-    const barDate = getBarDate(barIndex);
-    return barDate >= sixAgo && barDate <= todayD;
-  };
-
-  const handleBarClick = (barIndex: number) => {
-    if (!isBarEditable(barIndex)) return;
+  const handleBarClick = () => {
+    // Generate the 7 days for this week
+    const monday = getMondayAtOffset(calWeekOffset);
+    const weekDates: Date[] = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      d.setHours(0, 0, 0, 0);
+      weekDates.push(d);
+    }
+    setEditDates(weekDates);
     setShowEditSheet(true);
   };
 
@@ -273,7 +274,7 @@ const CaloriesTrends: React.FC = () => {
               const isCurrentWeek = calWeekOffset === 0;
               const isToday = isCurrentWeek && i === todayDayIdx;
               const isPeakBar = !isCurrentWeek && h > 0 && i === weeklyMaxBarIndex;
-              const editable = isBarEditable(i);
+              const editable = true;
 
 let bgColor = h > 0 ? '#1a1a1a' : 'rgba(26,26,26,0.08)';
               if (isToday) bgColor = '#2f2f2f';
@@ -284,7 +285,7 @@ let bgColor = h > 0 ? '#1a1a1a' : 'rgba(26,26,26,0.08)';
                 <div
                   key={i}
                   className="flex-1 rounded-sm"
-                  onClick={() => handleBarClick(i)}
+                  onClick={handleBarClick}
                   style={{
                     height: `${barPct}%`,
                     backgroundColor: bgColor,
@@ -500,6 +501,7 @@ let bgColor = h > 0 ? '#1a1a1a' : 'rgba(26,26,26,0.08)';
       {/* Edit Sheet */}
       {showEditSheet && (
         <CaloriesEditSheet
+          dates={editDates}
           onClose={() => setShowEditSheet(false)}
           onSaved={() => setRefreshKey(k => k + 1)}
         />

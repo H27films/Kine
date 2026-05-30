@@ -48,10 +48,11 @@ const fmtEditLabel = (d: Date): string =>
 interface Props {
   onClose: () => void;
   onSaved: () => void;
+  dates?: Date[];
 }
 
-const CaloriesEditSheet: React.FC<Props> = ({ onClose, onSaved }) => {
-  const editableDays = getEditableDays();
+const CaloriesEditSheet: React.FC<Props> = ({ onClose, onSaved, dates }) => {
+  const editableDays = dates ?? getEditableDays();
   const [editRowValues, setEditRowValues] = useState<string[]>(Array(7).fill(''));
   const [editSaving, setEditSaving] = useState(false);
   const [focusedRow, setFocusedRow] = useState<number | null>(null);
