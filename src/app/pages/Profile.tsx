@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Download, RefreshCw, BarChart3, Menu, Home, Dumbbell as DumbbellIcon } from 'lucide-react';
+import { Download, RefreshCw, BarChart3, Menu, Home, Dumbbell as DumbbellIcon, Database } from 'lucide-react';
 import { Page } from '../../types';
 import { supabase } from '../../lib/supabase';
 import ExercisesPlus from '../components/ExercisesPlus';
+import WorkoutsData from '../components/WorkoutsData';
 import { RunningManIcon, CaloriesIcon } from '../components/NavIcons';
 import { WaveTimeline } from '../components/WaveTimeline';
 import Strava from '../components/Strava';
@@ -48,6 +49,7 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
   const [exportDone, setExportDone] = useState(false);
   const [exportError, setExportError] = useState('');
   const [showExercises, setShowExercises] = useState(false);
+  const [showWorkoutsData, setShowWorkoutsData] = useState(false);
   const [lastExportDisplay, setLastExportDisplay] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -643,6 +645,27 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
           <div style={{ color: '#999' }}>›</div>
         </button>
 
+        {/* Workouts Data */}
+        <button
+          onClick={() => setShowWorkoutsData(true)}
+          className="w-full rounded-xl p-4 mb-3 flex items-center justify-between active:scale-[0.98] transition-all"
+          style={{ backgroundColor: 'rgba(0,0,0,0.05)' }}
+        >
+          <div className="flex items-center gap-4">
+            <Database size={20} color="#1a1a1a" />
+            <span style={{
+              fontSize: '0.8rem',
+              fontWeight: 500,
+              letterSpacing: '0.1em',
+              color: '#1a1a1a',
+              textTransform: 'uppercase',
+            }}>
+              Workouts Data
+            </span>
+          </div>
+          <div style={{ color: '#1a1a1a' }}>›</div>
+        </button>
+
         {/* Strava Connect & Sync */}
         <Strava />
       </div>
@@ -650,6 +673,10 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
       {/* Exercises+ Sheet */}
       {showExercises && (
         <ExercisesPlus onClose={() => setShowExercises(false)} onSaved={() => setShowExercises(false)} />
+      )}
+
+      {showWorkoutsData && (
+        <WorkoutsData onClose={() => setShowWorkoutsData(false)} />
       )}
 
       <style>{`
