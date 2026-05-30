@@ -8,6 +8,7 @@ import TrackerEditSheet from '../components/TrackerEditSheet';
 import ExerciseIconBar from '../components/ExerciseIconBar';
 import ExerciseLogDots from '../components/ExerciseLogDots';
 import MonthlyCalendarChart from '../components/MonthlyCalendarChart';
+import RecentLogsCardio from '../components/RecentLogsCardio';
 
 interface LogCardioProps {
   onNavigate: (page: Page, data?: any) => void;
@@ -48,6 +49,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, initialSelecte
   const [weekChartData, setWeekChartData] = useState<number[]>(Array(7).fill(0));
   const [sparklineClicked, setSparklineClicked] = useState(false);
   const [showTrackerEdit, setShowTrackerEdit] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [thirtyDayData, setThirtyDayData] = useState<{ date: string; total: number }[]>([]);
   const [thirtyDayOffset, setThirtyDayOffset] = useState(0);
   const [hasOlderCardioData, setHasOlderCardioData] = useState(false);
@@ -425,6 +427,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, initialSelecte
 
       await recalculateDailyTotals(today);
       window.dispatchEvent(new CustomEvent('kine:data-updated'));
+      setRefreshKey(k => k + 1);
       setSaveSuccess(true);
       setTrackerDistance('');
       setDistance('');
@@ -653,6 +656,8 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, initialSelecte
           />
         )}
       </button>
+
+      <RecentLogsCardio refreshKey={refreshKey} />
 
       <style>{`
         @keyframes cardio-sweep {
