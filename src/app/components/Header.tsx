@@ -81,7 +81,7 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
     { label: 'Weights',  icon: DumbbellIcon,                                                                   page: 'weights'      },
     { label: 'Cardio',   icon: ({ size }: { size?: number }) => <NewRunningManIcon size={size} color="#1a1a1a" />, page: 'cardio'    },
     { label: 'Calories', icon: ({ size }: { size?: number }) => <NewCaloriesIcon size={size} color="#1a1a1a" />,  page: 'calories'  },
-    { label: 'Data+',    icon: ({ size }: { size?: number }) => <BarChart3 size={size} color="#1a1a1a" />,        page: 'analytics' },
+    { label: 'Analytics+',    icon: ({ size }: { size?: number }) => <BarChart3 size={size} color="#1a1a1a" />,        page: 'analytics' },
     { label: 'Weights+', icon: DumbbellIcon,                                                                   page: 'weights-plus' },
     { label: 'Run+',     icon: ({ size }: { size?: number }) => <NewRunningManIcon size={size} color="#1a1a1a" />, page: 'running-plus' },
   ];

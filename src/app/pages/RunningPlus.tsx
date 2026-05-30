@@ -44,7 +44,7 @@ export const RunningPlus: React.FC<RunningPlusProps> = ({ onNavigate }) => {
     { label: 'Weights', icon: <DumbbellIconSmall size={21} />, page: 'weights' },
     { label: 'Cardio', icon: <RunningManIcon size={24} color="#1a1a1a" />, page: 'cardio' },
     { label: 'Calories', icon: <CaloriesIcon size={20} color="#1a1a1a" />, page: 'calories' },
-    { label: 'Data+', icon: <BarChart3 size={20} />, page: 'analytics' },
+    { label: 'Analytics+', icon: <BarChart3 size={20} />, page: 'analytics' },
   ];
 
   return (

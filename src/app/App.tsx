@@ -87,7 +87,7 @@ React.useEffect(() => {
       case 'cardio':
       case 'calories':
         return 'Log';
-      case 'analytics': return 'Data+';
+      case 'analytics': return 'Analytics+';
       case 'weights-plus': return 'Weights+';
       case 'running-plus': return 'Running+';
       case 'profile': return 'Profile';
