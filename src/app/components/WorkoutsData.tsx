@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, ChevronDown } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { supabase, getISOWeek } from '../../lib/supabase';
 
 interface WorkoutRow {
   id: number;
@@ -40,6 +40,8 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
   const [deletingConfirmId, setDeletingConfirmId] = useState<number | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [savingIds, setSavingIds] = useState<Set<number>>(new Set());
+  const [weekFilter, setWeekFilter] = useState<number | null>(null);
+  const [filterOpen, setFilterOpen] = useState(false);
 
   // Calculate date 5 weeks ago for filtering
   const fiveWeeksAgo = (): string => {
@@ -274,7 +276,7 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
       <div style={{
         display: 'flex', gap: '8px', padding: '12px 20px',
         borderBottom: '1px solid rgba(0,0,0,0.06)',
-      }}>
+      }} onClick={() => setFilterOpen(false)}>
         <button
           onClick={() => {
             if (selectMode && selectedIds.length > 0) {
@@ -294,7 +296,7 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
             fontFamily: "'JetBrains Mono', monospace",
           }}
         >
-          {selectMode && selectedIds.length > 0 ? 'DESELECT ALL' : 'SELECT'}
+          {selectMode && selectedIds.length > 0 ? 'DESELECT' : 'SELECT'}
         </button>
         {selectMode && (
           <button
@@ -312,6 +314,78 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
             ALL
           </button>
         )}
+
+        {/* Filter by week pill */}
+        <div style={{ position: 'relative' }} onClick={e => e.stopPropagation()}>
+          <button
+            onClick={() => setFilterOpen(o => !o)}
+            style={{
+              padding: '6px 14px', borderRadius: '999px',
+              backgroundColor: weekFilter !== null ? '#1a1a1a' : 'rgba(0,0,0,0.06)',
+              color: weekFilter !== null ? '#f2f2f2' : '#1a1a1a',
+              border: 'none', cursor: 'pointer',
+              fontSize: '9px', fontWeight: 700, letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              fontFamily: "'JetBrains Mono', monospace",
+              display: 'flex', alignItems: 'center', gap: '5px',
+            }}
+          >
+            {weekFilter !== null ? `W${weekFilter}` : 'FILTER'}
+            <span style={{ fontSize: '8px', opacity: 0.7 }}>{filterOpen ? '▲' : '▼'}</span>
+          </button>
+          {filterOpen && (() => {
+            const weekSet = new Set<number>();
+            rows.forEach(r => {
+              const d = new Date(r.date + 'T00:00:00');
+              weekSet.add(getISOWeek(d));
+            });
+            const weeks = Array.from(weekSet).sort((a, b) => b - a);
+            return (
+              <div style={{
+                position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 100,
+                backgroundColor: '#f2f2f2', borderRadius: '12px',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                border: '1px solid rgba(0,0,0,0.08)',
+                overflow: 'hidden', minWidth: '100px',
+              }}>
+                <div
+                  onClick={() => { setWeekFilter(null); setFilterOpen(false); }}
+                  style={{
+                    padding: '10px 14px', cursor: 'pointer',
+                    fontSize: '11px', fontWeight: 700,
+                    letterSpacing: '0.08em', textTransform: 'uppercase',
+                    color: weekFilter === null ? '#FC4C02' : '#1a1a1a',
+                    backgroundColor: weekFilter === null ? 'rgba(0,0,0,0.04)' : 'transparent',
+                    borderBottom: weeks.length > 0 ? '1px solid rgba(0,0,0,0.06)' : 'none',
+                    fontFamily: "'JetBrains Mono', monospace",
+                  }}
+                >
+                  ALL WEEKS
+                </div>
+                {weeks.map((w, i) => (
+                  <div
+                    key={w}
+                    onClick={() => { setWeekFilter(w); setFilterOpen(false); }}
+                    style={{
+                      padding: '10px 14px', cursor: 'pointer',
+                      fontSize: '11px', fontWeight: 700,
+                      letterSpacing: '0.08em', textTransform: 'uppercase',
+                      color: weekFilter === w ? '#FC4C02' : '#1a1a1a',
+                      backgroundColor: weekFilter === w ? 'rgba(0,0,0,0.04)' : 'transparent',
+                      borderBottom: i < weeks.length - 1 ? '1px solid rgba(0,0,0,0.06)' : 'none',
+                      fontFamily: "'JetBrains Mono', monospace",
+                    }}
+                  >
+                    W{w}
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
+        </div>
+        {!selectMode && weekFilter !== null && (
+          <div style={{ marginLeft: 'auto' }} />
+        )}
       </div>
 
       {/* List */}
@@ -326,8 +400,14 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
           </div>
         ) : (
           (() => {
+            const filteredRows = weekFilter !== null
+              ? rows.filter(r => {
+                  const d = new Date(r.date + 'T00:00:00');
+                  return getISOWeek(d) === weekFilter;
+                })
+              : rows;
             const grouped: { date: string; rows: WorkoutRow[] }[] = [];
-            rows.forEach(r => {
+            filteredRows.forEach(r => {
               const last = grouped[grouped.length - 1];
               if (last && last.date === r.date) {
                 last.rows.push(r);
@@ -353,7 +433,7 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
               return (
                 <div key={group.date} style={{ marginBottom: '8px' }}>
                   {/* Date header */}
-                  <div style={{ paddingTop: '16px', paddingBottom: '6px' }}>
+                  <div style={{ paddingTop: '8px', paddingBottom: '6px', display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
                     <span style={{
                       fontSize: '16px', fontWeight: 700, letterSpacing: '0.08em',
                       color: '#1a1a1a', textTransform: 'uppercase',
@@ -365,6 +445,13 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
                         const month = MONTH_NAMES[d.getMonth()];
                         return `${day} ${date} ${month}`;
                       })()}
+                    </span>
+                    <span style={{
+                      fontSize: '14px', fontWeight: 500, letterSpacing: '0.08em',
+                      color: '#1a1a1a', opacity: 0.75, textTransform: 'uppercase',
+                      fontFamily: "'JetBrains Mono', monospace",
+                    }}>
+                      W{getISOWeek(new Date(group.date + 'T00:00:00'))}
                     </span>
                   </div>
 

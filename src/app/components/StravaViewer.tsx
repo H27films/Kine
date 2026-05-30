@@ -259,7 +259,11 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
           <div style={{
             display: 'flex', alignItems: 'center', gap: '4px',
             padding: '5px 12px', borderRadius: '999px',
-            background: 'rgba(0,0,0,0.06)',
+            background: 'rgba(255,255,255,0.55)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            border: '1px solid rgba(255,255,255,0.3)',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.04)',
           }}>
             <span style={{
               fontSize: '10px', fontWeight: 700, color: '#1a1a1a',
@@ -392,17 +396,14 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
         </div>
       </div>
 
-      {/* Days / Activities count */}
-      <div style={{
-        padding: '4px 20px 0',
-      }}>
-        <span style={{ fontSize: '10px', color: 'rgba(26,26,26,0.45)', letterSpacing: '0.1em' }}>
-          {totalDays} DAYS / {filtered.length} ACTIVITIES
-        </span>
-      </div>
-
       {/* Activity list */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '0 20px 8px 20px' }}>
+        {/* Days / Activities count */}
+        <div style={{ padding: '4px 0 0 0' }}>
+          <span style={{ fontSize: '10px', color: 'rgba(26,26,26,0.45)', letterSpacing: '0.1em' }}>
+            {totalDays} DAYS / {filtered.length} ACTIVITIES
+          </span>
+        </div>
         {loading ? (
           <div style={{ textAlign: 'center', padding: '40px', color: 'rgba(26,26,26,0.35)', fontSize: '12px' }}>
             Loading...
