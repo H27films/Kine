@@ -639,7 +639,7 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
               color: '#1a1a1a',
               textTransform: 'uppercase',
             }}>
-              Data+
+              ANALYTICS
             </span>
           </div>
           <div style={{ color: '#999' }}>›</div>
