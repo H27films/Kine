@@ -154,7 +154,7 @@ const ExercisesEdit: React.FC<Props> = ({ onClose, onSaved }) => {
 
   const editRows = [
     { label: 'Name', value: name, onChange: setName, type: 'text' as const, placeholder: 'Fly Dumbbell' },
-    { label: 'Type2', value: type2, onChange: setType2, type: 'dropdown' as const, options: TYPE2_OPTIONS },
+    { label: 'Mode', value: type2, onChange: setType2, type: 'dropdown' as const, options: TYPE2_OPTIONS },
     { label: 'Multiplier', value: multiplier, onChange: setMultiplier, type: 'number' as const, placeholder: '1' },
     { label: 'Favourite', value: favourite, onChange: setFavourite, type: 'dropdown' as const, options: FAVOURITE_OPTIONS },
     { label: 'Notes', value: notes, onChange: setNotes, type: 'text' as const, placeholder: 'Optional' },
