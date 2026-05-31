@@ -42,17 +42,17 @@ const CaloriesDashboard: React.FC<Props> = ({ todayCalories, weeklyCalories }) =
             letterSpacing: '0.2em',
             color: '#1a1a1a',
             textTransform: 'uppercase',
-          }}>Total Calories</span>
+          }}>Weekly Calories</span>
           <div style={{
             fontFamily: "'Inter', sans-serif",
-            fontSize: '17px',
+            fontSize: '14px',
             fontWeight: 900,
             letterSpacing: '-0.04em',
             color: '#1a1a1a',
             lineHeight: 1,
           }}>
             {avgKcal !== null ? avgKcal.toLocaleString() : '\u2014'}
-            <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.08em', color: 'rgba(26,26,26,0.8)', marginLeft: 4 }}>KCAL</span>
+            <span style={{ fontSize: '8px', fontWeight: 700, letterSpacing: '0.08em', color: 'rgba(26,26,26,0.8)', marginLeft: 4 }}>KCAL</span>
           </div>
         </div>
 
@@ -65,8 +65,19 @@ const CaloriesDashboard: React.FC<Props> = ({ todayCalories, weeklyCalories }) =
             const barColor = `rgba(26,26,26,${opacity})`;
             const fillPct = Math.max(rawPct * 100, 8);
 
-            return (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+             return (
+               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                 <span style={{
+                   width: 14,
+                   fontSize: '12px',
+                   fontWeight: 700,
+                   letterSpacing: '0.05em',
+                   color: '#1a1a1a',
+                   flexShrink: 0,
+                   textAlign: 'left',
+                 }}>
+                   {DAY_LABELS[i]}
+                 </span>
                 <div style={{
                   flex: 1,
                   height: 20,
@@ -100,18 +111,7 @@ const CaloriesDashboard: React.FC<Props> = ({ todayCalories, weeklyCalories }) =
                     {val.toLocaleString()}
                   </span>
                 </div>
-                <span style={{
-                  width: 14,
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  letterSpacing: '0.05em',
-                  color: '#1a1a1a',
-                  flexShrink: 0,
-                  textAlign: 'right',
-                }}>
-                  {DAY_LABELS[i]}
-                </span>
-              </div>
+               </div>
             );
           })}
         </div>
