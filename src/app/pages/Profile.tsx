@@ -3,6 +3,7 @@ import { Download, RefreshCw, BarChart3, Menu, Home, Dumbbell as DumbbellIcon, D
 import { Page } from '../../types';
 import { supabase } from '../../lib/supabase';
 import ExercisesPlus from '../components/ExercisesPlus';
+import ExercisesEdit from '../components/ExercisesEdit';
 import WorkoutsData from '../components/WorkoutsData';
 import { RunningManIcon, CaloriesIcon } from '../components/NavIcons';
 import { WaveTimeline } from '../components/WaveTimeline';
@@ -49,6 +50,8 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
   const [exportDone, setExportDone] = useState(false);
   const [exportError, setExportError] = useState('');
   const [showExercises, setShowExercises] = useState(false);
+  const [showExercisesEdit, setShowExercisesEdit] = useState(false);
+  const [showExerciseOptions, setShowExerciseOptions] = useState(false);
   const [showWorkoutsData, setShowWorkoutsData] = useState(false);
   const [lastExportDisplay, setLastExportDisplay] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
@@ -605,7 +608,7 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
 
         {/* Exercises+ */}
         <button
-          onClick={() => setShowExercises(true)}
+          onClick={() => setShowExerciseOptions(true)}
           className="w-full rounded-xl p-4 mb-3 flex items-center justify-between active:scale-[0.98] transition-all"
           style={{ backgroundColor: 'rgba(0,0,0,0.05)' }}
         >
@@ -670,9 +673,74 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
         <Strava />
       </div>
 
-      {/* Exercises+ Sheet */}
+      {/* NEW/EDIT popup */}
+      {showExerciseOptions && (
+        <div
+          style={{
+            position: 'fixed', inset: 0, zIndex: 100,
+            backgroundColor: 'rgba(0,0,0,0.55)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+          }}
+          onClick={() => setShowExerciseOptions(false)}
+        >
+          <div
+            style={{
+              backgroundColor: '#F2F2ED',
+              borderRadius: '20px 20px 0 0',
+              padding: '24px 24px 32px',
+              fontFamily: "'Inter Variable', 'Inter', system-ui, sans-serif",
+              width: '100%',
+              maxWidth: '500px',
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <p style={{
+              fontSize: '14px', fontWeight: 900,
+              color: '#000000', letterSpacing: '0.2em', textTransform: 'uppercase',
+              margin: '0 0 20px 0', textAlign: 'center',
+            }}>
+              Exercises+
+            </p>
+            <button
+              onClick={() => { setShowExerciseOptions(false); setShowExercises(true); }}
+              style={{
+                width: '100%', padding: '14px',
+                backgroundColor: '#000000', color: '#ffffff',
+                borderRadius: 999, border: 'none',
+                fontSize: '12px', fontWeight: 900,
+                letterSpacing: '0.2em', textTransform: 'uppercase',
+                cursor: 'pointer', marginBottom: '12px',
+              }}
+            >
+              NEW
+            </button>
+            <button
+              onClick={() => { setShowExerciseOptions(false); setShowExercisesEdit(true); }}
+              style={{
+                width: '100%', padding: '14px',
+                backgroundColor: '#000000', color: '#ffffff',
+                borderRadius: 999, border: 'none',
+                fontSize: '12px', fontWeight: 900,
+                letterSpacing: '0.2em', textTransform: 'uppercase',
+                cursor: 'pointer',
+              }}
+            >
+              EDIT
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Exercises+ New Sheet */}
       {showExercises && (
         <ExercisesPlus onClose={() => setShowExercises(false)} onSaved={() => setShowExercises(false)} />
+      )}
+
+      {/* Exercises+ Edit Sheet */}
+      {showExercisesEdit && (
+        <ExercisesEdit onClose={() => setShowExercisesEdit(false)} onSaved={() => setShowExercisesEdit(false)} />
       )}
 
       {showWorkoutsData && (
