@@ -249,22 +249,30 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
     { label: 'Analytics+', icon: <BarChart3 size={20} />, page: 'analytics' },
   ];
 
-   const pillStyle = (): React.CSSProperties => ({
-     width: '100%',
-     padding: '20px 18px',
-     borderRadius: '8px',
-     border: 'none',
-     fontSize: '11px',
-     fontWeight: 600,
-     letterSpacing: '0.08em',
-     cursor: 'pointer',
-     backgroundColor: 'rgba(0,0,0,0.06)',
-     color: '#1a1a1a',
-     display: 'flex',
-     alignItems: 'center',
-     justifyContent: 'space-between',
-     gap: '6px',
-   });
+    const pillStyle = (): React.CSSProperties => ({
+      width: '100%',
+      padding: '20px 18px',
+      borderRadius: '8px',
+      border: 'none',
+      fontSize: '11px',
+      fontWeight: 600,
+      letterSpacing: '0.08em',
+      cursor: 'pointer',
+      backgroundColor: 'rgba(0,0,0,0.06)',
+      color: '#1a1a1a',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: '6px',
+    });
+
+    const getExerciseFontSize = (name: string | null): string => {
+      if (!name) return '10px';
+      if (name.length > 22) return '7px';
+      if (name.length > 16) return '8px';
+      if (name.length > 12) return '9px';
+      return '10px';
+    };
 
 
 
@@ -430,7 +438,7 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
                 setCategoryOpen(false);
               }}
               disabled={exerciseOpen}
-              style={{ ...pillStyle(), flex: 1 }}
+              style={{ ...pillStyle(), flex: 1, fontSize: getExerciseFontSize(selectedExercise) }}
             >
               {selectedExercise || 'EXERCISE'}
               <ChevronDown size={12} />
