@@ -365,21 +365,21 @@ const LogWeightsEntry: React.FC<LogWeightsEntryProps> = ({
                 <div style={{ height: '0.5px', backgroundColor: 'rgba(0,0,0,0.18)', marginTop: '17px', marginBottom: '9px' }} />
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '6px', paddingBottom: '14px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div
-                      onClick={() => onToggleFail(activeEx.exercise.id)}
-                      style={{
-                        cursor: 'pointer', userSelect: 'none',
-                        padding: '8px 16px', borderRadius: '8px',
-                        border: '1px solid rgba(255,255,255,0.55)',
-                        background: activeEx.fail ? '#1a1a1a' : 'linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.10) 100%)',
-                        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -1px 0 rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.08)',
-                        backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
-                        fontSize: '11px', fontWeight: 500, letterSpacing: '0.04em',
-                        color: activeEx.fail ? '#ffffff' : 'rgba(0,0,0,0.5)',
-                      }}
-                    >
-                      {activeEx.fail ? 'FAILED' : '+ FAIL'}
-                    </div>
+                      <div
+                        onClick={() => onToggleFail(activeEx.exercise.id)}
+                        style={{
+                          cursor: 'pointer', userSelect: 'none',
+                          padding: '8px 16px', borderRadius: '8px',
+                          border: '1px solid rgba(255,255,255,0.55)',
+                          background: activeEx.fail ? '#1a1a1a' : 'linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.10) 100%)',
+                          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -1px 0 rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.08)',
+                          backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+                          fontSize: '11px', fontWeight: 500, letterSpacing: '0.04em',
+                          color: activeEx.fail ? '#ffffff' : 'rgba(0,0,0,0.5)',
+                        }}
+                      >
+                        {activeEx.fail ? 'FAILED' : '+ FAIL'}
+                      </div>
                     {!showAdvanced && (
                       <div
                         onClick={() => { if (activeEx.lastSets && activeEx.lastSets.length > 0) onToggleCopyFromLast(activeEx.exercise.id); }}

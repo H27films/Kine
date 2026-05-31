@@ -1057,7 +1057,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                         return (
                           <div key={idx} className="grid items-center mb-2" style={{ gridTemplateColumns: '1.8rem 1fr 1fr 1fr', gap: '0.5rem' }}>
                             <p className="font-black" style={{ fontSize: '1rem', color: numColor, lineHeight: 1, textAlign: 'center' }}>{idx + 1}</p>
-                            <div className="flex items-center justify-between rounded-lg py-2 px-2" style={{ backgroundColor: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.08)' }} onClick={e => e.stopPropagation()}>
+                            <div className="flex items-center justify-between rounded-lg py-2 px-2" style={{ backgroundColor: 'rgba(0,0,0,0.04)' }} onClick={e => e.stopPropagation()}>
                               <button onClick={() => adjustWeight(ex.exercise.id, idx, -1)} style={{ color: 'rgba(0,0,0,0.5)', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>−</button>
                               <input
                                 type="number" inputMode="decimal" value={set.weight} placeholder="—"
@@ -1066,7 +1066,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
                               />
                               <button onClick={() => adjustWeight(ex.exercise.id, idx, 1)} style={{ color: 'rgba(0,0,0,0.5)', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>+</button>
                             </div>
-                            <div className="flex items-center justify-between rounded-lg py-2 px-2" style={{ backgroundColor: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.08)' }} onClick={e => e.stopPropagation()}>
+                            <div className="flex items-center justify-between rounded-lg py-2 px-2" style={{ backgroundColor: 'rgba(0,0,0,0.04)' }} onClick={e => e.stopPropagation()}>
                               <button onClick={() => updateSet(ex.exercise.id, idx, 'reps', Math.max(1, set.reps - 1))} style={{ color: 'rgba(0,0,0,0.5)', lineHeight: 1 }}>−</button>
                               <span className="font-bold" style={{ fontSize: '0.875rem', color: rowHasData ? '#1a1a1a' : 'rgba(26,26,26,0.3)' }}>{set.reps}</span>
                               <button onClick={() => updateSet(ex.exercise.id, idx, 'reps', set.reps + 1)} style={{ color: 'rgba(0,0,0,0.5)', lineHeight: 1 }}>+</button>
@@ -1078,24 +1078,24 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
 
                       <div className="flex items-center gap-5 mt-4 flex-wrap">
                         {ex.sets.length < 6 && (
-                          <button onClick={(e) => { e.stopPropagation(); addSet(ex.exercise.id); }} className="flex items-center gap-1 text-xs font-bold uppercase tracking-widest" style={{ color: 'rgba(26,26,26,0.35)' }}>
-                            <Plus size={13} /><span>Set</span>
+                          <button onClick={(e) => { e.stopPropagation(); addSet(ex.exercise.id); }} className="font-bold uppercase tracking-widest" style={{ fontSize: '11px', padding: '3px 12px', borderRadius: '999px', border: '1px solid rgba(255,255,255,0.55)', background: 'linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.10) 100%)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -1px 0 rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.08)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', color: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+                            <Plus size={11} /><span>SET</span>
                           </button>
                         )}
-                        <button onClick={(e) => { e.stopPropagation(); removeExercise(ex.exercise.id); }} className="flex items-center gap-1 text-xs font-bold uppercase tracking-widest" style={{ color: 'rgba(220,38,38,0.55)' }}>
-                          <Minus size={13} /><span>Remove Ex.</span>
+                        <button onClick={(e) => { e.stopPropagation(); removeExercise(ex.exercise.id); }} className="font-bold uppercase tracking-widest" style={{ fontSize: '11px', padding: '3px 12px', borderRadius: '999px', border: '1px solid rgba(255,255,255,0.55)', background: 'linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.10) 100%)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -1px 0 rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.08)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', color: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+                          <Minus size={11} /><span>REMOVE</span>
                         </button>
                         <button
                           onClick={(e) => { e.stopPropagation(); toggleFail(ex.exercise.id); }}
-                          className="text-xs font-bold uppercase tracking-widest"
-                          style={{ padding: '3px 12px', borderRadius: '999px', border: ex.fail ? '1px solid rgba(220,38,38,0.7)' : '1px solid rgba(0,0,0,0.12)', backgroundColor: ex.fail ? 'rgba(220,38,38,0.15)' : 'transparent', color: ex.fail ? '#dc2626' : 'rgba(26,26,26,0.28)', transition: 'all 0.2s', letterSpacing: '0.1em' }}
+                          className="font-bold uppercase tracking-widest"
+                          style={{ fontSize: '11px', padding: '3px 12px', borderRadius: '999px', border: ex.fail ? '1px solid rgba(220,38,38,0.7)' : '1px solid rgba(255,255,255,0.55)', background: ex.fail ? 'rgba(220,38,38,0.15)' : 'linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.10) 100%)', boxShadow: ex.fail ? 'inset 0 0 0 1px rgba(220,38,38,0.2)' : 'inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -1px 0 rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.08)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', color: ex.fail ? '#dc2626' : 'rgba(0,0,0,0.5)', transition: 'all 0.2s', letterSpacing: '0.1em' }}
                         >
                           Fail
                         </button>
                         <button
                           onClick={(e) => { e.stopPropagation(); loadMaxSession(ex.exercise.id); }}
-                          className="text-xs font-bold uppercase tracking-widest"
-                          style={{ padding: '3px 12px', borderRadius: '999px', border: '1px solid rgba(0,0,0,0.12)', backgroundColor: 'transparent', color: 'rgba(26,26,26,0.28)', transition: 'all 0.2s', letterSpacing: '0.1em' }}
+                          className="font-bold uppercase tracking-widest"
+                          style={{ fontSize: '11px', padding: '3px 12px', borderRadius: '999px', border: ex.loadedMax ? '1px solid #1a1a1a' : '1px solid rgba(255,255,255,0.55)', background: ex.loadedMax ? '#1a1a1a' : 'linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.10) 100%)', boxShadow: ex.loadedMax ? 'none' : 'inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -1px 0 rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.08)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', color: ex.loadedMax ? '#ffffff' : 'rgba(0,0,0,0.5)', transition: 'all 0.2s', letterSpacing: '0.1em' }}
                         >
                           Max
                         </button>

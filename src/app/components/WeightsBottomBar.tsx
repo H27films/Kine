@@ -83,13 +83,12 @@ export const WeightsBottomBar: React.FC<WeightsBottomBarProps> = ({
           onClick={() => onLoadMaxSession(activeEx.exercise.id)}
           style={{
             padding: '8px 16px', borderRadius: '8px',
-            border: '1px solid rgba(255,255,255,0.55)',
-            background: activeEx.loadedMax ? undefined : 'linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.10) 100%)',
-            backgroundColor: activeEx.loadedMax ? 'rgba(0,0,0,0.06)' : undefined,
-            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -1px 0 rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.08)',
+            border: activeEx.loadedMax ? '1px solid #1a1a1a' : '1px solid rgba(255,255,255,0.55)',
+            background: activeEx.loadedMax ? '#1a1a1a' : 'linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.10) 100%)',
+            boxShadow: activeEx.loadedMax ? 'none' : 'inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -1px 0 rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.08)',
             backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
             cursor: 'pointer',
-            color: activeEx.loadedMax ? '#1a1a1a' : 'rgba(0,0,0,0.5)',
+            color: activeEx.loadedMax ? '#ffffff' : 'rgba(0,0,0,0.5)',
             fontSize: '11px', fontWeight: 500, letterSpacing: '0.04em',
           }}
         >
