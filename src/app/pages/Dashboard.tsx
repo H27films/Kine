@@ -71,6 +71,7 @@ useEffect(() => {
      activityWeeklyData,
      monthlyMinOffset,
      monthlyMaxOffset,
+     weeklyCalories,
    } = useDashboardData(selectedDate, refreshKey);
 
   const visibleCardioKeys = [
@@ -285,6 +286,7 @@ useEffect(() => {
           visibleCardioKeys={visibleCardioKeys}
           todayActivities={todayActivities}
           todayCalories={todayCalories}
+          weeklyCalories={weeklyCalories}
         />
       </section>
 

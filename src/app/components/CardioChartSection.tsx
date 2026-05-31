@@ -1,5 +1,6 @@
 import React from 'react';
 import { Footprints } from 'lucide-react';
+import CaloriesDashboard from './CaloriesDashboard';
 
 export const CARDIO_DISPLAY: Record<string, { label: string; icon: React.ReactNode }> = {
   RUNNING: {
@@ -87,6 +88,7 @@ interface CardioChartSectionProps {
   visibleCardioKeys: string[];
   todayActivities: any[];
   todayCalories: number;
+  weeklyCalories: number[];
 }
 
 const CardioChartSection: React.FC<CardioChartSectionProps> = ({
@@ -96,6 +98,7 @@ const CardioChartSection: React.FC<CardioChartSectionProps> = ({
   visibleCardioKeys,
   todayActivities,
   todayCalories,
+  weeklyCalories,
 }) => {
   return (
     <>
@@ -144,31 +147,8 @@ const CardioChartSection: React.FC<CardioChartSectionProps> = ({
         })}
       </div>
 
-      {/* Calories progress bar */}
-      <div style={{ marginTop: '14px' }}>
-        <div style={{ height: todayCalories > 0 ? '32px' : '16px', width: '100%', backgroundColor: 'rgba(26,26,26,0.1)', borderRadius: '999px', overflow: 'hidden', padding: todayCalories > 0 ? '4px' : '2px' }}>
-          <div
-            style={{
-              height: '100%',
-              width: todayCalories > 0 ? `${Math.min((todayCalories / 1500) * 100, 100)}%` : '0%',
-              background: '#1a1a1a',
-              borderRadius: '999px',
-              boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
-              transition: 'all 0.6s cubic-bezier(0.4,0,0.2,1)',
-              display: 'flex',
-              alignItems: 'center',
-              paddingLeft: '10px',
-              minWidth: todayCalories > 0 ? '72px' : '0px',
-            }}
-          >
-            {todayCalories > 0 && (
-              <span style={{ fontSize: '10px', fontWeight: 800, color: '#ffffff', whiteSpace: 'nowrap', letterSpacing: '0.5px', fontFamily: "'Archivo', sans-serif" }}>
-                {todayCalories.toLocaleString()} kcal
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
+      {/* Calories bar — collapsed / expanded on click */}
+      <CaloriesDashboard todayCalories={todayCalories} weeklyCalories={weeklyCalories} />
 
       {selectedActivity && activityWeeklyData[selectedActivity] && (() => {
         const sparkData = activityWeeklyData[selectedActivity];

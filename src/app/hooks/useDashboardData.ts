@@ -39,6 +39,7 @@ export function useDashboardData(selectedDate: string, refreshKey: number) {
 
   const [activityWeeklyData, setActivityWeeklyData] = useState<Record<string, number[]>>({});
 
+  const [weeklyCalories, setWeeklyCalories] = useState<number[]>(Array(7).fill(0));
   const [monthlyMinOffset, setMonthlyMinOffset] = useState(-12);
   const [monthlyMaxOffset, setMonthlyMaxOffset] = useState(0);
 
@@ -161,6 +162,7 @@ export function useDashboardData(selectedDate: string, refreshKey: number) {
     loadWeightTrainingCalories();
     loadFoodRating();
     loadWeights();
+    loadWeeklyCalories();
   }, [selectedDate, refreshKey]);
 
   useEffect(() => {
@@ -186,6 +188,36 @@ export function useDashboardData(selectedDate: string, refreshKey: number) {
     };
     loadActivityWeekly();
   }, []);
+
+  const loadWeeklyCalories = async () => {
+    const today = new Date();
+    const dow = today.getDay();
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - (dow === 0 ? 6 : dow - 1));
+    const mondayStr = malaysiaDateStr(monday);
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    const sundayStr = malaysiaDateStr(sunday);
+
+    const { data } = await supabase.from('workouts')
+      .select('date, calories')
+      .eq('type', 'MEASUREMENT')
+      .eq('exercise_id', 90)
+      .gte('date', mondayStr)
+      .lte('date', sundayStr)
+      .not('calories', 'is', null)
+      .order('date', { ascending: true });
+
+    const weekly = Array(7).fill(0);
+    if (data) {
+      for (const row of data as any[]) {
+        const d = new Date(row.date + 'T12:00:00');
+        const dayIdx = d.getDay() === 0 ? 6 : d.getDay() - 1;
+        weekly[dayIdx] += Number(row.calories);
+      }
+    }
+    setWeeklyCalories(weekly);
+  };
 
   useEffect(() => {
     const loadWeeklyCharts = async () => {
@@ -301,5 +333,6 @@ export function useDashboardData(selectedDate: string, refreshKey: number) {
     activityWeeklyData,
     monthlyMinOffset,
     monthlyMaxOffset,
+    weeklyCalories,
   };
 }
