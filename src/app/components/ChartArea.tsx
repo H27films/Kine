@@ -7,6 +7,11 @@ interface DataPoint {
   workoutId: string;
 }
 
+interface SetData {
+  weight: string;
+  reps: number;
+}
+
 interface ChartAreaProps {
   mode: 'exercise' | 'aggregate';
   data: DataPoint[];
@@ -17,9 +22,11 @@ interface ChartAreaProps {
   category: string;
   pbCounts?: Record<number, number>;
   exerciseCounts?: Record<number, number>;
+  lastSets?: SetData[];
+  lastMultiplier?: number;
 }
 
-export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, sessionCount, metricLabel, selectedExercise, category, pbCounts = {}, exerciseCounts = {} }) => {
+export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, sessionCount, metricLabel, selectedExercise, category, pbCounts = {}, exerciseCounts = {}, lastSets = [], lastMultiplier = 1 }) => {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const displayTotal = total.toLocaleString();
 
@@ -385,6 +392,57 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
           </div>
         ) : null}
       </div>
+
+      {/* Last workout sets info for exercise mode */}
+      {mode === 'exercise' && lastSets.length > 0 && (
+        <div style={{ marginTop: '28px', display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{
+              fontFamily: "'Inconsolata', monospace",
+              fontSize: '22px',
+              fontWeight: 348,
+              fontStretch: '175%',
+              letterSpacing: '0.06em',
+              color: 'rgba(0,0,0,0.35)',
+              textTransform: 'uppercase',
+            }}>
+              LAST
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '8px' }}>
+              {lastSets.map((set, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 500, color: '#1a1a1a' }}>
+                  <span style={{ width: '12px', fontSize: '10px', fontWeight: 600, color: 'rgba(0,0,0,0.35)', letterSpacing: '0.05em' }}>S{i + 1}</span>
+                  <span style={{ fontWeight: 700 }}>{set.weight}</span>
+                  <span style={{ color: 'rgba(0,0,0,0.5)' }}>kg</span>
+                  <span style={{ color: 'rgba(0,0,0,0.3)' }}>×</span>
+                  <span style={{ fontWeight: 700 }}>{set.reps}</span>
+                  <span style={{ color: 'rgba(0,0,0,0.5)' }}>reps</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{
+              fontFamily: "'Inconsolata', monospace",
+              fontSize: '22px',
+              fontWeight: 348,
+              fontStretch: '175%',
+              letterSpacing: '0.06em',
+              color: 'rgba(0,0,0,0.35)',
+              textTransform: 'uppercase',
+              textAlign: 'right',
+            }}>
+              TOTAL
+            </div>
+            <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '-0.03em', color: '#1a1a1a', lineHeight: 1.1 }}>
+              {lastSets.reduce((sum, s) => sum + (parseFloat(s.weight) || 0) * s.reps * lastMultiplier, 0).toLocaleString()}
+            </div>
+            <div style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em', color: '#1a1a1a', marginTop: '2px', textTransform: 'uppercase' }}>
+              {lastSets.length} sets
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* MAX/AVG stats for aggregate mode */}
       {mode === 'aggregate' && data.length > 0 && (

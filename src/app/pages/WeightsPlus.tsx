@@ -49,6 +49,8 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
   const [loadingExercises, setLoadingExercises] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState<string | null>(null);
   const [selectedExerciseId, setSelectedExerciseId] = useState<string | null>(null);
+  const [lastWorkoutSets, setLastWorkoutSets] = useState<{weight: string; reps: number}[]>([]);
+  const [lastMultiplier, setLastMultiplier] = useState<number>(1);
   const menuRef = useRef<HTMLDivElement>(null);
   const categoryRef = useRef<HTMLDivElement>(null);
   const exerciseRef = useRef<HTMLDivElement>(null);
@@ -188,6 +190,32 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
             });
         }
      }
+
+      // Fetch last workout sets for exercise mode
+      if (selectedExerciseId) {
+        const { data: lastRows } = await supabase
+          .from('workouts')
+          .select('w1, r1, w2, r2, w3, r3, w4, r4, w5, r5, w6, r6, exercises:exercise_id(multiplier)')
+          .eq('exercise_id', selectedExerciseId)
+          .order('date', { ascending: false })
+          .limit(1);
+
+        const sets: {weight: string; reps: number}[] = [];
+        let mult = 1;
+        if (lastRows && lastRows.length > 0) {
+          const row = lastRows[0] as any;
+          mult = row.exercises?.multiplier ?? 1;
+          for (let i = 1; i <= 6; i++) {
+            const w = row[`w${i}`];
+            const r = row[`r${i}`];
+            if (w != null && Number(w) > 0) {
+              sets.push({ weight: String(Number(w)), reps: Number(r) || 10 });
+            }
+          }
+        }
+        setLastWorkoutSets(sets);
+        setLastMultiplier(mult);
+      }
 
       setData(points);
       setSessionCount(points.length);
@@ -345,7 +373,7 @@ export const WeightsPlus: React.FC<WeightsPlusProps> = ({ onNavigate }) => {
       </div>
 
         <div className="px-5" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', paddingTop: '16px' }}>
-          <ChartArea mode={selectedExercise ? 'exercise' : 'aggregate'} data={data} total={total} sessionCount={sessionCount} metricLabel={metricLabel} selectedExercise={selectedExercise} category={category} pbCounts={pbCounts} exerciseCounts={exerciseCounts} />
+          <ChartArea mode={selectedExercise ? 'exercise' : 'aggregate'} data={data} total={total} sessionCount={sessionCount} metricLabel={metricLabel} selectedExercise={selectedExercise} category={category} pbCounts={pbCounts} exerciseCounts={exerciseCounts} lastSets={lastWorkoutSets} lastMultiplier={lastMultiplier} />
         </div>
 
 
