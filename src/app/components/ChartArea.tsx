@@ -178,6 +178,51 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
                     </g>
                   );
                 })}
+                {/* Moving average line chart for exercise mode */}
+                {(() => {
+                  let linePath = '';
+                  if (data.length > 1) {
+                    // Calculate moving average (3-point)
+                    const maValues = data.map((_, i) => {
+                      const start = Math.max(0, i - 1);
+                      const end = Math.min(data.length - 1, i + 1);
+                      const sum = data.slice(start, end + 1).reduce((s, dd) => s + dd.value, 0);
+                      const count = end - start + 1;
+                      return sum / count;
+                    });
+                    // Calculate points based on MA
+                    const points = maValues.map((ma, i) => {
+                      const barHeight = Math.max(4, ((ma - yMin) / Math.max(yMax - yMin, 1)) * plotHeight);
+                      const y = paddingY + plotHeight - barHeight;
+                      const y_line = y + barHeight * 0.05;
+                      let x;
+                      if (i === 0) {
+                        x = paddingX; // left edge of first bar
+                      } else if (i === maValues.length - 1) {
+                        x = paddingX + i * (barWidth + barSpacing) + barWidth; // right edge of last bar
+                      } else {
+                        x = paddingX + i * (barWidth + barSpacing) + barWidth / 2; // center for middle
+                      }
+                      return { x, y: y_line };
+                    });
+                    // Build smooth path using cubic Bezier
+                    for (let i = 0; i < points.length - 1; i++) {
+                      const p0 = i > 0 ? points[i - 1] : points[i];
+                      const p1 = points[i];
+                      const p2 = points[i + 1];
+                      const p3 = i < points.length - 2 ? points[i + 2] : points[i + 1];
+                      const cp1x = p1.x + (p2.x - p0.x) / 6;
+                      const cp1y = p1.y + (p2.y - p0.y) / 6;
+                      const cp2x = p2.x - (p3.x - p1.x) / 6;
+                      const cp2y = p2.y - (p3.y - p1.y) / 6;
+                      if (i === 0) {
+                        linePath = `M ${p1.x} ${p1.y}`;
+                      }
+                      linePath += ` C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${p2.x} ${p2.y}`;
+                    }
+                  }
+                  return data.length > 1 ? <path d={linePath} stroke="rgba(220,220,220,0.4)" strokeWidth="3" fill="none" /> : null;
+                })()}
               </svg>
             ) : (
               // Aggregate chart (bar chart)
