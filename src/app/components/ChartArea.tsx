@@ -28,7 +28,10 @@ interface ChartAreaProps {
 
 export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, sessionCount, metricLabel, selectedExercise, category, pbCounts = {}, exerciseCounts = {}, lastSets = [], lastMultiplier = 1 }) => {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
-  const displayTotal = total.toLocaleString();
+  const isMillions = mode === 'aggregate' && total >= 1_000_000;
+  const displayTotal = isMillions
+    ? (total / 1_000_000).toFixed(3)
+    : total.toLocaleString();
 
   // SVG chart dimensions
   const chartHeight = 220;
@@ -121,9 +124,15 @@ export const ChartArea: React.FC<ChartAreaProps> = ({ mode, data, total, session
           </div>
         </div>
         <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-          <div style={{ fontSize: '14px', fontWeight: 500, letterSpacing: '0.15em', color: '#999', textTransform: 'uppercase' }}>
-            {metricLabel}
-          </div>
+          {isMillions ? (
+            <div style={{ fontSize: '14px', fontWeight: 500, letterSpacing: '0.15em', color: '#999', textTransform: 'uppercase' }}>
+              Million {metricLabel}
+            </div>
+          ) : (
+            <div style={{ fontSize: '14px', fontWeight: 500, letterSpacing: '0.15em', color: '#999', textTransform: 'uppercase' }}>
+              {metricLabel}
+            </div>
+          )}
           <div style={{
             width: '26px', height: '26px', borderRadius: '50%',
             backgroundColor: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center',
