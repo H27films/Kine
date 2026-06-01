@@ -27,8 +27,7 @@ interface WorkoutsDataProps {
 const MONTH_NAMES = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
 const FOOD_EXERCISE_ID = 89;
 const CALORIES_EXERCISE_ID = 90;
-
-const EXCLUDE_EXERCISE_ID = 82;
+const TRACKER_EXERCISE_ID = 82;
 
 const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
   const [rows, setRows] = useState<WorkoutRow[]>([]);
@@ -65,7 +64,6 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
           exercises:exercise_id(exercise_name)
         `)
         .in('type', ['CARDIO', 'MEASUREMENT'])
-        .not('exercise_id', 'eq', EXCLUDE_EXERCISE_ID)
         .gte('date', minDate)
         .order('date', { ascending: false })
         .order('id', { ascending: false })
@@ -89,11 +87,19 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
           total_weight: r.total_weight,
           new_entry: r.new_entry,
         }));
-        // Within same date, CARDIO before MEASUREMENT
+        // Within same date: CARDIO → MEASUREMENT → FOOD → CALORIES → TRACKER
         mapped.sort((a, b) => {
           if (a.date !== b.date) return b.date.localeCompare(a.date);
-          if (a.type === 'CARDIO' && b.type !== 'CARDIO') return -1;
-          if (a.type !== 'CARDIO' && b.type === 'CARDIO') return 1;
+          const order = (r: typeof a) => {
+            if (r.type === 'CARDIO') return 0;
+            if (r.exercise_id === FOOD_EXERCISE_ID) return 1;
+            if (r.exercise_id === CALORIES_EXERCISE_ID) return 2;
+            if (r.exercise_id === TRACKER_EXERCISE_ID) return 3;
+            return 0.5; // other MEASUREMENTs between CARDIO and FOOD
+          };
+          const oa = order(a);
+          const ob = order(b);
+          if (oa !== ob) return oa - ob;
           return b.id - a.id;
         });
         setRows(mapped);
@@ -200,7 +206,6 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
           exercises:exercise_id(exercise_name)
         `)
         .in('type', ['CARDIO', 'MEASUREMENT'])
-        .not('exercise_id', 'eq', EXCLUDE_EXERCISE_ID)
         .gte('date', minDate)
         .order('date', { ascending: false })
         .order('id', { ascending: false })
@@ -226,8 +231,16 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
         }));
         mapped.sort((a, b) => {
           if (a.date !== b.date) return b.date.localeCompare(a.date);
-          if (a.type === 'CARDIO' && b.type !== 'CARDIO') return -1;
-          if (a.type !== 'CARDIO' && b.type === 'CARDIO') return 1;
+          const order = (r: typeof a) => {
+            if (r.type === 'CARDIO') return 0;
+            if (r.exercise_id === FOOD_EXERCISE_ID) return 1;
+            if (r.exercise_id === CALORIES_EXERCISE_ID) return 2;
+            if (r.exercise_id === TRACKER_EXERCISE_ID) return 3;
+            return 0.5;
+          };
+          const oa = order(a);
+          const ob = order(b);
+          if (oa !== ob) return oa - ob;
           return b.id - a.id;
         });
         setRows(mapped);
