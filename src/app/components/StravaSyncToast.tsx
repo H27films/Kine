@@ -79,15 +79,20 @@ const StravaSyncToast: React.FC<StravaSyncToastProps> = () => {
               ? +(rawCalories / 50).toFixed(2)
               : rawDistance;
 
+            // Convert Strava's UTC start_date to Malaysia local time (UTC+8)
+            const activityLocalTime = new Date(a.start_date)
+              .toLocaleString('sv-SE', { timeZone: 'Asia/Kuala_Lumpur' })
+              .replace(' ', 'T');
             const { error } = await supabase.from('strava').insert({
               activity_id: a.id,
-              date: a.start_date.split('T')[0],
+              date: activityLocalTime.split('T')[0],
               type: a.type,
               distance_km: distanceKm,
               name: a.name,
               duration_seconds: a.moving_time,
               time_formatted: new Date(a.moving_time * 1000).toISOString().substr(11, 8),
               workout_calories: rawCalories,
+              created_at: activityLocalTime,
             });
             if (!error) inserted++;
           }

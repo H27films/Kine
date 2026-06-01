@@ -97,17 +97,20 @@ const Strava: React.FC = () => {
             ? +(rawCalories / 50).toFixed(2)
             : rawDistance;
 
-          // Convert Strava's UTC timestamp to local date (Malaysia UTC+8)
-          const localDate = new Date(a.start_date).toLocaleDateString('en-CA', { timeZone: 'Asia/Kuala_Lumpur' });
+          // Convert Strava's UTC start_date to Malaysia local time (UTC+8)
+          const activityLocalTime = new Date(a.start_date)
+            .toLocaleString('sv-SE', { timeZone: 'Asia/Kuala_Lumpur' })
+            .replace(' ', 'T');
           const { error } = await supabase.from('strava').insert({
             activity_id: a.id,
-            date: localDate,
+            date: activityLocalTime.split('T')[0],
             type: a.type,
             distance_km: distanceKm,
             name: a.name,
             duration_seconds: a.moving_time,
             time_formatted: new Date(a.moving_time * 1000).toISOString().substr(11, 8),
             workout_calories: rawCalories,
+            created_at: activityLocalTime,
           });
           if (error) console.error('Insert error:', error);
           else inserted++;
