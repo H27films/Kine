@@ -9,6 +9,7 @@ interface WeeklyGroupData {
   group: string;
   total: number;
   lastWeek: number;
+  count: number;
 }
 
 const sectionLabelStyle: React.CSSProperties = {
@@ -37,13 +38,17 @@ const WeeklyVolumeSection: React.FC = () => {
       supabase.from('workouts').select('type, total_weight').in('type', WEIGHT_TYPES).eq('week', prevWeek),
     ]);
 
+    const rowsForType = (rows: any[] | null, type: string) =>
+      (rows || []).filter(r => r.type === type);
+
     const sumByType = (rows: any[] | null, type: string) =>
-      (rows || []).filter(r => r.type === type).reduce((s, r) => s + Number(r.total_weight || 0), 0);
+      rowsForType(rows, type).reduce((s, r) => s + Number(r.total_weight || 0), 0);
 
     const groups = ['CHEST', 'BACK', 'LEGS'].map(t => ({
       group: t.charAt(0) + t.slice(1).toLowerCase(),
       total: sumByType(thisWeek, t),
       lastWeek: sumByType(lastWeekData, t),
+      count: rowsForType(thisWeek, t).length,
     }));
     setWeeklyData(groups);
   };
@@ -121,7 +126,7 @@ const WeeklyVolumeSection: React.FC = () => {
         </button>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-        {weeklyData.map(({ group, total, lastWeek }) => {
+        {weeklyData.map(({ group, total, lastWeek, count }) => {
           const pct = Math.min((total / WEEKLY_MAX) * 100, 100);
           return (
             <div key={group}>
@@ -137,12 +142,83 @@ const WeeklyVolumeSection: React.FC = () => {
                   <span style={{ color: 'rgba(26,26,26,0.45)', fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: "'Archivo', sans-serif" }}>kg</span>
                 </div>
               </div>
-              <div style={{ height: '44px', width: '100%', backgroundColor: 'rgba(26,26,26,0.1)', borderRadius: '999px', overflow: 'hidden', padding: '5px' }}>
+              <div style={{ height: '44px', width: '100%', backgroundColor: 'rgba(26,26,26,0.1)', borderRadius: '999px', overflow: 'hidden', padding: '5px', position: 'relative' }}>
                 <div style={{ height: '100%', width: `${pct}%`, background: '#1a1a1a', borderRadius: '999px', boxShadow: '0 8px 24px rgba(0,0,0,0.12)', transition: 'width 0.6s cubic-bezier(0.4,0,0.2,1)' }} />
+                {count > 0 && (
+                  <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    bottom: 0,
+                    left: '6px',
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: '50%',
+                    backgroundColor: '#1a1a1a',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    color: '#ffffff',
+                    lineHeight: 1,
+                    fontFamily: "'Archivo', sans-serif",
+                    margin: 'auto',
+                  }}>
+                    {count}
+                  </div>
+                )}
               </div>
             </div>
           );
         })}
+        {/* TOTAL bar */}
+        {weeklyData.length > 0 && (() => {
+          const grandTotal = weeklyData.reduce((sum, d) => sum + d.total, 0);
+          const totalCount = weeklyData.reduce((sum, d) => sum + d.count, 0);
+          const pct = Math.min((grandTotal / (WEEKLY_MAX * 3)) * 100, 100);
+          return (
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '0.6rem', paddingLeft: '2px', paddingRight: '2px' }}>
+                <div>
+                  <span style={{ color: '#1a1a1a', fontWeight: 700, fontSize: '1rem', letterSpacing: '0.05em', display: 'block', fontFamily: "'Archivo', sans-serif", textTransform: 'uppercase' }}>Total</span>
+                  <span style={{ color: 'rgba(26,26,26,0.75)', fontSize: '12px', fontWeight: 400, marginTop: '1px', display: 'block', fontFamily: "'Archivo', sans-serif" }}>
+                    {weekIdx === 0 ? 'Last week' : 'Previous'}: {Math.round(weeklyData.reduce((s, d) => s + d.lastWeek, 0)).toLocaleString()}kg
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
+                  <span style={{ color: '#1a1a1a', fontWeight: 900, fontSize: '1.4rem', letterSpacing: '-0.02em', lineHeight: 1, fontFamily: "'Archivo', sans-serif" }}>{Math.round(grandTotal).toLocaleString()}</span>
+                  <span style={{ color: 'rgba(26,26,26,0.45)', fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: "'Archivo', sans-serif" }}>kg</span>
+                </div>
+              </div>
+              <div style={{ height: '44px', width: '100%', backgroundColor: 'rgba(26,26,26,0.1)', borderRadius: '999px', overflow: 'hidden', padding: '5px', position: 'relative' }}>
+                <div style={{ height: '100%', width: `${pct}%`, background: '#1a1a1a', borderRadius: '999px', boxShadow: '0 8px 24px rgba(0,0,0,0.12)', transition: 'width 0.6s cubic-bezier(0.4,0,0.2,1)' }} />
+                {totalCount > 0 && (
+                  <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    bottom: 0,
+                    left: '6px',
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: '50%',
+                    backgroundColor: '#1a1a1a',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    color: '#ffffff',
+                    lineHeight: 1,
+                    fontFamily: "'Archivo', sans-serif",
+                    margin: 'auto',
+                  }}>
+                    {totalCount}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })()}
       </div>
     </section>
   );
