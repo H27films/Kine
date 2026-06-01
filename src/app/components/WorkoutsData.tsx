@@ -42,6 +42,8 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
   const [savingIds, setSavingIds] = useState<Set<number>>(new Set());
   const [weekFilter, setWeekFilter] = useState<number | null>(null);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [typeFilter, setTypeFilter] = useState<string | null>(null);
+  const [typeFilterOpen, setTypeFilterOpen] = useState(false);
 
   // Calculate date 5 weeks ago for filtering
   const fiveWeeksAgo = (): string => {
@@ -350,7 +352,7 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
               display: 'flex', alignItems: 'center', gap: '5px',
             }}
           >
-            {weekFilter !== null ? `W${weekFilter}` : 'FILTER'}
+            {weekFilter !== null ? `W${weekFilter}` : 'WEEK'}
             <span style={{ fontSize: '8px', opacity: 0.7 }}>{filterOpen ? '▲' : '▼'}</span>
           </button>
           {filterOpen && (() => {
@@ -403,6 +405,67 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
             );
           })()}
         </div>
+        {/* Type filter pill */}
+        <div style={{ position: 'relative' }} onClick={e => e.stopPropagation()}>
+          <button
+            onClick={() => { setTypeFilterOpen(o => !o); setFilterOpen(false); }}
+            style={{
+              padding: '6px 14px', borderRadius: '999px',
+              backgroundColor: typeFilter !== null ? '#1a1a1a' : 'rgba(0,0,0,0.06)',
+              color: typeFilter !== null ? '#f2f2f2' : '#1a1a1a',
+              border: 'none', cursor: 'pointer',
+              fontSize: '9px', fontWeight: 700, letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              fontFamily: "'JetBrains Mono', monospace",
+              display: 'flex', alignItems: 'center', gap: '5px',
+            }}
+          >
+            {typeFilter || 'FILTER'}
+            <span style={{ fontSize: '8px', opacity: 0.7 }}>{typeFilterOpen ? '▲' : '▼'}</span>
+          </button>
+          {typeFilterOpen && (
+            <div style={{
+              position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 100,
+              backgroundColor: '#f2f2f2', borderRadius: '12px',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+              border: '1px solid rgba(0,0,0,0.08)',
+              overflow: 'hidden', minWidth: '120px',
+            }}>
+              <div
+                onClick={() => { setTypeFilter(null); setTypeFilterOpen(false); }}
+                style={{
+                  padding: '10px 14px', cursor: 'pointer',
+                  fontSize: '11px', fontWeight: 700,
+                  letterSpacing: '0.08em', textTransform: 'uppercase',
+                  color: typeFilter === null ? '#FC4C02' : '#1a1a1a',
+                  backgroundColor: typeFilter === null ? 'rgba(0,0,0,0.04)' : 'transparent',
+                  borderBottom: '1px solid rgba(0,0,0,0.06)',
+                  fontFamily: "'JetBrains Mono', monospace",
+                }}
+              >
+                ALL TYPES
+              </div>
+              {['CARDIO', 'FOOD', 'CALORIES'].map((opt, i, arr) => (
+                <div
+                  key={opt}
+                  onClick={() => { setTypeFilter(opt); setTypeFilterOpen(false); }}
+                  style={{
+                    padding: '10px 14px', cursor: 'pointer',
+                    fontSize: '11px', fontWeight: 700,
+                    letterSpacing: '0.08em', textTransform: 'uppercase',
+                    color: typeFilter === opt ? '#FC4C02' : '#1a1a1a',
+                    backgroundColor: typeFilter === opt ? 'rgba(0,0,0,0.04)' : 'transparent',
+                    borderBottom: i < arr.length - 1 ? '1px solid rgba(0,0,0,0.06)' : 'none',
+                    fontFamily: "'JetBrains Mono', monospace",
+                  }}
+                >
+                  {opt}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         {!selectMode && weekFilter !== null && (
           <div style={{ marginLeft: 'auto' }} />
         )}
@@ -420,12 +483,19 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
           </div>
         ) : (
           (() => {
-            const filteredRows = weekFilter !== null
+            let filteredRows = weekFilter !== null
               ? rows.filter(r => {
                   const d = new Date(r.date + 'T00:00:00');
                   return getISOWeek(d) === weekFilter;
                 })
               : rows;
+            if (typeFilter === 'CARDIO') {
+              filteredRows = filteredRows.filter(r => r.type === 'CARDIO');
+            } else if (typeFilter === 'FOOD') {
+              filteredRows = filteredRows.filter(r => r.exercise_id === FOOD_EXERCISE_ID);
+            } else if (typeFilter === 'CALORIES') {
+              filteredRows = filteredRows.filter(r => r.exercise_id === CALORIES_EXERCISE_ID);
+            }
             const grouped: { date: string; rows: WorkoutRow[] }[] = [];
             filteredRows.forEach(r => {
               const last = grouped[grouped.length - 1];

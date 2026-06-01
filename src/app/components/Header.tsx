@@ -42,7 +42,7 @@ const DumbbellIcon = ({ size = 16 }: { size?: number }) => (
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type IconComponent = React.ComponentType<any>;
 
-export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNavigate, onToggleWeeklySummary, onToggleQuickLog, showQuickLog, showQuickLogVoice, trackerMultiplier, onToggleQuickLogVoice }) => {
+export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNavigate, onToggleWeeklySummary, onToggleQuickLog, showQuickLogVoice, trackerMultiplier, onToggleQuickLogVoice }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [score, setScore] = useState<number>(0);
   const menuRef = useRef<HTMLDivElement>(null);
