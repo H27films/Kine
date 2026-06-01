@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, ArrowLeft, BarChart3 } from 'lucide-react';
+import { Menu, ArrowLeft, BarChart3, Mic } from 'lucide-react';
 import { Page } from '../../types';
 import { RunningManIcon as NewRunningManIcon, CaloriesIcon as NewCaloriesIcon, ProfileIcon as NewProfileIcon } from './NavIcons';
 import { supabase } from '../../lib/supabase';
@@ -144,7 +144,7 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
                 style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}
               >
                 <span style={{ color: 'rgba(26,26,26,0.45)', display: 'flex', alignItems: 'center' }}>
-                  <img src="/icons/quicklog.svg" style={{ width: 16, height: 16, opacity: 1 }} alt="voice" />
+                  <Mic size={16} color="#1a1a1a" />
                 </span>
                 <span className="text-sm font-semibold" style={{ color: '#1a1a1a' }}>
                   {showQuickLogVoice ? 'Voice ✓' : 'Voice'}
