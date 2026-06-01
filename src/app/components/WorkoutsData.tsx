@@ -87,14 +87,14 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
           total_weight: r.total_weight,
           new_entry: r.new_entry,
         }));
-        // Within same date: CARDIO → MEASUREMENT → FOOD → CALORIES → TRACKER
+        // Within same date: CARDIO (except TRACKER) → MEASUREMENT → FOOD → CALORIES → TRACKER
         mapped.sort((a, b) => {
           if (a.date !== b.date) return b.date.localeCompare(a.date);
           const order = (r: typeof a) => {
+            if (r.exercise_id === TRACKER_EXERCISE_ID) return 4;
             if (r.type === 'CARDIO') return 0;
             if (r.exercise_id === FOOD_EXERCISE_ID) return 1;
             if (r.exercise_id === CALORIES_EXERCISE_ID) return 2;
-            if (r.exercise_id === TRACKER_EXERCISE_ID) return 3;
             return 0.5; // other MEASUREMENTs between CARDIO and FOOD
           };
           const oa = order(a);
@@ -232,10 +232,10 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
         mapped.sort((a, b) => {
           if (a.date !== b.date) return b.date.localeCompare(a.date);
           const order = (r: typeof a) => {
+            if (r.exercise_id === TRACKER_EXERCISE_ID) return 4;
             if (r.type === 'CARDIO') return 0;
             if (r.exercise_id === FOOD_EXERCISE_ID) return 1;
             if (r.exercise_id === CALORIES_EXERCISE_ID) return 2;
-            if (r.exercise_id === TRACKER_EXERCISE_ID) return 3;
             return 0.5;
           };
           const oa = order(a);
@@ -567,8 +567,10 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
                     const showDeleteConfirm = deletingConfirmId === row.id;
                     const primary = getPrimaryValue(row);
                     const isMeasurement = row.type === 'MEASUREMENT';
+                    const isTrackerRow = row.exercise_id === TRACKER_EXERCISE_ID;
                     const isCaloriesRow = row.exercise_id === CALORIES_EXERCISE_ID;
                     const isFoodRow = row.exercise_id === FOOD_EXERCISE_ID;
+                    const isHighlighted = isMeasurement || isTrackerRow;
 
                     return (
                       <React.Fragment key={row.id}>
@@ -581,7 +583,7 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
                             display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
                           padding: '12px 20px',
                           margin: '0 -20px',
-                          backgroundColor: isMeasurement ? 'rgba(0,0,0,0.03)' : 'transparent',
+                          backgroundColor: isHighlighted ? 'rgba(0,0,0,0.03)' : 'transparent',
                           borderBottom: isEditing
                             ? 'none'
                             : isLastInGroup && isWeekBoundary
