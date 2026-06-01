@@ -137,17 +137,17 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
             >
               <button
                 onClick={() => {
-                  onToggleQuickLog?.();
+                  onToggleQuickLogVoice?.();
                   setMenuOpen(false);
                 }}
                 className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-black/5 transition-colors"
                 style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}
               >
                 <span style={{ color: 'rgba(26,26,26,0.45)', display: 'flex', alignItems: 'center' }}>
-                  <img src="/icons/quicklog.svg" style={{ width: 16, height: 16, opacity: 1 }} alt="quick log" />
+                  <img src="/icons/quicklog.svg" style={{ width: 16, height: 16, opacity: 1 }} alt="voice" />
                 </span>
                 <span className="text-sm font-semibold" style={{ color: '#1a1a1a' }}>
-                  {showQuickLog ? 'Quick Log ✓' : 'Quick Log'}
+                  {showQuickLogVoice ? 'Voice ✓' : 'Voice'}
                 </span>
               </button>
               {menuItems.map((item, index) => (
@@ -186,7 +186,8 @@ export const Header: React.FC<HeaderProps> = ({ title, currentPage, onBack, onNa
             </div>
             <div className="flex items-center justify-end" style={{ width: 48 }}>
               <button
-                onClick={onToggleQuickLogVoice}
+                onClick={onToggleQuickLog}
+                onMouseDown={(e) => e.stopPropagation()}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, WebkitTapHighlightColor: 'transparent', display: 'flex', alignItems: 'center', gap: '8px' }}
               >
                 <div style={{
