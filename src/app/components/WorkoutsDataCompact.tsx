@@ -206,13 +206,13 @@ const WorkoutsDataCompact: React.FC<WorkoutsDataCompactProps> = ({ onOpenWorkout
     return null;
   };
 
-  // Group by date for separator between dates
+  // Group by date — only keep the 2 most recent dates
   const grouped: { date: string; rows: WorkoutRow[] }[] = [];
   rows.forEach(r => {
     const last = grouped[grouped.length - 1];
     if (last && last.date === r.date) {
       last.rows.push(r);
-    } else {
+    } else if (grouped.length < 2) {
       grouped.push({ date: r.date, rows: [r] });
     }
   });
