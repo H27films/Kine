@@ -631,7 +631,12 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
                               }}>
                                 {row.exercise_name}
                               </span>
-                              {row.new_entry === 'New' && (
+                              {row.new_entry === 'New' && (() => {
+                                const today = new Date();
+                                const d = new Date(row.date + 'T00:00:00');
+                                const diff = Math.floor((today.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
+                                return diff >= 0 && diff <= 1;
+                              })() && (
                                 <span style={{
                                   fontSize: '8px', fontWeight: 700, letterSpacing: '0.1em',
                                   color: '#f2f2f2', backgroundColor: '#1a1a1a',
