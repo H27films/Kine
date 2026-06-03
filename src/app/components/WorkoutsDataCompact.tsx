@@ -275,7 +275,7 @@ const WorkoutsDataCompact: React.FC<WorkoutsDataCompactProps> = ({ onOpenWorkout
       </div>
 
       {/* Data rows */}
-      <div className="space-y-3" style={{ fontFamily: "'Archivo', sans-serif" }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontFamily: "'Archivo', sans-serif" }}>
         {loading ? (
           <div style={{ fontSize: '0.8rem', color: 'rgba(26,26,26,0.35)', fontFamily: "'Archivo', sans-serif" }}>
             Loading...
