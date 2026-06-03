@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Database } from 'lucide-react';
 import { supabase, getISOWeek } from '../../lib/supabase';
 
 interface WorkoutRow {
@@ -254,16 +255,19 @@ const WorkoutsDataCompact: React.FC<WorkoutsDataCompactProps> = ({ onOpenWorkout
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
-          <span style={{
-            fontSize: '1.1rem',
-            fontWeight: 700,
-            letterSpacing: '0.15em',
-            textTransform: 'uppercase',
-            color: '#1a1a1a',
-            fontFamily: "'Archivo', sans-serif",
-          }}>
-            Workouts Data
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Database size={20} color="#1a1a1a" />
+            <span style={{
+              fontSize: '1.1rem',
+              fontWeight: 550,
+              letterSpacing: '0em',
+              textTransform: 'uppercase',
+              color: '#1a1a1a',
+              fontFamily: "'Archivo', sans-serif",
+            }}>
+              Workouts Data
+            </span>
+          </div>
           <svg width="22" height="12" viewBox="0 0 40 12" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M0 6H34M34 6L25 1M34 6L25 11" stroke="#1a1a1a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
