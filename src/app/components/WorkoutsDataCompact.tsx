@@ -227,8 +227,8 @@ const WorkoutsDataCompact: React.FC<WorkoutsDataCompactProps> = ({ onOpenWorkout
   };
 
   const valueStyle: React.CSSProperties = {
-    fontWeight: 800,
-    fontSize: '0.95rem',
+    fontWeight: 650,
+    fontSize: '0.85rem',
     color: '#1a1a1a',
     letterSpacing: '-0.02em',
     lineHeight: 1,
@@ -238,7 +238,7 @@ const WorkoutsDataCompact: React.FC<WorkoutsDataCompactProps> = ({ onOpenWorkout
   const labelStyle: React.CSSProperties = {
     color: 'rgba(26,26,26,0.6)',
     fontWeight: 500,
-    fontSize: '0.6rem',
+    fontSize: '0.55rem',
     letterSpacing: '0.08em',
     textTransform: 'uppercase',
     fontFamily: "'Archivo', sans-serif",
@@ -271,7 +271,7 @@ const WorkoutsDataCompact: React.FC<WorkoutsDataCompactProps> = ({ onOpenWorkout
       </div>
 
       {/* Data rows */}
-      <div className="space-y-2" style={{ fontFamily: "'Archivo', sans-serif" }}>
+      <div className="space-y-3" style={{ fontFamily: "'Archivo', sans-serif" }}>
         {loading ? (
           <div style={{ fontSize: '0.8rem', color: 'rgba(26,26,26,0.35)', fontFamily: "'Archivo', sans-serif" }}>
             Loading...
@@ -296,8 +296,8 @@ const WorkoutsDataCompact: React.FC<WorkoutsDataCompactProps> = ({ onOpenWorkout
               }}>
                 <span style={{
                   fontSize: '0.85rem',
-                  fontWeight: 700,
-                  letterSpacing: '0.08em',
+                  fontWeight: 550,
+                  letterSpacing: '0.06em',
                   color: '#1a1a1a',
                   textTransform: 'uppercase',
                   fontFamily: "'Archivo', sans-serif",
@@ -331,7 +331,7 @@ const WorkoutsDataCompact: React.FC<WorkoutsDataCompactProps> = ({ onOpenWorkout
                       borderRadius: '10px',
                       background: (row.exercise_id === FOOD_EXERCISE_ID || row.exercise_id === CALORIES_EXERCISE_ID || row.exercise_id === TRACKER_EXERCISE_ID) ? 'linear-gradient(135deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.12) 100%)' : 'rgba(0,0,0,0.05)',
                       boxShadow: '0 3px 10px rgba(0,0,0,0.08)',
-                      padding: '10px 14px',
+                      padding: '7px 12px',
                       cursor: 'pointer',
                       fontFamily: "'Archivo', sans-serif",
                     }}
@@ -340,7 +340,7 @@ const WorkoutsDataCompact: React.FC<WorkoutsDataCompactProps> = ({ onOpenWorkout
                       display: 'flex', alignItems: 'center', gap: '12px',
                     }}>
                       <div style={{
-                        width: '34px', height: '34px', borderRadius: '50%',
+                        width: '30px', height: '30px', borderRadius: '50%',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                         backgroundColor: 'rgba(0,0,0,0.04)',
                       }}>
@@ -355,7 +355,7 @@ const WorkoutsDataCompact: React.FC<WorkoutsDataCompactProps> = ({ onOpenWorkout
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <p style={{
-                          fontWeight: 600, fontSize: '13px', color: '#1a1a1a',
+                          fontWeight: 600, fontSize: '12px', color: '#1a1a1a',
                           textTransform: 'uppercase', letterSpacing: '0.05em',
                           fontFamily: "'Archivo', sans-serif",
                         }}>
