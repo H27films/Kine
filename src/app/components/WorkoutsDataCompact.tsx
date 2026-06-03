@@ -287,15 +287,10 @@ const WorkoutsDataCompact: React.FC<WorkoutsDataCompactProps> = ({ onOpenWorkout
         ) : (
           grouped.map((group, groupIdx) => (
             <React.Fragment key={group.date}>
-              {/* Separator line between date groups */}
-              {groupIdx > 0 && (
-                <div style={{ height: '16px', display: 'flex', alignItems: 'flex-end' }}>
-                  <div style={{ width: '100%', height: '1px', backgroundColor: '#1a1a1a', opacity: 0.8 }} />
-                </div>
-              )}
               {/* Date header above each date group */}
               <div style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                paddingTop: groupIdx > 0 ? '16px' : '0',
                 paddingBottom: '10px',
               }}>
                 <span style={{
@@ -324,9 +319,10 @@ const WorkoutsDataCompact: React.FC<WorkoutsDataCompactProps> = ({ onOpenWorkout
                   W{getISOWeek(new Date(group.date + 'T00:00:00'))}
                 </span>
               </div>
-              {group.rows.map(row => {
+              {group.rows.map((row, rowIdx) => {
                 const primary = getPrimaryValue(row);
                 const icon = getIcon(row.exercise_id);
+                const isLastInGroup = rowIdx === group.rows.length - 1;
                 return (
                   <div style={{ position: 'relative' }}>
                     {/* Full-width background */}
@@ -344,7 +340,7 @@ const WorkoutsDataCompact: React.FC<WorkoutsDataCompactProps> = ({ onOpenWorkout
                       bottom: 0, left: '50%', transform: 'translateX(-50%)',
                       width: '100vw',
                       height: '1px',
-                      backgroundColor: 'rgba(0,0,0,0.08)',
+                      backgroundColor: isLastInGroup ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.08)',
                       zIndex: 0,
                     }} />
                     <div
