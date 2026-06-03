@@ -22,11 +22,11 @@ export default async function handler(req: any, res: any) {
       
       if (data.access_token) {
         // Redirect back to app with token info in URL fragment
-        res.redirect(`https://kine-v2.vercel.app/?strava_token=${data.access_token}&strava_refresh=${data.refresh_token}&strava_expires=${data.expires_at}`);
+        res.redirect(`https://kine-mu.vercel.app/?strava_token=${data.access_token}&strava_refresh=${data.refresh_token}&strava_expires=${data.expires_at}`);
       } else {
-        res.redirect('https://kine-v2.vercel.app/?strava_error=auth_failed');
+        res.redirect('https://kine-mu.vercel.app/?strava_error=auth_failed');
       }
     } catch (e) {
-      res.redirect('https://kine-v2.vercel.app/?strava_error=server_error');
+      res.redirect('https://kine-mu.vercel.app/?strava_error=server_error');
     }
   }
