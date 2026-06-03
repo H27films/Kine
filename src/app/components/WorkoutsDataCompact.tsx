@@ -329,7 +329,7 @@ const WorkoutsDataCompact: React.FC<WorkoutsDataCompactProps> = ({ onOpenWorkout
                     onClick={onOpenWorkoutsData}
                     style={{
                       borderRadius: '10px',
-                      backgroundColor: 'rgba(0,0,0,0.05)',
+                      background: (row.exercise_id === FOOD_EXERCISE_ID || row.exercise_id === CALORIES_EXERCISE_ID || row.exercise_id === TRACKER_EXERCISE_ID) ? 'linear-gradient(135deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.12) 100%)' : 'rgba(0,0,0,0.05)',
                       boxShadow: '0 3px 10px rgba(0,0,0,0.08)',
                       padding: '10px 14px',
                       cursor: 'pointer',
