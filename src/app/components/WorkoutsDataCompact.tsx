@@ -275,7 +275,7 @@ const WorkoutsDataCompact: React.FC<WorkoutsDataCompactProps> = ({ onOpenWorkout
       </div>
 
       {/* Data rows */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontFamily: "'Archivo', sans-serif" }}>
+      <div style={{ display: 'flex', flexDirection: 'column', fontFamily: "'Archivo', sans-serif" }}>
         {loading ? (
           <div style={{ fontSize: '0.8rem', color: 'rgba(26,26,26,0.35)', fontFamily: "'Archivo', sans-serif" }}>
             Loading...
@@ -328,59 +328,78 @@ const WorkoutsDataCompact: React.FC<WorkoutsDataCompactProps> = ({ onOpenWorkout
                 const primary = getPrimaryValue(row);
                 const icon = getIcon(row.exercise_id);
                 return (
-                  <div
-                    key={row.id}
-                    onClick={onOpenWorkoutsData}
-                    style={{
-                      borderRadius: '10px',
-                      background: (row.exercise_id === FOOD_EXERCISE_ID || row.exercise_id === CALORIES_EXERCISE_ID || row.exercise_id === TRACKER_EXERCISE_ID) ? 'linear-gradient(135deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.12) 100%)' : 'rgba(0,0,0,0.05)',
-                      boxShadow: '0 3px 10px rgba(0,0,0,0.08)',
-                      padding: '7px 12px',
-                      cursor: 'pointer',
-                      fontFamily: "'Archivo', sans-serif",
-                    }}
-                  >
+                  <div style={{ position: 'relative' }}>
+                    {/* Full-width background */}
                     <div style={{
-                      display: 'flex', alignItems: 'center', gap: '12px',
-                    }}>
+                      position: 'absolute',
+                      top: 0, left: '50%', transform: 'translateX(-50%)',
+                      width: '100vw',
+                      height: '100%',
+                      backgroundColor: (row.exercise_id === FOOD_EXERCISE_ID || row.exercise_id === CALORIES_EXERCISE_ID || row.exercise_id === TRACKER_EXERCISE_ID) ? 'rgba(0,0,0,0.04)' : 'transparent',
+                      zIndex: 0,
+                    }} />
+                    {/* Full-width separator line */}
+                    <div style={{
+                      position: 'absolute',
+                      bottom: 0, left: '50%', transform: 'translateX(-50%)',
+                      width: '100vw',
+                      height: '1px',
+                      backgroundColor: 'rgba(0,0,0,0.08)',
+                      zIndex: 0,
+                    }} />
+                    <div
+                      key={row.id}
+                      onClick={onOpenWorkoutsData}
+                      style={{
+                        position: 'relative',
+                        padding: '12px 0',
+                        cursor: 'pointer',
+                        fontFamily: "'Archivo', sans-serif",
+                        zIndex: 1,
+                      }}
+                    >
                       <div style={{
-                        width: '30px', height: '30px', borderRadius: '50%',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                        backgroundColor: 'rgba(0,0,0,0.04)',
+                        display: 'flex', alignItems: 'center', gap: '12px',
                       }}>
-                        {icon || (
-                          <span style={{
-                            fontSize: '0.6rem', fontWeight: 800, color: '#1a1a1a',
-                            fontFamily: "'Archivo', sans-serif",
-                          }}>
-                            {row.exercise_name.charAt(0).toUpperCase()}
-                          </span>
-                        )}
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{
-                          fontWeight: 600, fontSize: '12px', color: '#1a1a1a',
-                          textTransform: 'uppercase', letterSpacing: '0.05em',
-                          fontFamily: "'Archivo', sans-serif",
+                        <div style={{
+                          width: '30px', height: '30px', borderRadius: '50%',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                          backgroundColor: 'rgba(0,0,0,0.04)',
                         }}>
-                          {row.exercise_name}
-                        </p>
-                        {row.time && (
+                          {icon || (
+                            <span style={{
+                              fontSize: '0.6rem', fontWeight: 800, color: '#1a1a1a',
+                              fontFamily: "'Archivo', sans-serif",
+                            }}>
+                              {row.exercise_name.charAt(0).toUpperCase()}
+                            </span>
+                          )}
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
                           <p style={{
-                            fontSize: '9px', fontWeight: 500, letterSpacing: '0.08em',
-                            color: 'rgba(26,26,26,0.6)', marginTop: '1px',
+                            fontWeight: 600, fontSize: '12px', color: '#1a1a1a',
+                            textTransform: 'uppercase', letterSpacing: '0.05em',
                             fontFamily: "'Archivo', sans-serif",
                           }}>
-                            {formatTime(row.time)}
+                            {row.exercise_name}
                           </p>
+                          {row.time && (
+                            <p style={{
+                              fontSize: '9px', fontWeight: 500, letterSpacing: '0.08em',
+                              color: 'rgba(26,26,26,0.6)', marginTop: '1px',
+                              fontFamily: "'Archivo', sans-serif",
+                            }}>
+                              {formatTime(row.time)}
+                            </p>
+                          )}
+                        </div>
+                        {primary && (
+                          <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px', flexShrink: 0 }}>
+                            <span style={valueStyle}>{primary.value}</span>
+                            {primary.label && <span style={labelStyle}>{primary.label}</span>}
+                          </div>
                         )}
                       </div>
-                      {primary && (
-                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px', flexShrink: 0 }}>
-                          <span style={valueStyle}>{primary.value}</span>
-                          {primary.label && <span style={labelStyle}>{primary.label}</span>}
-                        </div>
-                      )}
                     </div>
                   </div>
                 );
