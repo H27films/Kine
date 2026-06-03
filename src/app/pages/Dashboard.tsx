@@ -12,6 +12,8 @@ import { WeeklyChart } from '../components/WeeklyChart';
 import { WeightsCard } from '../components/WeightsCard';
 import { QuickLog } from '../components/QuickLog';
 import { useDashboardData } from '../hooks/useDashboardData';
+import WorkoutsDataCompact from '../components/WorkoutsDataCompact';
+import WorkoutsData from '../components/WorkoutsData';
 
 const CARDIO_ALWAYS = ['TRACKER', 'RUNNING', 'ROW', 'CROSS TRAINER', 'WALKING', 'CYCLE'];
 const CARDIO_CONDITIONAL: string[] = [];
@@ -28,6 +30,7 @@ export const Dashboard: React.FC<{ showWeeklySummary?: boolean; showQuickLog?: b
   const [weightsExpanded, setWeightsExpanded] = useState(false);
   const [monthlyOffset, setMonthlyOffset] = useState(0);
   const [showFoodRatingLabel, setShowFoodRatingLabel] = useState(true);
+  const [showWorkoutsData, setShowWorkoutsData] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 const quickLogRef = useRef<HTMLDivElement>(null);
 
@@ -389,6 +392,14 @@ useEffect(() => {
       <section className="mt-8">
         <DailyActivityCards />
       </section>
+
+      <section className="mt-8">
+        <WorkoutsDataCompact onOpenWorkoutsData={() => setShowWorkoutsData(true)} />
+      </section>
+
+      {showWorkoutsData && (
+        <WorkoutsData onClose={() => setShowWorkoutsData(false)} />
+      )}
     </div>
   );
 };
