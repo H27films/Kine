@@ -70,6 +70,7 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [savingIds, setSavingIds] = useState<Set<number>>(new Set());
   const [deletingConfirmId, setDeletingConfirmId] = useState<number | null>(null);
+  const [unloggingId, setUnloggingId] = useState<number | null>(null);
 
   const selectedActivities = activities.filter(a => selectedIds.includes(a.id));
 
@@ -114,6 +115,19 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
       const parsed = parseFloat(value);
       return { ...prev, [id]: { ...current, distance_km: isNaN(parsed) ? 0 : parsed } };
     });
+  };
+
+  const handleUnlogActivity = async (id: number) => {
+    setUnloggingId(id);
+    try {
+      const { error } = await supabase.from('strava').update({ logged: false }).eq('id', id);
+      if (error) throw error;
+      setActivities(prev => prev.map(a => a.id === id ? { ...a, logged: false } : a));
+    } catch (e: any) {
+      console.error('Unlog failed:', e.message);
+    } finally {
+      setUnloggingId(null);
+    }
   };
 
   const handleDeleteActivity = async (id: number) => {
@@ -609,119 +623,138 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
                         </div>
                       </div>
 
-                      {/* Expanded edit row (3rd line) */}
-                      {isEditing && editVal && (
-                        <div style={{
-                          padding: '10px 0 14px 0',
-                          display: 'flex', alignItems: 'center', gap: '12px',
-                          borderBottom: isLastInGroup && isWeekBoundary
-                            ? '1.5px solid #1a1a1a'
-                            : '1px solid rgba(0,0,0,0.06)',
-                        }}>
-                          {/* Date input */}
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(26,26,26,0.75)', letterSpacing: '0.1em', marginBottom: '6px' }}>DATE</div>
+                          {/* Expanded edit row (3rd line) */}
+                          {isEditing && editVal && (
                             <div style={{
-                              padding: '8px 10px', borderRadius: '10px',
-                              background: 'rgba(255,255,255,0.55)',
-                              backdropFilter: 'blur(12px)',
-                              WebkitBackdropFilter: 'blur(12px)',
-                              border: '1px solid rgba(255,255,255,0.3)',
-                              boxShadow: '0 4px 16px rgba(0,0,0,0.04)',
+                              padding: '10px 0 14px 0',
+                              display: 'flex', alignItems: 'center', gap: '8px',
+                              borderBottom: isLastInGroup && isWeekBoundary
+                                ? '1.5px solid #1a1a1a'
+                                : '1px solid rgba(0,0,0,0.06)',
                             }}>
-                              <input
-                                type="text"
-                                value={editVal.date}
-                                onChange={e => handleEditChange(a.id, 'date', e.target.value)}
-                                onClick={e => e.stopPropagation()}
-                                style={{
-                                  width: '100%', border: 'none', outline: 'none',
-                                  backgroundColor: 'transparent',
-                                  fontSize: '12px', fontWeight: 500,
-                                  fontFamily: "'JetBrains Mono', monospace",
-                                  color: '#1a1a1a',
-                                }}
-                                placeholder="YYYY-MM-DD"
-                              />
-                            </div>
-                          </div>
-                          {/* Distance input */}
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(26,26,26,0.75)', letterSpacing: '0.1em', marginBottom: '6px' }}>KM</div>
-                            <div style={{
-                              padding: '8px 10px', borderRadius: '10px',
-                              background: 'rgba(255,255,255,0.55)',
-                              backdropFilter: 'blur(12px)',
-                              WebkitBackdropFilter: 'blur(12px)',
-                              border: '1px solid rgba(255,255,255,0.3)',
-                              boxShadow: '0 4px 16px rgba(0,0,0,0.04)',
-                            }}>
-                              <input
-                                type="number"
-                                value={editVal.distance_km}
-                                onChange={e => handleEditChange(a.id, 'distance_km', e.target.value)}
-                                onClick={e => e.stopPropagation()}
-                                step="0.01"
-                                min="0"
-                                style={{
-                                  width: '100%', border: 'none', outline: 'none',
-                                  backgroundColor: 'transparent',
-                                  fontSize: '12px', fontWeight: 500,
-                                  fontFamily: "'JetBrains Mono', monospace",
-                                  color: '#1a1a1a',
-                                }}
-                              />
-                            </div>
-                          </div>
-                          {/* Delete button with confirmation */}
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                            <div style={{ height: '16px' }} /> {/* spacer to align with label above inputs */}
-                            {showDeleteConfirm ? (
-                              <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                              {/* Date input */}
+                              <div style={{ flex: 0.75, minWidth: 0 }}>
+                                <div style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(26,26,26,0.75)', letterSpacing: '0.1em', marginBottom: '6px' }}>DATE</div>
+                                <div style={{
+                                  padding: '6px 8px', borderRadius: '10px',
+                                  background: 'rgba(255,255,255,0.55)',
+                                  backdropFilter: 'blur(12px)',
+                                  WebkitBackdropFilter: 'blur(12px)',
+                                  border: '1px solid rgba(255,255,255,0.3)',
+                                  boxShadow: '0 4px 16px rgba(0,0,0,0.04)',
+                                }}>
+                                  <input
+                                    type="text"
+                                    value={editVal.date}
+                                    onChange={e => handleEditChange(a.id, 'date', e.target.value)}
+                                    onClick={e => e.stopPropagation()}
+                                    style={{
+                                      width: '100%', border: 'none', outline: 'none',
+                                      backgroundColor: 'transparent',
+                                      fontSize: '11px', fontWeight: 500,
+                                      fontFamily: "'JetBrains Mono', monospace",
+                                      color: '#1a1a1a',
+                                    }}
+                                    placeholder="YYYY-MM-DD"
+                                  />
+                                </div>
+                              </div>
+                              {/* Distance input */}
+                              <div style={{ flex: 0.5, minWidth: 0, maxWidth: '90px' }}>
+                                <div style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(26,26,26,0.75)', letterSpacing: '0.1em', marginBottom: '6px' }}>KM</div>
+                                <div style={{
+                                  padding: '6px 8px', borderRadius: '10px',
+                                  background: 'rgba(255,255,255,0.55)',
+                                  backdropFilter: 'blur(12px)',
+                                  WebkitBackdropFilter: 'blur(12px)',
+                                  border: '1px solid rgba(255,255,255,0.3)',
+                                  boxShadow: '0 4px 16px rgba(0,0,0,0.04)',
+                                }}>
+                                  <input
+                                    type="number"
+                                    value={editVal.distance_km}
+                                    onChange={e => handleEditChange(a.id, 'distance_km', e.target.value)}
+                                    onClick={e => e.stopPropagation()}
+                                    step="0.01"
+                                    min="0"
+                                    style={{
+                                      width: '100%', border: 'none', outline: 'none',
+                                      backgroundColor: 'transparent',
+                                      fontSize: '11px', fontWeight: 500,
+                                      fontFamily: "'JetBrains Mono', monospace",
+                                      color: '#1a1a1a',
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                              {/* Delete button */}
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flexShrink: 0 }}>
+                                <div style={{ height: '16px' }} />
+                                {showDeleteConfirm ? (
+                                  <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                                    <button
+                                      onClick={e => { e.stopPropagation(); handleDeleteActivity(a.id); }}
+                                      disabled={isDeleting}
+                                      style={{
+                                        padding: '5px 8px', borderRadius: '8px',
+                                        border: 'none', cursor: 'pointer',
+                                        backgroundColor: '#FC4C02', color: '#fff',
+                                        fontSize: '8px', fontWeight: 700, letterSpacing: '0.08em',
+                                        fontFamily: "'JetBrains Mono', monospace",
+                                      }}
+                                    >
+                                      {isDeleting ? '...' : 'DELETE'}
+                                    </button>
+                                    <button
+                                      onClick={e => { e.stopPropagation(); setDeletingConfirmId(null); }}
+                                      style={{
+                                        padding: '5px 6px', borderRadius: '8px',
+                                        border: 'none', cursor: 'pointer',
+                                        backgroundColor: 'rgba(0,0,0,0.06)', color: '#1a1a1a',
+                                        fontSize: '8px', fontWeight: 700, letterSpacing: '0.08em',
+                                        fontFamily: "'JetBrains Mono', monospace",
+                                      }}
+                                    >
+                                      X
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <button
+                                    onClick={e => { e.stopPropagation(); setDeletingConfirmId(a.id); }}
+                                    style={{
+                                      padding: '5px 8px', borderRadius: '8px',
+                                      border: '1px solid rgba(252,76,2,0.3)', cursor: 'pointer',
+                                      backgroundColor: 'rgba(252,76,2,0.06)', color: '#FC4C02',
+                                      fontSize: '8px', fontWeight: 700, letterSpacing: '0.08em',
+                                      textTransform: 'uppercase',
+                                      fontFamily: "'JetBrains Mono', monospace",
+                                    }}
+                                  >
+                                    DELETE
+                                  </button>
+                                )}
+                              </div>
+                              {/* UNLOG button */}
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flexShrink: 0 }}>
+                                <div style={{ height: '16px' }} />
                                 <button
-                                  onClick={e => { e.stopPropagation(); handleDeleteActivity(a.id); }}
-                                  disabled={isDeleting}
+                                  onClick={e => { e.stopPropagation(); handleUnlogActivity(a.id); }}
+                                  disabled={unloggingId === a.id}
                                   style={{
-                                    padding: '6px 12px', borderRadius: '8px',
-                                    border: 'none', cursor: 'pointer',
-                                    backgroundColor: '#FC4C02', color: '#fff',
-                                    fontSize: '9px', fontWeight: 700, letterSpacing: '0.08em',
+                                    padding: '5px 8px', borderRadius: '8px',
+                                    border: '1px solid rgba(26,26,26,0.2)', cursor: 'pointer',
+                                    backgroundColor: unloggingId === a.id ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.55)',
+                                    color: '#1a1a1a',
+                                    fontSize: '8px', fontWeight: 700, letterSpacing: '0.08em',
+                                    textTransform: 'uppercase',
                                     fontFamily: "'JetBrains Mono', monospace",
                                   }}
                                 >
-                                  {isDeleting ? '...' : 'DELETE'}
-                                </button>
-                                <button
-                                  onClick={e => { e.stopPropagation(); setDeletingConfirmId(null); }}
-                                  style={{
-                                    padding: '6px 8px', borderRadius: '8px',
-                                    border: 'none', cursor: 'pointer',
-                                    backgroundColor: 'rgba(0,0,0,0.06)', color: '#1a1a1a',
-                                    fontSize: '9px', fontWeight: 700, letterSpacing: '0.08em',
-                                    fontFamily: "'JetBrains Mono', monospace",
-                                  }}
-                                >
-                                  X
+                                  {unloggingId === a.id ? '...' : 'UNLOG'}
                                 </button>
                               </div>
-                            ) : (
-                              <button
-                                onClick={e => { e.stopPropagation(); setDeletingConfirmId(a.id); }}
-                                style={{
-                                  padding: '6px 12px', borderRadius: '8px',
-                                  border: '1px solid rgba(252,76,2,0.3)', cursor: 'pointer',
-                                  backgroundColor: 'rgba(252,76,2,0.06)', color: '#FC4C02',
-                                  fontSize: '9px', fontWeight: 700, letterSpacing: '0.08em',
-                                  textTransform: 'uppercase',
-                                  fontFamily: "'JetBrains Mono', monospace",
-                                }}
-                              >
-                                DELETE
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      )}
+                            </div>
+                          )}
                       </React.Fragment>
                     );
                   })}
