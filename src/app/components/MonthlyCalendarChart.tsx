@@ -42,26 +42,20 @@ const MonthlyCalendarChart: React.FC<MonthlyCalendarChartProps> = ({
       const lastDateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(lastDay.getDate()).padStart(2, '0')}`;
 
       let selectField: string;
-      let typeFilter: string;
       let exerciseFilter: number | null = null;
       if (selectedTab === 'RUNNING') {
         selectField = 'date, total_cardio';
-        typeFilter = 'CARDIO';
         exerciseFilter = 84;
       } else if (selectedTab === 'ROW') {
         selectField = 'date, total_cardio';
-        typeFilter = 'CARDIO';
         exerciseFilter = 83;
       } else if (selectedTab === 'CROSS TRAINER') {
         selectField = 'date, total_cardio';
-        typeFilter = 'CARDIO';
         exerciseFilter = 86;
       } else if (selectedTab === 'SCORE') {
         selectField = 'date, total_score';
-        typeFilter = 'CARDIO';
       } else {
         selectField = 'date, total_weight';
-        typeFilter = 'WEIGHTS';
       }
 
       let query = supabase
@@ -72,8 +66,10 @@ const MonthlyCalendarChart: React.FC<MonthlyCalendarChartProps> = ({
 
       if (selectedTab === 'WEIGHTS') {
         query = query.in('type', ['CHEST', 'BACK', 'LEGS']);
+      } else if (selectedTab === 'SCORE') {
+        // No type filter — total_score is the same for all rows on a date
       } else {
-        query = query.eq('type', typeFilter);
+        query = query.eq('type', 'CARDIO');
       }
 
       if (exerciseFilter) {
@@ -90,7 +86,7 @@ const MonthlyCalendarChart: React.FC<MonthlyCalendarChartProps> = ({
             // Take the score value (assumed same for all rows on date)
             byDate[date] = Number(r.total_score || 0);
           } else {
-            const value = Number(r.total_cardio || r.total_score || r.total_weight || 0);
+            const value = Number(r.total_cardio || r.total_weight || 0);
             byDate[date] = +((byDate[date] || 0) + value).toFixed(1);
           }
         });
