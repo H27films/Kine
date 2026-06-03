@@ -176,10 +176,11 @@ const WorkoutsDataCompact: React.FC<WorkoutsDataCompactProps> = ({ onOpenWorkout
         mapped.sort((a, b) => {
           if (a.date !== b.date) return b.date.localeCompare(a.date);
           const order = (r: typeof a) => {
+            if (r.exercise_id === FOOD_EXERCISE_ID) return 3;
+            if (r.exercise_id === CALORIES_EXERCISE_ID) return 4;
+            if (r.exercise_id === TRACKER_EXERCISE_ID) return 5;
             if (r.type === 'CARDIO') return 0;
-            if (r.exercise_id === FOOD_EXERCISE_ID) return 1;
-            if (r.exercise_id === CALORIES_EXERCISE_ID) return 2;
-            return 0.5;
+            return 1; // other MEASUREMENT
           };
           const oa = order(a);
           const ob = order(b);
