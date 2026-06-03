@@ -284,7 +284,7 @@ const WorkoutsDataCompact: React.FC<WorkoutsDataCompactProps> = ({ onOpenWorkout
             <React.Fragment key={group.date}>
               {/* Separator line between date groups */}
               {groupIdx > 0 && (
-                <div style={{ height: '40px', display: 'flex', alignItems: 'center' }}>
+                <div style={{ height: '16px', display: 'flex', alignItems: 'flex-end' }}>
                   <div style={{ width: '100%', height: '1px', backgroundColor: '#1a1a1a', opacity: 0.8 }} />
                 </div>
               )}
