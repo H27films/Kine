@@ -159,6 +159,7 @@ const SelectionBar: React.FC<SelectionBarProps> = (props) => {
     setError('');
     setConfirming('none');
     try {
+      await supabase.auth.getSession();
       const uniqueExerciseIds = [...new Set(insertable.map(a => EXERCISE_IDS[a.type]).filter(Boolean))];
       const { data: exercises, error: exErr } = await supabase
         .from('exercises')
