@@ -547,9 +547,12 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
                           </div>
 
                           {/* Type label */}
-                          <div style={{ position: 'relative' }}>
+                          <div style={{ position: 'relative' }} onClick={e => e.stopPropagation()}>
                             <div
-                              onClick={() => a.type === 'Walk' ? setEditingId(editingId === a.id ? null : a.id) : undefined}
+                              onClick={e => {
+                                e.stopPropagation();
+                                if (a.type === 'Walk') setEditingId(editingId === a.id ? null : a.id);
+                              }}
                               style={{
                                 fontSize: '13px', fontWeight: 700, letterSpacing: '0.1em',
                                 color: TYPE_COLORS[a.type] || '#1a1a1a',
@@ -575,7 +578,7 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
                                 {['Walk', 'CrossTrainer'].map((opt, i) => (
                                   <div
                                     key={opt}
-                                    onClick={() => handleTypeChange(a, opt)}
+                                    onClick={e => { e.stopPropagation(); handleTypeChange(a, opt); }}
                                     style={{
                                       padding: '10px 14px', cursor: 'pointer',
                                       fontSize: '11px', fontWeight: 700,
