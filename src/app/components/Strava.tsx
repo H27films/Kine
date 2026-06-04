@@ -98,8 +98,7 @@ const Strava: React.FC = () => {
             : rawDistance;
 
           // activity_time = created_at + 6 hours
-          const activityTime = new Date(Date.now() + 6 * 60 * 60 * 1000)
-            .toISOString().replace('Z', '').split('.')[0];
+          const activityTime = a.start_date_local.replace('Z', '').split('.')[0];
           const { error } = await supabase.from('strava').insert({
             activity_id: a.id,
             date: activityTime.split('T')[0],
