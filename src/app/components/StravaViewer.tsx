@@ -485,6 +485,7 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
                     const isSaving = savingIds.has(a.id);
                     const isDeleting = deletingId === a.id;
                     const showDeleteConfirm = deletingConfirmId === a.id;
+                    const canChangeType = isEditing && a.type === 'Walk';
 
                     return (
                       <React.Fragment key={a.id}>
@@ -547,17 +548,20 @@ const StravaViewer: React.FC<StravaViewerProps> = ({ onClose }) => {
                           </div>
 
                           {/* Type label */}
-                          <div style={{ position: 'relative' }} onClick={e => e.stopPropagation()}>
+                          <div style={{ position: 'relative' }}>
                             <div
                               onClick={e => {
-                                e.stopPropagation();
-                                if (a.type === 'Walk') setEditingId(editingId === a.id ? null : a.id);
+                                if (canChangeType) {
+                                  e.stopPropagation();
+                                  setEditingId(editingId === a.id ? null : a.id);
+                                }
+                                // If not canChangeType, let the click bubble to the row so select mode opens.
                               }}
                               style={{
                                 fontSize: '13px', fontWeight: 700, letterSpacing: '0.1em',
                                 color: TYPE_COLORS[a.type] || '#1a1a1a',
                                 textTransform: 'uppercase',
-                                cursor: a.type === 'Walk' ? 'pointer' : 'default',
+                                cursor: canChangeType ? 'pointer' : (selectMode ? 'pointer' : 'default'),
                                 textDecoration: a.type === 'Walk' ? 'underline dotted' : 'none',
                                 textUnderlineOffset: '4px',
                                 display: 'inline-block',
