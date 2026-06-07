@@ -5,6 +5,7 @@ import { supabase, todayStr, getISOWeek, getDayName, recalculateDailyTotals } fr
 import CaloriesSparkline from '../components/CaloriesSparkline';
 import CaloriesTrends from '../components/CaloriesTrends';
 import CaloriesEditSheet from '../components/CaloriesEditSheet';
+import BodyMeasurementsChart from '../components/BodyMeasurementsChart';
 
 interface LogCaloriesProps {
   onNavigate: (page: Page) => void;
@@ -566,6 +567,8 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
             </div>
 
             {saveError && <p className="text-red-400 text-sm mt-4 text-center">{saveError}</p>}
+
+            <BodyMeasurementsChart />
 
           </>
         )}
