@@ -532,11 +532,11 @@ export const LogCalories: React.FC<LogCaloriesProps> = () => {
                 return (
                   <label key={field.label} htmlFor={field.id} className="flex justify-between items-center p-5 rounded-lg cursor-text"
                     style={{
-                      backgroundColor: isFocused ? 'rgba(0,0,0,0.04)' : 'rgba(0,0,0,0.04)',
-                      border: isFocused ? '1px solid rgba(0,0,0,0.18)' : '1px solid rgba(0,0,0,0.08)',
-                      transition: 'background-color 0.15s, border-color 0.15s',
+                      backgroundColor: 'rgba(0,0,0,0.04)',
+                      border: 'none',
+                      transition: 'background-color 0.15s',
                     }}>
-                    <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: isFocused ? '#1a1a1a' : 'rgba(26,26,26,0.45)' }}>{field.label}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#1a1a1a' }}>{field.label}</span>
                     <div style={{ position: 'relative', width: '6rem', textAlign: 'right' }}>
                       {showHint && (
                         <span className="text-lg font-black tracking-tight" style={{ color: '#9ba4b0', pointerEvents: 'none', userSelect: 'none' }}>
