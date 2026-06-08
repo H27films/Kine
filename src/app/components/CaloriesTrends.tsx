@@ -349,7 +349,7 @@ let bgColor = h > 0 ? '#1a1a1a' : 'rgba(26,26,26,0.08)';
           </div>
 
           {/* Bars + line overlay — SVG behind, bars on top */}
-          <div className="flex items-end justify-between gap-1" style={{ height: '140px', position: 'relative' }}>
+          <div className="flex items-end justify-between gap-1" style={{ height: '140px', position: 'relative', overflow: 'hidden' }}>
             {weeklyFoodData.map((h, i) => {
               const isCurrentWeek = weekOff === 0 && i === 11;
               const todayIdx = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
