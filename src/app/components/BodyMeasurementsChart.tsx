@@ -11,7 +11,31 @@ interface BodyDataPoint {
   muscle_mass: number | null;
 }
 
+interface WeeklyAvg {
+  weekStart: string;
+  bodyweight: number | null;
+  body_fat_percent: number | null;
+  muscle_mass: number | null;
+}
+
 const PAGE_SIZE = 15;
+
+/** Get the Monday of the ISO week containing the given date string */
+const getMonday = (dateStr: string): string => {
+  const d = new Date(dateStr + 'T12:00:00');
+  const day = d.getDay();
+  const diff = d.getDate() - (day === 0 ? 6 : day - 1);
+  d.setDate(diff);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
+/** Average non-null values, rounded to 1 decimal, returning null if none */
+const avg = (vals: (number | null)[]): number | null => {
+  const nums = vals.filter((v): v is number => v !== null);
+  if (nums.length === 0) return null;
+  const raw = nums.reduce((a, b) => a + b, 0) / nums.length;
+  return Math.round(raw * 10) / 10;
+};
 
 const CHART_H = 100;
 const DOT_SIZE = 8;
@@ -94,7 +118,7 @@ const MetricChart: React.FC<MetricChartProps> = ({ label, unit, data, yMin, yMax
       </div>
 
       {/* Chart */}
-      <div ref={ref} style={{ position: 'relative', height: CHART_H + 10 }}>
+      <div ref={ref} style={{ position: 'relative', height: CHART_H + 24 }}>
         {/* Smooth connecting line via SVG overlay */}
         {slotW > 0 && n > 1 && (
           <svg
@@ -201,8 +225,31 @@ const MetricChart: React.FC<MetricChartProps> = ({ label, unit, data, yMin, yMax
   );
 };
 
+/** Group raw data points by week (Monday-based) and average each metric */
+const toWeeklyAverages = (data: BodyDataPoint[]): WeeklyAvg[] => {
+  const weekMap = new Map<string, { bw: number[]; bf: number[]; mm: number[] }>();
+  for (const d of data) {
+    const wk = getMonday(d.date);
+    if (!weekMap.has(wk)) weekMap.set(wk, { bw: [], bf: [], mm: [] });
+    const bucket = weekMap.get(wk)!;
+    if (d.bodyweight !== null) bucket.bw.push(d.bodyweight);
+    if (d.body_fat_percent !== null) bucket.bf.push(d.body_fat_percent);
+    if (d.muscle_mass !== null) bucket.mm.push(d.muscle_mass);
+  }
+  const sortedWeeks = Array.from(weekMap.keys()).sort();
+  return sortedWeeks.map(wk => {
+    const bucket = weekMap.get(wk)!;
+    return {
+      weekStart: wk,
+      bodyweight: bucket.bw.length > 0 ? avg(bucket.bw) : null,
+      body_fat_percent: bucket.bf.length > 0 ? avg(bucket.bf) : null,
+      muscle_mass: bucket.mm.length > 0 ? avg(bucket.mm) : null,
+    };
+  });
+};
+
 const BodyMeasurementsChart: React.FC = () => {
-  const [allData, setAllData] = useState<BodyDataPoint[]>([]);
+  const [weeklyAverages, setWeeklyAverages] = useState<WeeklyAvg[]>([]);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
 
@@ -221,25 +268,25 @@ const BodyMeasurementsChart: React.FC = () => {
         const filtered = (data as BodyDataPoint[]).filter(
           d => d.bodyweight !== null || d.body_fat_percent !== null || d.muscle_mass !== null
         );
-        setAllData(filtered.reverse());
+        setWeeklyAverages(toWeeklyAverages(filtered.reverse()));
       }
       setLoading(false);
     };
     fetchData();
   }, []);
 
-  const totalPages = Math.max(1, Math.ceil(allData.length / PAGE_SIZE));
-  const currentData = allData.slice(
-    Math.max(0, allData.length - (page + 1) * PAGE_SIZE),
-    Math.max(0, allData.length - page * PAGE_SIZE)
+  const totalPages = Math.max(1, Math.ceil(weeklyAverages.length / PAGE_SIZE));
+  const currentData = weeklyAverages.slice(
+    Math.max(0, weeklyAverages.length - (page + 1) * PAGE_SIZE),
+    Math.max(0, weeklyAverages.length - page * PAGE_SIZE)
   );
 
   const hasPrev = page < totalPages - 1;
   const hasNext = page > 0;
 
-  const weightData = currentData.filter(d => d.bodyweight !== null).map(d => ({ date: d.date, value: d.bodyweight! }));
-  const muscleData = currentData.filter(d => d.muscle_mass !== null).map(d => ({ date: d.date, value: d.muscle_mass! }));
-  const fatData = currentData.filter(d => d.body_fat_percent !== null).map(d => ({ date: d.date, value: d.body_fat_percent! }));
+  const weightData = currentData.filter(d => d.bodyweight !== null).map(d => ({ date: d.weekStart, value: d.bodyweight! }));
+  const muscleData = currentData.filter(d => d.muscle_mass !== null).map(d => ({ date: d.weekStart, value: d.muscle_mass! }));
+  const fatData = currentData.filter(d => d.body_fat_percent !== null).map(d => ({ date: d.weekStart, value: d.body_fat_percent! }));
 
   if (loading) {
     return (
@@ -249,7 +296,7 @@ const BodyMeasurementsChart: React.FC = () => {
     );
   }
 
-  if (allData.length === 0) {
+  if (weeklyAverages.length === 0) {
     return (
       <div style={{ marginTop: 24, height: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <span style={{ fontSize: '12px', fontWeight: 600, color: 'rgba(26,26,26,0.35)' }}>No data yet</span>
@@ -274,7 +321,7 @@ const BodyMeasurementsChart: React.FC = () => {
 
       {/* Three separate metric charts with goal lines */}
       <MetricChart label="Body Weight" unit="KG" data={weightData} yMin={77} yMax={81} goal={79} />
-      <MetricChart label="Muscle Mass" unit="KG" data={muscleData} yMin={39} yMax={41} goal={41} gapReversed />
+      <MetricChart label="Muscle Mass" unit="KG" data={muscleData} yMin={39} yMax={42} goal={41} gapReversed />
       <MetricChart label="Body Fat" unit="%" data={fatData} yMin={9} yMax={12} goal={10} />
     </div>
   );
