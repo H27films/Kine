@@ -978,7 +978,7 @@ export const WaveTimeline: React.FC<WaveTimelineProps> = ({ firstDate, lastDate 
       ref={containerRef}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
-      style={{ marginBottom: '0px', touchAction: 'pan-y' }}
+      style={{ marginBottom: '12px', touchAction: 'pan-y' }}
     >
       <svg
         viewBox={`0 0 ${W} ${H}`}

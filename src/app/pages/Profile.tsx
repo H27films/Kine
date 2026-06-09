@@ -424,10 +424,78 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
           <WaveTimeline firstDate={chartFirstDate} lastDate={chartLastDate} />
         )}
 
+        <div style={{ height: '24px', flexShrink: 0 }} />
+
+        {/* Workouts Data */}
+        <button
+          onClick={() => setShowWorkoutsData(true)}
+          className="w-full rounded-xl p-4 mb-3 flex items-center justify-between active:scale-[0.98] transition-all"
+          style={{ backgroundColor: 'rgba(0,0,0,0.05)' }}
+        >
+          <div className="flex items-center gap-4">
+            <Database size={20} color="#1a1a1a" />
+            <span style={{
+              fontSize: '0.8rem',
+              fontWeight: 500,
+              letterSpacing: '0.1em',
+              color: '#1a1a1a',
+              textTransform: 'uppercase',
+            }}>
+              Workouts Data
+            </span>
+          </div>
+          <div style={{ color: '#1a1a1a' }}>›</div>
+        </button>
+
+        {/* Strava Data + Connect & Sync */}
+        <Strava />
+
+        {/* Data+ Analytics */}
+        <button
+          onClick={() => onNavigate('analytics')}
+          className="w-full rounded-xl p-4 mb-3 flex items-center justify-between active:scale-[0.98] transition-all"
+          style={{ backgroundColor: 'rgba(0,0,0,0.05)' }}
+        >
+          <div className="flex items-center gap-4">
+            <BarChart3 size={22} color="#1a1a1a" />
+            <span style={{
+              fontSize: '0.8rem',
+              fontWeight: 500,
+              letterSpacing: '0.1em',
+              color: '#1a1a1a',
+              textTransform: 'uppercase',
+            }}>
+              ANALYTICS
+            </span>
+          </div>
+          <div style={{ color: '#999' }}>›</div>
+        </button>
+
+        {/* Exercises+ */}
+        <button
+          onClick={() => setShowExerciseOptions(true)}
+          className="w-full rounded-xl p-4 mb-3 flex items-center justify-between active:scale-[0.98] transition-all"
+          style={{ backgroundColor: 'rgba(0,0,0,0.05)' }}
+        >
+          <div className="flex items-center gap-4">
+            <DumbbellIcon size={22} color="#1a1a1a" />
+            <span style={{
+              fontSize: '0.8rem',
+              fontWeight: 500,
+              letterSpacing: '0.1em',
+              color: '#1a1a1a',
+              textTransform: 'uppercase',
+            }}>
+              Exercises+
+            </span>
+          </div>
+          <div style={{ color: '#999' }}>›</div>
+        </button>
+
         {/* Export Data section - in box */}
         <div style={{
           marginBottom: '8px',
-          marginTop: '20px',
+          marginTop: '4px',
           backgroundColor: 'rgba(0,0,0,0.05)',
           borderRadius: '12px',
           padding: '14px 16px',
@@ -470,8 +538,6 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
               </span>
             </div>
           </div>
-
-          {/* Row 2: LAST EXPORT label removed - now part of date stack above */}
 
           {/* Row 3: NEW ROWS count */}
           <div style={{ marginTop: '4px' }}>
@@ -520,7 +586,7 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
             </div>
           </div>
 
-          {/* Row 4: START / END labels (MAX/AVG style from Analytics) */}
+          {/* Row 4: START / END labels */}
           {exportDates.length > 0 && (
             <div style={{
               display: 'flex', justifyContent: 'space-between',
@@ -602,75 +668,6 @@ export const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
             <p className="mt-3" style={{ color: '#ef4444', fontSize: '0.75rem' }}>{exportError}</p>
           )}
         </div>
-
-        {/* Spacer - pushes bottom items to bottom */}
-        <div style={{ flex: 1 }} />
-
-        {/* Exercises+ */}
-        <button
-          onClick={() => setShowExerciseOptions(true)}
-          className="w-full rounded-xl p-4 mb-3 flex items-center justify-between active:scale-[0.98] transition-all"
-          style={{ backgroundColor: 'rgba(0,0,0,0.05)' }}
-        >
-          <div className="flex items-center gap-4">
-            <DumbbellIcon size={22} color="#1a1a1a" />
-            <span style={{
-              fontSize: '0.8rem',
-              fontWeight: 500,
-              letterSpacing: '0.1em',
-              color: '#1a1a1a',
-              textTransform: 'uppercase',
-            }}>
-              Exercises+
-            </span>
-          </div>
-          <div style={{ color: '#999' }}>›</div>
-        </button>
-
-        {/* Data+ Analytics */}
-        <button
-          onClick={() => onNavigate('analytics')}
-          className="w-full rounded-xl p-4 mb-3 flex items-center justify-between active:scale-[0.98] transition-all"
-          style={{ backgroundColor: 'rgba(0,0,0,0.05)' }}
-        >
-          <div className="flex items-center gap-4">
-            <BarChart3 size={22} color="#1a1a1a" />
-            <span style={{
-              fontSize: '0.8rem',
-              fontWeight: 500,
-              letterSpacing: '0.1em',
-              color: '#1a1a1a',
-              textTransform: 'uppercase',
-            }}>
-              ANALYTICS
-            </span>
-          </div>
-          <div style={{ color: '#999' }}>›</div>
-        </button>
-
-        {/* Workouts Data */}
-        <button
-          onClick={() => setShowWorkoutsData(true)}
-          className="w-full rounded-xl p-4 mb-3 flex items-center justify-between active:scale-[0.98] transition-all"
-          style={{ backgroundColor: 'rgba(0,0,0,0.05)' }}
-        >
-          <div className="flex items-center gap-4">
-            <Database size={20} color="#1a1a1a" />
-            <span style={{
-              fontSize: '0.8rem',
-              fontWeight: 500,
-              letterSpacing: '0.1em',
-              color: '#1a1a1a',
-              textTransform: 'uppercase',
-            }}>
-              Workouts Data
-            </span>
-          </div>
-          <div style={{ color: '#1a1a1a' }}>›</div>
-        </button>
-
-        {/* Strava Connect & Sync */}
-        <Strava />
       </div>
 
       {/* NEW/EDIT popup */}
