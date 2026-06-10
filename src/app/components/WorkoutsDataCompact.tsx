@@ -11,6 +11,9 @@ interface WorkoutRow {
   km: number | null;
   calories: number | null;
   food_rating: string | null;
+  bodyweight: number | null;
+  body_fat_percent: number | null;
+  muscle_mass: number | null;
   time: string | null;
 }
 
@@ -22,6 +25,7 @@ const MONTH_NAMES = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SE
 const FOOD_EXERCISE_ID = 89;
 const CALORIES_EXERCISE_ID = 90;
 const TRACKER_EXERCISE_ID = 82;
+const BODY_COMP_EXERCISE_ID = 88;
 
 const twoDaysAgo = (): string => {
   const d = new Date();
@@ -153,7 +157,7 @@ const WorkoutsDataCompact: React.FC<WorkoutsDataCompactProps> = ({ onOpenWorkout
         .from('workouts')
         .select(`
           id, date, type, exercise_id, km, calories, food_rating,
-          time,
+          bodyweight, body_fat_percent, muscle_mass, time,
           exercises:exercise_id(exercise_name)
         `)
         .in('type', ['CARDIO', 'MEASUREMENT'])
@@ -172,6 +176,9 @@ const WorkoutsDataCompact: React.FC<WorkoutsDataCompactProps> = ({ onOpenWorkout
           km: r.km,
           calories: r.calories,
           food_rating: r.food_rating,
+          bodyweight: r.bodyweight,
+          body_fat_percent: r.body_fat_percent,
+          muscle_mass: r.muscle_mass,
           time: r.time,
         }));
         mapped.sort((a, b) => {
@@ -201,6 +208,9 @@ const WorkoutsDataCompact: React.FC<WorkoutsDataCompactProps> = ({ onOpenWorkout
     }
     if (row.exercise_id === FOOD_EXERCISE_ID) {
       return row.food_rating ? { value: row.food_rating.toUpperCase(), label: '' } : null;
+    }
+    if (row.exercise_id === BODY_COMP_EXERCISE_ID) {
+      return null; // handled separately
     }
     if (row.km != null) {
       return { value: String(row.km), label: 'KM' };
@@ -389,7 +399,28 @@ const WorkoutsDataCompact: React.FC<WorkoutsDataCompactProps> = ({ onOpenWorkout
                             </p>
                           )}
                         </div>
-                        {primary && (
+                        {row.exercise_id === BODY_COMP_EXERCISE_ID ? (
+                          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', flexShrink: 0 }}>
+                            {row.bodyweight != null && (
+                              <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px' }}>
+                                <span style={valueStyle}>{row.bodyweight}</span>
+                                <span style={labelStyle}>KG</span>
+                              </div>
+                            )}
+                            {row.body_fat_percent != null && (
+                              <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px' }}>
+                                <span style={valueStyle}>{row.body_fat_percent}%</span>
+                                <span style={labelStyle}>FAT</span>
+                              </div>
+                            )}
+                            {row.muscle_mass != null && (
+                              <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px' }}>
+                                <span style={valueStyle}>{row.muscle_mass}</span>
+                                <span style={labelStyle}>MUSCLE</span>
+                              </div>
+                            )}
+                          </div>
+                        ) : primary && (
                           <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px', flexShrink: 0 }}>
                             <span style={valueStyle}>{primary.value}</span>
                             {primary.label && <span style={labelStyle}>{primary.label}</span>}

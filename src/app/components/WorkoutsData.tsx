@@ -28,6 +28,7 @@ const MONTH_NAMES = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SE
 const FOOD_EXERCISE_ID = 89;
 const CALORIES_EXERCISE_ID = 90;
 const TRACKER_EXERCISE_ID = 82;
+const BODY_COMP_EXERCISE_ID = 88;
 
 const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
   const [rows, setRows] = useState<WorkoutRow[]>([]);
@@ -259,6 +260,9 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
     }
     if (row.exercise_id === FOOD_EXERCISE_ID) {
       return row.food_rating ? { value: row.food_rating.toUpperCase(), label: '' } : null;
+    }
+    if (row.exercise_id === BODY_COMP_EXERCISE_ID) {
+      return null; // handled separately with 3 metrics
     }
     if (row.km != null) {
       return { value: String(row.km), label: 'KM' };
@@ -675,7 +679,34 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
                                 <div style={{ fontSize: '8px', color: 'rgba(26,26,26,0.4)', letterSpacing: '0.1em' }}>TIME</div>
                               </div>
                             )}
-                            {primary && (
+                            {row.exercise_id === BODY_COMP_EXERCISE_ID ? (
+                              <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+                                {row.bodyweight != null && (
+                                  <div style={{ textAlign: 'right' }}>
+                                    <div style={{ fontSize: '14px', fontWeight: 700, color: '#1a1a1a', letterSpacing: '-0.02em' }}>
+                                      {row.bodyweight}
+                                    </div>
+                                    <div style={{ fontSize: '8px', color: 'rgba(26,26,26,0.4)', letterSpacing: '0.1em' }}>KG</div>
+                                  </div>
+                                )}
+                                {row.body_fat_percent != null && (
+                                  <div style={{ textAlign: 'right' }}>
+                                    <div style={{ fontSize: '14px', fontWeight: 700, color: '#1a1a1a', letterSpacing: '-0.02em' }}>
+                                      {row.body_fat_percent}%
+                                    </div>
+                                    <div style={{ fontSize: '8px', color: 'rgba(26,26,26,0.4)', letterSpacing: '0.1em' }}>FAT</div>
+                                  </div>
+                                )}
+                                {row.muscle_mass != null && (
+                                  <div style={{ textAlign: 'right' }}>
+                                    <div style={{ fontSize: '14px', fontWeight: 700, color: '#1a1a1a', letterSpacing: '-0.02em' }}>
+                                      {row.muscle_mass}
+                                    </div>
+                                    <div style={{ fontSize: '8px', color: 'rgba(26,26,26,0.4)', letterSpacing: '0.1em' }}>MUSCLE</div>
+                                  </div>
+                                )}
+                              </div>
+                            ) : primary && (
                               <div style={{ textAlign: 'right' }}>
                                 <div style={{ fontSize: '14px', fontWeight: 700, color: '#1a1a1a', letterSpacing: '-0.02em' }}>
                                   {primary.value}
