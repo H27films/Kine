@@ -370,20 +370,36 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({
   const canNext = currentGlobalIdx > 0;
   const onPrev = () => {
     if (canPrev) {
-      setWeek(allWeekNumbers[currentGlobalIdx + 1]);
+      const nextWeek = allWeekNumbers[currentGlobalIdx + 1];
+      setWeek(nextWeek);
       setOpenDayIndex(null); setCardioDayDate(null); setClosing(false); setCardioReady(false);
       setOpenWeightsDayIndex(null); setWeightsDayDate(null); setWeightsClosing(false); setWeightsReady(false);
       setOpenScoreDayIndex(null); setScoreDayDate(null); setScoreClosing(false);
-      setOpenCaloriesDayIndex(null); setCaloriesDayDate(null); setCaloriesClosing(false);
+      // Keep Calories panel open if active — just update to same day index on new week
+      if (activeTab === 'Calories' && openCaloriesDayIndex !== null) {
+        const date = getCardioDayDate(nextWeek, openCaloriesDayIndex);
+        if (date) setCaloriesDayDate(date);
+        setCaloriesClosing(false);
+      } else {
+        setOpenCaloriesDayIndex(null); setCaloriesDayDate(null); setCaloriesClosing(false);
+      }
     }
   };
   const onNext = () => {
     if (canNext) {
-      setWeek(allWeekNumbers[currentGlobalIdx - 1]);
+      const nextWeek = allWeekNumbers[currentGlobalIdx - 1];
+      setWeek(nextWeek);
       setOpenDayIndex(null); setCardioDayDate(null); setClosing(false); setCardioReady(false);
       setOpenWeightsDayIndex(null); setWeightsDayDate(null); setWeightsClosing(false); setWeightsReady(false);
       setOpenScoreDayIndex(null); setScoreDayDate(null); setScoreClosing(false);
-      setOpenCaloriesDayIndex(null); setCaloriesDayDate(null); setCaloriesClosing(false);
+      // Keep Calories panel open if active — just update to same day index on new week
+      if (activeTab === 'Calories' && openCaloriesDayIndex !== null) {
+        const date = getCardioDayDate(nextWeek, openCaloriesDayIndex);
+        if (date) setCaloriesDayDate(date);
+        setCaloriesClosing(false);
+      } else {
+        setOpenCaloriesDayIndex(null); setCaloriesDayDate(null); setCaloriesClosing(false);
+      }
     }
   };
 
