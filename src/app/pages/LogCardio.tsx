@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { ChevronDown } from 'lucide-react';
 
 import { Page } from '../../types';
 import { supabase, Exercise, todayStr, getISOWeek, getDayName, currentWeekMonday, weeksAgoMonday, recalculateDailyTotals, getNewEntryStatus } from '../../lib/supabase';
@@ -58,6 +59,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, initialSelecte
   const [maxMonthlyOffset, setMaxMonthlyOffset] = useState(0);
   const [weekOffset, setWeekOffset] = useState(0);
   const [minWeekOffset, setMinWeekOffset] = useState(0);
+  const [cardioSectionCollapsed, setCardioSectionCollapsed] = useState(true);
 
 
   const isRunning = selectedExercise?.exercise_name?.toUpperCase() === 'RUNNING';
@@ -457,6 +459,16 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, initialSelecte
     marginTop: 8,
   };
 
+  const sectionLabelStyle: React.CSSProperties = {
+    fontSize: '1.1rem',
+    fontWeight: 700,
+    letterSpacing: '0.15em',
+    textTransform: 'uppercase',
+    color: '#1a1a1a',
+    marginBottom: '1.25rem',
+    fontFamily: "'Archivo', sans-serif",
+  };
+
   const hasAnyInput =
     (trackerDistance && parseFloat(trackerDistance) > 0) ||
     (distance && parseFloat(distance) > 0) ||
@@ -562,102 +574,133 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, initialSelecte
         </div>
       </header>
 
-      {/* EXERCISE section — icon picker */}
-      <section ref={exerciseSectionRef} className="mb-8" style={{ marginTop: 12 }}>
-        <div style={{ marginBottom: 20 }}>
-          <ExerciseLogDots exercises={nonTrackerExercises} saveSuccess={saveSuccess} />
-          <ExerciseIconBar
-            exercises={nonTrackerExercises}
-            selectedExercise={selectedExercise}
-            onSelect={setSelectedExercise}
-          />
-        </div>
-
-        {/* Distance */}
-        <label style={{ ...labelStyle, display: 'block', marginBottom: 8,             color: selectedExercise ? '#1a1a1a' : 'rgba(26,26,26,0.45)' }}>
-          {selectedExercise ? selectedExercise.exercise_name?.toUpperCase() : 'Distance'}
-        </label>
-        <div className="flex items-baseline gap-4">
-           <input
-            type="text"
-            inputMode="decimal"
-            value={distance}
-            onChange={e => setDistance(e.target.value)}
-            placeholder="0.0"
-            className="text-[2.5rem] font-black tracking-tighter w-full p-0" style={{ backgroundColor: 'transparent', border: 'none', color: '#1a1a1a' }}
-          />
-           <span className="text-[1rem] font-bold" style={{ color: 'rgba(26,26,26,0.85)', letterSpacing: '0.2em', paddingLeft: '4px' }}>KM</span>
-        </div>
-        <div style={separatorStyle} />
-      </section>
-
-      {/* Duration — only shown for Running */}
-      {isRunning && (
-        <section className="mb-8">
-          <label style={{ ...labelStyle, display: 'block', marginBottom: 8, marginTop: 8 }}>Duration</label>
-          <div className="flex items-baseline gap-4">
-            <div className="flex items-baseline gap-2">
-              <input type="text" inputMode="numeric" value={minutes} onChange={e => setMinutes(e.target.value)} placeholder="00"
-                className="text-[2.5rem] font-black tracking-tighter w-16 text-left p-0" style={{ backgroundColor: 'transparent', border: 'none', color: '#1a1a1a' }} />
-              <span style={{ ...labelStyle }}>MIN</span>
-            </div>
-            <div className="flex items-baseline gap-2">
-              <input type="text" inputMode="numeric" value={seconds} onChange={e => setSeconds(e.target.value)} placeholder="00"
-                className="text-[2.5rem] font-black tracking-tighter w-16 text-left p-0" style={{ backgroundColor: 'transparent', border: 'none', color: '#1a1a1a' }} />
-              <span style={{ ...labelStyle }}>SEC</span>
-            </div>
-          </div>
-          <div style={separatorStyle} />
-        </section>
-      )}
-
-      {/* Calories — only shown for Cycling */}
-      {isCycling && (
-        <section className="mb-8">
-          <label style={{ ...labelStyle, display: 'block', marginBottom: 8, marginTop: 8 }}>Calories</label>
-          <div className="flex items-baseline gap-4">
-             <input type="text" inputMode="numeric" value={calories} onChange={e => setCalories(e.target.value)} placeholder="0"
-              className="text-[2.5rem] font-black tracking-tighter w-full p-0" style={{ backgroundColor: 'transparent', border: 'none', color: '#1a1a1a' }} />
-            <span className="text-[1rem] font-bold" style={{ color: 'rgba(26,26,26,0.85)', letterSpacing: '0.2em', paddingLeft: '4px' }}>KCAL</span>
-          </div>
-          <div style={separatorStyle} />
-        </section>
-      )}
-
-      {saveError && <p className="text-red-400 text-sm mb-4 text-center">{saveError}</p>}
-
-      <button
-        onClick={handleCommit}
-        disabled={saving || !hasAnyInput}
-        className="w-full rounded-full py-5 text-[0.75rem] uppercase tracking-[0.4em] font-black active:scale-95 transition-all"
-        style={{
-          backgroundColor: saveSuccess ? 'rgba(0,0,0,0.07)' : '#000000',
-          color: saveSuccess ? '#1a1a1a' : '#ffffff',
-          boxShadow: '0 12px 32px rgba(0,0,0,0.12)',
-          opacity: saving || !hasAnyInput ? 0.8 : 0.9,
-          marginBottom: 48,
-          ...(saveSuccess ? {
-            position: 'relative' as const,
-            overflow: 'hidden' as const,
-          } : {}),
-        }}
+      {/* + CARDIO collapsible section */}
+      <div
+        className="flex justify-between items-center mb-3 cursor-pointer select-none"
+        onClick={() => setCardioSectionCollapsed(c => !c)}
       >
-        {saving ? 'Saving...' : saveSuccess ? '✓ Session Saved!' : 'Log Session'}
-        {saveSuccess && (
-          <span
-            style={{
-              position: 'absolute',
-              inset: 0,
-              background: 'linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,0.45) 40%,rgba(255,255,255,0.85) 50%,rgba(255,255,255,0.45) 60%,rgba(255,255,255,0))',
-              borderRadius: '9999px',
-              animation: 'cardio-sweep 0.8s ease-in-out 1 forwards',
-              pointerEvents: 'none',
-            }}
-          />
-        )}
-      </button>
+        <p style={sectionLabelStyle}>+ CARDIO</p>
+        <ChevronDown
+          size={16}
+          style={{
+            color: 'rgba(26,26,26,0.8)',
+            marginBottom: '1.25rem',
+            transition: 'transform 0.2s ease',
+            transform: cardioSectionCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
+          }}
+        />
+      </div>
 
-      <RecentLogsCardio refreshKey={refreshKey} />
+      {cardioSectionCollapsed && (
+        <div style={{ height: 1, width: '100%', backgroundColor: '#1a1a1a', marginTop: -4, marginBottom: 20 }} />
+      )}
+
+      {!cardioSectionCollapsed && (
+      <>
+        {/* EXERCISE section — icon picker */}
+        <section ref={exerciseSectionRef} className="mb-8" style={{ marginTop: 12 }}>
+          <div style={{ marginBottom: 20 }}>
+            <ExerciseLogDots exercises={nonTrackerExercises} saveSuccess={saveSuccess} />
+            <ExerciseIconBar
+              exercises={nonTrackerExercises}
+              selectedExercise={selectedExercise}
+              onSelect={setSelectedExercise}
+            />
+          </div>
+
+          {/* Distance */}
+          <label style={{ ...labelStyle, display: 'block', marginBottom: 8,             color: selectedExercise ? '#1a1a1a' : 'rgba(26,26,26,0.45)' }}>
+            {selectedExercise ? selectedExercise.exercise_name?.toUpperCase() : 'Distance'}
+          </label>
+          <div className="flex items-baseline gap-4">
+             <input
+              type="text"
+              inputMode="decimal"
+              value={distance}
+              onChange={e => setDistance(e.target.value)}
+              placeholder="0.0"
+              className="text-[2.5rem] font-black tracking-tighter w-full p-0" style={{ backgroundColor: 'transparent', border: 'none', color: '#1a1a1a' }}
+            />
+             <span className="text-[1rem] font-bold" style={{ color: 'rgba(26,26,26,0.85)', letterSpacing: '0.2em', paddingLeft: '4px' }}>KM</span>
+          </div>
+          <div style={separatorStyle} />
+        </section>
+
+        {/* Duration — only shown for Running */}
+        {isRunning && (
+          <section className="mb-8">
+            <label style={{ ...labelStyle, display: 'block', marginBottom: 8, marginTop: 8 }}>Duration</label>
+            <div className="flex items-baseline gap-4">
+              <div className="flex items-baseline gap-2">
+                <input type="text" inputMode="numeric" value={minutes} onChange={e => setMinutes(e.target.value)} placeholder="00"
+                  className="text-[2.5rem] font-black tracking-tighter w-16 text-left p-0" style={{ backgroundColor: 'transparent', border: 'none', color: '#1a1a1a' }} />
+                <span style={{ ...labelStyle }}>MIN</span>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <input type="text" inputMode="numeric" value={seconds} onChange={e => setSeconds(e.target.value)} placeholder="00"
+                  className="text-[2.5rem] font-black tracking-tighter w-16 text-left p-0" style={{ backgroundColor: 'transparent', border: 'none', color: '#1a1a1a' }} />
+                <span style={{ ...labelStyle }}>SEC</span>
+              </div>
+            </div>
+            <div style={separatorStyle} />
+          </section>
+        )}
+
+        {/* Calories — only shown for Cycling */}
+        {isCycling && (
+          <section className="mb-8">
+            <label style={{ ...labelStyle, display: 'block', marginBottom: 8, marginTop: 8 }}>Calories</label>
+            <div className="flex items-baseline gap-4">
+               <input type="text" inputMode="numeric" value={calories} onChange={e => setCalories(e.target.value)} placeholder="0"
+                className="text-[2.5rem] font-black tracking-tighter w-full p-0" style={{ backgroundColor: 'transparent', border: 'none', color: '#1a1a1a' }} />
+              <span className="text-[1rem] font-bold" style={{ color: 'rgba(26,26,26,0.85)', letterSpacing: '0.2em', paddingLeft: '4px' }}>KCAL</span>
+            </div>
+            <div style={separatorStyle} />
+          </section>
+        )}
+
+        {saveError && <p className="text-red-400 text-sm mb-4 text-center">{saveError}</p>}
+
+        <button
+          onClick={handleCommit}
+          disabled={saving || !hasAnyInput}
+          className="w-full rounded-full py-5 text-[0.75rem] uppercase tracking-[0.4em] font-black active:scale-95 transition-all"
+          style={{
+            backgroundColor: saveSuccess ? 'rgba(0,0,0,0.07)' : '#000000',
+            color: saveSuccess ? '#1a1a1a' : '#ffffff',
+            boxShadow: '0 12px 32px rgba(0,0,0,0.12)',
+            opacity: saving || !hasAnyInput ? 0.8 : 0.9,
+            marginBottom: 48,
+            ...(saveSuccess ? {
+              position: 'relative' as const,
+              overflow: 'hidden' as const,
+            } : {}),
+          }}
+        >
+          {saving ? 'Saving...' : saveSuccess ? '✓ Session Saved!' : 'Log Session'}
+          {saveSuccess && (
+            <span
+              style={{
+                position: 'absolute',
+                inset: 0,
+                background: 'linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,0.45) 40%,rgba(255,255,255,0.85) 50%,rgba(255,255,255,0.45) 60%,rgba(255,255,255,0))',
+                borderRadius: '9999px',
+                animation: 'cardio-sweep 0.8s ease-in-out 1 forwards',
+                pointerEvents: 'none',
+              }}
+            />
+          )}
+        </button>
+      </>
+      )}
+
+      <div style={cardioSectionCollapsed ? { marginBottom: -20 } : {}}>
+        <RecentLogsCardio refreshKey={refreshKey} />
+      </div>
+
+      {cardioSectionCollapsed && (
+        <div style={{ height: 1, width: '100%', backgroundColor: '#1a1a1a', marginTop: -8, marginBottom: 20 }} />
+      )}
 
       <style>{`
         @keyframes cardio-sweep {
