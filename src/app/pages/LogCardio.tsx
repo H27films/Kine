@@ -699,6 +699,10 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, initialSelecte
         <RecentLogsCardio refreshKey={refreshKey} onCollapsedChange={setRecentCardioCollapsed} />
       </div>
 
+      {!recentCardioCollapsed && (
+        <div style={{ height: 40 }} />
+      )}
+
       <style>{`
         @keyframes cardio-sweep {
           0% { transform: translateX(-100%); }
