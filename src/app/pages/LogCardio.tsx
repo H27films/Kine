@@ -60,6 +60,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, initialSelecte
   const [weekOffset, setWeekOffset] = useState(0);
   const [minWeekOffset, setMinWeekOffset] = useState(0);
   const [cardioSectionCollapsed, setCardioSectionCollapsed] = useState(true);
+  const [recentCardioCollapsed, setRecentCardioCollapsed] = useState(false);
 
 
   const isRunning = selectedExercise?.exercise_name?.toUpperCase() === 'RUNNING';
@@ -695,12 +696,8 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, initialSelecte
       )}
 
       <div style={cardioSectionCollapsed ? { marginBottom: -20 } : {}}>
-        <RecentLogsCardio refreshKey={refreshKey} />
+        <RecentLogsCardio refreshKey={refreshKey} onCollapsedChange={setRecentCardioCollapsed} />
       </div>
-
-      {cardioSectionCollapsed && (
-        <div style={{ height: 1, width: '100%', backgroundColor: '#1a1a1a', marginTop: -8, marginBottom: 20 }} />
-      )}
 
       <style>{`
         @keyframes cardio-sweep {

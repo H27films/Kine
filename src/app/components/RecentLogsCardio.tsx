@@ -95,6 +95,7 @@ interface CardioLog {
 
 interface Props {
   refreshKey: number;
+  onCollapsedChange?: (collapsed: boolean) => void;
 }
 
 const sectionLabelStyle: React.CSSProperties = {
@@ -107,13 +108,18 @@ const sectionLabelStyle: React.CSSProperties = {
   fontFamily: "'Archivo', sans-serif",
 };
 
-const RecentLogsCardio: React.FC<Props> = ({ refreshKey }) => {
+const RecentLogsCardio: React.FC<Props> = ({ refreshKey, onCollapsedChange }) => {
   const [recentLogs, setRecentLogs] = useState<CardioLog[]>([]);
   const [expandedLogId, setExpandedLogId] = useState<number | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
   const [editKm, setEditKm] = useState<Record<number, string>>({});
   const [savingLogId, setSavingLogId] = useState<number | null>(null);
   const [collapsed, setCollapsed] = useState(false);
+  
+  // Notify parent of collapsed state changes
+  React.useEffect(() => {
+    onCollapsedChange?.(collapsed);
+  }, [collapsed, onCollapsedChange]);
 
   const loadRecent = useCallback(async () => {
     const { data } = await supabase
