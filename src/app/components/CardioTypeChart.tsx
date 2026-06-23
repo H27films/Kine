@@ -231,7 +231,7 @@ export const CardioTypeChart: React.FC<CardioTypeChartProps> = ({ onNavigate }) 
               key={mode}
               onClick={() => setViewMode(mode)}
               style={{
-                fontSize: viewMode === mode ? '14px' : '10px',
+                fontSize: viewMode === mode ? '15px' : '10px',
                 fontWeight: 700,
                 textTransform: 'uppercase',
                 letterSpacing: '1.5px',
