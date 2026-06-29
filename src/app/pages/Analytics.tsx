@@ -342,8 +342,8 @@ export const Analytics: React.FC<AnalyticsProps> = ({ onNavigate }) => {
     ? minMonth === null || selectedMonth > minMonth
     : minWeek === null || selectedWeek > minWeek;
   const canGoNext = isMonthMode
-    ? maxMonth === null || selectedMonth < maxMonth
-    : maxWeek === null || selectedWeek < maxWeek;
+    ? maxMonth === null || selectedMonth < currentMonth
+    : maxWeek === null || selectedWeek < (currentWeek ?? 0);
 
   const navItems: NavItem[] = [
     { label: 'Home', icon: <Home size={20} />, page: 'dashboard' },
