@@ -62,7 +62,7 @@ export const MaxStatsCard: React.FC<MaxStatsCardProps> = ({ category, timePeriod
         rows = data || [];
       } else if (CARDIO_MAP[category]) {
         // Fetch all cardio + exercises, filter by name in JS (same as Analytics page)
-        const sel = isMonthly ? 'date, total_cardio, exercises(exercise_name)' : 'week, total_cardio, exercises(exercise_name)';
+        const sel = isMonthly ? 'date, total_cardio, exercise_id, exercises(exercise_name)' : 'week, total_cardio, exercise_id, exercises(exercise_name)';
         const { data } = await supabase.from('workouts').select(sel).not('week', 'is', null);
         rows = data || [];
       } else {
@@ -88,8 +88,13 @@ export const MaxStatsCard: React.FC<MaxStatsCardProps> = ({ category, timePeriod
         const bucket = isMonthly ? row.date?.substring(0, 7) : String(row.week);
         if (!bucket) continue;
 
-        // Cardio: filter by exercise name in JS (ROWING → ROW mapping)
-        if (CARDIO_MAP[category]) {
+        // TRACKER: filter by exercise_id matching [82,83,87]
+        if (category === 'TRACKER') {
+          const ids = CARDIO_MAP.TRACKER.exerciseIds!;
+          if (!ids.includes(Number(row.exercise_id))) continue;
+        }
+        // Other cardio: filter by exercise name in JS (ROWING → ROW mapping)
+        else if (CARDIO_MAP[category] && !CARDIO_MAP[category].exerciseIds) {
           const name = (row.exercises?.exercise_name || '').toUpperCase();
           const expectedName = category === 'ROWING' ? 'ROW' : category;
           if (name !== expectedName) continue;
