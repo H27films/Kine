@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { getValidStravaToken } from '../lib/stravaToken';
+import { getValidStravaToken, clearStravaTokens } from '../lib/stravaToken';
 
 interface StravaSyncToastProps {}
 
@@ -50,6 +50,7 @@ const StravaSyncToast: React.FC<StravaSyncToastProps> = () => {
         );
         const activities = await response.json();
         if (!Array.isArray(activities)) {
+          clearStravaTokens();
           setMessage('Strava token expired — reconnect');
           setVisible(true);
           setTimeout(() => {

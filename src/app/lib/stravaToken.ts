@@ -26,7 +26,10 @@ export async function getValidStravaToken(): Promise<string | null> {
       body: JSON.stringify({ refresh_token: refreshToken }),
     });
 
-    if (!response.ok) return null;
+    if (!response.ok) {
+      clearStravaTokens();
+      return null;
+    }
 
     const data = await response.json();
 
@@ -37,8 +40,17 @@ export async function getValidStravaToken(): Promise<string | null> {
       return data.access_token;
     }
 
+    clearStravaTokens();
     return null;
   } catch {
+    clearStravaTokens();
     return null;
   }
+}
+
+/** Clear all stored Strava tokens so Connect recognizes a re-auth is needed. */
+export function clearStravaTokens() {
+  localStorage.removeItem('strava_access_token');
+  localStorage.removeItem('strava_refresh_token');
+  localStorage.removeItem('strava_expires_at');
 }
