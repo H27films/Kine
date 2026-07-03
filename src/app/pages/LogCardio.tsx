@@ -59,7 +59,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, initialSelecte
   const [maxMonthlyOffset, setMaxMonthlyOffset] = useState(0);
   const [weekOffset, setWeekOffset] = useState(0);
   const [minWeekOffset, setMinWeekOffset] = useState(0);
-  const [cardioSectionCollapsed, setCardioSectionCollapsed] = useState(true);
+  const [cardioSectionCollapsed, setCardioSectionCollapsed] = useState(false);
   const [recentCardioCollapsed, setRecentCardioCollapsed] = useState(false);
 
 
