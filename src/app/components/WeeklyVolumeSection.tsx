@@ -31,7 +31,7 @@ const WeeklyVolumeSection: React.FC = () => {
 
   const loadWeeklyData = async (weeks: number[], idx: number) => {
     const selectedWeek = idx === 0 ? currentWeek : (weeks[idx - 1] ?? currentWeek);
-    const prevWeek = idx === 0 ? (weeks[0] ?? currentWeek - 1) : (weeks[idx] ?? selectedWeek - 1);
+    const prevWeek = idx === 0 ? currentWeek - 1 : (weeks[idx] ?? selectedWeek - 1);
 
     const [{ data: thisWeek }, { data: lastWeekData }] = await Promise.all([
       supabase.from('workouts').select('type, total_weight').in('type', WEIGHT_TYPES).eq('week', selectedWeek),
