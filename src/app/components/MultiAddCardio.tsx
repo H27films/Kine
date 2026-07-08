@@ -275,8 +275,12 @@ const MultiAddCardio: React.FC<MultiAddCardioProps> = ({ nonTrackerExercises, ca
           <button
             onClick={() => setRows(prev => [...prev, { exerciseName: 'RUNNING', distance: '', minutes: '', seconds: '', calories: '' }])}
             style={{
-              alignSelf: 'flex-start', padding: '4px 12px', borderRadius: '999px',
-              border: '1px solid rgba(0,0,0,0.12)', backgroundColor: 'transparent',
+              alignSelf: 'flex-start', padding: '4px 16px', borderRadius: '999px',
+              border: '1px solid rgba(255,255,255,0.55)',
+              background: 'rgba(255,255,255,0.55)',
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -1px 0 rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.08)',
               color: '#1a1a1a', fontSize: '0.65rem', fontWeight: 700,
               letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer',
               fontFamily: "'Archivo', sans-serif",
