@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, ChevronDown } from 'lucide-react';
-import { supabase, getISOWeek } from '../../lib/supabase';
+import { supabase, getISOWeek, getDayName } from '../../lib/supabase';
 
 interface WorkoutRow {
   id: number;
@@ -181,9 +181,15 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
     try {
       for (const id of ids) {
         const ev = editValues[id];
-        const updateData: Record<string, any> = { date: ev.date };
         const row = rows.find(r => r.id === id);
         if (!row) continue;
+
+        // Recalculate day and week from the new date
+        const newDate = new Date(ev.date + 'T00:00:00');
+        const dayName = getDayName(newDate);
+        const weekNum = getISOWeek(newDate);
+
+        const updateData: Record<string, any> = { date: ev.date, day: dayName, week: weekNum };
 
         if (row.exercise_id === CALORIES_EXERCISE_ID) {
           updateData.calories = ev.calories ? parseInt(ev.calories) : null;
