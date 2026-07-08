@@ -62,12 +62,14 @@ const MultiAddCardio: React.FC<MultiAddCardioProps> = ({ nonTrackerExercises, ca
         const timeStr = (row.minutes || row.seconds)
           ? `00:${(row.minutes || '0').padStart(2,'0')}:${(row.seconds || '0').padStart(2,'0')}`
           : null;
+        const workoutCalories = parseFloat(row.calories);
         await supabase.from('workouts').insert({
           date: today, week, day, type: 'CARDIO',
           exercise_id: exercise.id,
           km, total_cardio: totalCardio,
           multiplier: exercise.multiplier,
           time: timeStr,
+          workout_calories: workoutCalories > 0 ? workoutCalories : null,
           total_score_k: Math.round(totalCardio * 1000),
           new_entry: 'New', source: 'app',
         });
@@ -237,7 +239,7 @@ const MultiAddCardio: React.FC<MultiAddCardioProps> = ({ nonTrackerExercises, ca
                   />
                 </div>
 
-                {/* Calories — only editable for Cycle */}
+                {/* Calories — editable for all types, saves to workout_calories */}
                 <input
                   type="text"
                   inputMode="numeric"
@@ -247,13 +249,12 @@ const MultiAddCardio: React.FC<MultiAddCardioProps> = ({ nonTrackerExercises, ca
                     newRows[i] = { ...newRows[i], calories: e.target.value };
                     setRows(newRows);
                   }}
-                  placeholder={isCycle ? "0" : "—"}
-                  disabled={!isCycle}
+                  placeholder="0"
                   style={{
                     fontSize: '0.75rem', fontWeight: 600, padding: '6px 4px',
                     border: 'none', borderBottom: '1px solid rgba(0,0,0,0.1)',
                     backgroundColor: 'transparent',
-                    color: isCycle ? '#1a1a1a' : 'rgba(26,26,26,0.2)',
+                    color: '#1a1a1a',
                     width: '100%', outline: 'none', textAlign: 'center',
                   }}
                 />
