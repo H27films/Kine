@@ -14,9 +14,10 @@ interface MultiAddCardioProps {
   nonTrackerExercises: Exercise[];
   calorieConversion: number;
   onSaved: () => void;
+  onOpenChange?: (open: boolean) => void;
 }
 
-const MultiAddCardio: React.FC<MultiAddCardioProps> = ({ nonTrackerExercises, calorieConversion, onSaved }) => {
+const MultiAddCardio: React.FC<MultiAddCardioProps> = ({ nonTrackerExercises, calorieConversion, onSaved, onOpenChange }) => {
   const [open, setOpen] = useState(false);
   const [rows, setRows] = useState<MultiAddRow[]>(
     () => Array.from({ length: 3 }, () => ({ exerciseName: 'RUNNING', distance: '', minutes: '', seconds: '', calories: '' }))
@@ -91,7 +92,11 @@ const MultiAddCardio: React.FC<MultiAddCardioProps> = ({ nonTrackerExercises, ca
     <div className="mb-4" style={{ marginTop: '-4px' }}>
       <div
         className="flex items-center gap-2 cursor-pointer select-none"
-        onClick={() => setOpen(o => !o)}
+        onClick={() => {
+          const newOpen = !open;
+          setOpen(newOpen);
+          onOpenChange?.(newOpen);
+        }}
       >
         <span style={{ fontSize: '0.85rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#1a1a1a', fontFamily: "'Archivo', sans-serif" }}>
           Multi Add
@@ -110,10 +115,10 @@ const MultiAddCardio: React.FC<MultiAddCardioProps> = ({ nonTrackerExercises, ca
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '18px' }}>
           {/* Header row */}
           <div style={{ display: 'grid', gridTemplateColumns: COL_TEMPLATE, gap: '8px', padding: '0 2px' }}>
-            <span style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#1a1a1a' }}>Type</span>
-            <span style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#1a1a1a', textAlign: 'center' }}>KM</span>
-            <span style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#1a1a1a', textAlign: 'center' }}>Time</span>
-            <span style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#1a1a1a', textAlign: 'center' }}>Cal</span>
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#1a1a1a' }}>Type</span>
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#1a1a1a', textAlign: 'center' }}>KM</span>
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#1a1a1a', textAlign: 'center' }}>Time</span>
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#1a1a1a', textAlign: 'center' }}>Cal</span>
           </div>
 
           {rows.map((row, i) => {
@@ -125,19 +130,23 @@ const MultiAddCardio: React.FC<MultiAddCardioProps> = ({ nonTrackerExercises, ca
             const dropdownOpen = dropdownIdx === i;
 
             return (
-              <div key={i} style={{ display: 'grid', gridTemplateColumns: COL_TEMPLATE, gap: '8px', alignItems: 'center' }}>
+              <div key={i} style={{
+                display: 'grid', gridTemplateColumns: COL_TEMPLATE, gap: '8px', alignItems: 'center',
+                borderBottom: i < rows.length - 1 ? '0.5px solid rgba(0,0,0,0.12)' : 'none',
+                boxShadow: i < rows.length - 1 ? '0 1px 2px rgba(0,0,0,0.03)' : 'none',
+                paddingBottom: '10px',
+              }}>
                 {/* Custom Type dropdown */}
                 <div style={{ position: 'relative' }}>
                   <div
                     onClick={() => setDropdownIdx(dropdownOpen ? null : i)}
                     ref={dropdownIdx === i ? dropdownRef : null}
                     style={{
-                      fontSize: '0.75rem', fontWeight: 600, padding: '8px 8px',
+                      fontSize: '0.75rem', fontWeight: 600, padding: '8px 8px 8px 0',
                       cursor: 'pointer', color: '#1a1a1a', fontFamily: "'Archivo', sans-serif",
                       textTransform: 'uppercase', letterSpacing: '0.05em',
                       backgroundColor: 'transparent',
                       border: 'none',
-                      borderBottom: '1px solid rgba(0,0,0,0.1)',
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '2px',
                       userSelect: 'none', whiteSpace: 'nowrap', overflow: 'hidden',
                     }}
@@ -192,12 +201,12 @@ const MultiAddCardio: React.FC<MultiAddCardioProps> = ({ nonTrackerExercises, ca
                     setRows(newRows);
                   }}
                   placeholder="0.0"
-                  style={{
-                    fontSize: '0.85rem', fontWeight: 700, padding: '6px 4px',
-                    border: 'none', borderBottom: '1px solid rgba(0,0,0,0.1)',
-                    backgroundColor: 'transparent', color: '#1a1a1a',
-                    width: '100%', outline: 'none', textAlign: 'center',
-                  }}
+                    style={{
+                      fontSize: '0.85rem', fontWeight: 700, padding: '6px 4px',
+                      border: 'none',
+                      backgroundColor: 'transparent', color: '#1a1a1a',
+                      width: '100%', outline: 'none', textAlign: 'center',
+                    }}
                 />
 
                 {/* Time */}
@@ -211,10 +220,10 @@ const MultiAddCardio: React.FC<MultiAddCardioProps> = ({ nonTrackerExercises, ca
                       newRows[i] = { ...newRows[i], minutes: e.target.value };
                       setRows(newRows);
                     }}
-                    placeholder="--"
+                    placeholder="MM"
                     style={{
                       fontSize: '0.75rem', fontWeight: 600, padding: '6px 2px',
-                      border: 'none', borderBottom: '1px solid rgba(0,0,0,0.1)',
+                      border: 'none',
                       backgroundColor: 'transparent', color: '#1a1a1a',
                       width: '28px', outline: 'none', textAlign: 'center',
                     }}
@@ -229,10 +238,10 @@ const MultiAddCardio: React.FC<MultiAddCardioProps> = ({ nonTrackerExercises, ca
                       newRows[i] = { ...newRows[i], seconds: e.target.value };
                       setRows(newRows);
                     }}
-                    placeholder="--"
+                    placeholder="SS"
                     style={{
                       fontSize: '0.75rem', fontWeight: 600, padding: '6px 2px',
-                      border: 'none', borderBottom: '1px solid rgba(0,0,0,0.1)',
+                      border: 'none',
                       backgroundColor: 'transparent', color: '#1a1a1a',
                       width: '28px', outline: 'none', textAlign: 'center',
                     }}
@@ -250,20 +259,17 @@ const MultiAddCardio: React.FC<MultiAddCardioProps> = ({ nonTrackerExercises, ca
                     setRows(newRows);
                   }}
                   placeholder="0"
-                  style={{
-                    fontSize: '0.75rem', fontWeight: 600, padding: '6px 4px',
-                    border: 'none', borderBottom: '1px solid rgba(0,0,0,0.1)',
-                    backgroundColor: 'transparent',
-                    color: '#1a1a1a',
-                    width: '100%', outline: 'none', textAlign: 'center',
-                  }}
+                    style={{
+                      fontSize: '0.75rem', fontWeight: 600, padding: '6px 4px',
+                      border: 'none',
+                      backgroundColor: 'transparent',
+                      color: '#1a1a1a',
+                      width: '100%', outline: 'none', textAlign: 'center',
+                    }}
                 />
               </div>
             );
           })}
-
-          {/* Spacer before buttons */}
-          <div style={{ height: '8px' }} />
 
           {/* Add row button */}
           <button

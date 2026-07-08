@@ -62,6 +62,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, initialSelecte
   const [minWeekOffset, setMinWeekOffset] = useState(0);
   const [cardioSectionCollapsed, setCardioSectionCollapsed] = useState(false);
   const [recentCardioCollapsed, setRecentCardioCollapsed] = useState(false);
+  const [multiAddOpen, setMultiAddOpen] = useState(false);
 
   const isRunning = selectedExercise?.exercise_name?.toUpperCase() === 'RUNNING';
   const isCycling = selectedExercise?.exercise_name?.toUpperCase() === 'CYCLE';
@@ -601,12 +602,15 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, initialSelecte
         <MultiAddCardio
           nonTrackerExercises={nonTrackerExercises}
           calorieConversion={calorieConversion}
+          onOpenChange={setMultiAddOpen}
           onSaved={() => {
             setRefreshKey(k => k + 1);
             window.dispatchEvent(new CustomEvent('kine:data-updated'));
           }}
         />
 
+        {!multiAddOpen && (
+        <>
         {/* EXERCISE section — icon picker */}
         <section ref={exerciseSectionRef} className="mb-8" style={{ marginTop: 12 }}>
           <div style={{ marginBottom: 20 }}>
@@ -701,6 +705,8 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, initialSelecte
             />
           )}
         </button>
+        </>
+        )}
       </>
       )}
 
