@@ -20,7 +20,11 @@ interface MultiAddCardioProps {
 const MultiAddCardio: React.FC<MultiAddCardioProps> = ({ nonTrackerExercises, calorieConversion, onSaved, onOpenChange }) => {
   const [open, setOpen] = useState(false);
   const [rows, setRows] = useState<MultiAddRow[]>(
-    () => Array.from({ length: 3 }, () => ({ exerciseName: 'RUNNING', distance: '', minutes: '', seconds: '', calories: '' }))
+    () => [
+      { exerciseName: 'RUNNING', distance: '', minutes: '', seconds: '', calories: '' },
+      { exerciseName: 'WALKING', distance: '', minutes: '', seconds: '', calories: '' },
+      { exerciseName: 'ROW', distance: '', minutes: '', seconds: '', calories: '' },
+    ]
   );
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -40,7 +44,7 @@ const MultiAddCardio: React.FC<MultiAddCardioProps> = ({ nonTrackerExercises, ca
     }
   }, [dropdownIdx]);
 
-  const COL_TEMPLATE = '100px 1fr 1fr 60px';
+  const COL_TEMPLATE = '120px 0.8fr 1fr 60px';
 
   const handleLogAll = async () => {
     const hasAny = rows.some(r => parseFloat(r.distance) > 0);
@@ -79,7 +83,11 @@ const MultiAddCardio: React.FC<MultiAddCardioProps> = ({ nonTrackerExercises, ca
       await recalculateDailyTotals(today);
       onSaved();
       setSaveSuccess(true);
-      setRows(Array.from({ length: 3 }, () => ({ exerciseName: 'RUNNING', distance: '', minutes: '', seconds: '', calories: '' })));
+      setRows([
+        { exerciseName: 'RUNNING', distance: '', minutes: '', seconds: '', calories: '' },
+        { exerciseName: 'WALKING', distance: '', minutes: '', seconds: '', calories: '' },
+        { exerciseName: 'ROW', distance: '', minutes: '', seconds: '', calories: '' },
+      ]);
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (e: any) {
       console.error('Multi Add save error:', e);
@@ -139,7 +147,11 @@ const MultiAddCardio: React.FC<MultiAddCardioProps> = ({ nonTrackerExercises, ca
                 {/* Custom Type dropdown */}
                 <div style={{ position: 'relative' }}>
                   <div
-                    onClick={() => setDropdownIdx(dropdownOpen ? null : i)}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDropdownIdx(dropdownOpen ? null : i);
+                    }}
                     ref={dropdownIdx === i ? dropdownRef : null}
                     style={{
                       fontSize: '0.75rem', fontWeight: 600, padding: '8px 8px 8px 0',
