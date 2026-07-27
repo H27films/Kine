@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, ChevronDown } from 'lucide-react';
-import { supabase, getISOWeek, getDayName } from '../../lib/supabase';
+import { supabase, getISOWeek, getDayName, recalculateDailyTotals } from '../../lib/supabase';
 
 interface WorkoutRow {
   id: number;
@@ -177,12 +177,22 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
     const ids = Object.keys(editValues).map(Number);
     if (ids.length === 0) return;
 
+    // Collect original dates for recalculation (in case date changed)
+    const affectedDates = new Set<string>();
+    for (const id of ids) {
+      const row = rows.find(r => r.id === id);
+      if (row) affectedDates.add(row.date);
+    }
+
     setSavingIds(new Set(ids));
     try {
       for (const id of ids) {
         const ev = editValues[id];
         const row = rows.find(r => r.id === id);
         if (!row) continue;
+
+        // Also add the new date to affected dates
+        affectedDates.add(ev.date);
 
         // Recalculate day and week from the new date
         const newDate = new Date(ev.date + 'T00:00:00');
@@ -202,6 +212,13 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
         const { error } = await supabase.from('workouts').update(updateData).eq('id', id);
         if (error) throw error;
       }
+
+      // Recalculate totals for all affected dates (old + new)
+      for (const dateStr of affectedDates) {
+        await recalculateDailyTotals(dateStr);
+      }
+      window.dispatchEvent(new CustomEvent('kine:data-updated'));
+
       // Reload data
       const minDate = fiveWeeksAgo();
       const { data } = await supabase
