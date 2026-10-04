@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronDown, ArrowRight, Clock } from 'lucide-react';
+import { ChevronDown, Clock } from 'lucide-react';
 
 import { Page } from '../../types';
 import { supabase, Exercise, todayStr, getISOWeek, getDayName, currentWeekMonday, weeksAgoMonday, recalculateDailyTotals, getNewEntryStatus } from '../../lib/supabase';
@@ -635,13 +635,14 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, initialSelecte
                 onClick={() => setShowCrossTimer(true)}
                 aria-label="Log by timer"
                 style={{
-                  display: 'flex', alignItems: 'center', gap: 6,
-                  background: 'none', border: 'none', padding: 0,
-                  cursor: 'pointer', color: '#1a1a1a',
+                  display: 'flex', alignItems: 'center', gap: 5,
+                  background: 'none', border: 'none', cursor: 'pointer', color: '#1a1a1a',
+                  padding: '8px 6px', margin: '-8px -6px',
+                  fontFamily: "'Archivo', sans-serif",
                 }}
               >
-                <ArrowRight size={18} strokeWidth={2.2} />
-                <Clock size={18} strokeWidth={2.2} />
+                <span style={{ fontSize: '0.7rem', fontWeight: 300, letterSpacing: '0.22em', textTransform: 'uppercase' }}>TIMER</span>
+                <Clock size={15} strokeWidth={1.6} />
               </button>
             )}
           </div>
