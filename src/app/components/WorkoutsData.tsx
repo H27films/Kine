@@ -423,10 +423,18 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
         paddingTop: 'calc(16px + env(safe-area-inset-top))',
         borderBottom: '1px solid rgba(0,0,0,0.06)',
       }}>
-        <span style={{
-          fontSize: '14px', fontWeight: 700, letterSpacing: '0.15em',
-          color: '#1a1a1a', textTransform: 'uppercase',
-        }}>
+        <span
+          onClick={onClose}
+          role="button"
+          aria-label="Close"
+          style={{
+            fontSize: '14px', fontWeight: 700, letterSpacing: '0.15em',
+            color: '#1a1a1a', textTransform: 'uppercase',
+            cursor: 'pointer',
+            padding: '6px 8px', margin: '-6px -8px',
+            borderRadius: '8px',
+          }}
+        >
           Workouts Data
         </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
