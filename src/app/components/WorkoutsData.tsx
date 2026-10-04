@@ -44,6 +44,8 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
   const [filterOpen, setFilterOpen] = useState(false);
   const [typeFilter, setTypeFilter] = useState<string | null>(null);
   const [typeFilterOpen, setTypeFilterOpen] = useState(false);
+  const [editingDate, setEditingDate] = useState(false);
+  const [bulkDate, setBulkDate] = useState('');
 
   // Calculate date 5 weeks ago for filtering
   const fiveWeeksAgo = (): string => {
@@ -119,6 +121,8 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
     setSelectMode(false);
     setEditing(false);
     setEditValues({});
+    setEditingDate(false);
+    setBulkDate('');
     setDeletingConfirmId(null);
     setDeletingId(null);
   };
@@ -277,6 +281,112 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
     }
   };
 
+  // Reload rows from the DB (used after bulk date update)
+  const reloadRows = async () => {
+    const minDate = fiveWeeksAgo();
+    const { data } = await supabase
+      .from('workouts')
+      .select(`
+        id, date, type, exercise_id, km, calories, food_rating,
+        bodyweight, body_fat_percent, muscle_mass, time,
+        total_cardio, total_weight, new_entry,
+        exercises:exercise_id(exercise_name)
+      `)
+      .in('type', ['CARDIO', 'MEASUREMENT'])
+      .gte('date', minDate)
+      .order('date', { ascending: false })
+      .order('id', { ascending: false })
+      .limit(500);
+
+    if (data) {
+      const mapped = (data as any[]).map(r => ({
+        id: r.id,
+        date: r.date,
+        type: r.type,
+        exercise_id: r.exercise_id,
+        exercise_name: r.exercises?.exercise_name || 'Unknown',
+        km: r.km,
+        calories: r.calories,
+        food_rating: r.food_rating,
+        bodyweight: r.bodyweight,
+        body_fat_percent: r.body_fat_percent,
+        muscle_mass: r.muscle_mass,
+        time: r.time,
+        total_cardio: r.total_cardio,
+        total_weight: r.total_weight,
+        new_entry: r.new_entry,
+      }));
+      mapped.sort((a, b) => {
+        if (a.date !== b.date) return b.date.localeCompare(a.date);
+        const order = (r: typeof a) => {
+          if (r.exercise_id === TRACKER_EXERCISE_ID) return 4;
+          if (r.type === 'CARDIO') return 0;
+          if (r.exercise_id === FOOD_EXERCISE_ID) return 1;
+          if (r.exercise_id === CALORIES_EXERCISE_ID) return 2;
+          return 0.5;
+        };
+        const oa = order(a);
+        const ob = order(b);
+        if (oa !== ob) return oa - ob;
+        return b.id - a.id;
+      });
+      setRows(mapped);
+    }
+  };
+
+  // Open the bulk date editor in the footer, prefilled with the shared date (if any)
+  const startEditDate = () => {
+    const dates = new Set(rows.filter(r => selectedIds.includes(r.id)).map(r => r.date));
+    setBulkDate(dates.size === 1 ? Array.from(dates)[0] : '');
+    setEditingDate(true);
+    setDeletingConfirmId(null);
+    setDeletingId(null);
+  };
+
+  // Apply one date to every selected row at once
+  const handleApplyBulkDate = async () => {
+    const ids = selectedIds.slice();
+    if (ids.length === 0) return;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(bulkDate)) return;
+
+    const parsed = new Date(bulkDate + 'T00:00:00');
+    if (isNaN(parsed.getTime())) return;
+
+    const dayName = getDayName(parsed);
+    const weekNum = getISOWeek(parsed);
+
+    const affectedDates = new Set<string>();
+    for (const id of ids) {
+      const row = rows.find(r => r.id === id);
+      if (row) affectedDates.add(row.date);
+    }
+    affectedDates.add(bulkDate);
+
+    setSavingIds(new Set(ids));
+    try {
+      for (const id of ids) {
+        const { error } = await supabase
+          .from('workouts')
+          .update({ date: bulkDate, day: dayName, week: weekNum })
+          .eq('id', id);
+        if (error) throw error;
+      }
+
+      for (const dateStr of affectedDates) {
+        await recalculateDailyTotals(dateStr);
+      }
+      window.dispatchEvent(new CustomEvent('kine:data-updated'));
+
+      await reloadRows();
+      setEditingDate(false);
+      setBulkDate('');
+    } catch (e: any) {
+      console.error('Bulk date update failed:', e.message);
+    } finally {
+      setSavingIds(new Set());
+    }
+  };
+
   const getPrimaryValue = (row: WorkoutRow): { value: string; label: string } | null => {
     if (row.exercise_id === CALORIES_EXERCISE_ID) {
       return row.calories != null ? { value: String(row.calories), label: 'KCAL' } : null;
@@ -294,6 +404,7 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
   };
 
   const selectedRows = rows.filter(r => selectedIds.includes(r.id));
+  const isValidBulkDate = /^\d{4}-\d{2}-\d{2}$/.test(bulkDate) && !isNaN(new Date(bulkDate + 'T00:00:00').getTime());
 
   return (
     <div
@@ -954,6 +1065,67 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
                  CANCEL
                </button>
              </>
+           ) : editingDate ? (
+             <div style={{ flex: 1, minWidth: 0 }}>
+               {/* Bulk date editor */}
+               <div style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(26,26,26,0.75)', letterSpacing: '0.1em', marginBottom: '6px' }}>
+                 NEW DATE ({selectedIds.length})
+               </div>
+               <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                 <div style={{
+                   flex: 1, minWidth: 0,
+                   padding: '8px 10px', borderRadius: '10px',
+                   background: 'rgba(255,255,255,0.55)',
+                   backdropFilter: 'blur(12px)',
+                   WebkitBackdropFilter: 'blur(12px)',
+                   border: '1px solid rgba(255,255,255,0.3)',
+                 }}>
+                   <input
+                     type="text"
+                     value={bulkDate}
+                     onChange={e => setBulkDate(e.target.value)}
+                     disabled={savingIds.size > 0}
+                     autoFocus
+                     style={{
+                       width: '100%', border: 'none', outline: 'none',
+                       backgroundColor: 'transparent',
+                       fontSize: '12px', fontWeight: 500,
+                       fontFamily: "'JetBrains Mono', monospace",
+                       color: '#1a1a1a',
+                     }}
+                     placeholder="YYYY-MM-DD"
+                   />
+                 </div>
+                 <button
+                   onClick={handleApplyBulkDate}
+                   disabled={savingIds.size > 0 || selectedIds.length === 0 || !isValidBulkDate}
+                   style={{
+                     padding: '8px 18px', borderRadius: '999px', border: 'none',
+                     cursor: (savingIds.size > 0 || selectedIds.length === 0 || !isValidBulkDate) ? 'default' : 'pointer',
+                     backgroundColor: (savingIds.size > 0 || selectedIds.length === 0 || !isValidBulkDate) ? 'rgba(0,0,0,0.08)' : '#1a1a1a',
+                     color: (savingIds.size > 0 || selectedIds.length === 0 || !isValidBulkDate) ? 'rgba(26,26,26,0.4)' : '#f2f2f2',
+                     fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em',
+                     textTransform: 'uppercase',
+                     fontFamily: "'JetBrains Mono', monospace",
+                   }}
+                 >
+                   {savingIds.size > 0 ? 'APPLYING...' : 'APPLY'}
+                 </button>
+                 <button
+                   onClick={() => { setEditingDate(false); setBulkDate(''); }}
+                   disabled={savingIds.size > 0}
+                   style={{
+                     padding: '8px 16px', borderRadius: '999px', border: 'none', cursor: 'pointer',
+                     backgroundColor: 'rgba(0,0,0,0.06)', color: '#1a1a1a',
+                     fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em',
+                     textTransform: 'uppercase',
+                     fontFamily: "'JetBrains Mono', monospace",
+                   }}
+                 >
+                   CANCEL
+                 </button>
+               </div>
+             </div>
            ) : (
              <>
                <button
@@ -969,6 +1141,21 @@ const WorkoutsData: React.FC<WorkoutsDataProps> = ({ onClose }) => {
                  }}
                >
                  EDIT SELECTED
+               </button>
+               <button
+                 onClick={startEditDate}
+                 disabled={selectedIds.length === 0}
+                 style={{
+                   padding: '8px 18px', borderRadius: '999px', border: 'none',
+                   cursor: selectedIds.length === 0 ? 'default' : 'pointer',
+                   backgroundColor: 'rgba(0,0,0,0.06)',
+                   color: selectedIds.length > 0 ? '#1a1a1a' : 'rgba(26,26,26,0.4)',
+                   fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em',
+                   textTransform: 'uppercase',
+                   fontFamily: "'JetBrains Mono', monospace",
+                 }}
+               >
+                 EDIT DATE
                </button>
                <button
                  onClick={clearSelection}
