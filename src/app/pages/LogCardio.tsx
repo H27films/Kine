@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, ArrowRight, Clock } from 'lucide-react';
 
 import { Page } from '../../types';
 import { supabase, Exercise, todayStr, getISOWeek, getDayName, currentWeekMonday, weeksAgoMonday, recalculateDailyTotals, getNewEntryStatus } from '../../lib/supabase';
@@ -11,6 +11,7 @@ import ExerciseLogDots from '../components/ExerciseLogDots';
 import MonthlyCalendarChart from '../components/MonthlyCalendarChart';
 import RecentLogsCardio from '../components/RecentLogsCardio';
 import MultiAddCardio from '../components/MultiAddCardio';
+import CrossTrainerTimer from '../components/CrossTrainerTimer';
 
 interface LogCardioProps {
   onNavigate: (page: Page, data?: any) => void;
@@ -63,9 +64,11 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, initialSelecte
   const [cardioSectionCollapsed, setCardioSectionCollapsed] = useState(false);
   const [recentCardioCollapsed, setRecentCardioCollapsed] = useState(false);
   const [multiAddOpen, setMultiAddOpen] = useState(false);
+  const [showCrossTimer, setShowCrossTimer] = useState(false);
 
   const isRunning = selectedExercise?.exercise_name?.toUpperCase() === 'RUNNING';
   const isCycling = selectedExercise?.exercise_name?.toUpperCase() === 'CYCLE';
+  const isCrossTrainer = selectedExercise?.exercise_name?.toUpperCase().includes('CROSS') ?? false;
 
   // Scroll to exercise section when pre-selected cardio is Running, Row, or Cross Trainer
   useEffect(() => {
@@ -623,9 +626,25 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, initialSelecte
           </div>
 
           {/* Distance */}
-          <label style={{ ...labelStyle, display: 'block', marginBottom: 8,             color: selectedExercise ? '#1a1a1a' : 'rgba(26,26,26,0.45)' }}>
-            {selectedExercise ? selectedExercise.exercise_name?.toUpperCase() : 'Distance'}
-          </label>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <label style={{ ...labelStyle, color: selectedExercise ? '#1a1a1a' : 'rgba(26,26,26,0.45)' }}>
+              {selectedExercise ? selectedExercise.exercise_name?.toUpperCase() : 'Distance'}
+            </label>
+            {isCrossTrainer && (
+              <button
+                onClick={() => setShowCrossTimer(true)}
+                aria-label="Log by timer"
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  background: 'none', border: 'none', padding: 0,
+                  cursor: 'pointer', color: '#1a1a1a',
+                }}
+              >
+                <ArrowRight size={18} strokeWidth={2.2} />
+                <Clock size={18} strokeWidth={2.2} />
+              </button>
+            )}
+          </div>
           <div className="flex items-baseline gap-4">
              <input
               type="text"
@@ -891,6 +910,17 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, initialSelecte
       {/* Tracker Edit Sheet */}
       {showTrackerEdit && (
         <TrackerEditSheet weekOffset={weekOffset} onClose={() => setShowTrackerEdit(false)} onSaved={() => { setShowTrackerEdit(false); setSaveSuccess(v => !v); }} />
+      )}
+
+      {/* Cross Trainer Timer */}
+      {showCrossTimer && (
+        <CrossTrainerTimer
+          onClose={() => setShowCrossTimer(false)}
+          onApply={(km) => {
+            setDistance(km > 0 ? String(+km.toFixed(2)) : '');
+            setShowCrossTimer(false);
+          }}
+        />
       )}
 
     </div>
