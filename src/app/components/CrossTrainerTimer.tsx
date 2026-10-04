@@ -15,6 +15,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
 const primaryBtn: React.CSSProperties = {
   flex: 1,
+  width: '100%',
   padding: '15px',
   backgroundColor: '#000000',
   color: '#ffffff',
@@ -24,11 +25,13 @@ const primaryBtn: React.CSSProperties = {
   fontWeight: 900,
   letterSpacing: '0.25em',
   textTransform: 'uppercase',
+  textAlign: 'center',
   cursor: 'pointer',
 };
 
 const secondaryBtn: React.CSSProperties = {
   flex: 1,
+  width: '100%',
   padding: '15px',
   backgroundColor: 'transparent',
   color: '#000000',
@@ -38,6 +41,7 @@ const secondaryBtn: React.CSSProperties = {
   fontWeight: 900,
   letterSpacing: '0.25em',
   textTransform: 'uppercase',
+  textAlign: 'center',
   cursor: 'pointer',
 };
 
