@@ -6,10 +6,10 @@ const MINUTES_PER_KM = 12;
 
 interface Props {
   onClose: () => void;
-  onApply: (km: number) => void;
+  onLog: (km: number) => Promise<void>;
 }
 
-type Phase = 'idle' | 'running' | 'paused' | 'done';
+type Phase = 'idle' | 'running' | 'paused' | 'logging' | 'done' | 'error';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
@@ -41,7 +41,7 @@ const secondaryBtn: React.CSSProperties = {
   cursor: 'pointer',
 };
 
-const CrossTrainerTimer: React.FC<Props> = ({ onClose, onApply }) => {
+const CrossTrainerTimer: React.FC<Props> = ({ onClose, onLog }) => {
   const [phase, setPhase] = useState<Phase>('idle');
   const [elapsedMs, setElapsedMs] = useState(0);
   // Elapsed time already banked from previously finished run segments
@@ -89,12 +89,20 @@ const CrossTrainerTimer: React.FC<Props> = ({ onClose, onApply }) => {
     setPhase('running');
   };
 
-  // Complete — freeze, push the KM into the KM field, show confirmation
-  const handleComplete = () => {
+  // Log complete — freeze, write the KM to Supabase, then confirm
+  const handleComplete = async () => {
     const ms = liveMs();
+    // Bank the elapsed time so a retry (or the readout) stays stable
+    baseRef.current = ms;
     setElapsedMs(ms);
-    setPhase('done');
-    onApply((ms / 1000) / 60 / MINUTES_PER_KM);
+    setPhase('logging');
+    try {
+      await onLog((ms / 1000) / 60 / MINUTES_PER_KM);
+      setPhase('done');
+    } catch (e) {
+      console.error('Cross trainer timer log failed:', e);
+      setPhase('error');
+    }
   };
 
   return (
@@ -135,33 +143,58 @@ const CrossTrainerTimer: React.FC<Props> = ({ onClose, onApply }) => {
           </button>
         </div>
 
-        {phase === 'done' ? (
-          /* ---------- Confirmation ---------- */
+        {(phase === 'logging' || phase === 'done' || phase === 'error') ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 28 }}>
-            <Check size={44} strokeWidth={2.5} color="#000000" />
-            <div style={{
-              marginTop: 12,
-              fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-0.02em',
-              color: '#000000', lineHeight: 1,
-            }}>
-              {km.toFixed(2)} KM
-            </div>
-            <div style={{
-              marginTop: 10,
-              fontSize: '10px', fontWeight: 900, letterSpacing: '0.2em',
-              color: '#000000', textTransform: 'uppercase',
-            }}>
-              Entered in km field
-            </div>
-            <div style={{
-              marginTop: 6,
-              fontSize: '10px', fontWeight: 700, letterSpacing: '0.15em',
-              color: 'rgba(0,0,0,0.4)', textTransform: 'uppercase', textAlign: 'center',
-            }}>
-              {timeStr} elapsed · 1 km = {MINUTES_PER_KM} min
-              <br />
-              Tap Log Session to save
-            </div>
+            {phase === 'error' ? (
+              <>
+                <X size={44} strokeWidth={2.5} color="#b02828" />
+                <div style={{
+                  marginTop: 12,
+                  fontSize: '1.25rem', fontWeight: 900, letterSpacing: '0.08em',
+                  color: '#b02828', textTransform: 'uppercase',
+                }}>
+                  Log failed
+                </div>
+                <div style={{
+                  marginTop: 6,
+                  fontSize: '10px', fontWeight: 700, letterSpacing: '0.15em',
+                  color: 'rgba(0,0,0,0.4)', textTransform: 'uppercase', textAlign: 'center',
+                }}>
+                  Nothing was saved to Supabase
+                  <br />
+                  Check your connection and retry
+                </div>
+              </>
+            ) : (
+              <>
+                <Check size={44} strokeWidth={2.5} color={phase === 'logging' ? 'rgba(0,0,0,0.25)' : '#000000'} />
+                <div style={{
+                  marginTop: 12,
+                  fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-0.02em',
+                  color: '#000000', lineHeight: 1,
+                }}>
+                  {km.toFixed(2)} KM
+                </div>
+                <div style={{
+                  marginTop: 10,
+                  fontSize: '10px', fontWeight: 900, letterSpacing: '0.2em',
+                  color: '#000000', textTransform: 'uppercase',
+                }}>
+                  {phase === 'logging' ? 'Logging…' : 'Cross Trainer logged'}
+                </div>
+                {phase === 'done' && (
+                  <div style={{
+                    marginTop: 6,
+                    fontSize: '10px', fontWeight: 700, letterSpacing: '0.15em',
+                    color: 'rgba(0,0,0,0.4)', textTransform: 'uppercase', textAlign: 'center',
+                  }}>
+                    Saved to Supabase
+                    <br />
+                    {timeStr} elapsed · 1 km = {MINUTES_PER_KM} min
+                  </div>
+                )}
+              </>
+            )}
           </div>
         ) : (
           /* ---------- Live readout ---------- */
@@ -213,15 +246,32 @@ const CrossTrainerTimer: React.FC<Props> = ({ onClose, onApply }) => {
                 cursor: totalSeconds < 1 ? 'default' : 'pointer',
               }}
             >
-              Complete
+              Log Complete
             </button>
           </div>
+        )}
+
+        {phase === 'logging' && (
+          <button disabled style={{ ...primaryBtn, opacity: 0.5, cursor: 'default' }}>
+            Logging…
+          </button>
         )}
 
         {phase === 'done' && (
           <button onClick={onClose} style={primaryBtn}>
             Done
           </button>
+        )}
+
+        {phase === 'error' && (
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button onClick={onClose} style={secondaryBtn}>
+              Close
+            </button>
+            <button onClick={handleComplete} style={primaryBtn}>
+              Retry
+            </button>
+          </div>
         )}
       </div>
     </div>

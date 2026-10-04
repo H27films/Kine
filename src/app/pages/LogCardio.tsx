@@ -449,6 +449,45 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, initialSelecte
     }
   };
 
+  // Log Cross Trainer KM from the timer overlay.
+  // Only the KM is stored — the elapsed time is intentionally NOT saved,
+  // matching exactly what the normal KM entry line writes.
+  const handleLogCrossTimer = async (km: number) => {
+    const exercise = nonTrackerExercises.find(
+      e => e.exercise_name?.toUpperCase().includes('CROSS')
+    );
+    if (!exercise) throw new Error('Cross trainer exercise not found');
+    const rounded = +km.toFixed(2);
+    if (!(rounded > 0)) throw new Error('No distance to log');
+
+    const today = todayStr();
+    const todayDate = new Date(today + 'T12:00:00+08:00');
+    const week = getISOWeek(todayDate);
+    const day = getDayName(todayDate);
+    const totalCardio = +(rounded * Number(exercise.multiplier)).toFixed(2);
+
+    const { error } = await supabase.from('workouts').insert({
+      date: today, week, day, type: 'CARDIO',
+      exercise_id: exercise.id,
+      km: rounded, total_cardio: totalCardio,
+      multiplier: exercise.multiplier,
+      time: null,
+      total_score_k: Math.round(totalCardio * 1000),
+      new_entry: 'New', source: 'app',
+    });
+    if (error) throw error;
+
+    await recalculateDailyTotals(today);
+    window.dispatchEvent(new CustomEvent('kine:data-updated'));
+    setRefreshKey(k => k + 1);
+
+    // Clear the entry fields so the same session isn't logged twice
+    setDistance('');
+    setMinutes('');
+    setSeconds('');
+    setCalories('');
+  };
+
   const labelStyle = {
     color: 'rgba(26,26,26,0.45)',
     fontSize: '0.75rem',
@@ -917,10 +956,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, initialSelecte
       {showCrossTimer && (
         <CrossTrainerTimer
           onClose={() => setShowCrossTimer(false)}
-          onApply={(km) => {
-            const v = +km.toFixed(2);
-            setDistance(v > 0 ? String(v) : '');
-          }}
+          onLog={handleLogCrossTimer}
         />
       )}
 
