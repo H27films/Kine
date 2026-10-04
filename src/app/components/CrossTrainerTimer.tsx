@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X } from 'lucide-react';
+import { X, Check } from 'lucide-react';
 
 // Conversion ratio: 1 KM = 12 minutes
 const MINUTES_PER_KM = 12;
@@ -9,45 +9,92 @@ interface Props {
   onApply: (km: number) => void;
 }
 
+type Phase = 'idle' | 'running' | 'paused' | 'done';
+
 const pad = (n: number) => String(n).padStart(2, '0');
 
+const primaryBtn: React.CSSProperties = {
+  flex: 1,
+  padding: '15px',
+  backgroundColor: '#000000',
+  color: '#ffffff',
+  borderRadius: 999,
+  border: 'none',
+  fontSize: '12px',
+  fontWeight: 900,
+  letterSpacing: '0.25em',
+  textTransform: 'uppercase',
+  cursor: 'pointer',
+};
+
+const secondaryBtn: React.CSSProperties = {
+  flex: 1,
+  padding: '15px',
+  backgroundColor: 'transparent',
+  color: '#000000',
+  borderRadius: 999,
+  border: '1.5px solid rgba(0,0,0,0.2)',
+  fontSize: '12px',
+  fontWeight: 900,
+  letterSpacing: '0.25em',
+  textTransform: 'uppercase',
+  cursor: 'pointer',
+};
+
 const CrossTrainerTimer: React.FC<Props> = ({ onClose, onApply }) => {
-  const [running, setRunning] = useState(false);
+  const [phase, setPhase] = useState<Phase>('idle');
   const [elapsedMs, setElapsedMs] = useState(0);
-  const startRef = useRef<number>(0);
+  // Elapsed time already banked from previously finished run segments
+  const baseRef = useRef(0);
+  // Timestamp when the currently running segment began
+  const segStartRef = useRef(0);
+
+  const liveMs = () =>
+    baseRef.current + (phase === 'running' ? Date.now() - segStartRef.current : 0);
 
   // Tick while running
   useEffect(() => {
-    if (!running) return;
-    const id = setInterval(() => {
-      setElapsedMs(Date.now() - startRef.current);
-    }, 200);
+    if (phase !== 'running') return;
+    const id = setInterval(() => setElapsedMs(liveMs()), 200);
     return () => clearInterval(id);
-  }, [running]);
+  }, [phase]);
 
   const totalSeconds = Math.floor(elapsedMs / 1000);
   const hours = Math.floor(totalSeconds / 3600);
   const mins = Math.floor((totalSeconds % 3600) / 60);
   const secs = totalSeconds % 60;
-  const timeStr = hours > 0
-    ? `${hours}:${pad(mins)}:${pad(secs)}`
-    : `${pad(mins)}:${pad(secs)}`;
+  const timeStr =
+    hours > 0 ? `${hours}:${pad(mins)}:${pad(secs)}` : `${pad(mins)}:${pad(secs)}`;
 
   // KM equivalent from elapsed time (1 KM = 12 MIN)
   const km = totalSeconds / 60 / MINUTES_PER_KM;
 
   const handleStart = () => {
-    startRef.current = Date.now();
+    baseRef.current = 0;
+    segStartRef.current = Date.now();
     setElapsedMs(0);
-    setRunning(true);
+    setPhase('running');
   };
 
-  const handleStop = () => {
-    const ms = Date.now() - startRef.current;
-    const sec = Math.floor(ms / 1000);
+  // Pause — bank the current segment, keep the timer open
+  const handlePause = () => {
+    baseRef.current = baseRef.current + (Date.now() - segStartRef.current);
+    setElapsedMs(baseRef.current);
+    setPhase('paused');
+  };
+
+  // Resume — start a new segment from the banked time
+  const handleResume = () => {
+    segStartRef.current = Date.now();
+    setPhase('running');
+  };
+
+  // Complete — freeze, push the KM into the KM field, show confirmation
+  const handleComplete = () => {
+    const ms = liveMs();
     setElapsedMs(ms);
-    setRunning(false);
-    onApply(sec / 60 / MINUTES_PER_KM);
+    setPhase('done');
+    onApply((ms / 1000) / 60 / MINUTES_PER_KM);
   };
 
   return (
@@ -88,59 +135,92 @@ const CrossTrainerTimer: React.FC<Props> = ({ onClose, onApply }) => {
           </button>
         </div>
 
-        {/* Time + KM readout */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 28 }}>
-          <div style={{
-            fontSize: '3.5rem', fontWeight: 900, letterSpacing: '-0.02em',
-            color: '#000000', lineHeight: 1,
-            fontVariantNumeric: 'tabular-nums',
-          }}>
-            {timeStr}
+        {phase === 'done' ? (
+          /* ---------- Confirmation ---------- */
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 28 }}>
+            <Check size={44} strokeWidth={2.5} color="#000000" />
+            <div style={{
+              marginTop: 12,
+              fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-0.02em',
+              color: '#000000', lineHeight: 1,
+            }}>
+              {km.toFixed(2)} KM
+            </div>
+            <div style={{
+              marginTop: 10,
+              fontSize: '10px', fontWeight: 900, letterSpacing: '0.2em',
+              color: '#000000', textTransform: 'uppercase',
+            }}>
+              Entered in km field
+            </div>
+            <div style={{
+              marginTop: 6,
+              fontSize: '10px', fontWeight: 700, letterSpacing: '0.15em',
+              color: 'rgba(0,0,0,0.4)', textTransform: 'uppercase', textAlign: 'center',
+            }}>
+              {timeStr} elapsed · 1 km = {MINUTES_PER_KM} min
+              <br />
+              Tap Log Session to save
+            </div>
           </div>
-          <div style={{
-            marginTop: 14,
-            fontSize: '1.25rem', fontWeight: 800, letterSpacing: '0.08em',
-            color: '#000000', textTransform: 'uppercase',
-          }}>
-            {km.toFixed(2)} KM
-          </div>
-          <div style={{
-            marginTop: 6,
-            fontSize: '10px', fontWeight: 700, letterSpacing: '0.2em',
-            color: 'rgba(0,0,0,0.35)', textTransform: 'uppercase',
-          }}>
-            1 KM = {MINUTES_PER_KM} MIN
-          </div>
-        </div>
-
-        {/* Controls */}
-        {running ? (
-          <button
-            onClick={handleStop}
-            style={{
-              width: '100%', padding: '15px',
-              backgroundColor: '#000000', color: '#ffffff',
-              borderRadius: 999, border: 'none',
-              fontSize: '12px', fontWeight: 900,
-              letterSpacing: '0.25em', textTransform: 'uppercase',
-              cursor: 'pointer',
-            }}
-          >
-            Stop
-          </button>
         ) : (
-          <button
-            onClick={handleStart}
-            style={{
-              width: '100%', padding: '15px',
-              backgroundColor: '#000000', color: '#ffffff',
-              borderRadius: 999, border: 'none',
-              fontSize: '12px', fontWeight: 900,
-              letterSpacing: '0.25em', textTransform: 'uppercase',
-              cursor: 'pointer',
-            }}
-          >
+          /* ---------- Live readout ---------- */
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 28 }}>
+            <div style={{
+              fontSize: '3.5rem', fontWeight: 900, letterSpacing: '-0.02em',
+              color: '#000000', lineHeight: 1,
+              fontVariantNumeric: 'tabular-nums',
+            }}>
+              {timeStr}
+            </div>
+            <div style={{
+              marginTop: 14,
+              fontSize: '1.25rem', fontWeight: 800, letterSpacing: '0.08em',
+              color: '#000000', textTransform: 'uppercase',
+            }}>
+              {km.toFixed(2)} KM
+            </div>
+            <div style={{
+              marginTop: 6,
+              fontSize: '10px', fontWeight: 700, letterSpacing: '0.2em',
+              color: 'rgba(0,0,0,0.35)', textTransform: 'uppercase',
+            }}>
+              {phase === 'paused' ? 'Paused · ' : ''}1 km = {MINUTES_PER_KM} min
+            </div>
+          </div>
+        )}
+{/* ---------- Controls ---------- */}
+        {phase === 'idle' && (
+          <button onClick={handleStart} style={primaryBtn}>
             Start
+          </button>
+        )}
+
+        {(phase === 'running' || phase === 'paused') && (
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button
+              onClick={phase === 'running' ? handlePause : handleResume}
+              style={secondaryBtn}
+            >
+              {phase === 'running' ? 'Pause' : 'Resume'}
+            </button>
+            <button
+              onClick={handleComplete}
+              disabled={totalSeconds < 1}
+              style={{
+                ...primaryBtn,
+                opacity: totalSeconds < 1 ? 0.35 : 1,
+                cursor: totalSeconds < 1 ? 'default' : 'pointer',
+              }}
+            >
+              Complete
+            </button>
+          </div>
+        )}
+
+        {phase === 'done' && (
+          <button onClick={onClose} style={primaryBtn}>
+            Done
           </button>
         )}
       </div>

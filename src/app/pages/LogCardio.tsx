@@ -918,8 +918,8 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, initialSelecte
         <CrossTrainerTimer
           onClose={() => setShowCrossTimer(false)}
           onApply={(km) => {
-            setDistance(km > 0 ? String(+km.toFixed(2)) : '');
-            setShowCrossTimer(false);
+            const v = +km.toFixed(2);
+            setDistance(v > 0 ? String(v) : '');
           }}
         />
       )}
