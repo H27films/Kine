@@ -71,6 +71,20 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = ({
     transition: 'background-color 0.15s, color 0.15s',
   };
 
+  // Always place the caret at the end of the value on focus/click so editing
+  // appends to the number instead of jumping to its start.
+  const placeCaretAtEnd = (e: React.FocusEvent<HTMLInputElement> | React.MouseEvent<HTMLInputElement>) => {
+    const el = e.currentTarget;
+    const end = el.value.length;
+    requestAnimationFrame(() => {
+      try {
+        el.setSelectionRange(end, end);
+      } catch {
+        /* selection unsupported on this input type */
+      }
+    });
+  };
+
   return (
     <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 0 }}>
       {/* Swipe-to-remove background */}
@@ -205,14 +219,47 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = ({
             const rowTotal = w * set.reps * mult;
             const rowHasData = set.weight !== '';
             const numColor = rowHasData ? '#1a1a1a' : 'rgba(26,26,26,0.25)';
+            const prevSet = idx > 0 ? ex.sets[idx - 1] : null;
+            const canCopyFromAbove = !!prevSet && !rowHasData && prevSet.weight !== '';
             return (
               <div key={idx} className="grid items-center mb-2" style={{ gridTemplateColumns: '1.8rem 1fr 1fr 1fr', gap: '0.5rem' }}>
-                <p className="font-black" style={{ fontSize: '1rem', color: numColor, lineHeight: 1, textAlign: 'center' }}>{idx + 1}</p>
+                {canCopyFromAbove ? (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      updateSet(ex.exercise.id, idx, 'weight', prevSet!.weight);
+                      updateSet(ex.exercise.id, idx, 'reps', prevSet!.reps);
+                    }}
+                    aria-label={`Copy set ${idx} weight and reps from set ${idx}`}
+                    title="Copy from set above"
+                    style={{
+                      width: 24, height: 24, borderRadius: '50%',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      margin: '0 auto', padding: 0,
+                      backgroundColor: 'transparent',
+                      border: '1px solid rgba(0,0,0,0.55)',
+                      color: 'rgba(0,0,0,0.75)', fontSize: '0.72rem', fontWeight: 700,
+                      lineHeight: 1, cursor: 'pointer', flexShrink: 0,
+                      transition: 'opacity 0.15s',
+                    }}
+                  >
+                    {idx + 1}
+                  </button>
+                ) : (
+                  <p className="font-black" style={{ fontSize: '1rem', color: numColor, lineHeight: 1, textAlign: 'center' }}>{idx + 1}</p>
+                )}
                 <div className="flex items-center justify-between rounded-lg" style={{ backgroundColor: 'rgba(0,0,0,0.04)', height: 44, padding: '0 5px' }} onClick={e => e.stopPropagation()}>
                   <button onClick={() => adjustWeight(ex.exercise.id, idx, -1)} style={stepperStyle}>−</button>
                   <input
-                    type="number" inputMode="decimal" value={set.weight} placeholder="—"
-                    onChange={e => updateSet(ex.exercise.id, idx, 'weight', e.target.value)}
+                    type="text" inputMode="decimal" value={set.weight} placeholder="—"
+                    onChange={e => {
+                      const digits = e.target.value.replace(/[^0-9.]/g, '');
+                      const parts = digits.split('.');
+                      const cleaned = parts.length > 2 ? parts[0] + '.' + parts.slice(1).join('') : digits;
+                      updateSet(ex.exercise.id, idx, 'weight', cleaned);
+                    }}
+                    onFocus={placeCaretAtEnd}
+                    onClick={placeCaretAtEnd}
                     style={{ background: 'transparent', border: 'none', outline: 'none', width: '100%', textAlign: 'center', fontSize: '0.875rem', fontWeight: 700, color: rowHasData ? '#1a1a1a' : 'rgba(26,26,26,0.3)', MozAppearance: 'textfield', height: 44 }}
                   />
                   <button onClick={() => adjustWeight(ex.exercise.id, idx, 1)} style={stepperStyle}>+</button>

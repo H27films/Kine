@@ -56,6 +56,20 @@ export const SetInputRow: React.FC<SetInputRowProps> = ({
     MozAppearance: 'textfield' as const,
   };
 
+  // Always place the caret at the end of the value on focus/click so editing
+  // appends to the number instead of jumping to its start.
+  const placeCaretAtEnd = (e: React.FocusEvent<HTMLInputElement> | React.MouseEvent<HTMLInputElement>) => {
+    const el = e.currentTarget;
+    const end = el.value.length;
+    requestAnimationFrame(() => {
+      try {
+        el.setSelectionRange(end, end);
+      } catch {
+        /* selection unsupported on this input type */
+      }
+    });
+  };
+
   return (
     <div>
       {showSeparator && (
@@ -93,8 +107,15 @@ export const SetInputRow: React.FC<SetInputRowProps> = ({
                 }}
                 style={stepperStyle}
               >−</div>
-              <input type="number" inputMode="decimal" value={set.weight} placeholder="—"
-                onChange={e => onUpdateSet(exerciseId, idx, 'weight', e.target.value)}
+              <input type="text" inputMode="decimal" value={set.weight} placeholder="—"
+                onChange={e => {
+                  const digits = e.target.value.replace(/[^0-9.]/g, '');
+                  const parts = digits.split('.');
+                  const cleaned = parts.length > 2 ? parts[0] + '.' + parts.slice(1).join('') : digits;
+                  onUpdateSet(exerciseId, idx, 'weight', cleaned);
+                }}
+                onFocus={placeCaretAtEnd}
+                onClick={placeCaretAtEnd}
                 style={inputStyle} />
               <div onClick={() => {
                   const cur = parseFloat(set.weight) || 0;
@@ -109,8 +130,10 @@ export const SetInputRow: React.FC<SetInputRowProps> = ({
               <div onClick={() => onUpdateSet(exerciseId, idx, 'reps', Math.max(1, set.reps - 1))}
                 style={stepperStyle}
               >−</div>
-              <input type="number" inputMode="numeric" value={set.reps}
+              <input type="text" inputMode="numeric" value={set.reps}
                 onChange={e => { const val = parseInt(e.target.value) || 1; onUpdateSet(exerciseId, idx, 'reps', Math.max(1, val)); }}
+                onFocus={placeCaretAtEnd}
+                onClick={placeCaretAtEnd}
                 style={inputStyle}
               />
               <div onClick={() => onUpdateSet(exerciseId, idx, 'reps', set.reps + 1)}
