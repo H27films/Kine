@@ -23,8 +23,8 @@ export const SetInputRow: React.FC<SetInputRowProps> = ({
 
   // Shared stepper style: small rounded circles (lighter than the box) for easier tapping
   const stepperStyle = {
-    width: 34,
-    height: 34,
+    width: 26,
+    height: 26,
     borderRadius: '50%',
     display: 'flex',
     alignItems: 'center',
@@ -33,7 +33,7 @@ export const SetInputRow: React.FC<SetInputRowProps> = ({
     backgroundColor: 'rgba(255,255,255,0.6)',
     boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
     color: 'rgba(0,0,0,0.45)',
-    fontSize: '17px',
+    fontSize: '14px',
     fontWeight: 400,
     lineHeight: 1,
     flexShrink: 0,
