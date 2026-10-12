@@ -50,6 +50,27 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = ({
     ? `Last: ${ex.lastSets.length} sets — ${ex.lastSets[0].weight}kg × ${ex.lastSets[0].reps}`
     : 'No previous data';
 
+  // Shared stepper style: small rounded circles (lighter than the box), vertically centred
+  const stepperStyle = {
+    width: 30,
+    height: 30,
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.6)',
+    boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
+    color: 'rgba(0,0,0,0.45)',
+    fontSize: '16px',
+    fontWeight: 400,
+    lineHeight: 1,
+    flexShrink: 0,
+    border: 'none',
+    padding: 0,
+    cursor: 'pointer',
+    transition: 'background-color 0.15s, color 0.15s',
+  };
+
   return (
     <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 0 }}>
       {/* Swipe-to-remove background */}
@@ -187,19 +208,19 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = ({
             return (
               <div key={idx} className="grid items-center mb-2" style={{ gridTemplateColumns: '1.8rem 1fr 1fr 1fr', gap: '0.5rem' }}>
                 <p className="font-black" style={{ fontSize: '1rem', color: numColor, lineHeight: 1, textAlign: 'center' }}>{idx + 1}</p>
-                <div className="flex items-center justify-between rounded-lg py-2 px-2" style={{ backgroundColor: 'rgba(0,0,0,0.04)' }} onClick={e => e.stopPropagation()}>
-                  <button onClick={() => adjustWeight(ex.exercise.id, idx, -1)} style={{ color: 'rgba(0,0,0,0.5)', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>−</button>
+                <div className="flex items-center justify-between rounded-lg" style={{ backgroundColor: 'rgba(0,0,0,0.04)', height: 44, padding: '0 5px' }} onClick={e => e.stopPropagation()}>
+                  <button onClick={() => adjustWeight(ex.exercise.id, idx, -1)} style={stepperStyle}>−</button>
                   <input
                     type="number" inputMode="decimal" value={set.weight} placeholder="—"
                     onChange={e => updateSet(ex.exercise.id, idx, 'weight', e.target.value)}
-                    style={{ background: 'transparent', border: 'none', outline: 'none', width: '100%', textAlign: 'center', fontSize: '0.875rem', fontWeight: 700, color: rowHasData ? '#1a1a1a' : 'rgba(26,26,26,0.3)', MozAppearance: 'textfield' }}
+                    style={{ background: 'transparent', border: 'none', outline: 'none', width: '100%', textAlign: 'center', fontSize: '0.875rem', fontWeight: 700, color: rowHasData ? '#1a1a1a' : 'rgba(26,26,26,0.3)', MozAppearance: 'textfield', height: 44 }}
                   />
-                  <button onClick={() => adjustWeight(ex.exercise.id, idx, 1)} style={{ color: 'rgba(0,0,0,0.5)', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>+</button>
+                  <button onClick={() => adjustWeight(ex.exercise.id, idx, 1)} style={stepperStyle}>+</button>
                 </div>
-                <div className="flex items-center justify-between rounded-lg py-2 px-2" style={{ backgroundColor: 'rgba(0,0,0,0.04)' }} onClick={e => e.stopPropagation()}>
-                  <button onClick={() => updateSet(ex.exercise.id, idx, 'reps', Math.max(1, set.reps - 1))} style={{ color: 'rgba(0,0,0,0.5)', lineHeight: 1 }}>−</button>
-                  <span className="font-bold" style={{ fontSize: '0.875rem', color: rowHasData ? '#1a1a1a' : 'rgba(26,26,26,0.3)' }}>{set.reps}</span>
-                  <button onClick={() => updateSet(ex.exercise.id, idx, 'reps', set.reps + 1)} style={{ color: 'rgba(0,0,0,0.5)', lineHeight: 1 }}>+</button>
+                <div className="flex items-center justify-between rounded-lg" style={{ backgroundColor: 'rgba(0,0,0,0.04)', height: 44, padding: '0 5px' }} onClick={e => e.stopPropagation()}>
+                  <button onClick={() => updateSet(ex.exercise.id, idx, 'reps', Math.max(1, set.reps - 1))} style={stepperStyle}>−</button>
+                  <span className="font-bold" style={{ fontSize: '0.875rem', flex: 1, textAlign: 'center', color: rowHasData ? '#1a1a1a' : 'rgba(26,26,26,0.3)' }}>{set.reps}</span>
+                  <button onClick={() => updateSet(ex.exercise.id, idx, 'reps', set.reps + 1)} style={stepperStyle}>+</button>
                 </div>
                 <p className="text-center font-bold" style={{ fontSize: '0.875rem', color: '#1a1a1a' }}>{rowTotal > 0 ? rowTotal : '—'}</p>
               </div>

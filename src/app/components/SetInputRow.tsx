@@ -21,6 +21,41 @@ export const SetInputRow: React.FC<SetInputRowProps> = ({
   const hasData = set.weight !== '';
   const showSeparator = idx > 0;
 
+  // Shared stepper style: small rounded circles (lighter than the box) for easier tapping
+  const stepperStyle = {
+    width: 34,
+    height: 34,
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    backgroundColor: 'rgba(255,255,255,0.6)',
+    boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
+    color: 'rgba(0,0,0,0.45)',
+    fontSize: '17px',
+    fontWeight: 400,
+    lineHeight: 1,
+    flexShrink: 0,
+    transition: 'background-color 0.15s, color 0.15s',
+    userSelect: 'none' as const,
+  };
+
+  const inputStyle = {
+    flex: 1,
+    minWidth: 0,
+    background: 'transparent',
+    border: 'none',
+    outline: 'none',
+    textAlign: 'center' as const,
+    fontSize: '15px',
+    fontWeight: 600,
+    color: hasData ? '#1a1a1a' : 'rgba(0,0,0,0.25)',
+    height: 48,
+    padding: 0,
+    MozAppearance: 'textfield' as const,
+  };
+
   return (
     <div>
       {showSeparator && (
@@ -50,43 +85,36 @@ export const SetInputRow: React.FC<SetInputRowProps> = ({
           </div>
           <div style={{ display: 'flex', gap: '6px' }}>
             {/* Weight input */}
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'row', borderRadius: '6px', backgroundColor: 'rgba(0,0,0,0.04)', overflow: 'hidden', height: 48 }}>
-              <div
-                onClick={() => {
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderRadius: '6px', backgroundColor: 'rgba(0,0,0,0.04)', overflow: 'hidden', height: 48, padding: '0 4px' }}>
+              <div onClick={() => {
                   const cur = parseFloat(set.weight) || 0;
                   const next = Math.max(0, Math.round((cur - 1) * 10) / 10);
                   onUpdateSet(exerciseId, idx, 'weight', next === 0 ? '' : String(next));
                 }}
-                style={{ width: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'rgba(0,0,0,0.35)', fontSize: '15px', fontWeight: 300, flexShrink: 0 }}
+                style={stepperStyle}
               >−</div>
-              <input
-                type="number" inputMode="decimal" value={set.weight} placeholder="—"
+              <input type="number" inputMode="decimal" value={set.weight} placeholder="—"
                 onChange={e => onUpdateSet(exerciseId, idx, 'weight', e.target.value)}
-                style={{ flex: 1, minWidth: 0, background: 'transparent', border: 'none', outline: 'none', textAlign: 'center', fontSize: '15px', fontWeight: 600, color: hasData ? '#1a1a1a' : 'rgba(0,0,0,0.25)', height: 48, padding: 0, MozAppearance: 'textfield' }}
-              />
-              <div
-                onClick={() => {
+                style={inputStyle} />
+              <div onClick={() => {
                   const cur = parseFloat(set.weight) || 0;
                   const next = Math.round((cur + 1) * 10) / 10;
                   onUpdateSet(exerciseId, idx, 'weight', String(next));
                 }}
-                style={{ width: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'rgba(0,0,0,0.35)', fontSize: '15px', fontWeight: 300, flexShrink: 0 }}
+                style={stepperStyle}
               >+</div>
             </div>
             {/* Reps input */}
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'row', borderRadius: '6px', backgroundColor: 'rgba(0,0,0,0.04)', overflow: 'hidden', height: 48 }}>
-              <div
-                onClick={() => onUpdateSet(exerciseId, idx, 'reps', Math.max(1, set.reps - 1))}
-                style={{ width: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'rgba(0,0,0,0.35)', fontSize: '15px', fontWeight: 300, flexShrink: 0 }}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderRadius: '6px', backgroundColor: 'rgba(0,0,0,0.04)', overflow: 'hidden', height: 48, padding: '0 4px' }}>
+              <div onClick={() => onUpdateSet(exerciseId, idx, 'reps', Math.max(1, set.reps - 1))}
+                style={stepperStyle}
               >−</div>
-              <input
-                type="number" inputMode="numeric" value={set.reps}
+              <input type="number" inputMode="numeric" value={set.reps}
                 onChange={e => { const val = parseInt(e.target.value) || 1; onUpdateSet(exerciseId, idx, 'reps', Math.max(1, val)); }}
-                style={{ flex: 1, minWidth: 0, background: 'transparent', border: 'none', outline: 'none', textAlign: 'center', fontSize: '15px', fontWeight: 600, color: '#1a1a1a', height: 48, padding: 0, MozAppearance: 'textfield' }}
+                style={inputStyle}
               />
-              <div
-                onClick={() => onUpdateSet(exerciseId, idx, 'reps', set.reps + 1)}
-                style={{ width: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'rgba(0,0,0,0.35)', fontSize: '15px', fontWeight: 300, flexShrink: 0 }}
+              <div onClick={() => onUpdateSet(exerciseId, idx, 'reps', set.reps + 1)}
+                style={stepperStyle}
               >+</div>
             </div>
           </div>
