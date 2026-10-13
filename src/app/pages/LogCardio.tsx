@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronDown, Clock } from 'lucide-react';
+import { ChevronDown, Clock, Footprints } from 'lucide-react';
 
 import { Page } from '../../types';
 import { supabase, Exercise, todayStr, getISOWeek, getDayName, currentWeekMonday, weeksAgoMonday, recalculateDailyTotals, getNewEntryStatus } from '../../lib/supabase';
@@ -12,6 +12,7 @@ import MonthlyCalendarChart from '../components/MonthlyCalendarChart';
 import RecentLogsCardio from '../components/RecentLogsCardio';
 import MultiAddCardio from '../components/MultiAddCardio';
 import CrossTrainerTimer from '../components/CrossTrainerTimer';
+import WalkGpsTimer from '../components/WalkGpsTimer';
 
 interface LogCardioProps {
   onNavigate: (page: Page, data?: any) => void;
@@ -65,10 +66,12 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, initialSelecte
   const [recentCardioCollapsed, setRecentCardioCollapsed] = useState(false);
   const [multiAddOpen, setMultiAddOpen] = useState(false);
   const [showCrossTimer, setShowCrossTimer] = useState(false);
+  const [showWalkGps, setShowWalkGps] = useState(false);
 
   const isRunning = selectedExercise?.exercise_name?.toUpperCase() === 'RUNNING';
   const isCycling = selectedExercise?.exercise_name?.toUpperCase() === 'CYCLE';
   const isCrossTrainer = selectedExercise?.exercise_name?.toUpperCase().includes('CROSS') ?? false;
+  const isWalking = selectedExercise?.exercise_name?.toUpperCase().includes('WALK') ?? false;
 
   // Scroll to exercise section when pre-selected cardio is Running, Row, or Cross Trainer
   useEffect(() => {
@@ -488,6 +491,49 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, initialSelecte
     setCalories('');
   };
 
+  // Log Walking KM captured live from the phone's GPS.
+  // Stores the KM like the normal entry line, plus the elapsed time (HH:MM:SS).
+  const handleLogWalkGps = async (km: number, elapsedSeconds: number) => {
+    const exercise = nonTrackerExercises.find(
+      e => e.exercise_name?.toUpperCase().includes('WALK')
+    );
+    if (!exercise) throw new Error('Walking exercise not found');
+    const rounded = +km.toFixed(2);
+    if (!(rounded > 0)) throw new Error('No distance to log');
+
+    const today = todayStr();
+    const todayDate = new Date(today + 'T12:00:00+08:00');
+    const week = getISOWeek(todayDate);
+    const day = getDayName(todayDate);
+    const totalCardio = +(rounded * Number(exercise.multiplier)).toFixed(2);
+
+    const hh = String(Math.floor(elapsedSeconds / 3600)).padStart(2, '0');
+    const mm = String(Math.floor((elapsedSeconds % 3600) / 60)).padStart(2, '0');
+    const ss = String(elapsedSeconds % 60).padStart(2, '0');
+    const timeStr = `${hh}:${mm}:${ss}`;
+
+    const { error } = await supabase.from('workouts').insert({
+      date: today, week, day, type: 'CARDIO',
+      exercise_id: exercise.id,
+      km: rounded, total_cardio: totalCardio,
+      multiplier: exercise.multiplier,
+      time: timeStr,
+      total_score_k: Math.round(totalCardio * 1000),
+      new_entry: 'New', source: 'app',
+    });
+    if (error) throw error;
+
+    await recalculateDailyTotals(today);
+    window.dispatchEvent(new CustomEvent('kine:data-updated'));
+    setRefreshKey(k => k + 1);
+
+    // Clear the entry fields so the same session isn't logged twice
+    setDistance('');
+    setMinutes('');
+    setSeconds('');
+    setCalories('');
+  };
+
   const labelStyle = {
     color: 'rgba(26,26,26,0.45)',
     fontSize: '0.75rem',
@@ -682,6 +728,21 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, initialSelecte
               >
                 <span style={{ fontSize: '0.7rem', fontWeight: 300, letterSpacing: '0.22em', textTransform: 'uppercase' }}>TIMER</span>
                 <Clock size={15} strokeWidth={1.6} />
+              </button>
+            )}
+            {isWalking && (
+              <button
+                onClick={() => setShowWalkGps(true)}
+                aria-label="Track walk with GPS"
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 5,
+                  background: 'none', border: 'none', cursor: 'pointer', color: '#1a1a1a',
+                  padding: '8px 6px', margin: '-8px -6px',
+                  fontFamily: "'Archivo', sans-serif",
+                }}
+              >
+                <span style={{ fontSize: '0.7rem', fontWeight: 300, letterSpacing: '0.22em', textTransform: 'uppercase' }}>GPS</span>
+                <Footprints size={15} strokeWidth={1.6} />
               </button>
             )}
           </div>
@@ -957,6 +1018,14 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, initialSelecte
         <CrossTrainerTimer
           onClose={() => setShowCrossTimer(false)}
           onLog={handleLogCrossTimer}
+        />
+      )}
+
+      {/* Walking GPS Tracker */}
+      {showWalkGps && (
+        <WalkGpsTimer
+          onClose={() => setShowWalkGps(false)}
+          onLog={handleLogWalkGps}
         />
       )}
 
