@@ -48,6 +48,18 @@ const secondaryBtn: React.CSSProperties = {
   cursor: 'pointer',
 };
 
+// Compact black pill used for the three equal idle buttons (2 KM / 3 KM / Start).
+const presetBtn: React.CSSProperties = {
+  ...primaryBtn,
+  flex: 1,
+  width: '100%',
+  minWidth: 0,
+  padding: '15px 6px',
+  fontSize: '11px',
+  letterSpacing: '0.12em',
+  whiteSpace: 'nowrap',
+};
+
 const CrossTrainerTimer: React.FC<Props> = ({ onClose, onLog }) => {
   const [phase, setPhase] = useState<Phase>('idle');
   const [elapsedMs, setElapsedMs] = useState(0);
@@ -62,14 +74,13 @@ const CrossTrainerTimer: React.FC<Props> = ({ onClose, onLog }) => {
   // Guards against firing the auto-finish twice
   const finishedRef = useRef(false);
 
-  // Total countdown duration for the chosen preset (ms)
+  // Preset mode (2/3 KM) counts DOWN to a target; open-ended Start counts UP.
+  const isPreset = targetKm != null;
+  // Total countdown duration for the chosen preset (ms); 0 in open-ended mode
   const targetMs = targetKm != null ? targetKm * MINUTES_PER_KM * 60 * 1000 : 0;
 
   const liveMs = () =>
     baseRef.current + (phase === 'running' ? Date.now() - segStartRef.current : 0);
-
-  // Remaining countdown time (clamped at 0)
-  const remainingMs = Math.max(0, targetMs - liveMs());
 
   // Tick while running
   useEffect(() => {
@@ -77,31 +88,42 @@ const CrossTrainerTimer: React.FC<Props> = ({ onClose, onLog }) => {
     const id = setInterval(() => {
       const ms = liveMs();
       setElapsedMs(ms);
-      // Auto-finish the moment the countdown hits zero
-      if (ms >= targetMs && !finishedRef.current) {
+      // Auto-finish the moment the countdown hits zero (preset mode only)
+      if (isPreset && ms >= targetMs && !finishedRef.current) {
         finishedRef.current = true;
         handleComplete();
       }
     }, 200);
     return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, targetMs]);
+  }, [phase, targetMs, isPreset]);
 
-  // Remaining countdown as m:ss / h:mm:ss
-  const remTotalSeconds = Math.floor(remainingMs / 1000);
-  const hours = Math.floor(remTotalSeconds / 3600);
-  const mins = Math.floor((remTotalSeconds % 3600) / 60);
-  const secs = remTotalSeconds % 60;
+  // Display time: remaining for presets, elapsed for open-ended
+  const displayMs = isPreset ? Math.max(0, targetMs - liveMs()) : liveMs();
+  const displayTotalSeconds = Math.floor(displayMs / 1000);
+  const hours = Math.floor(displayTotalSeconds / 3600);
+  const mins = Math.floor((displayTotalSeconds % 3600) / 60);
+  const secs = displayTotalSeconds % 60;
   const timeStr =
     hours > 0 ? `${hours}:${pad(mins)}:${pad(secs)}` : `${pad(mins)}:${pad(secs)}`;
 
-  // Remaining KM from remaining time (1 KM = 12 MIN)
-  const km = remTotalSeconds / 60 / MINUTES_PER_KM;
+  // Distance shown: remaining for presets, accumulated for open-ended (1 KM = 12 MIN)
+  const km = displayTotalSeconds / 60 / MINUTES_PER_KM;
   // Elapsed seconds — used to gate the Log Complete button until the run has actually started
   const elapsedSeconds = Math.floor(elapsedMs / 1000);
 
   const handleStartWith = (presetKm: number) => {
     setTargetKm(presetKm);
+    baseRef.current = 0;
+    segStartRef.current = Date.now();
+    finishedRef.current = false;
+    setElapsedMs(0);
+    setPhase('running');
+  };
+
+  // Open-ended start — no target, elapsed time dictates the distance
+  const handleStart = () => {
+    setTargetKm(null);
     baseRef.current = 0;
     segStartRef.current = Date.now();
     finishedRef.current = false;
@@ -130,9 +152,9 @@ const CrossTrainerTimer: React.FC<Props> = ({ onClose, onLog }) => {
     baseRef.current = ms;
     setElapsedMs(ms);
 
-    // Reached (or passed) the target → log the full preset distance.
-    // Stopped early → log the partial distance actually covered (1 km = 12 min).
-    const reachedTarget = ms >= targetMs;
+    // Preset that ran to zero → log the full distance.
+    // Preset stopped early, or any open-ended run → log the distance covered (1 km = 12 min).
+    const reachedTarget = isPreset && ms >= targetMs;
     const kmToLog = reachedTarget
       ? (targetKm ?? 0)
       : (ms / 1000) / 60 / MINUTES_PER_KM;
@@ -233,7 +255,7 @@ const CrossTrainerTimer: React.FC<Props> = ({ onClose, onLog }) => {
                   }}>
                     Saved to Supabase
                     <br />
-                    {timeStr} left · 1 km = {MINUTES_PER_KM} min
+                    {isPreset ? `${timeStr} left` : `${timeStr} elapsed`} · 1 km = {MINUTES_PER_KM} min
                   </div>
                 )}
               </>
@@ -261,22 +283,25 @@ const CrossTrainerTimer: React.FC<Props> = ({ onClose, onLog }) => {
               fontSize: '10px', fontWeight: 700, letterSpacing: '0.2em',
               color: 'rgba(0,0,0,0.35)', textTransform: 'uppercase',
             }}>
-              {phase === 'paused' ? 'Paused · ' : ''}remaining · 1 km = {MINUTES_PER_KM} min
+              {phase === 'paused' ? 'Paused · ' : ''}{isPreset ? 'remaining' : 'elapsed'} · 1 km = {MINUTES_PER_KM} min
             </div>
           </div>
         )}
 {/* ---------- Controls ---------- */}
         {phase === 'idle' && (
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{ display: 'flex', gap: '8px' }}>
             {PRESETS.map(presetKm => (
               <button
                 key={presetKm}
                 onClick={() => handleStartWith(presetKm)}
-                style={primaryBtn}
+                style={presetBtn}
               >
                 {presetKm} KM
               </button>
             ))}
+            <button onClick={handleStart} style={presetBtn}>
+              Start
+            </button>
           </div>
         )}
 
