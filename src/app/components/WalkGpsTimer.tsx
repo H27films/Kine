@@ -334,17 +334,6 @@ const WalkGpsTimer: React.FC<Props> = ({ onClose, onLog }) => {
                     ? `${paceStr} /km`
                     : 'Acquiring GPS…'}
             </div>
-            {phase === 'idle' && (
-              <div style={{
-                marginTop: 10,
-                fontSize: '9px', fontWeight: 600, letterSpacing: '0.1em',
-                color: 'rgba(0,0,0,0.4)', textTransform: 'uppercase', textAlign: 'center', lineHeight: 1.6,
-              }}>
-                Keep this screen open while walking.
-                <br />
-                Location permission will be requested.
-              </div>
-            )}
           </div>
         )}
 
