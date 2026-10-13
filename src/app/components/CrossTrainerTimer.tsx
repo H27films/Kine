@@ -4,6 +4,9 @@ import { X, Check } from 'lucide-react';
 // Conversion ratio: 1 KM = 12 minutes
 const MINUTES_PER_KM = 12;
 
+// Fixed-distance presets: tapping one starts a countdown from km × 12 min.
+const PRESETS = [2, 3];
+
 interface Props {
   onClose: () => void;
   onLog: (km: number) => Promise<void>;
@@ -48,34 +51,60 @@ const secondaryBtn: React.CSSProperties = {
 const CrossTrainerTimer: React.FC<Props> = ({ onClose, onLog }) => {
   const [phase, setPhase] = useState<Phase>('idle');
   const [elapsedMs, setElapsedMs] = useState(0);
+  // Chosen fixed distance (km) once a preset is tapped; null while idle
+  const [targetKm, setTargetKm] = useState<number | null>(null);
+  // The distance actually logged (full preset on completion, partial on early stop)
+  const [resultKm, setResultKm] = useState(0);
   // Elapsed time already banked from previously finished run segments
   const baseRef = useRef(0);
   // Timestamp when the currently running segment began
   const segStartRef = useRef(0);
+  // Guards against firing the auto-finish twice
+  const finishedRef = useRef(false);
+
+  // Total countdown duration for the chosen preset (ms)
+  const targetMs = targetKm != null ? targetKm * MINUTES_PER_KM * 60 * 1000 : 0;
 
   const liveMs = () =>
     baseRef.current + (phase === 'running' ? Date.now() - segStartRef.current : 0);
 
+  // Remaining countdown time (clamped at 0)
+  const remainingMs = Math.max(0, targetMs - liveMs());
+
   // Tick while running
   useEffect(() => {
     if (phase !== 'running') return;
-    const id = setInterval(() => setElapsedMs(liveMs()), 200);
+    const id = setInterval(() => {
+      const ms = liveMs();
+      setElapsedMs(ms);
+      // Auto-finish the moment the countdown hits zero
+      if (ms >= targetMs && !finishedRef.current) {
+        finishedRef.current = true;
+        handleComplete();
+      }
+    }, 200);
     return () => clearInterval(id);
-  }, [phase]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, targetMs]);
 
-  const totalSeconds = Math.floor(elapsedMs / 1000);
-  const hours = Math.floor(totalSeconds / 3600);
-  const mins = Math.floor((totalSeconds % 3600) / 60);
-  const secs = totalSeconds % 60;
+  // Remaining countdown as m:ss / h:mm:ss
+  const remTotalSeconds = Math.floor(remainingMs / 1000);
+  const hours = Math.floor(remTotalSeconds / 3600);
+  const mins = Math.floor((remTotalSeconds % 3600) / 60);
+  const secs = remTotalSeconds % 60;
   const timeStr =
     hours > 0 ? `${hours}:${pad(mins)}:${pad(secs)}` : `${pad(mins)}:${pad(secs)}`;
 
-  // KM equivalent from elapsed time (1 KM = 12 MIN)
-  const km = totalSeconds / 60 / MINUTES_PER_KM;
+  // Remaining KM from remaining time (1 KM = 12 MIN)
+  const km = remTotalSeconds / 60 / MINUTES_PER_KM;
+  // Elapsed seconds — used to gate the Log Complete button until the run has actually started
+  const elapsedSeconds = Math.floor(elapsedMs / 1000);
 
-  const handleStart = () => {
+  const handleStartWith = (presetKm: number) => {
+    setTargetKm(presetKm);
     baseRef.current = 0;
     segStartRef.current = Date.now();
+    finishedRef.current = false;
     setElapsedMs(0);
     setPhase('running');
   };
@@ -93,15 +122,25 @@ const CrossTrainerTimer: React.FC<Props> = ({ onClose, onLog }) => {
     setPhase('running');
   };
 
-  // Log complete — freeze, write the KM to Supabase, then confirm
+  // Log complete — freeze, write the distance to Supabase, then confirm.
+  // Full preset if the countdown ran to zero; partial distance if stopped early.
   const handleComplete = async () => {
     const ms = liveMs();
     // Bank the elapsed time so a retry (or the readout) stays stable
     baseRef.current = ms;
     setElapsedMs(ms);
+
+    // Reached (or passed) the target → log the full preset distance.
+    // Stopped early → log the partial distance actually covered (1 km = 12 min).
+    const reachedTarget = ms >= targetMs;
+    const kmToLog = reachedTarget
+      ? (targetKm ?? 0)
+      : (ms / 1000) / 60 / MINUTES_PER_KM;
+    setResultKm(kmToLog);
+
     setPhase('logging');
     try {
-      await onLog((ms / 1000) / 60 / MINUTES_PER_KM);
+      await onLog(kmToLog);
       setPhase('done');
     } catch (e) {
       console.error('Cross trainer timer log failed:', e);
@@ -177,7 +216,7 @@ const CrossTrainerTimer: React.FC<Props> = ({ onClose, onLog }) => {
                   fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-0.02em',
                   color: '#000000', lineHeight: 1,
                 }}>
-                  {km.toFixed(2)} KM
+                  {resultKm.toFixed(2)} KM
                 </div>
                 <div style={{
                   marginTop: 10,
@@ -194,7 +233,7 @@ const CrossTrainerTimer: React.FC<Props> = ({ onClose, onLog }) => {
                   }}>
                     Saved to Supabase
                     <br />
-                    {timeStr} elapsed · 1 km = {MINUTES_PER_KM} min
+                    {timeStr} left · 1 km = {MINUTES_PER_KM} min
                   </div>
                 )}
               </>
@@ -222,15 +261,23 @@ const CrossTrainerTimer: React.FC<Props> = ({ onClose, onLog }) => {
               fontSize: '10px', fontWeight: 700, letterSpacing: '0.2em',
               color: 'rgba(0,0,0,0.35)', textTransform: 'uppercase',
             }}>
-              {phase === 'paused' ? 'Paused · ' : ''}1 km = {MINUTES_PER_KM} min
+              {phase === 'paused' ? 'Paused · ' : ''}remaining · 1 km = {MINUTES_PER_KM} min
             </div>
           </div>
         )}
 {/* ---------- Controls ---------- */}
         {phase === 'idle' && (
-          <button onClick={handleStart} style={primaryBtn}>
-            Start
-          </button>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            {PRESETS.map(presetKm => (
+              <button
+                key={presetKm}
+                onClick={() => handleStartWith(presetKm)}
+                style={primaryBtn}
+              >
+                {presetKm} KM
+              </button>
+            ))}
+          </div>
         )}
 
         {(phase === 'running' || phase === 'paused') && (
@@ -243,11 +290,11 @@ const CrossTrainerTimer: React.FC<Props> = ({ onClose, onLog }) => {
             </button>
             <button
               onClick={handleComplete}
-              disabled={totalSeconds < 1}
+              disabled={elapsedSeconds < 1}
               style={{
                 ...primaryBtn,
-                opacity: totalSeconds < 1 ? 0.35 : 1,
-                cursor: totalSeconds < 1 ? 'default' : 'pointer',
+                opacity: elapsedSeconds < 1 ? 0.35 : 1,
+                cursor: elapsedSeconds < 1 ? 'default' : 'pointer',
               }}
             >
               Log Complete
