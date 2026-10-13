@@ -290,6 +290,9 @@ const CrossTrainerTimer: React.FC<Props> = ({ onClose, onLog }) => {
 {/* ---------- Controls ---------- */}
         {phase === 'idle' && (
           <div style={{ display: 'flex', gap: '8px' }}>
+            <button onClick={handleStart} style={presetBtn}>
+              Start
+            </button>
             {PRESETS.map(presetKm => (
               <button
                 key={presetKm}
@@ -299,9 +302,6 @@ const CrossTrainerTimer: React.FC<Props> = ({ onClose, onLog }) => {
                 {presetKm} KM
               </button>
             ))}
-            <button onClick={handleStart} style={presetBtn}>
-              Start
-            </button>
           </div>
         )}
 
