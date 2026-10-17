@@ -140,7 +140,7 @@ useEffect(() => {
   ref={quickLogRef}
   style={{
     overflow: 'hidden',
-    maxHeight: showQuickLog && !showWeeklySummary ? '190px' : '0px',
+    maxHeight: showQuickLog && !showWeeklySummary ? '235px' : '0px',
     opacity: showQuickLog && !showWeeklySummary ? 1 : 0,
     marginBottom: showQuickLog && !showWeeklySummary ? '12px' : '0px',
     transition: 'max-height 0.25s ease, opacity 0.25s ease, margin-bottom 0.25s ease',

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { supabase, todayStr, getISOWeek, getDayName, recalculateDailyTotals } from '../../lib/supabase';
+import { History, Calendar } from 'lucide-react';
+import { supabase, todayStr, dateOffsetStr, getISOWeek, getDayName, recalculateDailyTotals } from '../../lib/supabase';
 import { QuickLogVoice } from './QuickLogVoice';
 
 const TRACKER_ID       = 82;
@@ -11,6 +12,9 @@ type FoodOption = typeof FOOD_OPTIONS[number];
 
 export const QuickLog: React.FC<{ onClose?: () => void; onSuccess?: () => void }> = ({ onClose, onSuccess }) => {
   const today = todayStr();
+  // Date currently being edited — today by default, yesterday when "Previous" is toggled
+  const [editingDate, setEditingDate] = useState<string>(today);
+  const isPreviousDay = editingDate !== today;
   const [trackerKm, setTrackerKm] = useState('');
   const [calories, setCalories] = useState('');
   const [foodRating, setFoodRating] = useState<FoodOption>('OK');
@@ -21,25 +25,36 @@ export const QuickLog: React.FC<{ onClose?: () => void; onSuccess?: () => void }
 
   const foodRatingRef = useRef<HTMLDivElement>(null);
 
+  // e.g. "THU 16 OCT" — shown on the toggle button when editing yesterday
+  const dateLabel = new Date(editingDate + 'T12:00:00+08:00')
+    .toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'Asia/Kuala_Lumpur' })
+    .toUpperCase()
+    .replace(',', '');
+
   useEffect(() => {
     const load = async () => {
+      // Reset fields so values from the other date don't leak in
+      setTrackerKm('');
+      setCalories('');
+      setFoodRating('OK');
+
       const { data: exData } = await supabase
         .from('exercises').select('multiplier').eq('exercise_id', TRACKER_ID).maybeSingle();
       if (exData) setTrackerMultiplier(Number(exData.multiplier || 1));
 
       const { data: tData } = await supabase
         .from('workouts').select('km').eq('type', 'CARDIO')
-        .eq('exercise_id', TRACKER_ID).eq('date', today).maybeSingle();
+        .eq('exercise_id', TRACKER_ID).eq('date', editingDate).maybeSingle();
       if (tData && tData.km !== null) setTrackerKm(parseFloat(String(tData.km)).toFixed(1));
 
       const { data: cData } = await supabase
         .from('workouts').select('calories').eq('type', 'MEASUREMENT')
-        .eq('exercise_id', CALORIES_ID).eq('date', today).not('calories', 'is', null).maybeSingle();
+        .eq('exercise_id', CALORIES_ID).eq('date', editingDate).not('calories', 'is', null).maybeSingle();
       setCalories(cData && cData.calories != null ? String(cData.calories) : '');
 
       const { data: fData } = await supabase
         .from('workouts').select('food_rating').eq('type', 'MEASUREMENT')
-        .eq('exercise_id', FOOD_ID).eq('date', today).not('food_rating', 'is', null).maybeSingle();
+        .eq('exercise_id', FOOD_ID).eq('date', editingDate).not('food_rating', 'is', null).maybeSingle();
       if (fData && fData.food_rating) {
         const r = String(fData.food_rating).toUpperCase();
         setFoodRating(r === 'BAD' ? 'BAD' : r === 'GOOD' ? 'GOOD' : 'OK');
@@ -48,7 +63,7 @@ export const QuickLog: React.FC<{ onClose?: () => void; onSuccess?: () => void }
       }
     };
     load();
-  }, [today]);
+  }, [editingDate]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -61,20 +76,20 @@ export const QuickLog: React.FC<{ onClose?: () => void; onSuccess?: () => void }
   }, [foodRatingOpen]);
 
   const upsert = async (type: string, exerciseId: number, payload: Record<string, unknown>) => {
-    const week = getISOWeek(new Date(today + 'T12:00:00+08:00'));
-    const day  = getDayName(new Date(today + 'T12:00:00+08:00'));
+    const week = getISOWeek(new Date(editingDate + 'T12:00:00+08:00'));
+    const day  = getDayName(new Date(editingDate + 'T12:00:00+08:00'));
     const { data: existing } = await supabase
       .from('workouts').select('id')
-      .eq('type', type).eq('exercise_id', exerciseId).eq('date', today).maybeSingle();
+      .eq('type', type).eq('exercise_id', exerciseId).eq('date', editingDate).maybeSingle();
     if (existing) {
       await supabase.from('workouts').update(payload).eq('id', existing.id);
     } else {
       await supabase.from('workouts').insert({
-        date: today, week, day, type, exercise_id: exerciseId,
+        date: editingDate, week, day, type, exercise_id: exerciseId,
         total_score_k: null, new_entry: 'New', source: 'app', ...payload,
       });
     }
-    await recalculateDailyTotals(today);
+    await recalculateDailyTotals(editingDate);
   };
 
   const saveTracker = async () => {
@@ -96,6 +111,8 @@ export const QuickLog: React.FC<{ onClose?: () => void; onSuccess?: () => void }
     setSaving(true);
     try {
       await Promise.all([saveTracker(), saveCalories(), saveFood()]);
+      // Let the dashboard/charts refetch the newly logged data
+      window.dispatchEvent(new CustomEvent('kine:data-updated'));
       onClose?.();
     } finally {
       setSaving(false);
@@ -231,6 +248,22 @@ export const QuickLog: React.FC<{ onClose?: () => void; onSuccess?: () => void }
             cursor: saving ? 'default' : 'pointer', transition: 'all 0.2s',
           }}>
             {saving ? 'SAVING…' : 'LOG'}
+          </button>
+        </div>
+
+        {/* Previous day toggle button */}
+        <div style={{ marginTop: '8px' }}>
+          <button onClick={() => setEditingDate(isPreviousDay ? today : dateOffsetStr(-1))} style={{
+            ...glassBtn,
+            ...(isPreviousDay ? {
+              background: '#1a1a1a',
+              border: '1px solid #1a1a1a',
+              color: '#f2f2f2',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 1px 3px rgba(0,0,0,0.15)',
+            } : {}),
+          }}>
+            {isPreviousDay ? <Calendar size={14} /> : <History size={14} />}
+            {isPreviousDay ? `TODAY · ${dateLabel}` : 'PREVIOUS'}
           </button>
         </div>
 
