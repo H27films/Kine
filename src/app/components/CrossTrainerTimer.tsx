@@ -3,6 +3,8 @@ import { X, Check } from 'lucide-react';
 
 // Conversion ratio: 1 KM = 12 minutes
 const MINUTES_PER_KM = 12;
+// Warm-up duration that doesn't register any distance
+const WARM_UP_MS = 30000;
 
 // Fixed-distance presets: tapping one starts a countdown from km × 12 min.
 const PRESETS = [2, 3];
@@ -12,7 +14,7 @@ interface Props {
   onLog: (km: number) => Promise<void>;
 }
 
-type Phase = 'idle' | 'running' | 'paused' | 'logging' | 'done' | 'error';
+type Phase = 'idle' | 'warmingUp' | 'running' | 'paused' | 'logging' | 'done' | 'error';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
@@ -80,16 +82,25 @@ const CrossTrainerTimer: React.FC<Props> = ({ onClose, onLog }) => {
   const targetMs = targetKm != null ? targetKm * MINUTES_PER_KM * 60 * 1000 : 0;
 
   const liveMs = () =>
-    baseRef.current + (phase === 'running' ? Date.now() - segStartRef.current : 0);
+    baseRef.current + (phase === 'running' || phase === 'warmingUp' ? Date.now() - segStartRef.current : 0);
 
-  // Tick while running
+  // Tick while running or warming up
   useEffect(() => {
-    if (phase !== 'running') return;
+    if (phase !== 'running' && phase !== 'warmingUp') return;
     const id = setInterval(() => {
       const ms = liveMs();
       setElapsedMs(ms);
+      // Auto-finish warm-up and hand over to the proper timer
+      if (phase === 'warmingUp' && ms >= WARM_UP_MS) {
+        finishedRef.current = false;
+        segStartRef.current = Date.now();
+        baseRef.current = 0;
+        setElapsedMs(0);
+        setPhase('running');
+        return;
+      }
       // Auto-finish the moment the countdown hits zero (preset mode only)
-      if (isPreset && ms >= targetMs && !finishedRef.current) {
+      if (isPreset && phase === 'running' && ms >= targetMs && !finishedRef.current) {
         finishedRef.current = true;
         handleComplete();
       }
@@ -98,8 +109,10 @@ const CrossTrainerTimer: React.FC<Props> = ({ onClose, onLog }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, targetMs, isPreset]);
 
-  // Display time: remaining for presets, elapsed for open-ended
-  const displayMs = isPreset ? Math.max(0, targetMs - liveMs()) : liveMs();
+  // Display time: remaining for presets, elapsed for open-ended, countdown during warm-up
+  const displayMs = phase === 'warmingUp'
+    ? Math.max(0, WARM_UP_MS - liveMs())
+    : isPreset ? Math.max(0, targetMs - liveMs()) : liveMs();
   const displayTotalSeconds = Math.floor(displayMs / 1000);
   const hours = Math.floor(displayTotalSeconds / 3600);
   const mins = Math.floor((displayTotalSeconds % 3600) / 60);
@@ -107,8 +120,8 @@ const CrossTrainerTimer: React.FC<Props> = ({ onClose, onLog }) => {
   const timeStr =
     hours > 0 ? `${hours}:${pad(mins)}:${pad(secs)}` : `${pad(mins)}:${pad(secs)}`;
 
-  // Distance shown: remaining for presets, accumulated for open-ended (1 KM = 12 MIN)
-  const km = displayTotalSeconds / 60 / MINUTES_PER_KM;
+  // Distance shown: 0 during warm-up, remaining for presets, accumulated for open-ended (1 KM = 12 MIN)
+  const km = phase === 'warmingUp' ? 0 : displayTotalSeconds / 60 / MINUTES_PER_KM;
   // Elapsed seconds — used to gate the Log Complete button until the run has actually started
   const elapsedSeconds = Math.floor(elapsedMs / 1000);
 
@@ -118,7 +131,7 @@ const CrossTrainerTimer: React.FC<Props> = ({ onClose, onLog }) => {
     segStartRef.current = Date.now();
     finishedRef.current = false;
     setElapsedMs(0);
-    setPhase('running');
+    setPhase('warmingUp');
   };
 
   // Open-ended start — no target, elapsed time dictates the distance
@@ -128,7 +141,7 @@ const CrossTrainerTimer: React.FC<Props> = ({ onClose, onLog }) => {
     segStartRef.current = Date.now();
     finishedRef.current = false;
     setElapsedMs(0);
-    setPhase('running');
+    setPhase('warmingUp');
   };
 
   // Pause — bank the current segment, keep the timer open
@@ -283,7 +296,7 @@ const CrossTrainerTimer: React.FC<Props> = ({ onClose, onLog }) => {
               fontSize: '10px', fontWeight: 700, letterSpacing: '0.2em',
               color: 'rgba(0,0,0,0.35)', textTransform: 'uppercase',
             }}>
-              {phase === 'paused' ? 'Paused · ' : ''}{isPreset ? 'remaining' : 'elapsed'} · 1 km = {MINUTES_PER_KM} min
+              {phase === 'paused' ? 'Paused · ' : ''}{phase === 'warmingUp' ? 'WARM UP' : isPreset ? 'remaining' : 'elapsed'} · 1 km = {MINUTES_PER_KM} min
             </div>
           </div>
         )}
