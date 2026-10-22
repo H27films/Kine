@@ -111,7 +111,7 @@ const RunningTimer: React.FC<Props> = ({ onClose, onLog }) => {
         {phase === 'idle' && (
           <>
             <div style={{ fontSize: '3.5rem', fontWeight: 900, letterSpacing: '-0.02em', color: '#000000', lineHeight: 1, textAlign: 'center', marginBottom: 24, fontVariantNumeric: 'tabular-nums' }}>
-              00:00:00
+              00:00
             </div>
             <button onClick={handleStart} style={primaryBtn}>
               Start
