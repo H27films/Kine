@@ -12,6 +12,7 @@ import MonthlyCalendarChart from '../components/MonthlyCalendarChart';
 import RecentLogsCardio from '../components/RecentLogsCardio';
 import MultiAddCardio from '../components/MultiAddCardio';
 import CrossTrainerTimer from '../components/CrossTrainerTimer';
+import RunningTimer from '../components/RunningTimer';
 import WalkGpsTimer from '../components/WalkGpsTimer';
 
 interface LogCardioProps {
@@ -66,6 +67,7 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, initialSelecte
   const [recentCardioCollapsed, setRecentCardioCollapsed] = useState(false);
   const [multiAddOpen, setMultiAddOpen] = useState(false);
   const [showCrossTimer, setShowCrossTimer] = useState(false);
+  const [showRunTimer, setShowRunTimer] = useState(false);
   const [showWalkGps, setShowWalkGps] = useState(false);
 
   const isRunning = selectedExercise?.exercise_name?.toUpperCase() === 'RUNNING';
@@ -534,6 +536,49 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, initialSelecte
     setCalories('');
   };
 
+  // Log Running KM + duration from the timer overlay.
+  // Stores KM (manual entry), time (HH:MM:SS from the timer), total_cardio = km × multiplier —
+  // matching exactly what the normal KM + duration entry line writes for running.
+  const handleLogRunTimer = async (km: number, elapsedSeconds: number) => {
+    const exercise = nonTrackerExercises.find(
+      e => e.exercise_name?.toUpperCase().includes('RUN')
+    );
+    if (!exercise) throw new Error('Running exercise not found');
+    const rounded = +km.toFixed(2);
+    if (!(rounded > 0)) throw new Error('No distance to log');
+
+    const today = todayStr();
+    const todayDate = new Date(today + 'T12:00:00+08:00');
+    const week = getISOWeek(todayDate);
+    const day = getDayName(todayDate);
+    const totalCardio = +(rounded * Number(exercise.multiplier)).toFixed(2);
+
+    const mm = String(Math.floor((elapsedSeconds % 3600) / 60)).padStart(2, '0');
+    const ss = String(elapsedSeconds % 60).padStart(2, '0');
+    const timeStr = `${mm}:${ss}`;
+
+    const { error } = await supabase.from('workouts').insert({
+      date: today, week, day, type: 'CARDIO',
+      exercise_id: exercise.id,
+      km: rounded, total_cardio: totalCardio,
+      multiplier: exercise.multiplier,
+      time: timeStr,
+      total_score_k: Math.round(totalCardio * 1000),
+      new_entry: 'New', source: 'app',
+    });
+    if (error) throw error;
+
+    await recalculateDailyTotals(today);
+    window.dispatchEvent(new CustomEvent('kine:data-updated'));
+    setRefreshKey(k => k + 1);
+
+    // Clear the entry fields so the same session isn't logged twice
+    setDistance('');
+    setMinutes('');
+    setSeconds('');
+    setCalories('');
+  };
+
   const labelStyle = {
     color: 'rgba(26,26,26,0.45)',
     fontSize: '0.75rem',
@@ -718,6 +763,21 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, initialSelecte
             {isCrossTrainer && (
               <button
                 onClick={() => setShowCrossTimer(true)}
+                aria-label="Log by timer"
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 5,
+                  background: 'none', border: 'none', cursor: 'pointer', color: '#1a1a1a',
+                  padding: '8px 6px', margin: '-8px -6px',
+                  fontFamily: "'Archivo', sans-serif",
+                }}
+              >
+                <span style={{ fontSize: '0.7rem', fontWeight: 300, letterSpacing: '0.22em', textTransform: 'uppercase' }}>TIMER</span>
+                <Clock size={15} strokeWidth={1.6} />
+              </button>
+            )}
+            {isRunning && (
+              <button
+                onClick={() => setShowRunTimer(true)}
                 aria-label="Log by timer"
                 style={{
                   display: 'flex', alignItems: 'center', gap: 5,
@@ -1018,6 +1078,14 @@ export const LogCardio: React.FC<LogCardioProps> = ({ onNavigate, initialSelecte
         <CrossTrainerTimer
           onClose={() => setShowCrossTimer(false)}
           onLog={handleLogCrossTimer}
+        />
+      )}
+
+      {/* Running Timer */}
+      {showRunTimer && (
+        <RunningTimer
+          onClose={() => setShowRunTimer(false)}
+          onLog={handleLogRunTimer}
         />
       )}
 
