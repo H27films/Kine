@@ -92,6 +92,17 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
 
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  // Inject the save-pill fill animation once (white glass sweep left-to-right)
+  useEffect(() => {
+    if (document.getElementById('kine-save-fill')) return;
+    const style = document.createElement('style');
+    style.id = 'kine-save-fill';
+    style.textContent =
+    '@keyframes kineSavePop { 0% { transform: scale(0.92); } 60% { transform: scale(1.06); } 100% { transform: scale(1); } } @keyframes kineSaveFillX { from { transform: scaleX(0); } to { transform: scaleX(1); } } @keyframes kineSaveLabel { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }';
+    document.head.appendChild(style);
+  }, []);
+
   const [swipeOffsets, setSwipeOffsets] = useState<Record<number, number>>({});
   const touchStartX = useRef<Record<number, number>>({});
 
@@ -288,7 +299,7 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
       if (error) throw error;
       setSavedWorkoutIds(exerciseIds);
       setTemplateSaveFlash(true);
-      setTimeout(() => setTemplateSaveFlash(false), 2200);
+      setTimeout(() => setTemplateSaveFlash(false), 1600);
     } catch (err) {
       console.error('Failed to save workout template:', err);
     }
@@ -703,31 +714,57 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
             {selectedGroup && addedExercises.length > 1 && (
               <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                  <button
+                <button
                     type="button"
                     onClick={handleSaveWorkoutTemplate}
+                    disabled={templateSaveFlash}
+                    aria-live="polite"
                     style={{
+                      position: 'relative',
+                      overflow: 'hidden',
                       padding: '5px 14px',
                       borderRadius: '999px',
                       border: 'none',
-                      backgroundColor: 'rgba(0,0,0,0.06)',
-                      color: '#1a1a1a',
+                      background: 'rgba(0,0,0,0.06)',
+                      color: templateSaveFlash ? '#ffffff' : '#1a1a1a',
                       fontSize: '0.7rem',
                       fontWeight: 670,
                       letterSpacing: '0.12em',
                       textTransform: 'uppercase',
-                      cursor: 'pointer',
+                      cursor: templateSaveFlash ? 'default' : 'pointer',
                       fontFamily: "'Archivo', sans-serif",
                       lineHeight: '18px',
                       minWidth: '88px',
-                      textAlign: 'left',
+                      textAlign: 'center',
+                      transition: 'color 0.3s ease',
+                      animation: templateSaveFlash ? 'kineSavePop 0.45s ease' : 'none',
                     }}
                   >
-                    + SAVE
+                    {templateSaveFlash && (
+                      <span
+                        aria-hidden="true"
+                        style={{
+                          position: 'absolute',
+                          inset: 0,
+                          background: '#111111',
+                          transformOrigin: 'left center',
+                          animation: 'kineSaveFillX 0.5s ease forwards',
+                          pointerEvents: 'none',
+                        }}
+                      />
+                    )}
+                    <span
+                      key={templateSaveFlash ? 'saved' : 'idle'}
+                      style={{
+                        position: 'relative',
+                        zIndex: 1,
+                        display: 'inline-block',
+                        animation: 'kineSaveLabel 0.35s ease',
+                      }}
+                    >
+                      {templateSaveFlash ? '✓ Saved' : '+ SAVE'}
+                    </span>
                   </button>
-                  {templateSaveFlash && (
-                    <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#22c55e', letterSpacing: '0.08em' }}>Saved</span>
-                  )}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                   <button
@@ -884,9 +921,22 @@ export const LogWeights: React.FC<LogWeightsProps> = ({ onNavigate, showWeeklySu
             onClick={handleLogAll}
             disabled={saving}
             className="w-full mt-8 py-4 rounded-full font-black uppercase tracking-widest text-sm active:scale-95 duration-150"
-            style={{ backgroundColor: saveSuccess ? '#22c55e' : '#1a1a1a', color: '#ffffff', boxShadow: '0 12px 32px rgba(0,0,0,0.12)', opacity: saving ? 0.7 : 1 }}
+            style={{
+              background: saveSuccess
+                ? 'linear-gradient(90deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.45) 50%, rgba(255,255,255,0.10) 100%)'
+                : '#1a1a1a',
+              color: saveSuccess ? '#1a1a1a' : '#ffffff',
+              boxShadow: '0 12px 32px rgba(0,0,0,0.12)',
+              backdropFilter: saveSuccess ? 'blur(12px)' : 'none',
+              WebkitBackdropFilter: saveSuccess ? 'blur(12px)' : 'none',
+              border: saveSuccess ? '1px solid rgba(255,255,255,0.5)' : 'none',
+              opacity: saving ? 0.7 : 1,
+              transition: 'all 0.4s ease',
+              backgroundSize: saveSuccess ? '200% auto' : 'auto',
+              animation: saveSuccess ? 'kineSaveFill 0.6s ease forwards' : 'none',
+            }}
           >
-            {saving ? 'Saving...' : saveSuccess ? '✓ Saved!' : 'Log Exercises'}
+            {saving ? 'Saving...' : saveSuccess ? 'Saved' : 'Log Exercises'}
           </button>
         </section>
       )}
