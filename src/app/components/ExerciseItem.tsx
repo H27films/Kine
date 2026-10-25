@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { ChevronRight, ChevronUp, Plus, Minus, Check } from 'lucide-react';
 import { AddedExercise, SetRow } from '../pages/LogWeights';
 
@@ -46,6 +46,7 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = ({
   touchStartX,
 }) => {
   const mult = ex.exercise.multiplier ?? 1;
+  const [flashingRow, setFlashingRow] = useState<number | null>(null);
   const lastSummary = ex.lastSets && ex.lastSets.length > 0
     ? `Last: ${ex.lastSets.length} sets — ${ex.lastSets[0].weight}kg × ${ex.lastSets[0].reps}`
     : 'No previous data';
@@ -83,6 +84,15 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = ({
         /* selection unsupported on this input type */
       }
     });
+  };
+
+  const handleCopyFromAbove = (idx: number) => {
+    const prevSet = ex.sets[idx - 1];
+    if (!prevSet || prevSet.weight === '') return;
+    updateSet(ex.exercise.id, idx, 'weight', prevSet.weight);
+    updateSet(ex.exercise.id, idx, 'reps', prevSet.reps);
+    setFlashingRow(idx);
+    setTimeout(() => setFlashingRow(null), 300);
   };
 
   return (
@@ -221,6 +231,10 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = ({
             const numColor = rowHasData ? '#1a1a1a' : 'rgba(26,26,26,0.25)';
             const prevSet = idx > 0 ? ex.sets[idx - 1] : null;
             const canCopyFromAbove = !!prevSet && !rowHasData && prevSet.weight !== '';
+            const isFlashing = flashingRow === idx;
+            const flashBg = isFlashing
+              ? 'linear-gradient(135deg, rgba(26,26,26,0.14), rgba(255,255,255,0.14))'
+              : 'transparent';
             return (
               <div key={idx} className="grid items-center mb-2" style={{ gridTemplateColumns: '1.8rem 1fr 1fr 1fr', gap: '0.5rem' }}>
                 {canCopyFromAbove ? (
@@ -229,6 +243,8 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = ({
                       e.stopPropagation();
                       updateSet(ex.exercise.id, idx, 'weight', prevSet!.weight);
                       updateSet(ex.exercise.id, idx, 'reps', prevSet!.reps);
+                      setFlashingRow(idx);
+                      setTimeout(() => setFlashingRow(null), 300);
                     }}
                     aria-label={`Copy set ${idx} weight and reps from set ${idx}`}
                     title="Copy from set above"
@@ -240,7 +256,34 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = ({
                       border: '1px solid rgba(0,0,0,0.55)',
                       color: 'rgba(0,0,0,0.75)', fontSize: '0.72rem', fontWeight: 700,
                       lineHeight: 1, cursor: 'pointer', flexShrink: 0,
-                      transition: 'opacity 0.15s',
+                      transition: 'opacity 0.15s, background 0.3s ease',
+                      background: isFlashing ? flashBg : 'transparent',
+                    }}
+                  >
+                    {idx + 1}
+                  </button>
+                ) : idx > 0 && prevSet ? (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCopyFromAbove(idx);
+                    }}
+                    style={{
+                      fontSize: '1rem',
+                      color: numColor,
+                      lineHeight: 1,
+                      textAlign: 'center',
+                      background: flashBg,
+                      borderRadius: '4px',
+                      border: 'none',
+                      cursor: 'pointer',
+                      padding: 0,
+                      transition: 'all 0.3s ease',
+                      flexShrink: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '100%',
                     }}
                   >
                     {idx + 1}
