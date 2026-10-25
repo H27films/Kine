@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { ChevronRight, ChevronUp, Plus, Minus, Check } from 'lucide-react';
 import { AddedExercise, SetRow } from '../pages/LogWeights';
 
@@ -85,6 +85,16 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = ({
       }
     });
   };
+
+  // Inject the number-flash keyframes once (sweeps a white/grey gradient across the text)
+  useEffect(() => {
+    if (document.getElementById('kine-number-flash')) return;
+    const style = document.createElement('style');
+    style.id = 'kine-number-flash';
+    style.textContent =
+      '@keyframes kineNumberFlash { 0% { background-position: 200% 0%; } 100% { background-position: 0% 0%; } }';
+    document.head.appendChild(style);
+  }, []);
 
   const handleCopyFromAbove = (idx: number) => {
     const prevSet = ex.sets[idx - 1];
@@ -232,9 +242,23 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = ({
             const prevSet = idx > 0 ? ex.sets[idx - 1] : null;
             const canCopyFromAbove = !!prevSet && !rowHasData && prevSet.weight !== '';
             const isFlashing = flashingRow === idx;
-            const flashBg = isFlashing
-              ? 'linear-gradient(135deg, rgba(26,26,26,0.14), rgba(255,255,255,0.14))'
-              : 'transparent';
+            const numStyle: React.CSSProperties = {
+              fontSize: '1rem',
+              fontWeight: 900,
+              color: '#1a1a1a',
+              lineHeight: 1,
+              textAlign: 'center',
+              transition: 'all 0.3s ease',
+            };
+            const flashStyle: React.CSSProperties = isFlashing
+              ? {
+                  background: 'linear-gradient(90deg, rgba(26,26,26,0.2), #ffffff, rgba(26,26,26,0.2))',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundSize: '200% auto',
+                  animation: 'kineNumberFlash 0.4s ease',
+                }
+              : {};
             return (
               <div key={idx} className="grid items-center mb-2" style={{ gridTemplateColumns: '1.8rem 1fr 1fr 1fr', gap: '0.5rem' }}>
                 {canCopyFromAbove ? (
@@ -244,7 +268,7 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = ({
                       updateSet(ex.exercise.id, idx, 'weight', prevSet!.weight);
                       updateSet(ex.exercise.id, idx, 'reps', prevSet!.reps);
                       setFlashingRow(idx);
-                      setTimeout(() => setFlashingRow(null), 300);
+                      setTimeout(() => setFlashingRow(null), 400);
                     }}
                     aria-label={`Copy set ${idx} weight and reps from set ${idx}`}
                     title="Copy from set above"
@@ -254,10 +278,9 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = ({
                       margin: '0 auto', padding: 0,
                       backgroundColor: 'transparent',
                       border: '1px solid rgba(0,0,0,0.55)',
-                      color: 'rgba(0,0,0,0.75)', fontSize: '0.72rem', fontWeight: 700,
-                      lineHeight: 1, cursor: 'pointer', flexShrink: 0,
-                      transition: 'opacity 0.15s, background 0.3s ease',
-                      background: isFlashing ? flashBg : 'transparent',
+                      ...numStyle,
+                      ...flashStyle,
+                      cursor: 'pointer', flexShrink: 0,
                     }}
                   >
                     {idx + 1}
@@ -269,16 +292,11 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = ({
                       handleCopyFromAbove(idx);
                     }}
                     style={{
-                      fontSize: '1rem',
-                      color: numColor,
-                      lineHeight: 1,
-                      textAlign: 'center',
-                      background: flashBg,
-                      borderRadius: '4px',
+                      ...numStyle,
+                      ...flashStyle,
                       border: 'none',
+                      backgroundColor: 'transparent',
                       cursor: 'pointer',
-                      padding: 0,
-                      transition: 'all 0.3s ease',
                       flexShrink: 0,
                       display: 'flex',
                       alignItems: 'center',
@@ -289,7 +307,7 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = ({
                     {idx + 1}
                   </button>
                 ) : (
-                  <p className="font-black" style={{ fontSize: '1rem', color: numColor, lineHeight: 1, textAlign: 'center' }}>{idx + 1}</p>
+                  <p style={{ ...numStyle, ...flashStyle }}>{idx + 1}</p>
                 )}
                 <div className="flex items-center justify-between rounded-lg" style={{ backgroundColor: 'rgba(0,0,0,0.04)', height: 44, padding: '0 5px' }} onClick={e => e.stopPropagation()}>
                   <button onClick={() => adjustWeight(ex.exercise.id, idx, -1)} style={stepperStyle}>−</button>
